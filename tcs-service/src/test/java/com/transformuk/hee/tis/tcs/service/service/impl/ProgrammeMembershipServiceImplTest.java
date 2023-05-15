@@ -685,8 +685,8 @@ public class ProgrammeMembershipServiceImplTest {
     when(curriculumMembershipRepositoryMock.findById(1L))
         .thenReturn(Optional.of(curriculumMembership1));
 
-    when(conditionsOfJoiningRepositoryMock.getOne(PROGRAMME_MEMBERSHIP_ID_1))
-        .thenReturn(conditionsOfJoining);
+    when(conditionsOfJoiningRepositoryMock.findById(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(conditionsOfJoining));
 
     //when
     ProgrammeMembershipDTO result = testObj.findOne(1L);

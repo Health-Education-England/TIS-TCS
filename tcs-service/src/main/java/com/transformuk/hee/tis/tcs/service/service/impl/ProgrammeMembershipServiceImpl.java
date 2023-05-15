@@ -385,11 +385,13 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       ProgrammeMembershipCurriculaDTO programmeMembershipDto) {
     if (programmeMembershipDto == null) return null;
 
-    ConditionsOfJoining conditionsOfJoining
-        = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
-    ConditionsOfJoiningDto conditionsOfJoiningDto
-        = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
-    programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningDto);
+    Optional<ConditionsOfJoining> conditionsOfJoiningOptional
+        = conditionsOfJoiningRepository.findById(programmeMembershipDto.getUuid());
+    if (conditionsOfJoiningOptional.isPresent()) {
+      ConditionsOfJoiningDto conditionsOfJoiningDto
+          = conditionsOfJoiningMapper.toDto(conditionsOfJoiningOptional.get());
+      programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningDto);
+    }
     return programmeMembershipDto;
   }
 
@@ -397,11 +399,13 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       ProgrammeMembershipDTO programmeMembershipDto) {
     if (programmeMembershipDto == null) return null;
 
-    ConditionsOfJoining conditionsOfJoining
-        = conditionsOfJoiningRepository.getOne(programmeMembershipDto.getUuid());
-    ConditionsOfJoiningDto conditionsOfJoiningDto
-        = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
-    programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningDto);
+    Optional<ConditionsOfJoining> conditionsOfJoiningOptional
+        = conditionsOfJoiningRepository.findById(programmeMembershipDto.getUuid());
+    if (conditionsOfJoiningOptional.isPresent()) {
+      ConditionsOfJoiningDto conditionsOfJoiningDto
+          = conditionsOfJoiningMapper.toDto(conditionsOfJoiningOptional.get());
+      programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningDto);
+    }
     return programmeMembershipDto;
   }
 
