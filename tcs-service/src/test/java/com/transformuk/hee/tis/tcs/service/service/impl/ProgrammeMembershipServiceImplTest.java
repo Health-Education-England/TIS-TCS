@@ -409,6 +409,8 @@ public class ProgrammeMembershipServiceImplTest {
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = any.get();
     Assert.assertEquals(2,
         programmeMembershipCurriculaDTO.getCurriculumMemberships().size());
+    ConditionsOfJoiningDto expectedCoj = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+    Assert.assertEquals(expectedCoj, programmeMembershipCurriculaDTO.getConditionsOfJoining());
   }
 
   @Test
