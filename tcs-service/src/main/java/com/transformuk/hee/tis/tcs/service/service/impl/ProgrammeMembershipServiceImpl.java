@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.persistence.EntityNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -383,7 +382,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private ProgrammeMembershipCurriculaDTO attachConditionsOfJoining(
       ProgrammeMembershipCurriculaDTO programmeMembershipDto) {
-    if (programmeMembershipDto == null) return null;
+    if (programmeMembershipDto == null) {
+      return null;
+    }
 
     Optional<ConditionsOfJoining> conditionsOfJoiningOptional
         = conditionsOfJoiningRepository.findById(programmeMembershipDto.getUuid());
@@ -397,7 +398,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
   private ProgrammeMembershipDTO attachConditionsOfJoiningToPm(
       ProgrammeMembershipDTO programmeMembershipDto) {
-    if (programmeMembershipDto == null) return null;
+    if (programmeMembershipDto == null) {
+      return null;
+    }
 
     Optional<ConditionsOfJoining> conditionsOfJoiningOptional
         = conditionsOfJoiningRepository.findById(programmeMembershipDto.getUuid());

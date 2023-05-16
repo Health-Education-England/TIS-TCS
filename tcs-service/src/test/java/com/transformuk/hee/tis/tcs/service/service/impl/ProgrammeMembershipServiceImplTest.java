@@ -347,16 +347,19 @@ public class ProgrammeMembershipServiceImplTest {
     pm1.setProgrammeStartDate(dateFrom);
     pm1.setProgrammeEndDate(dateTo);
     pm1.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pm1.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
 
     pm2.setProgramme(programme);
     pm2.setProgrammeStartDate(dateFrom);
     pm2.setProgrammeEndDate(dateTo);
     pm2.setProgrammeMembershipType(ProgrammeMembershipType.FTSTA);
+    pm2.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
 
     pm3.setProgramme(programme);
     pm3.setProgrammeStartDate(anotherDateFrom);
     pm3.setProgrammeEndDate(anotherDateTo);
     pm3.setProgrammeMembershipType(ProgrammeMembershipType.ACADEMIC);
+    pm3.setUuid(PROGRAMME_MEMBERSHIP_ID_2);
 
     CurriculumMembership cm1 = new CurriculumMembership();
     CurriculumMembership cm2 = new CurriculumMembership();
@@ -386,6 +389,8 @@ public class ProgrammeMembershipServiceImplTest {
     Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
     when(curriculumRepositoryMock.findAllById(curriculumIds))
         .thenReturn(Lists.newArrayList(curriculum1, curriculum2));
+    when(conditionsOfJoiningRepositoryMock.findById(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(conditionsOfJoining));
 
     List<ProgrammeMembershipCurriculaDTO> result = testObj
         .findProgrammeMembershipsForTraineeRolledUp(TRAINEE_ID);
