@@ -26,9 +26,9 @@ public class ConditionsOfJoiningDto implements Serializable {
       return false;
     }
     ConditionsOfJoiningDto that = (ConditionsOfJoiningDto) o;
-    return Objects.equals(programmeMembershipUuid, that.getProgrammeMembershipUuid()) &&
-        Objects.equals(signedAt, that.getSignedAt()) &&
-        Objects.equals(version, that.getVersion());
+    return Objects.equals(programmeMembershipUuid, that.getProgrammeMembershipUuid())
+        && Objects.equals(signedAt, that.getSignedAt())
+        && Objects.equals(version, that.getVersion());
   }
 
   @Override
