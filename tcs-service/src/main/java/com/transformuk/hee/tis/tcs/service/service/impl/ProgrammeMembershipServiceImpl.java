@@ -193,8 +193,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Delete the curriculumMembership by id. NOTE: this is the curriculumMembership, not the
-   * containing programmeMembership
+   * Delete the curriculumMembership by id.
+   * NOTE: this is the curriculumMembership, not the containing programmeMembership
    *
    * @param id the id of the entity
    */
@@ -312,11 +312,11 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return pmc ->
         Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDto.getProgrammeId())
             && Objects.equals(pmc.getProgrammeMembershipType(),
-            programmeMembershipCurriculaDto.getProgrammeMembershipType())
+               programmeMembershipCurriculaDto.getProgrammeMembershipType())
             && Objects.equals(pmc.getProgrammeStartDate(),
-            programmeMembershipCurriculaDto.getProgrammeStartDate())
+                programmeMembershipCurriculaDto.getProgrammeStartDate())
             && Objects.equals(pmc.getProgrammeEndDate(),
-            programmeMembershipCurriculaDto.getProgrammeEndDate());
+                programmeMembershipCurriculaDto.getProgrammeEndDate());
   }
 
   @Transactional(readOnly = true)
