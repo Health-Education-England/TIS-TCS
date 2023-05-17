@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -99,11 +100,14 @@ public class ProgrammeMembershipServiceImplTest {
   private ApplicationEventPublisher applicationEventPublisherMock;
   @Mock
   private PersonRepository personRepositoryMock;
+  @Mock
+  ConditionsOfJoiningService conditionsOfJoiningService;
 
   @Before
   public void setup() {
     curriculumMembershipMapper = new CurriculumMembershipMapper();
-    programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper);
+    programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper,
+        conditionsOfJoiningService);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());

@@ -13,11 +13,13 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -28,9 +30,12 @@ import org.springframework.util.CollectionUtils;
 public class ProgrammeMembershipMapper {
 
   CurriculumMembershipMapper curriculumMembershipMapper;
+  ConditionsOfJoiningService conditionsOfJoiningService;
 
-  public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper) {
+  public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper,
+      @Lazy ConditionsOfJoiningService conditionsOfJoiningService) {
     this.curriculumMembershipMapper = curriculumMembershipMapper;
+    this.conditionsOfJoiningService = conditionsOfJoiningService;
   }
 
   public ProgrammeMembershipDTO toDto(ProgrammeMembership programmeMembership) {
@@ -61,6 +66,10 @@ public class ProgrammeMembershipMapper {
             .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
         programmeMembershipDto.getCurriculumMemberships()
             .add(curriculumMembershipDto);
+        if (programmeMembershipDto.getUuid() != null) {
+          programmeMembershipDto.setConditionsOfJoining(
+              conditionsOfJoiningService.findOne(programmeMembershipDto.getUuid()));
+        }
         result.add(programmeMembershipDto);
       }
     }
@@ -170,7 +179,9 @@ public class ProgrammeMembershipMapper {
       result.setPerson(personToPersonDTO(programmeMembership.getPerson()));
     }
     result.setTrainingPathway(programmeMembership.getTrainingPathway());
-
+    if (result.getUuid() != null) {
+      result.setConditionsOfJoining(conditionsOfJoiningService.findOne(result.getUuid()));
+    }
     return result;
   }
 

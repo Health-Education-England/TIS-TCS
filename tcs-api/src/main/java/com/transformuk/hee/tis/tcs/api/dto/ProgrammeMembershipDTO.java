@@ -65,6 +65,8 @@ public class ProgrammeMembershipDTO implements Serializable {
   @Valid
   private List<CurriculumMembershipDTO> curriculumMemberships;
 
+  private ConditionsOfJoiningDto conditionsOfJoining;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
