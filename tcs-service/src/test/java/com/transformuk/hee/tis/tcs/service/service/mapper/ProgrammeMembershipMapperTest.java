@@ -87,6 +87,10 @@ public class ProgrammeMembershipMapperTest {
     Assert.assertNotNull(pmDTOreturned);
     assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm ID is used as pm ID
     assertThat(pmID).isEqualTo(pmDTOreturned.getUuid());
+
+    //check Condition of joining is attached to first PmDto and others are null
     assertThat(conditionsOfJoiningDto).isEqualTo(pmDTOreturned.getConditionsOfJoining());
+    assertThat(result.get(1).getConditionsOfJoining()).isNull();
+    assertThat(result.get(2).getConditionsOfJoining()).isNull();
   }
 }
