@@ -1,12 +1,18 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
+import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
@@ -24,6 +30,11 @@ public class ProgrammeMembershipMapperTest {
   @Mock
   CurriculumMembershipMapper curriculumMembershipMapperMock;
 
+  ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
+
+  @Mock
+  ConditionsOfJoiningService conditionsOfJoiningServiceMock;
+
   @InjectMocks
   private ProgrammeMembershipMapper testObj;
 
@@ -34,6 +45,7 @@ public class ProgrammeMembershipMapperTest {
     ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership();
     CurriculumMembership cm1 = new CurriculumMembership(), cm2 = new CurriculumMembership(),
         cm3 = new CurriculumMembership();
+    ConditionsOfJoining conditionsOfJoining = new ConditionsOfJoining();
 
     pm1.setUuid(pmID);
     pm2.setUuid(pm2ID);
@@ -54,12 +66,20 @@ public class ProgrammeMembershipMapperTest {
     CurriculumMembershipDTO cmDTO3 = new CurriculumMembershipDTO();
     cmDTO3.setId(3L);
 
+    conditionsOfJoining.setVersion(GoldGuideVersion.GG9);
+    conditionsOfJoining.setProgrammeMembershipUuid(pmID);
+    conditionsOfJoining.setSignedAt(Instant.now());
+    ConditionsOfJoiningDto conditionsOfJoiningDto
+        = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+
     when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm1))
         .thenReturn(cmDTO1);
     when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm2))
         .thenReturn(cmDTO2);
     when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm3))
         .thenReturn(cmDTO3);
+    when(conditionsOfJoiningServiceMock.findOne(pmID))
+        .thenReturn(conditionsOfJoiningDto);
 
     List<ProgrammeMembershipDTO> result = testObj.allEntityToDto(Lists.newArrayList(pm1, pm2));
 
@@ -68,5 +88,6 @@ public class ProgrammeMembershipMapperTest {
     Assert.assertNotNull(pmDTOreturned);
     assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm ID is used as pm ID
     assertThat(pmID).isEqualTo(pmDTOreturned.getUuid());
+    assertThat(conditionsOfJoiningDto).isEqualTo(pmDTOreturned.getConditionsOfJoining());
   }
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
@@ -20,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.mapstruct.AfterMapping;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -48,6 +46,7 @@ public class ProgrammeMembershipMapper {
       }
       result.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
+      result.setConditionsOfJoining(conditionsOfJoiningService.findOne(result.getUuid()));
     }
     return result;
   }
@@ -67,6 +66,7 @@ public class ProgrammeMembershipMapper {
             .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
         programmeMembershipDto.getCurriculumMemberships()
             .add(curriculumMembershipDto);
+        programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(programmeMembershipDto.getUuid()));
         result.add(programmeMembershipDto);
       }
     }
@@ -89,6 +89,7 @@ public class ProgrammeMembershipMapper {
       }
       programmeMembershipDto.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
+      programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(programmeMembershipDto.getUuid()));
       listMap.put(programmeMembershipDto, programmeMembershipDto);
     }
 
@@ -176,7 +177,7 @@ public class ProgrammeMembershipMapper {
       result.setPerson(personToPersonDTO(programmeMembership.getPerson()));
     }
     result.setTrainingPathway(programmeMembership.getTrainingPathway());
-
+    result.setConditionsOfJoining(conditionsOfJoiningService.findOne(result.getUuid()));
     return result;
   }
 
@@ -289,15 +290,5 @@ public class ProgrammeMembershipMapper {
       result.setStatus(rotationDTO.getStatus());
     }
     return result;
-  }
-
-  @AfterMapping
-  private void attachConditionsOfJoining(ProgrammeMembershipDTO pmDto) {
-      pmDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(pmDto.getUuid()));
-  }
-
-  @AfterMapping
-  private void attachConditionsOfJoining(ProgrammeMembershipCurriculaDTO pmcDto) {
-    pmcDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(pmcDto.getUuid()));
   }
 }
