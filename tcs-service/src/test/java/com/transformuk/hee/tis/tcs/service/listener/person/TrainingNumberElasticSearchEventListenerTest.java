@@ -12,6 +12,7 @@ import com.transformuk.hee.tis.tcs.service.event.TrainingNumberSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.util.List;
@@ -44,6 +45,9 @@ public class TrainingNumberElasticSearchEventListenerTest {
   ProgrammeMembershipRepository programmeMembershipRepositoryMock;
 
   @Mock
+  ConditionsOfJoiningService conditionsOfJoiningServiceMock;
+
+  @Mock
   ApplicationEventPublisher applicationEventPublisherMock;
 
   @Captor
@@ -56,7 +60,7 @@ public class TrainingNumberElasticSearchEventListenerTest {
   public void setup() {
     CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper();
     ReflectionTestUtils.setField(testObj, "programmeMembershipMapper",
-        new ProgrammeMembershipMapper(curriculumMembershipMapper));
+        new ProgrammeMembershipMapper(curriculumMembershipMapper, conditionsOfJoiningServiceMock));
 
     trainingNumberDto = new TrainingNumberDTO();
     trainingNumberDto.setId(TRAININGNUMER_ID);

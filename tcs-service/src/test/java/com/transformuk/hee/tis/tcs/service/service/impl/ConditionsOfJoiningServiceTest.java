@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.time.Instant;
@@ -37,7 +38,7 @@ class ConditionsOfJoiningServiceTest {
     ConditionsOfJoiningMapper mapper = Mappers.getMapper(ConditionsOfJoiningMapper.class);
     programmeMembershipService = mock(ProgrammeMembershipService.class);
 
-    conditionsOfJoiningService = new ConditionsOfJoiningService(repository, mapper,
+    conditionsOfJoiningService = new ConditionsOfJoiningServiceImpl(repository, mapper,
         programmeMembershipService);
   }
 

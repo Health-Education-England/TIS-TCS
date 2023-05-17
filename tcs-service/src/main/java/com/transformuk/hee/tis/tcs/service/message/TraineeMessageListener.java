@@ -1,8 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
-import com.transformuk.hee.tis.tcs.service.service.impl.ConditionsOfJoiningService;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
