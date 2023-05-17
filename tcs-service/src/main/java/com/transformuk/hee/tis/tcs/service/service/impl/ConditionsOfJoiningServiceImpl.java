@@ -7,15 +7,10 @@ import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningReposit
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,13 +64,6 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
         programmeMembershipUuid);
 
     return mapper.toDto(entity);
-  }
-  @Override
-  @Transactional(readOnly = true)
-  public Page<ConditionsOfJoiningDto> findAll(Pageable pageable) {
-    LOG.debug("Request to get all ConditionsOfJoining");
-    return repository.findAll(pageable)
-        .map(mapper::toDto);
   }
 
   /**

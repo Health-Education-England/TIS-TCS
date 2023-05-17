@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
