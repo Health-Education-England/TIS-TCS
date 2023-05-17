@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -48,6 +49,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -100,10 +102,14 @@ public class ProgrammeMembershipServiceImplTest {
   @Mock
   private PersonRepository personRepositoryMock;
 
+  @Autowired
+  ConditionsOfJoiningService conditionsOfJoiningService;
+
   @Before
   public void setup() {
     curriculumMembershipMapper = new CurriculumMembershipMapper();
-    programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper);
+    programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper,
+        conditionsOfJoiningService);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());

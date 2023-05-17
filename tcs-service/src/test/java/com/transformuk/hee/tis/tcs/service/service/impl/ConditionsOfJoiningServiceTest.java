@@ -27,7 +27,7 @@ class ConditionsOfJoiningServiceTest {
   private static final UUID PROGRAMME_MEMBERSHIP_UUID = UUID.randomUUID();
   private static final Instant SIGNED_AT = Instant.now();
 
-  private ConditionsOfJoiningService conditionsOfJoiningService;
+  private ConditionsOfJoiningServiceImpl conditionsOfJoiningService;
   private ConditionsOfJoiningRepository repository;
   private ProgrammeMembershipService programmeMembershipService;
 
@@ -37,7 +37,7 @@ class ConditionsOfJoiningServiceTest {
     ConditionsOfJoiningMapper mapper = Mappers.getMapper(ConditionsOfJoiningMapper.class);
     programmeMembershipService = mock(ProgrammeMembershipService.class);
 
-    conditionsOfJoiningService = new ConditionsOfJoiningService(repository, mapper,
+    conditionsOfJoiningService = new ConditionsOfJoiningServiceImpl(repository, mapper,
         programmeMembershipService);
   }
 

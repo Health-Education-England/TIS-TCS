@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
@@ -13,11 +14,13 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.mapstruct.AfterMapping;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -28,9 +31,12 @@ import org.springframework.util.CollectionUtils;
 public class ProgrammeMembershipMapper {
 
   CurriculumMembershipMapper curriculumMembershipMapper;
+  ConditionsOfJoiningService conditionsOfJoiningService;
 
-  public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper) {
+  public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper,
+      ConditionsOfJoiningService conditionsOfJoiningService) {
     this.curriculumMembershipMapper = curriculumMembershipMapper;
+    this.conditionsOfJoiningService = conditionsOfJoiningService;
   }
 
   public ProgrammeMembershipDTO toDto(ProgrammeMembership programmeMembership) {
@@ -283,5 +289,15 @@ public class ProgrammeMembershipMapper {
       result.setStatus(rotationDTO.getStatus());
     }
     return result;
+  }
+
+  @AfterMapping
+  private void attachConditionsOfJoining(ProgrammeMembershipDTO pmDto) {
+      pmDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(pmDto.getUuid()));
+  }
+
+  @AfterMapping
+  private void attachConditionsOfJoining(ProgrammeMembershipCurriculaDTO pmcDto) {
+    pmcDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(pmcDto.getUuid()));
   }
 }
