@@ -49,7 +49,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -101,8 +100,7 @@ public class ProgrammeMembershipServiceImplTest {
   private ApplicationEventPublisher applicationEventPublisherMock;
   @Mock
   private PersonRepository personRepositoryMock;
-
-  @Autowired
+  @Mock
   ConditionsOfJoiningService conditionsOfJoiningService;
 
   @Before

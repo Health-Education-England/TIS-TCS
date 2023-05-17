@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -32,7 +33,7 @@ public class ProgrammeMembershipMapper {
   ConditionsOfJoiningService conditionsOfJoiningService;
 
   public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper,
-      ConditionsOfJoiningService conditionsOfJoiningService) {
+      @Lazy ConditionsOfJoiningService conditionsOfJoiningService) {
     this.curriculumMembershipMapper = curriculumMembershipMapper;
     this.conditionsOfJoiningService = conditionsOfJoiningService;
   }
@@ -46,7 +47,6 @@ public class ProgrammeMembershipMapper {
       }
       result.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
-      result.setConditionsOfJoining(conditionsOfJoiningService.findOne(result.getUuid()));
     }
     return result;
   }
@@ -66,7 +66,10 @@ public class ProgrammeMembershipMapper {
             .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
         programmeMembershipDto.getCurriculumMemberships()
             .add(curriculumMembershipDto);
-        programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(programmeMembershipDto.getUuid()));
+        if (programmeMembershipDto.getUuid() != null) {
+          programmeMembershipDto.setConditionsOfJoining(
+              conditionsOfJoiningService.findOne(programmeMembershipDto.getUuid()));
+        }
         result.add(programmeMembershipDto);
       }
     }
@@ -89,7 +92,6 @@ public class ProgrammeMembershipMapper {
       }
       programmeMembershipDto.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
-      programmeMembershipDto.setConditionsOfJoining(conditionsOfJoiningService.findOne(programmeMembershipDto.getUuid()));
       listMap.put(programmeMembershipDto, programmeMembershipDto);
     }
 
@@ -177,7 +179,9 @@ public class ProgrammeMembershipMapper {
       result.setPerson(personToPersonDTO(programmeMembership.getPerson()));
     }
     result.setTrainingPathway(programmeMembership.getTrainingPathway());
-    result.setConditionsOfJoining(conditionsOfJoiningService.findOne(result.getUuid()));
+    if (result.getUuid() != null) {
+      result.setConditionsOfJoining(conditionsOfJoiningService.findOne(result.getUuid()));
+    }
     return result;
   }
 

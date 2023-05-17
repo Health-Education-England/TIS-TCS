@@ -1,7 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
-import com.transformuk.hee.tis.tcs.service.service.impl.ConditionsOfJoiningServiceImpl;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TraineeMessageListener {
 
-  private final ConditionsOfJoiningServiceImpl conditionsOfJoiningService;
+  private final ConditionsOfJoiningService conditionsOfJoiningService;
 
-  TraineeMessageListener(ConditionsOfJoiningServiceImpl conditionsOfJoiningService) {
+  TraineeMessageListener(ConditionsOfJoiningService conditionsOfJoiningService) {
     this.conditionsOfJoiningService = conditionsOfJoiningService;
   }
 

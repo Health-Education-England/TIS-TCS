@@ -35,12 +35,4 @@ public interface ConditionsOfJoiningService {
    * @return the entity
    */
   ConditionsOfJoiningDto findOne(UUID programmeMembershipUuid);
-
-  /**
-   * Get a list of Conditions Of Joining for a trainee.
-   *
-   * @param traineeId the TIS id of the trainee
-   * @return a list of Conditions of Joining for the trainee
-   */
-  List<ConditionsOfJoiningDto> findConditionsOfJoiningsForTrainee(Long traineeId);
 }

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
-import com.transformuk.hee.tis.tcs.service.service.impl.ConditionsOfJoiningServiceImpl;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,11 +17,11 @@ class TraineeMessageListenerTest {
   private static final Instant SIGNED_AT = Instant.now();
 
   private TraineeMessageListener listener;
-  private ConditionsOfJoiningServiceImpl service;
+  private ConditionsOfJoiningService service;
 
   @BeforeEach
   void setUp() {
-    service = mock(ConditionsOfJoiningServiceImpl.class);
+    service = mock(ConditionsOfJoiningService.class);
     listener = new TraineeMessageListener(service);
   }
 

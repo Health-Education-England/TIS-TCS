@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.time.Instant;
@@ -27,7 +28,7 @@ class ConditionsOfJoiningServiceTest {
   private static final UUID PROGRAMME_MEMBERSHIP_UUID = UUID.randomUUID();
   private static final Instant SIGNED_AT = Instant.now();
 
-  private ConditionsOfJoiningServiceImpl conditionsOfJoiningService;
+  private ConditionsOfJoiningService conditionsOfJoiningService;
   private ConditionsOfJoiningRepository repository;
   private ProgrammeMembershipService programmeMembershipService;
 

@@ -13,9 +13,6 @@ import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
-import com.transformuk.hee.tis.tcs.service.service.impl.ConditionsOfJoiningServiceImpl;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.util.List;
@@ -30,7 +27,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -48,8 +44,8 @@ public class TrainingNumberElasticSearchEventListenerTest {
   @Mock
   ProgrammeMembershipRepository programmeMembershipRepositoryMock;
 
-  @Autowired
-  ConditionsOfJoiningService conditionsOfJoiningService;
+  @Mock
+  ConditionsOfJoiningService conditionsOfJoiningServiceMock;
 
   @Mock
   ApplicationEventPublisher applicationEventPublisherMock;
@@ -64,7 +60,7 @@ public class TrainingNumberElasticSearchEventListenerTest {
   public void setup() {
     CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper();
     ReflectionTestUtils.setField(testObj, "programmeMembershipMapper",
-        new ProgrammeMembershipMapper(curriculumMembershipMapper, conditionsOfJoiningService));
+        new ProgrammeMembershipMapper(curriculumMembershipMapper, conditionsOfJoiningServiceMock));
 
     trainingNumberDto = new TrainingNumberDTO();
     trainingNumberDto.setId(TRAININGNUMER_ID);

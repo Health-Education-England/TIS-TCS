@@ -92,23 +92,4 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
         = repository.findById(programmeMembershipUuid).orElse(null);
     return mapper.toDto(conditionsOfJoining);
   }
-
-  /**
-   * Get a list of Conditions Of Joining for a trainee.
-   *
-   * @param traineeId the TIS id of the trainee
-   * @return a list of Conditions of Joining for the trainee
-   */
-  @Override
-  @Transactional(readOnly = true)
-  public List<ConditionsOfJoiningDto> findConditionsOfJoiningsForTrainee(Long traineeId) {
-    LOG.debug("Request to get ConditionsOfJoining for trainee : {}", traineeId);
-    List<ConditionsOfJoining> foundConditionsOfJoinings = repository
-        .findByTraineeId(traineeId);
-
-    if (CollectionUtils.isNotEmpty(foundConditionsOfJoinings)) {
-      return mapper.allEntityToDto(foundConditionsOfJoinings);
-    }
-    return Collections.emptyList();
-  }
 }
