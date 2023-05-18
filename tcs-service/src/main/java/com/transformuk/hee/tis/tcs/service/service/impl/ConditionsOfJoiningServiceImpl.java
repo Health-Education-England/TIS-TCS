@@ -30,8 +30,8 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
   /**
    * Initialise the Conditions of Joining service.
    *
-   * @param repository the Conditions of Joining repository
-   * @param mapper the Conditions of Joining mapper
+   * @param repository                 the Conditions of Joining repository
+   * @param mapper                     the Conditions of Joining mapper
    * @param programmeMembershipService the Programme Membership service
    */
   @Autowired

@@ -10,10 +10,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -29,9 +27,6 @@ public class CurriculumMembershipMapperTest {
 
   @Mock
   ConditionsOfJoiningMapper conditionsOfJoiningMapperMock;
-
-  @Mock
-  ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
 
   @InjectMocks
   private CurriculumMembershipMapper testObj;
@@ -67,25 +62,24 @@ public class CurriculumMembershipMapperTest {
     conditionsOfJoining.setVersion(GoldGuideVersion.GG9);
     conditionsOfJoining.setProgrammeMembershipUuid(pmID);
     conditionsOfJoining.setSignedAt(Instant.now());
+    pm1.setConditionsOfJoining(conditionsOfJoining);
     ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     ConditionsOfJoiningDto conditionsOfJoiningDto
         = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
-
-    when(conditionsOfJoiningRepositoryMock.findById(pmID))
-        .thenReturn(Optional.of(conditionsOfJoining));
+    pm1.setConditionsOfJoining(conditionsOfJoining);
     when(conditionsOfJoiningMapperMock.toDto(conditionsOfJoining))
         .thenReturn(conditionsOfJoiningDto);
 
     List<ProgrammeMembershipDTO> result = testObj.allEntityToDto(Lists.newArrayList(cm1, cm2));
 
     Assert.assertEquals(2, result.size()); //listed by curriculum membership
-    ProgrammeMembershipDTO pmDTOreturned = result.get(0);
-    Assert.assertNotNull(pmDTOreturned);
-    assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm ID is used as pm ID
-    assertThat(pmID).isEqualTo(pmDTOreturned.getUuid());
+    ProgrammeMembershipDTO actualPmDto = result.get(0);
+    Assert.assertNotNull(actualPmDto);
+    assertThat(cm1.getId()).isEqualTo(actualPmDto.getId()); //check that cm ID is used as pm ID
+    assertThat(pmID).isEqualTo(actualPmDto.getUuid());
 
     //check Condition of joining is attached to first PmDto and the other is null
-    assertThat(conditionsOfJoiningDto).isEqualTo(pmDTOreturned.getConditionsOfJoining());
+    assertThat(actualPmDto.getConditionsOfJoining()).isEqualTo(conditionsOfJoiningDto);
     assertThat(result.get(1).getConditionsOfJoining()).isNull();
   }
 }
