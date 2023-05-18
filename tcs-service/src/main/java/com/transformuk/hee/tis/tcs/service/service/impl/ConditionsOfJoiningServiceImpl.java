@@ -65,19 +65,4 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
 
     return mapper.toDto(entity);
   }
-
-  /**
-   * Get one ConditionsOfJoiningDto by uuid.
-   *
-   * @param programmeMembershipUuid the uuid of the entity
-   * @return the entity
-   */
-  @Override
-  @Transactional(readOnly = true)
-  public ConditionsOfJoiningDto findOne(UUID programmeMembershipUuid) {
-    LOG.debug("Request to get ConditionsOfJoiningDto : {}", programmeMembershipUuid);
-    ConditionsOfJoining conditionsOfJoining
-        = repository.findById(programmeMembershipUuid).orElse(null);
-    return mapper.toDto(conditionsOfJoining);
-  }
 }
