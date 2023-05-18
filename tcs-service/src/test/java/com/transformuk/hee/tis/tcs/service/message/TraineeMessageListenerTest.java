@@ -1,7 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
@@ -10,6 +12,7 @@ import com.transformuk.hee.tis.tcs.service.service.impl.ConditionsOfJoiningServi
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 
 class TraineeMessageListenerTest {
 
@@ -26,7 +29,7 @@ class TraineeMessageListenerTest {
   }
 
   @Test
-  void shouldSaveSignedCoj() {
+  void shouldSaveSignedCojWhenEventValid() {
     ConditionsOfJoiningDto dto = new ConditionsOfJoiningDto();
     dto.setSignedAt(SIGNED_AT);
     dto.setVersion(GoldGuideVersion.GG9);
@@ -35,5 +38,17 @@ class TraineeMessageListenerTest {
     listener.receiveMessage(event);
 
     verify(service).save(ID, dto);
+  }
+
+  @Test
+  void shouldNotRequeueMessageWhenEventArgumentsInvalid() {
+    ConditionsOfJoiningDto dto = new ConditionsOfJoiningDto();
+    dto.setSignedAt(SIGNED_AT);
+    dto.setVersion(GoldGuideVersion.GG9);
+    ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(ID, dto);
+
+    when(service.save(ID, dto)).thenThrow(IllegalArgumentException.class);
+
+    assertThrows(AmqpRejectAndDontRequeueException.class, () -> listener.receiveMessage(event));
   }
 }
