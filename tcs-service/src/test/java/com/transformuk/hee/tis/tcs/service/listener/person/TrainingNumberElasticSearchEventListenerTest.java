@@ -60,8 +60,10 @@ public class TrainingNumberElasticSearchEventListenerTest {
 
   @Before
   public void setup() {
-    CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper();
     ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
+    CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper(
+        conditionsOfJoiningMapper, conditionsOfJoiningRepositoryMock);
+
     ReflectionTestUtils.setField(testObj, "programmeMembershipMapper",
         new ProgrammeMembershipMapper(curriculumMembershipMapper, conditionsOfJoiningMapper,
             conditionsOfJoiningRepositoryMock));

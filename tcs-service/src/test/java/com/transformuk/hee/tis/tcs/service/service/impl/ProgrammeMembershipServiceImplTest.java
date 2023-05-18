@@ -108,8 +108,9 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Before
   public void setup() {
-    curriculumMembershipMapper = new CurriculumMembershipMapper();
     conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
+    curriculumMembershipMapper = new CurriculumMembershipMapper(conditionsOfJoiningMapper,
+        conditionsOfJoiningRepositoryMock);
     programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper,
         conditionsOfJoiningMapper, conditionsOfJoiningRepositoryMock);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
