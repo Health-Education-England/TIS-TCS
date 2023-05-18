@@ -22,12 +22,14 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
+import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -88,6 +90,7 @@ public class ProgrammeMembershipServiceImplTest {
   private ProgrammeMembershipServiceImpl testObj;
   private ProgrammeMembershipMapper programmeMembershipMapper;
   private CurriculumMembershipMapper curriculumMembershipMapper;
+  private ConditionsOfJoiningMapper conditionsOfJoiningMapper;
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock
@@ -101,13 +104,14 @@ public class ProgrammeMembershipServiceImplTest {
   @Mock
   private PersonRepository personRepositoryMock;
   @Mock
-  ConditionsOfJoiningService conditionsOfJoiningService;
+  ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
 
   @Before
   public void setup() {
     curriculumMembershipMapper = new CurriculumMembershipMapper();
+    conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper,
-        conditionsOfJoiningService);
+        conditionsOfJoiningMapper, conditionsOfJoiningRepositoryMock);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
