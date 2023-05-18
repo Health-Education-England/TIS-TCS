@@ -10,9 +10,10 @@ import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
+import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -29,10 +30,11 @@ public class ProgrammeMembershipMapperTest {
   @Mock
   CurriculumMembershipMapper curriculumMembershipMapperMock;
 
-  ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
+  @Mock
+  ConditionsOfJoiningMapper conditionsOfJoiningMapperMock;
 
   @Mock
-  ConditionsOfJoiningService conditionsOfJoiningServiceMock;
+  ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
 
   @InjectMocks
   private ProgrammeMembershipMapper testObj;
@@ -68,6 +70,7 @@ public class ProgrammeMembershipMapperTest {
     conditionsOfJoining.setVersion(GoldGuideVersion.GG9);
     conditionsOfJoining.setProgrammeMembershipUuid(pmID);
     conditionsOfJoining.setSignedAt(Instant.now());
+    ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     ConditionsOfJoiningDto conditionsOfJoiningDto
         = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
 
@@ -77,7 +80,9 @@ public class ProgrammeMembershipMapperTest {
         .thenReturn(cmDTO2);
     when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm3))
         .thenReturn(cmDTO3);
-    when(conditionsOfJoiningServiceMock.findOne(pmID))
+    when(conditionsOfJoiningRepositoryMock.findById(pmID))
+        .thenReturn(Optional.of(conditionsOfJoining));
+    when(conditionsOfJoiningMapperMock.toDto(conditionsOfJoining))
         .thenReturn(conditionsOfJoiningDto);
 
     List<ProgrammeMembershipDTO> result = testObj.allEntityToDto(Lists.newArrayList(pm1, pm2));
