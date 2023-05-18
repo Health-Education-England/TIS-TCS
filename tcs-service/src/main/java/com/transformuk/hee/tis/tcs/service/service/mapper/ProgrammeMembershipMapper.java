@@ -34,6 +34,13 @@ public class ProgrammeMembershipMapper {
   ConditionsOfJoiningMapper conditionsOfJoiningMapper;
   ConditionsOfJoiningRepository conditionsOfJoiningRepository;
 
+  /**
+   * Initialise the ProgrammeMembership mapper.
+   *
+   * @param curriculumMembershipMapper the Curriculum Membership mapper
+   * @param conditionsOfJoiningMapper the Conditions of Joining mapper
+   * @param conditionsOfJoiningRepository the Conditions of Joining repository
+   */
   public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper,
       ConditionsOfJoiningMapper conditionsOfJoiningMapper,
       ConditionsOfJoiningRepository conditionsOfJoiningRepository) {
