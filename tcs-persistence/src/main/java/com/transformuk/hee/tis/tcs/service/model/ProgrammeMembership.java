@@ -17,7 +17,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PreRemove;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Version;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
@@ -67,6 +69,10 @@ public class ProgrammeMembership implements Serializable {
   @ManyToOne
   @JoinColumn(name = "trainingNumberId")
   private TrainingNumber trainingNumber;
+
+  @OneToOne(mappedBy = "programmeMembership", cascade = CascadeType.REMOVE)
+  @PrimaryKeyJoinColumn
+  private ConditionsOfJoining conditionsOfJoining;
 
   @OneToMany(mappedBy = "programmeMembership", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<CurriculumMembership> curriculumMemberships = new HashSet<>();

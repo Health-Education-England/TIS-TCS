@@ -20,6 +20,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -27,6 +28,7 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
+import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -46,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -135,6 +138,9 @@ class ProgrammeMembershipResourceIntTest {
 
   @Autowired
   private RotationRepository rotationRepository;
+
+  @Autowired
+  ConditionsOfJoiningRepository conditionsOfJoiningRepository;
 
   @Autowired
   private CurriculumMembershipMapper curriculumMembershipMapper;
@@ -274,7 +280,7 @@ class ProgrammeMembershipResourceIntTest {
     for (long id : new Long[]{savedCurriculumMembership.getId(),
         savedCurriculumMembership1.getId()}) {
       restProgrammeMembershipMockMvc.perform(
-          get("/api/programme-memberships/details/{ids}", id))
+              get("/api/programme-memberships/details/{ids}", id))
           .andExpect(status().isOk())
           .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
           .andExpect(jsonPath("$.[*].programmeMembershipType")
@@ -320,8 +326,8 @@ class ProgrammeMembershipResourceIntTest {
     ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper
         .toDto(curriculumMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isCreated());
 
     // Validate that ProgrammeMembership has been added to the database
@@ -378,8 +384,8 @@ class ProgrammeMembershipResourceIntTest {
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isCreated());
 
     // Validate that ProgrammeMembership has been added to the database
@@ -460,8 +466,8 @@ class ProgrammeMembershipResourceIntTest {
     programmeMembershipDTO.getCurriculumMemberships().add(newCurriculumMembershipDTO);
     programmeMembershipDTO.setProgrammeEndDate(UPDATED_PROGRAMME_END_DATE);
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isOk());
 
     // Validate the programme membership has been updated with the new curriculum membership
@@ -582,8 +588,8 @@ class ProgrammeMembershipResourceIntTest {
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(content().string(containsString(
             "Programme Start Date must be before the End Date")));
@@ -616,8 +622,8 @@ class ProgrammeMembershipResourceIntTest {
     ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
         .toDto(programmeMembership);
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(content().string(containsString(
             "ProgrammeStartDate is required")))
@@ -639,8 +645,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
@@ -656,8 +662,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
@@ -684,8 +690,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
@@ -712,8 +718,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("person"))
@@ -742,8 +748,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("programmeId"))
@@ -771,8 +777,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
@@ -802,8 +808,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when & then
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
@@ -839,8 +845,8 @@ class ProgrammeMembershipResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restProgrammeMembershipMockMvc.perform(post("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Alice in the database
@@ -983,8 +989,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isOk());
 
     //then
@@ -1052,8 +1058,8 @@ class ProgrammeMembershipResourceIntTest {
 
     //when
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(pmDto1)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(pmDto1)))
         .andExpect(status().isOk());
 
     //then
@@ -1103,8 +1109,8 @@ class ProgrammeMembershipResourceIntTest {
     // assumed to be new and added instead of being updated).
     //TODO: confirm the ProgrammeMembershipDTO and CurriculumMembershipDTO Update.class field groups
     restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the CurriculumMembership is not in the database
@@ -1244,6 +1250,61 @@ class ProgrammeMembershipResourceIntTest {
     assertThat(programmeMembershipRepository.findAll()).hasSize(1);
     assertThat(curriculumMembershipRepository.findAll()).hasSize(1);
   }
+
+
+  @Test
+  @Transactional
+  void conditionsOfJoiningShouldSurviveProgrammeMembershipUpdate() throws Exception {
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+
+    curriculumMembership
+        .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    ConditionsOfJoining coj = new ConditionsOfJoining();
+    coj.setProgrammeMembership(programmeMembership);
+    conditionsOfJoiningRepository.saveAndFlush(coj);
+    // Verifies entity is persisted as well as setting the expected UUID.
+    UUID expectedCojUuid = conditionsOfJoiningRepository.getOne(programmeMembership.getUuid())
+        .getProgrammeMembershipUuid();
+
+    ProgrammeMembership updatedProgrammeMembership = programmeMembershipRepository
+        .findById(programmeMembership.getUuid()).orElse(null);
+
+    ProgrammeMembershipDTO programmeMembershipDTO = programmeMembershipMapper
+        .toDto(updatedProgrammeMembership);
+
+    programmeMembershipDTO.setConditionsOfJoining(null);
+    programmeMembershipDTO.setProgrammeEndDate(UPDATED_PROGRAMME_END_DATE);
+
+    CurriculumMembershipDTO curriculumMembershipDTO
+        = programmeMembershipDTO.getCurriculumMemberships().iterator().next();
+
+    curriculumMembershipDTO.setIntrepidId(UPDATED_INTREPID_ID);
+    curriculumMembershipDTO.setCurriculumStartDate(UPDATED_CURRICULUM_START_DATE);
+    curriculumMembershipDTO.setCurriculumEndDate(UPDATED_CURRICULUM_END_DATE);
+    curriculumMembershipDTO.setCurriculumCompletionDate(UPDATED_CURRICULUM_COMPLETION_DATE);
+    curriculumMembershipDTO.setPeriodOfGrace(UPDATED_PERIOD_OF_GRACE);
+
+    //when
+    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+        .andExpect(status().isOk());
+
+    //then
+    assertThat(conditionsOfJoiningRepository.getOne(expectedCojUuid)).isEqualTo(coj);
+  }
+
 
   @Test
   @Transactional
