@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-class ConditionsOfJoiningServiceTest {
+class ConditionsOfJoiningServiceImplTest {
 
   private static final Long CURRICULUM_MEMBERSHIP_ID = 40L;
   private static final UUID PROGRAMME_MEMBERSHIP_UUID = UUID.randomUUID();

@@ -134,8 +134,6 @@ public class ProgrammeMembershipMapper {
     result.getCurriculumMemberships()
         .addAll(curriculumMembershipMapper.toEntity(programmeMembershipDto));
     result.getCurriculumMemberships().forEach(cm -> cm.setProgrammeMembership(result));
-    result.setConditionsOfJoining(
-        conditionsOfJoiningMapper.toEntity(programmeMembershipDto.getConditionsOfJoining()));
     return result;
   }
 

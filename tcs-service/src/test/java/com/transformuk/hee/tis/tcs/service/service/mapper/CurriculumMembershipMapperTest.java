@@ -4,14 +4,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
+<<<<<<< HEAD
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
+=======
+>>>>>>> feat/cojIntoPmDtoV3squashed
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+<<<<<<< HEAD
 import java.time.Instant;
 import java.util.List;
+=======
+import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+>>>>>>> feat/cojIntoPmDtoV3squashed
 import java.util.UUID;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -32,12 +42,11 @@ public class CurriculumMembershipMapperTest {
   private CurriculumMembershipMapper testObj;
 
   @Test
-  public void entityToDtoShouldReturnListOfAllElementsInAsDto() {
+  public void entityToDtoShouldReturnListOfAllElementsAsDto() {
     UUID pmID = UUID.randomUUID();
     UUID pm2ID = UUID.randomUUID();
     ProgrammeMembership pm1 = new ProgrammeMembership(), pm2 = new ProgrammeMembership();
-    CurriculumMembership cm1 = new CurriculumMembership(), cm2 = new CurriculumMembership(),
-        cm3 = new CurriculumMembership();
+    CurriculumMembership cm1 = new CurriculumMembership(), cm2 = new CurriculumMembership();
     ConditionsOfJoining conditionsOfJoining = new ConditionsOfJoining();
 
     pm1.setUuid(pmID);
@@ -45,19 +54,10 @@ public class CurriculumMembershipMapperTest {
 
     cm1.setId(1L);
     cm2.setId(2L);
-    cm3.setId(3L);
     cm1.setProgrammeMembership(pm1);
     cm2.setProgrammeMembership(pm2);
-    cm3.setProgrammeMembership(pm2);
     pm1.setCurriculumMemberships(Sets.newLinkedHashSet(cm1));
-    pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2, cm3));
-
-    CurriculumMembershipDTO cmDTO1 = new CurriculumMembershipDTO();
-    cmDTO1.setId(1L);
-    CurriculumMembershipDTO cmDTO2 = new CurriculumMembershipDTO();
-    cmDTO2.setId(2L);
-    CurriculumMembershipDTO cmDTO3 = new CurriculumMembershipDTO();
-    cmDTO3.setId(3L);
+    pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2));
 
     conditionsOfJoining.setVersion(GoldGuideVersion.GG9);
     conditionsOfJoining.setProgrammeMembershipUuid(pmID);

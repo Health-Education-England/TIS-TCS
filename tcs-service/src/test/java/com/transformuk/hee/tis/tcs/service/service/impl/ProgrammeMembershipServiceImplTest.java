@@ -88,6 +88,7 @@ public class ProgrammeMembershipServiceImplTest {
   private ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
   private ProgrammeMembershipServiceImpl testObj;
   private ProgrammeMembershipMapper programmeMembershipMapper;
+  private CurriculumMembershipMapper curriculumMembershipMapper;
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock

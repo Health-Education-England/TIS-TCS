@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.message;
 
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,12 @@ public class TraineeMessageListener {
 
   @RabbitListener(queues = "${app.rabbit.trainee.queue.coj.signed}", ackMode = "AUTO")
   public void receiveMessage(final ConditionsOfJoiningSignedEvent event) {
-    conditionsOfJoiningService.save(event.getProgrammeMembershipId(),
-        event.getConditionsOfJoining());
+    try {
+      conditionsOfJoiningService.save(event.getProgrammeMembershipId(),
+          event.getConditionsOfJoining());
+    } catch (IllegalArgumentException e) {
+      // Do not requeue the message if the event arguments are not valid.
+      throw new AmqpRejectAndDontRequeueException(e);
+    }
   }
 }
