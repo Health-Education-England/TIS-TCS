@@ -90,11 +90,11 @@ public class ProgrammeMembershipMapperTest {
     Assert.assertEquals(3, result.size()); //listed by curriculum membership
     ProgrammeMembershipDTO pmDTOreturned = result.get(0);
     Assert.assertNotNull(pmDTOreturned);
-    assertThat(cm1.getId()).isEqualTo(pmDTOreturned.getId()); //check that cm ID is used as pm ID
-    assertThat(pmID).isEqualTo(pmDTOreturned.getUuid());
+    assertThat(pmDTOreturned.getId()).isEqualTo(cm1.getId()); //check that cm ID is used as pm ID
+    assertThat(pmDTOreturned.getUuid()).isEqualTo(pmID);
 
     //check Condition of joining is attached to first PmDto and others are null
-    assertThat(conditionsOfJoiningDto).isEqualTo(pmDTOreturned.getConditionsOfJoining());
+    assertThat(pmDTOreturned.getConditionsOfJoining()).isEqualTo(conditionsOfJoiningDto);
     assertThat(result.get(1).getConditionsOfJoining()).isNull();
     assertThat(result.get(2).getConditionsOfJoining()).isNull();
   }

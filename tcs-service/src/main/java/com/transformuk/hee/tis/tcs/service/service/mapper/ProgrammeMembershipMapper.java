@@ -77,16 +77,6 @@ public class ProgrammeMembershipMapper {
             .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
         programmeMembershipDto.getCurriculumMemberships()
             .add(curriculumMembershipDto);
-        if (programmeMembershipDto.getUuid() != null) {
-          Optional<ConditionsOfJoining> conditionsOfJoiningOptional
-              = conditionsOfJoiningRepository.findById(programmeMembershipDto.getUuid());
-          if (conditionsOfJoiningOptional.isPresent()) {
-            programmeMembershipDto.setConditionsOfJoining(
-                conditionsOfJoiningMapper.toDto(conditionsOfJoiningOptional.get()));
-          } else {
-            programmeMembershipDto.setConditionsOfJoining(null);
-          }
-        }
         result.add(programmeMembershipDto);
       }
     }
