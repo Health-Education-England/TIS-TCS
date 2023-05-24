@@ -189,12 +189,8 @@ public class ProgrammeMembershipMapper {
     if (result.getUuid() != null) {
       Optional<ConditionsOfJoining> conditionsOfJoiningOptional
           = conditionsOfJoiningRepository.findById(result.getUuid());
-      if (conditionsOfJoiningOptional.isPresent()) {
-        result.setConditionsOfJoining(
-            conditionsOfJoiningMapper.toDto(conditionsOfJoiningOptional.get()));
-      } else {
-        result.setConditionsOfJoining(null);
-      }
+      conditionsOfJoiningOptional.ifPresent(c -> result.setConditionsOfJoining(
+          conditionsOfJoiningMapper.toDto(c)));
     }
     return result;
   }

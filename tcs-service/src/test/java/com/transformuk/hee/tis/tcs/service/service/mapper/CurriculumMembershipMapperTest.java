@@ -5,12 +5,10 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,12 +51,7 @@ public class CurriculumMembershipMapperTest {
     pm1.setCurriculumMemberships(Sets.newLinkedHashSet(cm1));
     pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2));
 
-    conditionsOfJoining.setVersion(GoldGuideVersion.GG9);
-    conditionsOfJoining.setProgrammeMembershipUuid(pmID);
-    conditionsOfJoining.setSignedAt(Instant.now());
-    ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
-    ConditionsOfJoiningDto conditionsOfJoiningDto
-        = conditionsOfJoiningMapper.toDto(conditionsOfJoining);
+    ConditionsOfJoiningDto conditionsOfJoiningDto = new ConditionsOfJoiningDto();
 
     when(conditionsOfJoiningRepositoryMock.findById(pmID))
         .thenReturn(Optional.of(conditionsOfJoining));
