@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
+import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.util.UUID;
@@ -18,22 +19,30 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class ConditionsOfJoiningService {
+public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ConditionsOfJoiningService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ConditionsOfJoiningServiceImpl.class);
 
   private final ConditionsOfJoiningRepository repository;
   private final ConditionsOfJoiningMapper mapper;
   private final ProgrammeMembershipService programmeMembershipService;
 
+  /**
+   * Initialise the Conditions of Joining service.
+   *
+   * @param repository the Conditions of Joining repository
+   * @param mapper the Conditions of Joining mapper
+   * @param programmeMembershipService the Programme Membership service
+   */
   @Autowired
-  public ConditionsOfJoiningService(ConditionsOfJoiningRepository repository,
+  public ConditionsOfJoiningServiceImpl(ConditionsOfJoiningRepository repository,
       ConditionsOfJoiningMapper mapper, ProgrammeMembershipService programmeMembershipService) {
     this.repository = repository;
     this.mapper = mapper;
     this.programmeMembershipService = programmeMembershipService;
   }
 
+  @Override
   public ConditionsOfJoiningDto save(Long programmeMembershipId, ConditionsOfJoiningDto dto) {
     LOG.info("Request received to save Conditions of Joining for Programme Membership {}.",
         programmeMembershipId);
