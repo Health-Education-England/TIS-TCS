@@ -13,8 +13,7 @@ from (
     if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
   from
     ContactDetails cd
-  left join GmcDetails gmc on (gmc.id = cd.id)
-  and gmc.gmcNumber is not null
+  inner join GmcDetails gmc on (gmc.id = cd.id)
   and not lower(gmc.gmcNumber) = "unknown"
   left join (
     -- count current PMs with combined programme names for each person
