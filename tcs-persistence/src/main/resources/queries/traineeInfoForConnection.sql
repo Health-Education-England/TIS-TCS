@@ -40,6 +40,7 @@ from (
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
   WHERECLAUSE(cd, id)
   ) as ot
+where not lower(gmc.id) = "unknown"
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;
