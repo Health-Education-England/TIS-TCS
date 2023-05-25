@@ -14,6 +14,8 @@ from (
   from
     ContactDetails cd
   left join GmcDetails gmc on (gmc.id = cd.id)
+  and gmc.id is not null
+  and not lower(gmc.id) = "unknown"
   left join (
     -- count current PMs with combined programme names for each person
     select
@@ -40,7 +42,6 @@ from (
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
   WHERECLAUSE(cd, id)
   ) as ot
-where not lower(gmc.id) = "unknown"
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;
