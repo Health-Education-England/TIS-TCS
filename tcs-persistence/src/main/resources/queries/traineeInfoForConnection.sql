@@ -14,7 +14,8 @@ from (
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
-  and not lower(gmc.gmcNumber) = "unknown"
+   -- note: null values are filtered out by the condition below
+  and lower(gmc.gmcNumber) <> 'unknown'
   left join (
     -- count current PMs with combined programme names for each person
     select
