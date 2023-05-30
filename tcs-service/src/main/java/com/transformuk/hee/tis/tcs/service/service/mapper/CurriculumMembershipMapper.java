@@ -18,6 +18,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningReposit
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -74,13 +75,7 @@ public class CurriculumMembershipMapper {
     List<ProgrammeMembershipDTO> result = Lists.newArrayList();
 
     for (CurriculumMembership curriculumMembership : curriculumMemberships) {
-      ProgrammeMembershipDTO programmeMembershipDto = curriculumMembershipToProgrammeMembershipDto(
-          curriculumMembership);
-      if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
-        programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
-      }
-      programmeMembershipDto.getCurriculumMemberships()
-          .add(curriculumMembershipToCurriculumMembershipDto(curriculumMembership));
+      ProgrammeMembershipDTO programmeMembershipDto = toDto(curriculumMembership);
       result.add(programmeMembershipDto);
     }
 
@@ -95,23 +90,24 @@ public class CurriculumMembershipMapper {
    */
   public List<ProgrammeMembershipDTO> curriculumMembershipsToProgrammeMembershipDtos(
       List<CurriculumMembership> curriculumMemberships) {
-    Map<ProgrammeMembershipDTO, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
+    Map<UUID, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
 
     for (CurriculumMembership curriculumMembership : curriculumMemberships) {
       ProgrammeMembershipDTO programmeMembershipDto = curriculumMembershipToProgrammeMembershipDto(
           curriculumMembership);
-      if (listMap.containsKey(programmeMembershipDto)) {
-        programmeMembershipDto = listMap.get(programmeMembershipDto);
+      if (listMap.containsKey(programmeMembershipDto.getUuid())) {
+        programmeMembershipDto = listMap.get(programmeMembershipDto.getUuid());
       }
       if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
         programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
       }
       programmeMembershipDto.getCurriculumMemberships()
           .add(curriculumMembershipToCurriculumMembershipDto(curriculumMembership));
-      listMap.put(programmeMembershipDto, programmeMembershipDto);
+
+      listMap.put(programmeMembershipDto.getUuid(), programmeMembershipDto);
     }
 
-    return listMap.keySet().stream().collect(Collectors.toList());
+    return listMap.values().stream().collect(Collectors.toList());
   }
 
   /**
