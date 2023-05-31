@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.28.0</version>
+  <version>6.28.1</version>
 
   <dependencies>
     <dependency>
@@ -602,4 +602,11 @@
       </properties>
     </profile>
   </profiles>
+  <distributionManagement>
+    <repository>
+      <id>codeartifact</id>
+      <name>CodeArtifact</name>
+      <url>https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/</url>
+    </repository>
+  </distributionManagement>
 </project>

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -86,23 +87,23 @@ public class ProgrammeMembershipMapper {
 
   public List<ProgrammeMembershipDTO> programmeMembershipsToProgrammeMembershipDTOs(
       List<ProgrammeMembership> programmeMemberships) {
-    Map<ProgrammeMembershipDTO, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
+    Map<UUID, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
 
     for (ProgrammeMembership programmeMembership : programmeMemberships) {
       ProgrammeMembershipDTO programmeMembershipDto
           = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
-      if (listMap.containsKey(programmeMembershipDto)) {
-        programmeMembershipDto = listMap.get(programmeMembershipDto);
+      if (listMap.containsKey(programmeMembershipDto.getUuid())) {
+        programmeMembershipDto = listMap.get(programmeMembershipDto.getUuid());
       }
       if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
         programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
       }
       programmeMembershipDto.getCurriculumMemberships()
           .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
-      listMap.put(programmeMembershipDto, programmeMembershipDto);
+      listMap.put(programmeMembershipDto.getUuid(), programmeMembershipDto);
     }
 
-    return new ArrayList<>(listMap.keySet());
+    return new ArrayList<>(listMap.values());
   }
 
   /**
