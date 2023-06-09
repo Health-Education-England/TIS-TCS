@@ -117,28 +117,25 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Save a list of programmeMembership.
    *
-   * @param programmeMembershipDto the list of entities to save
+   * @param programmeMembershipDtos the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDto) {
-    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
+  public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDtos) {
+    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDtos);
 
     List<ProgrammeMembership> programmeMemberships =
         programmeMembershipMapper
-            .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
+            .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDtos);
     programmeMemberships.forEach(programmeMembership -> {
       programmeMembership = programmeMembershipRepository.save(programmeMembership);
       updatePersonWhenStatusIsStale(programmeMembership.getPerson().getId());
     });
 
+    //emit events
     List<ProgrammeMembershipDTO> resultDtos =
         programmeMembershipMapper
             .programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
-
-    // update Person status
-    resultDtos.forEach(dto -> updatePersonWhenStatusIsStale(dto.getPerson().getId()));
-    //emit events
     emitProgrammeMembershipSavedEvents(resultDtos);
     return resultDtos;
   }

@@ -21,8 +21,6 @@ spring:
 
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
-    level:
-      root: debug
 
 application:
 
