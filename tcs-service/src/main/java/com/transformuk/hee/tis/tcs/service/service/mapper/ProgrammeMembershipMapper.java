@@ -55,7 +55,7 @@ public class ProgrammeMembershipMapper {
   }
 
   /**
-   * Convert a programmeMembership entity to DTO with all currculumMemberships
+   * Convert a programmeMembership entity to DTO with all currculumMemberships.
    *
    * @param pm programmeMembership entity
    * @return pmDto programmeMembership dto
@@ -73,11 +73,11 @@ public class ProgrammeMembershipMapper {
   /**
    * Convert programmeMembership from entities to DTOs, and flatten every curriculumMembership in
    * programmeMemberships.
-   * <p>
-   * So the returned ProgrammeMembershipDTO list can contain the same programmeMembershipDTOs Under
-   * each of ProgrammeMembershipDTO, there will be only one CurriculumMembershipDTO.
    *
-   * @param programmeMemberships
+   * <p>So the returned ProgrammeMembershipDTO list can contain the same programmeMembershipDTOs
+   * under each of ProgrammeMembershipDTO, there will be only one CurriculumMembershipDTO.
+   *
+   * @param programmeMemberships list of programmeMembership entities to convert
    * @return ProgrammeMembershipDTO list
    */
   public List<ProgrammeMembershipDTO> allEntityToDto(
@@ -99,11 +99,11 @@ public class ProgrammeMembershipMapper {
   /**
    * Convert programmeMembership from entities to DTOS, and roll up curriculumMembership for the
    * same programmeMembership.
-   * <p>
-   * So the returned ProgrammeMembershipDTO list contains unique ProgrammeMembershipDTOs Under each
-   * of ProgrammeMembershipDTO, there can be multiple CurriculumMembershipDTOs.
    *
-   * @param programmeMemberships
+   * <p>So the returned ProgrammeMembershipDTO list contains unique ProgrammeMembershipDTOs
+   * under each of ProgrammeMembershipDTO, there can be multiple CurriculumMembershipDTOs.
+   *
+   * @param programmeMemberships list of programmeMembership entities to convert
    * @return ProgrammeMembershipDTO list
    */
   public List<ProgrammeMembershipDTO> programmeMembershipsToProgrammeMembershipDTOs(
@@ -166,11 +166,11 @@ public class ProgrammeMembershipMapper {
    * for each DTO.
    *
    * @param pmDtos list of ProgrammeMembershipDTO
-   * @return
+   * @return the ProgrammeMembership entity list
    */
   public List<ProgrammeMembership> programmeMembershipDTOsToProgrammeMemberships(
       List<ProgrammeMembershipDTO> pmDtos) {
-    return pmDtos.stream().map(pmDto -> toEntity(pmDto)).collect(Collectors.toList());
+    return pmDtos.stream().map(this::toEntity).collect(Collectors.toList());
   }
 
   // convert programmeMembership entity to DTO with an empty curriculumMembership list
