@@ -121,8 +121,7 @@ public class CurriculumMembershipMapper {
     List<CurriculumMembership> curriculumMembershipList = Lists.newArrayList();
     for (CurriculumMembershipDTO curriculumMembershipDto :
         programmeMembershipDto.getCurriculumMemberships()) {
-      CurriculumMembership curriculumMembership
-          = programmeMembershipDtoToCurriculumMembership(programmeMembershipDto);
+      CurriculumMembership curriculumMembership = new CurriculumMembership();
       curriculumMembership = curriculumMembershipDtoToCurriculumMembership(curriculumMembershipDto,
           curriculumMembership);
       curriculumMembershipList.add(curriculumMembership);
@@ -222,46 +221,6 @@ public class CurriculumMembershipMapper {
     curriculumMembership.setCurriculumId(curriculumMembershipDto.getCurriculumId());
     curriculumMembership.setAmendedDate(curriculumMembershipDto.getAmendedDate());
     return curriculumMembership;
-  }
-
-  /**
-   * Convert a ProgrammeMembershipDTO to a CurriculumMembership object.
-   *
-   * @param programmeMembershipDto the ProgrammeMembershipDTO object to convert
-   * @return a CurriculumMembership object
-   * @deprecated 2022-05 as part of the programme membership refactoring, a curriculum membership
-   *     should not duplicate programme membership fields.
-   */
-  @Deprecated
-  private CurriculumMembership programmeMembershipDtoToCurriculumMembership(
-      ProgrammeMembershipDTO programmeMembershipDto) {
-    CurriculumMembership result = new CurriculumMembership();
-
-    result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());
-    result.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
-    result.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
-    result.setLeavingReason(programmeMembershipDto.getLeavingReason());
-    result.setLeavingDestination(programmeMembershipDto.getLeavingDestination());
-    if (programmeMembershipDto.getProgrammeId() != null) {
-      Programme programme = new Programme();
-      programme.setId(programmeMembershipDto.getProgrammeId());
-      programme.setProgrammeName(programmeMembershipDto.getProgrammeName());
-      programme.setOwner(programmeMembershipDto.getProgrammeOwner());
-      programme.setProgrammeNumber(programmeMembershipDto.getProgrammeNumber());
-      result.setProgramme(programme);
-      result.setRotation(rotationDtoToRotation(programmeMembershipDto.getRotation()));
-    }
-    result.setTrainingNumber(
-        trainingNumberDtoToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
-
-    if (programmeMembershipDto.getPerson() == null) {
-      result.setPerson(null);
-    } else {
-      result.setPerson(personDtoToPerson(programmeMembershipDto.getPerson()));
-    }
-    result.setTrainingPathway(programmeMembershipDto.getTrainingPathway());
-
-    return result;
   }
 
   /**
