@@ -17,6 +17,10 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMap
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapperImpl;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapperImpl;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -63,10 +67,12 @@ public class TrainingNumberElasticSearchEventListenerTest {
     ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper(
         conditionsOfJoiningMapper, conditionsOfJoiningRepositoryMock);
+    TrainingNumberMapper trainingNumberMapper = new TrainingNumberMapperImpl();
+    RotationMapper rotationMapper = new RotationMapperImpl();
 
     ReflectionTestUtils.setField(testObj, "programmeMembershipMapper",
         new ProgrammeMembershipMapper(curriculumMembershipMapper, conditionsOfJoiningMapper,
-            conditionsOfJoiningRepositoryMock));
+            conditionsOfJoiningRepositoryMock, trainingNumberMapper, rotationMapper));
 
     trainingNumberDto = new TrainingNumberDTO();
     trainingNumberDto.setId(TRAININGNUMER_ID);

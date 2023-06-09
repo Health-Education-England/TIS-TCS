@@ -16,11 +16,13 @@ import java.util.UUID;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProgrammeMembershipMapperTest {
@@ -36,6 +38,12 @@ public class ProgrammeMembershipMapperTest {
 
   @InjectMocks
   private ProgrammeMembershipMapper testObj;
+
+  @Before
+  public void setup() {
+    ReflectionTestUtils.setField(testObj, "trainingNumberMapper",
+        new TrainingNumberMapperImpl());
+  }
 
   @Test
   public void entityToDtoShouldReturnListOfAllElementsInAsDto() {

@@ -61,14 +61,14 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Initialise the ProgrammeMembershipService.
    *
-   * @param programmeMembershipRepository   the ProgrammeMembershipRepository
-   * @param curriculumMembershipRepository  the CurriculumMembershipRepository
-   * @param programmeMembershipMapper       the ProgrammeMembershipMapper
-   * @param curriculumMembershipMapper      the CurriculumMembershipMapper
-   * @param curriculumRepository            the CurriculumRepository
-   * @param curriculumMapper                the CurriculumMapper
-   * @param applicationEventPublisher       the ApplicationEventPublisher
-   * @param personRepository                the PersonRepository
+   * @param programmeMembershipRepository  the ProgrammeMembershipRepository
+   * @param curriculumMembershipRepository the CurriculumMembershipRepository
+   * @param programmeMembershipMapper      the ProgrammeMembershipMapper
+   * @param curriculumMembershipMapper     the CurriculumMembershipMapper
+   * @param curriculumRepository           the CurriculumRepository
+   * @param curriculumMapper               the CurriculumMapper
+   * @param applicationEventPublisher      the ApplicationEventPublisher
+   * @param personRepository               the PersonRepository
    */
   public ProgrammeMembershipServiceImpl(
       ProgrammeMembershipRepository programmeMembershipRepository,
@@ -106,12 +106,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     ProgrammeMembershipDTO programmeMembershipSavedDto
         = programmeMembershipMapper.toDto(programmeMembership);
 
-    //emit events
+    // update Person status
     updatePersonWhenStatusIsStale(programmeMembershipSavedDto.getPerson().getId());
-    List<ProgrammeMembershipDTO> resultDtos
-        = Collections.singletonList(programmeMembershipSavedDto);
-    emitProgrammeMembershipSavedEvents(resultDtos);
-    return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
+    //emit events
+    emitProgrammeMembershipSavedEvents(Collections.singletonList(programmeMembershipSavedDto));
+
+    return programmeMembershipSavedDto;
   }
 
   /**
@@ -132,10 +132,13 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       updatePersonWhenStatusIsStale(programmeMembership.getPerson().getId());
     });
 
-    //emit events
     List<ProgrammeMembershipDTO> resultDtos =
         programmeMembershipMapper
             .programmeMembershipsToProgrammeMembershipDTOs(programmeMemberships);
+
+    // update Person status
+    resultDtos.forEach(dto -> updatePersonWhenStatusIsStale(dto.getPerson().getId()));
+    //emit events
     emitProgrammeMembershipSavedEvents(resultDtos);
     return resultDtos;
   }
@@ -180,8 +183,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Delete the curriculumMembership by id.
-   * NOTE: this is the curriculumMembership, not the containing programmeMembership
+   * Delete the curriculumMembership by id. NOTE: this is the curriculumMembership, not the
+   * containing programmeMembership
    *
    * @param id the id of the entity
    */
@@ -298,11 +301,11 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return pmc ->
         Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDto.getProgrammeId())
             && Objects.equals(pmc.getProgrammeMembershipType(),
-                programmeMembershipCurriculaDto.getProgrammeMembershipType())
+            programmeMembershipCurriculaDto.getProgrammeMembershipType())
             && Objects.equals(pmc.getProgrammeStartDate(),
-                programmeMembershipCurriculaDto.getProgrammeStartDate())
+            programmeMembershipCurriculaDto.getProgrammeStartDate())
             && Objects.equals(pmc.getProgrammeEndDate(),
-                programmeMembershipCurriculaDto.getProgrammeEndDate());
+            programmeMembershipCurriculaDto.getProgrammeEndDate());
   }
 
   @Transactional(readOnly = true)
