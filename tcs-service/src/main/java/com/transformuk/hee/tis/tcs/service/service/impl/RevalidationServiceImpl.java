@@ -362,6 +362,9 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {
+    if (gmcDetails == null) {
+      return null;
+    }
     RevalidationRecordDto revalidationRecordDto = new RevalidationRecordDto();
     revalidationRecordDto.setGmcNumber(gmcDetails.getGmcNumber());
 

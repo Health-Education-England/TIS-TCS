@@ -50,7 +50,12 @@ public class RevalidationResource {
   public ResponseEntity<RevalidationRecordDto> getRevalidationTraineeRecord(
       @PathVariable String gmcId) {
     LOG.debug("REST request to find Revalidation Record: {}", gmcId);
-    return ResponseEntity.ok(revalidationService.findRevalidationByGmcId(gmcId));
+    RevalidationRecordDto recordDto = revalidationService.findRevalidationByGmcId(gmcId);
+    if (recordDto != null) {
+      return ResponseEntity.ok(recordDto);
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @GetMapping(value = {"/revalidation/connection", "/revalidation/connection/{gmcIds}"})
