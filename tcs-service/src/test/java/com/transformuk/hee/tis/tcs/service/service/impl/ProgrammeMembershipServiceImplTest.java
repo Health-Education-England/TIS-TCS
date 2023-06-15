@@ -265,6 +265,20 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(1, result.getCurriculumMemberships().size());
   }
 
+  @Test()
+  public void findOneByUuidShouldReturnProgrammeMembershipDTO() {
+    //given
+    when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(programmeMembership1));
+
+    //when
+    ProgrammeMembershipDTO result = testObj.findOne(PROGRAMME_MEMBERSHIP_ID_1);
+
+    //then
+    Assert.assertNotNull(result);
+    Assert.assertEquals(PROGRAMME_ID, result.getProgrammeId().longValue());
+    Assert.assertEquals(2, result.getCurriculumMemberships().size());
+  }
 
   @Test(expected = NullPointerException.class)
   public void findProgrammeMembershipsForTraineeShouldFailWhenTraineeIsNull() {

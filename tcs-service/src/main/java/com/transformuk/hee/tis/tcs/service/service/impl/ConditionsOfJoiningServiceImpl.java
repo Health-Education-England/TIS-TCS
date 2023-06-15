@@ -43,16 +43,32 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
   }
 
   @Override
-  public ConditionsOfJoiningDto save(Long programmeMembershipId, ConditionsOfJoiningDto dto) {
-    LOG.info("Request received to save Conditions of Joining for Programme Membership {}.",
-        programmeMembershipId);
-
-    ProgrammeMembershipDTO programmeMembership = programmeMembershipService.findOne(
-        programmeMembershipId);
+  public ConditionsOfJoiningDto save(Object id, ConditionsOfJoiningDto dto) {
+    UUID realProgrammeMembershipId = null;
+    Long curriculumMembershipId = null;
+    ProgrammeMembershipDTO programmeMembership;
+    try {
+      realProgrammeMembershipId = UUID.fromString(id.toString());
+    } catch (IllegalArgumentException e) {
+      try {
+        curriculumMembershipId = (Long) id;
+      } catch (ClassCastException castException) {
+        throw new IllegalArgumentException(id + " is neither Long nor UUID");
+      }
+    }
+    if (realProgrammeMembershipId == null) {
+      LOG.info("Request received to save Conditions of Joining for Curriculum Membership {}.",
+          curriculumMembershipId);
+      programmeMembership = programmeMembershipService.findOne(curriculumMembershipId);
+    } else {
+      LOG.info("Request received to save Conditions of Joining for Programme Membership {}.",
+          realProgrammeMembershipId);
+      programmeMembership = programmeMembershipService.findOne(realProgrammeMembershipId);
+    }
 
     if (programmeMembership == null) {
       throw new IllegalArgumentException(
-          String.format("Programme Membership %s not found.", programmeMembershipId));
+          String.format("Programme Membership %s not found.", id));
     }
 
     UUID programmeMembershipUuid = programmeMembership.getUuid();
