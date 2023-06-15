@@ -1,13 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
-import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
@@ -18,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -82,7 +79,7 @@ public class ProgrammeMembershipMapper {
    */
   public List<ProgrammeMembershipDTO> allEntityToDto(
       List<ProgrammeMembership> programmeMemberships) {
-    List<ProgrammeMembershipDTO> result = Lists.newArrayList();
+    List<ProgrammeMembershipDTO> result = new ArrayList<>();
 
     programmeMemberships.forEach(
         pm -> pm.getCurriculumMemberships().forEach(cm -> {
@@ -204,7 +201,7 @@ public class ProgrammeMembershipMapper {
         trainingNumberMapper.trainingNumberToTrainingNumberDTO(entity.getTrainingNumber()));
     dto.setPerson(personToPersonDTO(entity.getPerson()));
 
-    dto.setCurriculumMemberships(Lists.newArrayList());
+    dto.setCurriculumMemberships(new ArrayList<>());
 
     if (dto.getUuid() != null) {
       Optional<ConditionsOfJoining> conditionsOfJoiningOptional
@@ -217,17 +214,9 @@ public class ProgrammeMembershipMapper {
 
   private List<CurriculumMembershipDTO> programmeMembershipToCurriculumMembershipDtos(
       ProgrammeMembership programmeMembership) {
-    List<CurriculumMembershipDTO> curriculumMembershipDtos = Lists.newArrayList();
-    Set<CurriculumMembership> curriculumMemberships
-        = programmeMembership.getCurriculumMemberships();
-
-    curriculumMemberships.forEach(cm -> {
-      CurriculumMembershipDTO cmDto =
-          curriculumMembershipMapper.curriculumMembershipToCurriculumMembershipDto(cm);
-      curriculumMembershipDtos.add(cmDto);
-    });
-
-    return curriculumMembershipDtos;
+    return programmeMembership.getCurriculumMemberships().stream()
+        .map(curriculumMembershipMapper::curriculumMembershipToCurriculumMembershipDto)
+        .collect(Collectors.toList());
   }
 
   private PersonDTO personToPersonDTO(Person person) {
