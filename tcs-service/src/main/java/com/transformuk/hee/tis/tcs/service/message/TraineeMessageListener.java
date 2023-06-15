@@ -21,7 +21,7 @@ public class TraineeMessageListener {
   @RabbitListener(queues = "${app.rabbit.trainee.queue.coj.signed}", ackMode = "AUTO")
   public void receiveMessage(final ConditionsOfJoiningSignedEvent event) {
     try {
-      conditionsOfJoiningService.save(event.getProgrammeMembershipId(),
+      conditionsOfJoiningService.save(event.getId(),
           event.getConditionsOfJoining());
     } catch (IllegalArgumentException e) {
       // Do not requeue the message if the event arguments are not valid.
