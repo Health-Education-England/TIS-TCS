@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -43,6 +44,14 @@ public interface ProgrammeMembershipService {
    * @return the entity
    */
   ProgrammeMembershipDTO findOne(Long id);
+
+  /**
+   * Get the "uuid" programmeMembership.
+   *
+   * @param uuid the uuid of the entity
+   * @return the entity
+   */
+  ProgrammeMembershipDTO findOne(UUID uuid);
 
   /**
    * Delete the "id" programmeMembership.

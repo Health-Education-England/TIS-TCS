@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.28.3</version>
+  <version>6.29.1</version>
 
   <dependencies>
     <dependency>

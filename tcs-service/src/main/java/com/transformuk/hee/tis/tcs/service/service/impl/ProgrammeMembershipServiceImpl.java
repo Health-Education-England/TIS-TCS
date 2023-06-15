@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -117,16 +118,16 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Save a list of programmeMembership.
    *
-   * @param programmeMembershipDtos the list of entities to save
+   * @param programmeMembershipDto the list of entities to save
    * @return the list of persisted entities
    */
   @Override
-  public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDtos) {
-    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDtos);
+  public List<ProgrammeMembershipDTO> save(List<ProgrammeMembershipDTO> programmeMembershipDto) {
+    log.debug("Request to save ProgrammeMembership : {}", programmeMembershipDto);
 
     List<ProgrammeMembership> programmeMemberships =
         programmeMembershipMapper
-            .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDtos);
+            .programmeMembershipDTOsToProgrammeMemberships(programmeMembershipDto);
     programmeMemberships.forEach(programmeMembership -> {
       programmeMembership = programmeMembershipRepository.save(programmeMembership);
       updatePersonWhenStatusIsStale(programmeMembership.getPerson().getId());
@@ -177,6 +178,21 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     CurriculumMembership curriculumMembership = curriculumMembershipRepository.findById(id)
         .orElse(null);
     return curriculumMembershipMapper.toDto(curriculumMembership);
+  }
+
+  /**
+   * Get one programmeMembership by uuid.
+   *
+   * @param uuid the uuid of the entity
+   * @return the entity
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public ProgrammeMembershipDTO findOne(UUID uuid) {
+    log.debug("Request to get ProgrammeMembership : {}", uuid);
+    ProgrammeMembership programmeMembership = programmeMembershipRepository.findByUuid(uuid)
+        .orElse(null);
+    return programmeMembershipMapper.toDto(programmeMembership);
   }
 
   /**
