@@ -23,18 +23,19 @@ class TraineeMessageListenerTest {
 
   private TraineeMessageListener listener;
   private ConditionsOfJoiningService service;
+  private ConditionsOfJoiningDto dto;
 
   @BeforeEach
   void setUp() {
     service = mock(ConditionsOfJoiningService.class);
     listener = new TraineeMessageListener(service);
+    dto = new ConditionsOfJoiningDto();
+    dto.setSignedAt(SIGNED_AT);
+    dto.setVersion(GoldGuideVersion.GG9);
   }
 
   @Test
   void shouldSaveSignedCojWhenEventValidWithCmId() {
-    ConditionsOfJoiningDto dto = new ConditionsOfJoiningDto();
-    dto.setSignedAt(SIGNED_AT);
-    dto.setVersion(GoldGuideVersion.GG9);
     ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
         CURRICULUM_MEMBERSHIP_ID, dto);
 
@@ -45,9 +46,6 @@ class TraineeMessageListenerTest {
 
   @Test
   void shouldSaveSignedCojWhenEventValidWithPmId() {
-    ConditionsOfJoiningDto dto = new ConditionsOfJoiningDto();
-    dto.setSignedAt(SIGNED_AT);
-    dto.setVersion(GoldGuideVersion.GG9);
     ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
         PROGRAMME_MEMBERSHIP_ID, dto);
 
@@ -58,9 +56,6 @@ class TraineeMessageListenerTest {
 
   @Test
   void shouldNotRequeueMessageWhenEventArgumentsInvalid() {
-    ConditionsOfJoiningDto dto = new ConditionsOfJoiningDto();
-    dto.setSignedAt(SIGNED_AT);
-    dto.setVersion(GoldGuideVersion.GG9);
     ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
         CURRICULUM_MEMBERSHIP_ID, dto);
 

@@ -31,6 +31,7 @@ class ConditionsOfJoiningServiceImplTest {
   private ConditionsOfJoiningService conditionsOfJoiningService;
   private ConditionsOfJoiningRepository repository;
   private ProgrammeMembershipService programmeMembershipService;
+  private ConditionsOfJoiningDto coj;
 
   @BeforeEach
   void setUp() {
@@ -40,14 +41,13 @@ class ConditionsOfJoiningServiceImplTest {
 
     conditionsOfJoiningService = new ConditionsOfJoiningServiceImpl(repository, mapper,
         programmeMembershipService);
+    coj = new ConditionsOfJoiningDto();
+    coj.setSignedAt(SIGNED_AT);
+    coj.setVersion(GoldGuideVersion.GG9);
   }
 
   @Test
   void saveShouldThrowExceptionWhenCurriculumMembershipIdNotFound() {
-    ConditionsOfJoiningDto coj = new ConditionsOfJoiningDto();
-    coj.setSignedAt(SIGNED_AT);
-    coj.setVersion(GoldGuideVersion.GG9);
-
     when(programmeMembershipService.findOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(null);
 
     assertThrows(IllegalArgumentException.class,
@@ -57,10 +57,6 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenProgrammeMembershipIdNotFound() {
-    ConditionsOfJoiningDto coj = new ConditionsOfJoiningDto();
-    coj.setSignedAt(SIGNED_AT);
-    coj.setVersion(GoldGuideVersion.GG9);
-
     when(programmeMembershipService.findOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(null);
 
     assertThrows(IllegalArgumentException.class,
@@ -70,10 +66,6 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenInvalidIdProvided() {
-    ConditionsOfJoiningDto coj = new ConditionsOfJoiningDto();
-    coj.setSignedAt(SIGNED_AT);
-    coj.setVersion(GoldGuideVersion.GG9);
-
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save("not a long or a uuid", coj));
     verify(repository, never()).save(any());
@@ -81,10 +73,6 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldSaveTheConditionsOfJoiningAgainstTheProgrammeMembershipFromCmId() {
-    ConditionsOfJoiningDto coj = new ConditionsOfJoiningDto();
-    coj.setSignedAt(SIGNED_AT);
-    coj.setVersion(GoldGuideVersion.GG9);
-
     ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
     programmeMembershipDto.setUuid(PROGRAMME_MEMBERSHIP_UUID);
 
@@ -105,10 +93,6 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldSaveTheConditionsOfJoiningAgainstTheProgrammeMembershipFromPmId() {
-    ConditionsOfJoiningDto coj = new ConditionsOfJoiningDto();
-    coj.setSignedAt(SIGNED_AT);
-    coj.setVersion(GoldGuideVersion.GG9);
-
     ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
     programmeMembershipDto.setUuid(PROGRAMME_MEMBERSHIP_UUID);
 
@@ -129,7 +113,6 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldReplaceAnyProvidedProgrammeMembershipUuid() {
-    ConditionsOfJoiningDto coj = new ConditionsOfJoiningDto();
     coj.setProgrammeMembershipUuid(UUID.randomUUID());
 
     ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
