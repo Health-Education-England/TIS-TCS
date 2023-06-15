@@ -53,7 +53,8 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
       try {
         curriculumMembershipId = (Long) id;
       } catch (ClassCastException castException) {
-        throw new IllegalArgumentException(id + " is neither Long nor UUID");
+        throw new IllegalArgumentException(
+            String.format("%s is neither Long nor UUID", id));
       }
     }
     if (realProgrammeMembershipId == null) {
