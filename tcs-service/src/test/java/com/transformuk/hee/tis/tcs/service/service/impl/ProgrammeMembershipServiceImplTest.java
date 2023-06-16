@@ -33,8 +33,13 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMap
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapperImpl;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,6 +91,8 @@ public class ProgrammeMembershipServiceImplTest {
   private final Programme programme = new Programme();
   private final PersonDTO personDto = new PersonDTO();
   private final Person person = new Person();
+  @Mock
+  ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
   private ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
   private ProgrammeMembershipServiceImpl testObj;
   private ProgrammeMembershipMapper programmeMembershipMapper;
@@ -103,16 +110,20 @@ public class ProgrammeMembershipServiceImplTest {
   private ApplicationEventPublisher applicationEventPublisherMock;
   @Mock
   private PersonRepository personRepositoryMock;
-  @Mock
-  ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
 
   @Before
   public void setup() {
     conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     curriculumMembershipMapper = new CurriculumMembershipMapper(conditionsOfJoiningMapper,
         conditionsOfJoiningRepositoryMock);
+    TrainingNumberMapper trainingNumberMapper = new TrainingNumberMapperImpl();
+    ReflectionTestUtils.setField(trainingNumberMapper, "programmeMapper",
+        new ProgrammeMapperImpl());
+    RotationMapper rotationMapper = new RotationMapperImpl();
+
     programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper,
-        conditionsOfJoiningMapper, conditionsOfJoiningRepositoryMock);
+        conditionsOfJoiningMapper,
+        conditionsOfJoiningRepositoryMock, trainingNumberMapper, rotationMapper);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());

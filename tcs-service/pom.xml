@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.29.0</version>
+  <version>6.29.1</version>
 
   <dependencies>
     <dependency>
@@ -311,19 +311,10 @@
       <artifactId>spring-boot-devtools</artifactId>
       <optional>true</optional>
     </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-amqp</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.sentry</groupId>
-      <artifactId>sentry-spring-boot-starter</artifactId>
-      <version>${sentryVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.sentry</groupId>
-      <artifactId>sentry-logback</artifactId>
-      <version>${sentryVersion}</version>
     </dependency>
 
   </dependencies>
@@ -372,8 +363,6 @@
     <tis.shared.modules.version>2.3.0</tis.shared.modules.version>
     <undertow.version>2.0.15.Final</undertow.version>
     <validation-api.version>1.1.0.Final</validation-api.version>
-
-    <sentryVersion>6.22.0</sentryVersion>
   </properties>
 
   <build>
