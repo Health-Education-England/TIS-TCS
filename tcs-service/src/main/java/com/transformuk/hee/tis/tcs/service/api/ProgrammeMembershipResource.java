@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
@@ -146,9 +147,16 @@ public class ProgrammeMembershipResource {
    */
   @GetMapping("/programme-memberships/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable Long id) {
+  public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable String id) {
     log.debug("REST request to get ProgrammeMembership : {}", id);
-    ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipService.findOne(id);
+    ProgrammeMembershipDTO programmeMembershipDto;
+
+    try {
+      programmeMembershipDto = programmeMembershipService.findOne(UUID.fromString(id));
+    } catch (IllegalArgumentException e) {
+      programmeMembershipDto = programmeMembershipService.findOne(Long.parseLong(id));
+    }
+
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
   }
 

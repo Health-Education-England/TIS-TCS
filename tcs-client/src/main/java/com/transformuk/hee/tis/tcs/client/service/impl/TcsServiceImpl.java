@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -460,6 +461,14 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
+  public ProgrammeMembershipDTO getProgrammeMembershipByUuid(UUID uuid) {
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS + uuid, HttpMethod.GET, null,
+            new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
+            })
+        .getBody();
+  }
+
   public ProgrammeMembershipDTO createProgrammeMembership(
       ProgrammeMembershipDTO programmeMembershipDTO) {
     HttpHeaders headers = new HttpHeaders();
@@ -525,7 +534,7 @@ public class TcsServiceImpl extends AbstractClientService {
    *
    * @param name          the name of the Specialty
    * @param specialtyType the SpecialtyType to filter specialties by
-   * @return              list of all specialties matching the parameters
+   * @return list of all specialties matching the parameters
    */
   @Cacheable("specialty")
   public List<SpecialtyDTO> getSpecialtyByName(String name, SpecialtyType specialtyType) {
@@ -534,8 +543,8 @@ public class TcsServiceImpl extends AbstractClientService {
         .exchange(
             serviceUrl + API_CURRENT_SPECIALTIES_COLUMN_FILTERS
                 + specialtyJsonQuerystringAndSpecialtyTypeURLEncoded
-                    .replace("PARAMETER_NAME", urlEncode(name))
-                    .replace("PARAMETER_TYPE", urlEncode(specialtyType.name())), HttpMethod.GET,
+                .replace("PARAMETER_NAME", urlEncode(name))
+                .replace("PARAMETER_TYPE", urlEncode(specialtyType.name())), HttpMethod.GET,
             null,
             new ParameterizedTypeReference<List<SpecialtyDTO>>() {
             })
