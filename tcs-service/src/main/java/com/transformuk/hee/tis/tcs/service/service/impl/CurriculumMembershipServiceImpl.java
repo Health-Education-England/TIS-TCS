@@ -9,11 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service Implementation for managing CurriculumMembership.
+ */
 @Service
 @Transactional
 public class CurriculumMembershipServiceImpl implements CurriculumMembershipService {
 
-  private final Logger log = LoggerFactory.getLogger(CurriculumMembershipService.class);
+  private final Logger log = LoggerFactory.getLogger(CurriculumMembershipServiceImpl.class);
 
   private final CurriculumMembershipRepository curriculumMembershipRepository;
 
@@ -38,9 +41,9 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
 
   /**
    * Delete the curriculumMembership by id.
-   * <p>
-   * If the curriculumMembership is the last in the programmeMembership to delete, delete the
-   * programmeMembership.
+   *
+   * <p>If the curriculumMembership is the last in the programmeMembership to delete, delete the
+   * programmeMembership too.
    *
    * @param id the id of the entity
    */

@@ -56,6 +56,13 @@ public class ProgrammeMembershipResource {
   private final CurriculumMembershipService curriculumMembershipService;
   private final ProgrammeMembershipValidator programmeMembershipValidator;
 
+  /**
+   * Initialise the ProgrammeMembershipResource.
+   *
+   * @param programmeMembershipService
+   * @param curriculumMembershipService
+   * @param programmeMembershipValidator
+   */
   public ProgrammeMembershipResource(ProgrammeMembershipService programmeMembershipService,
       CurriculumMembershipService curriculumMembershipService,
       ProgrammeMembershipValidator programmeMembershipValidator) {
