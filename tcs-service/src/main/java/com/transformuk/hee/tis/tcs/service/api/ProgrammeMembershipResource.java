@@ -59,9 +59,9 @@ public class ProgrammeMembershipResource {
   /**
    * Initialise the ProgrammeMembershipResource.
    *
-   * @param programmeMembershipService
-   * @param curriculumMembershipService
-   * @param programmeMembershipValidator
+   * @param programmeMembershipService the ProgrammeMembershipService
+   * @param curriculumMembershipService the CurriculumMembershipService
+   * @param programmeMembershipValidator the ProgrammeMembershipValidator
    */
   public ProgrammeMembershipResource(ProgrammeMembershipService programmeMembershipService,
       CurriculumMembershipService curriculumMembershipService,
