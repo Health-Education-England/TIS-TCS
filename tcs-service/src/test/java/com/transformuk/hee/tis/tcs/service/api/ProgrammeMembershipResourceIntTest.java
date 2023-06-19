@@ -33,6 +33,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.RotationRepository;
+import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
@@ -146,6 +147,9 @@ class ProgrammeMembershipResourceIntTest {
   private ProgrammeMembershipService programmeMembershipService;
 
   @Autowired
+  private CurriculumMembershipService curriculumMembershipService;
+
+  @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
   @Autowired
@@ -227,8 +231,7 @@ class ProgrammeMembershipResourceIntTest {
     programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository,
         programmeRepository, curriculumRepository, rotationService);
     ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(
-        programmeMembershipService,
-        programmeMembershipValidator);
+        programmeMembershipService, curriculumMembershipService, programmeMembershipValidator);
     this.restProgrammeMembershipMockMvc = MockMvcBuilders
         .standaloneSetup(programmeMembershipResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)

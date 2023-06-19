@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
+import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -51,6 +52,8 @@ public class ProgrammeMembershipResourceTest {
   @MockBean
   private ProgrammeMembershipService programmeMembershipServiceMock;
   @MockBean
+  private CurriculumMembershipService curriculumMembershipServiceMock;
+  @MockBean
   private ProgrammeMembershipValidator programmeMembershipValidatorMock;
 
   private ProgrammeMembershipResource testObj;
@@ -60,7 +63,7 @@ public class ProgrammeMembershipResourceTest {
   @Before
   public void setup() {
     testObj = new ProgrammeMembershipResource(programmeMembershipServiceMock,
-        programmeMembershipValidatorMock);
+        curriculumMembershipServiceMock, programmeMembershipValidatorMock);
     mockMvc = MockMvcBuilders.standaloneSetup(testObj).build();
   }
 
@@ -198,7 +201,7 @@ public class ProgrammeMembershipResourceTest {
         .andExpect(header().string("X-tcsApp-alert", "tcsApp.programmeMembership.deleted"))
         .andExpect(header().string("X-tcsApp-params", CURRICULUM_ID1 + "," + CURRICULUM_ID2));
 
-    verify(programmeMembershipServiceMock).delete(CURRICULUM_ID1);
-    verify(programmeMembershipServiceMock).delete(CURRICULUM_ID2);
+    verify(curriculumMembershipServiceMock).delete(CURRICULUM_ID1);
+    verify(curriculumMembershipServiceMock).delete(CURRICULUM_ID2);
   }
 }

@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
+import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import io.github.jhipster.web.util.ResponseUtil;
 import java.net.URI;
@@ -52,11 +53,14 @@ public class ProgrammeMembershipResource {
   private static final String ENTITY_NAME = "programmeMembership";
   private final Logger log = LoggerFactory.getLogger(ProgrammeMembershipResource.class);
   private final ProgrammeMembershipService programmeMembershipService;
+  private final CurriculumMembershipService curriculumMembershipService;
   private final ProgrammeMembershipValidator programmeMembershipValidator;
 
   public ProgrammeMembershipResource(ProgrammeMembershipService programmeMembershipService,
+      CurriculumMembershipService curriculumMembershipService,
       ProgrammeMembershipValidator programmeMembershipValidator) {
     this.programmeMembershipService = programmeMembershipService;
+    this.curriculumMembershipService = curriculumMembershipService;
     this.programmeMembershipValidator = programmeMembershipValidator;
   }
 
@@ -171,7 +175,7 @@ public class ProgrammeMembershipResource {
           .forEach(curriculumMembershipDTO -> {
             // Note: The curriculum membership id is set in the mapper with the contents of the
             // programme membership id
-            programmeMembershipService.delete(curriculumMembershipDTO.getId());
+            curriculumMembershipService.delete(curriculumMembershipDTO.getId());
             idsDeleted.add(curriculumMembershipDTO.getId().toString());
           });
     }
@@ -191,7 +195,7 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteProgrammeMembershipById(@PathVariable Long id) {
     log.debug("REST request to delete ProgrammeMembership by id : {}", id);
-    programmeMembershipService.delete(id);
+    curriculumMembershipService.delete(id);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }

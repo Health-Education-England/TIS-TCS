@@ -54,13 +54,6 @@ public interface ProgrammeMembershipService {
   ProgrammeMembershipDTO findOne(UUID uuid);
 
   /**
-   * Delete the "id" programmeMembership.
-   *
-   * @param id the id of the entity
-   */
-  void delete(Long id);
-
-  /**
    * Get all the programmeMemberships for a trainee id and programme id.
    *
    * @return the list of entities
@@ -94,5 +87,4 @@ public interface ProgrammeMembershipService {
    * @return a list of programme memberships of the programme
    */
   List<ProgrammeMembershipDTO> findProgrammeMembershipsByProgramme(Long programmeId);
-
 }

@@ -195,32 +195,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return programmeMembershipMapper.toDto(programmeMembership);
   }
 
-  /**
-   * Delete the curriculumMembership by id. NOTE: this is the curriculumMembership, not the
-   * containing programmeMembership
-   *
-   * @param id the id of the entity
-   */
-  @Override
-  public void delete(Long id) {
-    log.debug("Request to delete CurriculumMembership : {}", id);
-
-    //Get the person id from the programme membership before deleting it
-    ProgrammeMembership programmeMembership = curriculumMembershipRepository.getOne(id)
-        .getProgrammeMembership();
-    Long personId = programmeMembership.getPerson().getId();
-
-    programmeMembership.getCurriculumMemberships().removeIf(cm -> cm.getId().equals(id));
-
-    if (!programmeMembership.getCurriculumMemberships().isEmpty()) {
-      programmeMembershipRepository.save(programmeMembership);
-    } else {
-      programmeMembershipRepository.delete(programmeMembership);
-    }
-
-    updatePersonWhenStatusIsStale(personId);
-  }
-
   @Transactional(readOnly = true)
   @Override
   public List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTraineeAndProgramme(
@@ -381,7 +355,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return result;
   }
 
-  private void updatePersonWhenStatusIsStale(Long personId) {
+  protected void updatePersonWhenStatusIsStale(Long personId) {
     Person person = personRepository.getOne(personId);
     Status newStatus = person.programmeMembershipsStatus();
     log.debug("person id:{} was {} and re-evaluated is {}.", personId, person.getStatus(),
