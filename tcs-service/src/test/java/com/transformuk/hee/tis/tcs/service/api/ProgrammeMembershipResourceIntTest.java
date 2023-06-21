@@ -62,6 +62,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -889,7 +890,7 @@ class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  void shouldGetProgrammeMembershipDto() throws Exception {
+  void shouldGetProgrammeMembershipDtoById() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
     programmeRepository.saveAndFlush(programme);
@@ -906,6 +907,48 @@ class ProgrammeMembershipResourceIntTest {
     // Get the programmeMembership
     restProgrammeMembershipMockMvc
         .perform(get("/api/programme-memberships/{id}", curriculumMembership.getId()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.curriculumMemberships[*].id")
+            .value(hasItem(curriculumMembership.getId().intValue())))
+        .andExpect(
+            jsonPath("$.curriculumMemberships[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
+        .andExpect(jsonPath("$.programmeMembershipType")
+            .value(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.toString().toUpperCase()))
+        .andExpect(jsonPath("$.rotation.name").value(rotation.getName()))
+        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumStartDate")
+            .value(hasItem(DEFAULT_CURRICULUM_START_DATE.toString())))
+        .andExpect(jsonPath("$.curriculumMemberships[*].curriculumEndDate")
+            .value(hasItem(DEFAULT_CURRICULUM_END_DATE.toString())))
+        .andExpect(jsonPath("$.curriculumMemberships[*].periodOfGrace")
+            .value(hasItem(DEFAULT_PERIOD_OF_GRACE)))
+        .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
+        .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()))
+        .andExpect(jsonPath("$.leavingReason").value(DEFAULT_LEAVING_REASON))
+        .andExpect(jsonPath("$.curriculumMemberships[*].amendedDate").isNotEmpty());
+  }
+
+  @Test
+  @Transactional
+  void shouldGetProgrammeMembershipDtoWhenByUuid() throws Exception {
+    // Initialize the database
+    personRepository.saveAndFlush(person);
+    programmeRepository.saveAndFlush(programme);
+    rotationRepository.saveAndFlush(rotation);
+
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setRotation(rotation);
+    programmeMembership.setCurriculumMemberships(Collections.singleton(curriculumMembership));
+    programmeMembership = programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+
+    // Get the programmeMembership
+    restProgrammeMembershipMockMvc
+        .perform(get("/api/programme-memberships/{id}", programmeMembership.getUuid()))
+        .andDo(MockMvcResultHandlers.print())
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.curriculumMemberships[*].id")

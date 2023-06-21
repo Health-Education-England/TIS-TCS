@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -200,5 +202,21 @@ public class ProgrammeMembershipResourceTest {
 
     verify(programmeMembershipServiceMock).delete(CURRICULUM_ID1);
     verify(programmeMembershipServiceMock).delete(CURRICULUM_ID2);
+  }
+
+  @Test
+  public void shouldGetProgrammeMembershipByUuidWhenIdParamIsAUuid()
+      throws Exception {
+    mockMvc.perform(get("/api/programme-memberships/" + UUID.randomUUID()));
+
+    verify(programmeMembershipServiceMock).findOne(any(UUID.class));
+  }
+
+  @Test
+  public void shouldGetProgrammeMembershipByIdWhenIdParamIsNotAUuid()
+      throws Exception {
+    mockMvc.perform(get("/api/programme-memberships/" + 1L));
+
+    verify(programmeMembershipServiceMock).findOne(any(Long.class));
   }
 }
