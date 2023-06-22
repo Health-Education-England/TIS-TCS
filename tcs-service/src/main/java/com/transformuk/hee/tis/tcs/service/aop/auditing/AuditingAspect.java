@@ -5,13 +5,18 @@ import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfile
 
 import com.transformuk.hee.tis.audit.enumeration.GenericAuditEventType;
 import com.transformuk.hee.tis.security.model.UserProfile;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +27,12 @@ import org.springframework.http.ResponseEntity;
 @Aspect
 public class AuditingAspect {
 
-  private final static String TCS_PREFIX = "tcs_";
-  private final static String GET_PREFIX = "get";
-  private final static String ETL_USERNAME = "consolidated_etl";
-  private final static String RESOURCE_POSTFIX = "Resource";
+  private static final Logger LOG = LoggerFactory.getLogger(AuditingAspect.class);
+  private static final String TCS_PREFIX = "tcs_";
+  private static final String GET_PREFIX = "get";
+  private static final String ETL_USERNAME = "consolidated_etl";
+  private static final String RESOURCE_POSTFIX = "Resource";
+  private static final Object[] SINGLE_LONG_ENTRY = {Long.class};
   private final AuditEventRepository auditEventRepository;
 
   public AuditingAspect(AuditEventRepository auditEventRepository) {
@@ -62,23 +69,36 @@ public class AuditingAspect {
    * This is the aspect to audit deleted records by fetching the information by id
    */
   @Before("execution(* com.transformuk.hee.tis.tcs.service.api.*.delete*(..))")
-  public void auditDeleteBeforeExecution(JoinPoint joinPoint) throws Throwable {
+  public void auditDeleteBeforeExecution(JoinPoint joinPoint) {
     // Audit log the dto which we want to delete it
     UserProfile userPofile = getProfileFromContext();
-    if (!userPofile.getUserName().equalsIgnoreCase(ETL_USERNAME)) {
-      final Object deleteId = joinPoint.getArgs()[0];
-      if (deleteId != null && deleteId instanceof Long) {
-        String targetClassName = joinPoint.getTarget().getClass().getSimpleName();
-        String entityName = targetClassName.substring(0,
-            StringUtils.length(targetClassName) - StringUtils.length(RESOURCE_POSTFIX));
-        final Method method = joinPoint.getTarget().getClass()
-            .getDeclaredMethod(GET_PREFIX + entityName, new Class[]{Long.class});
-        final Object responseEntity = method.invoke(joinPoint.getTarget(), deleteId);
-        Object dto = ((ResponseEntity) responseEntity).getBody();
-        AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX,
-            joinPoint.getSignature().getName()
-            , GenericAuditEventType.delete, dto);
-        auditEventRepository.add(auditEvent);
+    if (userPofile.getUserName().equalsIgnoreCase(ETL_USERNAME)) {
+      return;
+    }
+
+    final Object deleteId = joinPoint.getArgs()[0];
+    if (deleteId instanceof Long) {
+      String targetClassName = joinPoint.getTarget().getClass().getSimpleName();
+      String entityName = targetClassName.substring(0,
+          StringUtils.length(targetClassName) - StringUtils.length(RESOURCE_POSTFIX));
+      final Optional<Method> method = Arrays.stream(
+              joinPoint.getTarget().getClass().getDeclaredMethods())
+          .filter(m -> (GET_PREFIX + entityName).equals(m.getName()))
+          .filter(m -> Arrays.equals(SINGLE_LONG_ENTRY, m.getParameterTypes()))
+          .findAny();
+      if (method.isPresent()) {
+        try {
+          final Object responseEntity = method.get().invoke(joinPoint.getTarget(), deleteId);
+          Object dto = ((ResponseEntity) responseEntity).getBody();
+          AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX,
+              joinPoint.getSignature().getName()
+              , GenericAuditEventType.delete, dto);
+          auditEventRepository.add(auditEvent);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+          LOG.info(
+              String.format("Failed to get %s{id:%s} to audit the delete", entityName, deleteId),
+              e);
+        }
       }
     }
   }
@@ -87,7 +107,7 @@ public class AuditingAspect {
    * Advice that Audit methods returning for all create method.
    */
   @AfterReturning(pointcut = "auditingCreatePointcut()")
-  public void auditCreateReturning(JoinPoint joinPoint) throws Throwable {
+  public void auditCreateReturning(JoinPoint joinPoint) {
     setAuditEvent(GenericAuditEventType.add, joinPoint);
   }
 
@@ -95,7 +115,7 @@ public class AuditingAspect {
    * Advice that Audit methods returning for all update method.
    */
   @AfterReturning(pointcut = "auditingUpdatePointcut()")
-  public void auditUpdateReturning(JoinPoint joinPoint) throws Throwable {
+  public void auditUpdateReturning(JoinPoint joinPoint) {
     setAuditEvent(GenericAuditEventType.modify, joinPoint);
   }
 
@@ -103,21 +123,16 @@ public class AuditingAspect {
    * Advice that Audit methods returning for all delete method.
    */
   @AfterReturning(pointcut = "auditingDeletePointcut()")
-  public void auditDeleteReturning(JoinPoint joinPoint) throws Throwable {
+  public void auditDeleteReturning(JoinPoint joinPoint) {
     setAuditEvent(GenericAuditEventType.delete, joinPoint);
   }
 
-  private void setAuditEvent(GenericAuditEventType auditEventType, JoinPoint joinPoint)
-      throws Throwable {
-    try {
-      UserProfile userPofile = getProfileFromContext();
-      AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX,
-          joinPoint.getSignature().getName()
-          , auditEventType, joinPoint.getArgs());
-      auditEventRepository.add(auditEvent);
-    } catch (IllegalArgumentException e) {
-      throw e;
-    }
+  private void setAuditEvent(GenericAuditEventType auditEventType, JoinPoint joinPoint) {
+    UserProfile userPofile = getProfileFromContext();
+    AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX,
+        joinPoint.getSignature().getName()
+        , auditEventType, joinPoint.getArgs());
+    auditEventRepository.add(auditEvent);
   }
 
 }
