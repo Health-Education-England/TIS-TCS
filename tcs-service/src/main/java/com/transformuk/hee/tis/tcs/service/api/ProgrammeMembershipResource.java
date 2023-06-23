@@ -153,10 +153,14 @@ public class ProgrammeMembershipResource {
 
     try {
       programmeMembershipDto = programmeMembershipService.findOne(UUID.fromString(id));
+      return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
     } catch (IllegalArgumentException e) {
-      programmeMembershipDto = programmeMembershipService.findOne(Long.parseLong(id));
+      return getProgrammeMembership(Long.parseLong(id));
     }
+  }
 
+  public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(Long id) {
+    ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipService.findOne(id);
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
   }
 

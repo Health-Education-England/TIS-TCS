@@ -12,6 +12,8 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +30,11 @@ public class AuditingAspect {
   private final static String RESOURCE_POSTFIX = "Resource";
   private final AuditEventRepository auditEventRepository;
 
+  private final Logger log = LoggerFactory.getLogger(AuditingAspect.class);
+
   public AuditingAspect(AuditEventRepository auditEventRepository) {
     this.auditEventRepository = auditEventRepository;
   }
-
 
   /**
    * Pointcut that matches all rest call for create method.
@@ -71,14 +74,20 @@ public class AuditingAspect {
         String targetClassName = joinPoint.getTarget().getClass().getSimpleName();
         String entityName = targetClassName.substring(0,
             StringUtils.length(targetClassName) - StringUtils.length(RESOURCE_POSTFIX));
-        final Method method = joinPoint.getTarget().getClass()
-            .getDeclaredMethod(GET_PREFIX + entityName, new Class[]{Long.class});
-        final Object responseEntity = method.invoke(joinPoint.getTarget(), deleteId);
-        Object dto = ((ResponseEntity) responseEntity).getBody();
-        AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX,
-            joinPoint.getSignature().getName()
-            , GenericAuditEventType.delete, dto);
-        auditEventRepository.add(auditEvent);
+        try {
+          final Method method = joinPoint.getTarget().getClass()
+              .getDeclaredMethod(GET_PREFIX + entityName, Long.class);
+          final Object responseEntity = method.invoke(joinPoint.getTarget(), deleteId);
+          Object dto = ((ResponseEntity) responseEntity).getBody();
+          AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX,
+              joinPoint.getSignature().getName()
+              , GenericAuditEventType.delete, dto);
+          auditEventRepository.add(auditEvent);
+        } catch (NoSuchMethodException e) {
+          log.info(
+              "Audit logging: Delete {} for id: {} are not logged properly. MethodNotFound: {}",
+              entityName, deleteId, e.getMessage());
+        }
       }
     }
   }
