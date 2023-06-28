@@ -45,6 +45,12 @@ public class RevalidationResource {
     }
   }
 
+  /**
+   * Get doctor with programme detatils by gmcId
+   *
+   * @param gmcId the gmc number
+   * @return doctor details, if not found return 404 not found
+   */
   @GetMapping("/revalidation/trainee/{gmcId}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<RevalidationRecordDto> getRevalidationTraineeRecord(

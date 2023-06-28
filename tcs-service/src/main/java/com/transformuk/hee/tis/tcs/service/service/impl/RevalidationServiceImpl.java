@@ -113,6 +113,9 @@ public class RevalidationServiceImpl implements RevalidationService {
   public RevalidationRecordDto findRevalidationByGmcId(final String gmcId) {
     LOG.debug("GMC No received from Revalidation application: {}", gmcId);
     GmcDetails gmcDetails = gmcDetailsRepository.findGmcDetailsByGmcNumber(gmcId);
+    if (gmcDetails == null) {
+      return null;
+    }
     return buildRevalidationRecord(gmcDetails);
   }
 
@@ -362,9 +365,6 @@ public class RevalidationServiceImpl implements RevalidationService {
   }
 
   private RevalidationRecordDto buildRevalidationRecord(GmcDetails gmcDetails) {
-    if (gmcDetails == null) {
-      return null;
-    }
     RevalidationRecordDto revalidationRecordDto = new RevalidationRecordDto();
     revalidationRecordDto.setGmcNumber(gmcDetails.getGmcNumber());
 
