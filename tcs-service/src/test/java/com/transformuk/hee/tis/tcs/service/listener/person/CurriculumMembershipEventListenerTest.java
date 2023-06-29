@@ -72,7 +72,7 @@ public class CurriculumMembershipEventListenerTest {
   @Test
   public void shouldHandleCurriculumMembershipDeletedEvent() {
     testObj.handleCurriculumMembershipDeletedEvent(deletedEvent);
-    verify(personElasticSearchService).deletePersonDocument(PERSONID);
+    verify(personElasticSearchService).updatePersonDocument(PERSONID);
     verify(revalidationRabbitService).updateReval(revalidationService.buildTcsConnectionInfo(PERSONID));
   }
 

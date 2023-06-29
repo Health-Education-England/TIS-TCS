@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
@@ -219,6 +220,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     }
 
     updatePersonWhenStatusIsStale(personId);
+    applicationEventPublisher.publishEvent(
+        new CurriculumMembershipDeletedEvent(programmeMembershipMapper.toDto(programmeMembership)));
   }
 
   @Transactional(readOnly = true)
