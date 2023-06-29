@@ -200,6 +200,15 @@ public class RevalidationServiceImplTest {
   }
 
   @Test
+  public void findRevalidationRecordByGmcIdShouldRetrieveNullWhenNoDoctorFound() {
+    when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber("1000")).thenReturn(null);
+
+    RevalidationRecordDto result = testObj.findRevalidationByGmcId("1000");
+
+    assertThat(result, nullValue());
+  }
+
+  @Test
   public void findRevalidationRecordByGmcIdShouldRetrieveOne() {
     ConnectionInfoDto connectionInfoDto = ConnectionInfoDto.builder()
         .tcsPersonId(PERSON_ID)
