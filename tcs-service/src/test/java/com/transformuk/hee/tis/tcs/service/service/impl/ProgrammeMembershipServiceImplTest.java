@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -593,8 +594,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     verify(programmeMembershipRepositoryMock, times(1))
         .delete(any()); //since the last CM is deleted, so the PM is deleted too
-
+    verify(applicationEventPublisherMock, times(2)).publishEvent(any(
+        CurriculumMembershipDeletedEvent.class));
   }
-
-
 }
