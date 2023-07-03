@@ -1,0 +1,1 @@
+/* CurriculumMembership table is not created in tests so for testing keep this blank */
