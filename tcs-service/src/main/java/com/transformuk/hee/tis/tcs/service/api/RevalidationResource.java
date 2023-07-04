@@ -45,12 +45,23 @@ public class RevalidationResource {
     }
   }
 
+  /**
+   * Get doctor with programme detatils by gmcId.
+   *
+   * @param gmcId the gmc number
+   * @return doctor details, if not found return 404 not found
+   */
   @GetMapping("/revalidation/trainee/{gmcId}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<RevalidationRecordDto> getRevalidationTraineeRecord(
       @PathVariable String gmcId) {
     LOG.debug("REST request to find Revalidation Record: {}", gmcId);
-    return ResponseEntity.ok(revalidationService.findRevalidationByGmcId(gmcId));
+    RevalidationRecordDto recordDto = revalidationService.findRevalidationByGmcId(gmcId);
+    if (recordDto != null) {
+      return ResponseEntity.ok(recordDto);
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @GetMapping(value = {"/revalidation/connection", "/revalidation/connection/{gmcIds}"})

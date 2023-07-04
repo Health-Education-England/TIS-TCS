@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,14 +63,14 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   /**
    * Initialise the ProgrammeMembershipService.
    *
-   * @param programmeMembershipRepository   the ProgrammeMembershipRepository
-   * @param curriculumMembershipRepository  the CurriculumMembershipRepository
-   * @param programmeMembershipMapper       the ProgrammeMembershipMapper
-   * @param curriculumMembershipMapper      the CurriculumMembershipMapper
-   * @param curriculumRepository            the CurriculumRepository
-   * @param curriculumMapper                the CurriculumMapper
-   * @param applicationEventPublisher       the ApplicationEventPublisher
-   * @param personRepository                the PersonRepository
+   * @param programmeMembershipRepository  the ProgrammeMembershipRepository
+   * @param curriculumMembershipRepository the CurriculumMembershipRepository
+   * @param programmeMembershipMapper      the ProgrammeMembershipMapper
+   * @param curriculumMembershipMapper     the CurriculumMembershipMapper
+   * @param curriculumRepository           the CurriculumRepository
+   * @param curriculumMapper               the CurriculumMapper
+   * @param applicationEventPublisher      the ApplicationEventPublisher
+   * @param personRepository               the PersonRepository
    */
   public ProgrammeMembershipServiceImpl(
       ProgrammeMembershipRepository programmeMembershipRepository,
@@ -106,12 +108,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     ProgrammeMembershipDTO programmeMembershipSavedDto
         = programmeMembershipMapper.toDto(programmeMembership);
 
-    //emit events
+    // update Person status
     updatePersonWhenStatusIsStale(programmeMembershipSavedDto.getPerson().getId());
-    List<ProgrammeMembershipDTO> resultDtos
-        = Collections.singletonList(programmeMembershipSavedDto);
-    emitProgrammeMembershipSavedEvents(resultDtos);
-    return CollectionUtils.isNotEmpty(resultDtos) ? resultDtos.get(0) : null;
+    //emit events
+    emitProgrammeMembershipSavedEvents(Collections.singletonList(programmeMembershipSavedDto));
+
+    return programmeMembershipSavedDto;
   }
 
   /**
@@ -180,8 +182,23 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Delete the curriculumMembership by id.
-   * NOTE: this is the curriculumMembership, not the containing programmeMembership
+   * Get one programmeMembership by uuid.
+   *
+   * @param uuid the uuid of the entity
+   * @return the entity
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public ProgrammeMembershipDTO findOne(UUID uuid) {
+    log.debug("Request to get ProgrammeMembership : {}", uuid);
+    ProgrammeMembership programmeMembership = programmeMembershipRepository.findByUuid(uuid)
+        .orElse(null);
+    return programmeMembershipMapper.toDto(programmeMembership);
+  }
+
+  /**
+   * Delete the curriculumMembership by id. NOTE: this is the curriculumMembership, not the
+   * containing programmeMembership
    *
    * @param id the id of the entity
    */
@@ -203,6 +220,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     }
 
     updatePersonWhenStatusIsStale(personId);
+    applicationEventPublisher.publishEvent(
+        new CurriculumMembershipDeletedEvent(programmeMembershipMapper.toDto(programmeMembership)));
   }
 
   @Transactional(readOnly = true)
@@ -298,11 +317,11 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return pmc ->
         Objects.equals(pmc.getProgrammeId(), programmeMembershipCurriculaDto.getProgrammeId())
             && Objects.equals(pmc.getProgrammeMembershipType(),
-                programmeMembershipCurriculaDto.getProgrammeMembershipType())
+            programmeMembershipCurriculaDto.getProgrammeMembershipType())
             && Objects.equals(pmc.getProgrammeStartDate(),
-                programmeMembershipCurriculaDto.getProgrammeStartDate())
+            programmeMembershipCurriculaDto.getProgrammeStartDate())
             && Objects.equals(pmc.getProgrammeEndDate(),
-                programmeMembershipCurriculaDto.getProgrammeEndDate());
+            programmeMembershipCurriculaDto.getProgrammeEndDate());
   }
 
   @Transactional(readOnly = true)

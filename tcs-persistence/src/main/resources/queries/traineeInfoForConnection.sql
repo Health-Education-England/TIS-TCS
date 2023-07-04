@@ -13,7 +13,9 @@ from (
     if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
   from
     ContactDetails cd
-  left join GmcDetails gmc on (gmc.id = cd.id)
+  inner join GmcDetails gmc on (gmc.id = cd.id)
+   -- note: null values are filtered out by the condition below
+    and lower(gmc.gmcNumber) <> 'unknown'
   left join (
     -- count current PMs with combined programme names for each person
     select
@@ -31,15 +33,20 @@ from (
     on pm1.personId = currentPmCounts.personId and currentPmCounts.count_num = 1 and (pm1.programmeStartDate <= current_date() and pm1.programmeEndDate >= current_date())
   left join (
     -- get max curriculumEndDate for every PM
-      select
-        cm.programmeMembershipUuid,
-        max(cm.curriculumEndDate) curriculumEndDate
-      from CurriculumMembership cm
-      WHERECLAUSE(cm, personId)
-      group by cm.programmeMembershipUuid
+    select
+      cm2.programmeMembershipUuid,
+      max(cm2.curriculumEndDate) curriculumEndDate,
+      cm2.personId
+    from (
+        select cm.programmeMembershipUuid, cm.curriculumEndDate, pm2.personId
+        from CurriculumMembership cm
+        join ProgrammeMembership pm2 on cm.programmeMembershipUuid = pm2.uuid
+      ) cm2
+    WHERECLAUSE(cm2, personId)
+    group by cm2.programmeMembershipUuid
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
   WHERECLAUSE(cd, id)
-  ) as ot
+) as ot
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;

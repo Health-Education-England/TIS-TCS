@@ -124,6 +124,15 @@ public class RevalidationResourceTest {
   }
 
   @Test
+  public void shouldReturn404FindRevalidationRecordsFromGmcIdNotFound() throws Exception {
+    when(revalidationServiceImplMock.findRevalidationByGmcId(GMC_ID1))
+        .thenReturn(null);
+
+    restRevalidationMock.perform(get("/api/revalidation/trainee/{gmcId}", GMC_ID1))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
   public void shouldFindRevalidationRecordsFromListOfGmcIds() throws Exception {
     final List<String> gmcIds = asList(GMC_ID1, GMC_ID2, GMC_ID3);
     final Map<String, RevalidationRecordDto> revalidationRecordDtoMap = new HashMap<>();

@@ -1,25 +1,21 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
-import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
-import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
-import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Mapper for the entity ProgrammeMembership and its DTO ProgrammeMembershipDTO.
@@ -29,6 +25,8 @@ public class ProgrammeMembershipMapper {
 
   CurriculumMembershipMapper curriculumMembershipMapper;
   ConditionsOfJoiningMapper conditionsOfJoiningMapper;
+  TrainingNumberMapper trainingNumberMapper;
+  RotationMapper rotationMapper;
 
   /**
    * Initialise the ProgrammeMembership mapper.
@@ -37,175 +35,177 @@ public class ProgrammeMembershipMapper {
    * @param conditionsOfJoiningMapper  the Conditions of Joining mapper
    */
   public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper,
-      ConditionsOfJoiningMapper conditionsOfJoiningMapper) {
+      ConditionsOfJoiningMapper conditionsOfJoiningMapper,
+      TrainingNumberMapper trainingNumberMapper,
+      RotationMapper rotationMapper) {
     this.curriculumMembershipMapper = curriculumMembershipMapper;
     this.conditionsOfJoiningMapper = conditionsOfJoiningMapper;
+    this.trainingNumberMapper = trainingNumberMapper;
+    this.rotationMapper = rotationMapper;
   }
 
-  public ProgrammeMembershipDTO toDto(ProgrammeMembership programmeMembership) {
-    ProgrammeMembershipDTO result = null;
-    if (programmeMembership != null) {
-      result = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
-      if (CollectionUtils.isEmpty(result.getCurriculumMemberships())) {
-        result.setCurriculumMemberships(Lists.newArrayList());
-      }
-      result.getCurriculumMemberships()
-          .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
+  /**
+   * Convert a programmeMembership entity to DTO with all currculumMemberships.
+   *
+   * @param pm programmeMembership entity
+   * @return pmDto programmeMembership dto
+   */
+  public ProgrammeMembershipDTO toDto(ProgrammeMembership pm) {
+    ProgrammeMembershipDTO pmDto = null;
+    if (pm != null) {
+      pmDto = programmeMembershipToProgrammeMembershipDTO(pm);
+      pmDto.getCurriculumMemberships()
+          .addAll(programmeMembershipToCurriculumMembershipDtos(pm));
     }
-    return result;
+    return pmDto;
   }
 
+  /**
+   * Convert programmeMembership from entities to DTOs, and flatten every curriculumMembership in
+   * programmeMemberships.
+   *
+   * <p>So the returned ProgrammeMembershipDTO list can contain the same programmeMembershipDTOs
+   * under each of ProgrammeMembershipDTO, there will be only one CurriculumMembershipDTO.
+   *
+   * @param programmeMemberships list of programmeMembership entities to convert
+   * @return ProgrammeMembershipDTO list
+   */
   public List<ProgrammeMembershipDTO> allEntityToDto(
       List<ProgrammeMembership> programmeMemberships) {
-    List<ProgrammeMembershipDTO> result = Lists.newArrayList();
+    List<ProgrammeMembershipDTO> result = new ArrayList<>();
 
-    for (ProgrammeMembership programmeMembership : programmeMemberships) {
-      for (CurriculumMembership curriculumMembership
-          : programmeMembership.getCurriculumMemberships()) {
-        ProgrammeMembershipDTO programmeMembershipDto
-            = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
-        programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
-        CurriculumMembershipDTO curriculumMembershipDto
-            = curriculumMembershipMapper
-            .curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
-        programmeMembershipDto.getCurriculumMemberships()
-            .add(curriculumMembershipDto);
-        result.add(programmeMembershipDto);
-      }
-    }
+    programmeMemberships.forEach(
+        pm -> pm.getCurriculumMemberships().forEach(cm -> {
+          ProgrammeMembershipDTO pmDto = programmeMembershipToProgrammeMembershipDTO(pm);
+          CurriculumMembershipDTO cmDto
+              = curriculumMembershipMapper.curriculumMembershipToCurriculumMembershipDto(cm);
+          pmDto.getCurriculumMemberships().add(cmDto);
+          result.add(pmDto);
+        }));
 
     return result;
   }
 
+  /**
+   * Convert programmeMembership from entities to DTOS, and roll up curriculumMembership for the
+   * same programmeMembership.
+   *
+   * <p>So the returned ProgrammeMembershipDTO list contains unique ProgrammeMembershipDTOs
+   * under each of ProgrammeMembershipDTO, there can be multiple CurriculumMembershipDTOs.
+   *
+   * @param programmeMemberships list of programmeMembership entities to convert
+   * @return ProgrammeMembershipDTO list
+   */
   public List<ProgrammeMembershipDTO> programmeMembershipsToProgrammeMembershipDTOs(
       List<ProgrammeMembership> programmeMemberships) {
-    Map<ProgrammeMembershipDTO, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
+    Map<UUID, ProgrammeMembershipDTO> listMap = Maps.newHashMap();
 
-    for (ProgrammeMembership programmeMembership : programmeMemberships) {
-      ProgrammeMembershipDTO programmeMembershipDto
-          = programmeMembershipToProgrammeMembershipDTO(programmeMembership);
-      if (listMap.containsKey(programmeMembershipDto)) {
-        programmeMembershipDto = listMap.get(programmeMembershipDto);
+    programmeMemberships.forEach(pm -> {
+      ProgrammeMembershipDTO pmDto = programmeMembershipToProgrammeMembershipDTO(pm);
+      if (listMap.containsKey(pmDto.getUuid())) {
+        pmDto = listMap.get(pmDto.getUuid());
       }
-      if (CollectionUtils.isEmpty(programmeMembershipDto.getCurriculumMemberships())) {
-        programmeMembershipDto.setCurriculumMemberships(Lists.newArrayList());
-      }
-      programmeMembershipDto.getCurriculumMemberships()
-          .addAll(programmeMembershipToCurriculumMembershipDtos(programmeMembership));
-      listMap.put(programmeMembershipDto, programmeMembershipDto);
-    }
+      pmDto.getCurriculumMemberships().addAll(programmeMembershipToCurriculumMembershipDtos(pm));
+      listMap.put(pmDto.getUuid(), pmDto);
+    });
 
-    return new ArrayList<>(listMap.keySet());
+    return new ArrayList<>(listMap.values());
   }
 
   /**
    * Covert a ProgrammeMembershipDTO to a ProgrammeMembership, including its CurriculumMemberships.
    *
-   * @param programmeMembershipDto the ProgrammeMembershipDTO to convert
+   * @param dto the ProgrammeMembershipDTO to convert
    * @return the ProgrammeMembership entity
    */
-  public ProgrammeMembership toEntity(ProgrammeMembershipDTO programmeMembershipDto) {
-    ProgrammeMembership result = new ProgrammeMembership();
+  public ProgrammeMembership toEntity(ProgrammeMembershipDTO dto) {
+    ProgrammeMembership entity = new ProgrammeMembership();
 
-    result.setUuid(programmeMembershipDto.getUuid()); //use real (database) ID
-    result.setProgrammeMembershipType(programmeMembershipDto.getProgrammeMembershipType());
-    result.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
-    result.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
-    result.setLeavingReason(programmeMembershipDto.getLeavingReason());
-    result.setTrainingPathway(programmeMembershipDto.getTrainingPathway());
-    result.setAmendedDate(programmeMembershipDto.getAmendedDate());
+    entity.setUuid(dto.getUuid()); //use real (database) ID
+    entity.setProgrammeMembershipType(dto.getProgrammeMembershipType());
+    entity.setProgrammeStartDate(dto.getProgrammeStartDate());
+    entity.setProgrammeEndDate(dto.getProgrammeEndDate());
+    entity.setLeavingReason(dto.getLeavingReason());
+    entity.setTrainingPathway(dto.getTrainingPathway());
+    entity.setAmendedDate(dto.getAmendedDate());
+
     Programme programme = null;
-    if (programmeMembershipDto.getProgrammeId() != null) {
+    if (dto.getProgrammeId() != null) {
       programme = new Programme();
-      programme.setId(programmeMembershipDto.getProgrammeId());
-      programme.setProgrammeName(programmeMembershipDto.getProgrammeName());
-      programme.setOwner(programmeMembershipDto.getProgrammeOwner());
-      programme.setProgrammeNumber(programmeMembershipDto.getProgrammeNumber());
-      result.setRotation(rotationDTOToRotation(programmeMembershipDto.getRotation()));
+      programme.setId(dto.getProgrammeId());
+      programme.setProgrammeName(dto.getProgrammeName());
+      programme.setOwner(dto.getProgrammeOwner());
+      programme.setProgrammeNumber(dto.getProgrammeNumber());
+      entity.setRotation(rotationMapper.toEntity(dto.getRotation()));
     }
-    result.setProgramme(programme);
-    result.setTrainingNumber(
-        trainingNumberDTOToTrainingNumber(programmeMembershipDto.getTrainingNumber()));
-    result.setPerson(personDTOToPerson(programmeMembershipDto.getPerson()));
+    entity.setProgramme(programme);
 
-    if (programmeMembershipDto.getCurriculumMemberships() == null) {
-      result.setCurriculumMemberships(new HashSet<>());
-    }
-    result.getCurriculumMemberships()
-        .addAll(curriculumMembershipMapper.toEntity(programmeMembershipDto));
-    result.getCurriculumMemberships().forEach(cm -> cm.setProgrammeMembership(result));
-    return result;
+    entity.setTrainingNumber(
+        trainingNumberMapper.trainingNumberDTOToTrainingNumber(dto.getTrainingNumber()));
+    entity.setPerson(personDTOToPerson(dto.getPerson()));
+
+    entity.setCurriculumMemberships(new HashSet<>());
+    entity.getCurriculumMemberships()
+        .addAll(curriculumMembershipMapper.toEntity(dto));
+    entity.getCurriculumMemberships().forEach(cm -> cm.setProgrammeMembership(entity));
+    return entity;
   }
 
+  /**
+   * Convert ProgrammeMembership DTOs to entities by using {@link #toEntity(ProgrammeMembershipDTO)}
+   * for each DTO.
+   *
+   * @param pmDtos list of ProgrammeMembershipDTO
+   * @return the ProgrammeMembership entity list
+   */
   public List<ProgrammeMembership> programmeMembershipDTOsToProgrammeMemberships(
-      List<ProgrammeMembershipDTO> programmeMembershipDTOs) {
-    List<ProgrammeMembership> result = Lists.newArrayList();
-
-    for (ProgrammeMembershipDTO programmeMembershipDto : programmeMembershipDTOs) {
-      result.add(toEntity(programmeMembershipDto));
-    }
-
-    return result;
+      List<ProgrammeMembershipDTO> pmDtos) {
+    return pmDtos.stream().map(this::toEntity).collect(Collectors.toList());
   }
 
+  // convert programmeMembership entity to DTO with an empty curriculumMembership list
   private ProgrammeMembershipDTO programmeMembershipToProgrammeMembershipDTO(
-      ProgrammeMembership programmeMembership) {
-    ProgrammeMembershipDTO result = new ProgrammeMembershipDTO();
+      ProgrammeMembership entity) {
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
 
-    if (!programmeMembership.getCurriculumMemberships().isEmpty()) {
-      //Preserve backward-compatibility
-      result.setId(programmeMembership.getCurriculumMemberships().iterator().next().getId());
+    if (!entity.getCurriculumMemberships().isEmpty()) {
+      //Preserve backward-compatibility, set ID in DTO to the ID of the first curriculumMembership
+      dto.setId(entity.getCurriculumMemberships().iterator().next().getId());
     }
-    result.setUuid(programmeMembership.getUuid());
-    result.setProgrammeMembershipType(programmeMembership.getProgrammeMembershipType());
-    result.setProgrammeStartDate(programmeMembership.getProgrammeStartDate());
-    result.setProgrammeEndDate(programmeMembership.getProgrammeEndDate());
-    result.setLeavingReason(programmeMembership.getLeavingReason());
-    result.setAmendedDate(programmeMembership.getAmendedDate());
-    Programme programme = programmeMembership.getProgramme();
+
+    dto.setUuid(entity.getUuid());
+    dto.setProgrammeMembershipType(entity.getProgrammeMembershipType());
+    dto.setProgrammeStartDate(entity.getProgrammeStartDate());
+    dto.setProgrammeEndDate(entity.getProgrammeEndDate());
+    dto.setLeavingReason(entity.getLeavingReason());
+    dto.setAmendedDate(entity.getAmendedDate());
+    dto.setTrainingPathway(entity.getTrainingPathway());
+
+    Programme programme = entity.getProgramme();
     if (programme != null) {
-      result.setProgrammeId(programme.getId());
-      result.setProgrammeOwner(programme.getOwner());
-      result.setProgrammeName(programme.getProgrammeName());
-      result.setProgrammeNumber(programme.getProgrammeNumber());
-      result.setRotation(rotationToRotationDTO(programmeMembership.getRotation(), programme));
+      dto.setProgrammeId(programme.getId());
+      dto.setProgrammeOwner(programme.getOwner());
+      dto.setProgrammeName(programme.getProgrammeName());
+      dto.setProgrammeNumber(programme.getProgrammeNumber());
+      dto.setRotation(rotationToRotationDTO(entity.getRotation(), programme));
     }
-    result.setTrainingNumber(
-        trainingNumberToTrainingNumberDTO(programmeMembership.getTrainingNumber()));
 
-    if (programmeMembership.getPerson() == null) {
-      result.setPerson(null);
-    } else {
-      result.setPerson(personToPersonDTO(programmeMembership.getPerson()));
-    }
-    result.setTrainingPathway(programmeMembership.getTrainingPathway());
-    result.setConditionsOfJoining(
-        conditionsOfJoiningMapper.toDto(programmeMembership.getConditionsOfJoining()));
-    return result;
+    dto.setTrainingNumber(
+        trainingNumberMapper.trainingNumberToTrainingNumberDTO(entity.getTrainingNumber()));
+    dto.setPerson(personToPersonDTO(entity.getPerson()));
+
+    dto.setCurriculumMemberships(new ArrayList<>());
+
+    dto.setConditionsOfJoining(
+        conditionsOfJoiningMapper.toDto(entity.getConditionsOfJoining()));
+    return dto;
   }
 
   private List<CurriculumMembershipDTO> programmeMembershipToCurriculumMembershipDtos(
       ProgrammeMembership programmeMembership) {
-    List<CurriculumMembershipDTO> curriculumMembershipDtos = Lists.newArrayList();
-    Set<CurriculumMembership> curriculumMemberships
-        = programmeMembership.getCurriculumMemberships();
-
-    curriculumMemberships.forEach(cm -> {
-      CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
-
-      cmDto.setId(cm.getId());
-      cmDto.setIntrepidId(cm.getIntrepidId());
-      cmDto.setCurriculumStartDate(cm.getCurriculumStartDate());
-      cmDto.setCurriculumEndDate(cm.getCurriculumEndDate());
-      cmDto.setPeriodOfGrace(cm.getPeriodOfGrace());
-      cmDto.setCurriculumCompletionDate(cm.getCurriculumCompletionDate());
-      cmDto.setCurriculumId(cm.getCurriculumId());
-      cmDto.setAmendedDate(cm.getAmendedDate());
-
-      curriculumMembershipDtos.add(cmDto);
-    });
-
-    return curriculumMembershipDtos;
+    return programmeMembership.getCurriculumMemberships().stream()
+        .map(curriculumMembershipMapper::curriculumMembershipToCurriculumMembershipDto)
+        .collect(Collectors.toList());
   }
 
   private PersonDTO personToPersonDTO(Person person) {
@@ -247,28 +247,7 @@ public class ProgrammeMembershipMapper {
     return result;
   }
 
-  private TrainingNumberDTO trainingNumberToTrainingNumberDTO(TrainingNumber trainingNumber) {
-    TrainingNumberDTO result = null;
-    if (trainingNumber != null) {
-      result = new TrainingNumberDTO();
-      result.setId(trainingNumber.getId());
-      result.setIntrepidId(trainingNumber.getIntrepidId());
-      result.setTrainingNumber(trainingNumber.getTrainingNumber());
-    }
-    return result;
-  }
-
-  private TrainingNumber trainingNumberDTOToTrainingNumber(TrainingNumberDTO trainingNumberDTO) {
-    TrainingNumber result = null;
-    if (trainingNumberDTO != null) {
-      result = new TrainingNumber();
-      result.setId(trainingNumberDTO.getId());
-      result.setIntrepidId(trainingNumberDTO.getIntrepidId());
-      result.setTrainingNumber(trainingNumberDTO.getTrainingNumber());
-    }
-    return result;
-  }
-
+  // map rotation entity to DTO with programme details
   private RotationDTO rotationToRotationDTO(Rotation rotation, Programme programme) {
     RotationDTO result = null;
     if (rotation != null) {
@@ -279,18 +258,6 @@ public class ProgrammeMembershipMapper {
       result.setProgrammeName(programme.getProgrammeName());
       result.setProgrammeNumber(programme.getProgrammeNumber());
       result.setStatus(rotation.getStatus());
-    }
-    return result;
-  }
-
-  private Rotation rotationDTOToRotation(RotationDTO rotationDTO) {
-    Rotation result = null;
-    if (rotationDTO != null) {
-      result = new Rotation();
-      result.setId(rotationDTO.getId());
-      result.setProgrammeId(rotationDTO.getProgrammeId());
-      result.setName(rotationDTO.getName());
-      result.setStatus(rotationDTO.getStatus());
     }
     return result;
   }

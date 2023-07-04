@@ -64,8 +64,7 @@ public class CurriculumMembershipEventListener {
     LOG.info("Received CurriculumMembership deleted event for CurriculumMembership id: [{}]",
         event.getProgrammeMembershipDTO().getId());
     final Long personId = event.getProgrammeMembershipDTO().getPerson().getId();
-    personElasticSearchService.deletePersonDocument(personId);
+    personElasticSearchService.updatePersonDocument(personId);
     revalidationRabbitService.updateReval(revalidationService.buildTcsConnectionInfo(personId));
   }
-
 }

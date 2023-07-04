@@ -30,9 +30,20 @@
   <logger name="sun.rmi" level="WARN"/>
   <logger name="sun.rmi.transport" level="WARN"/>
 
+  <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+    <appender-ref ref="SENTRY"/>
+  </root>
+
   <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
     <resetJUL>true</resetJUL>
   </contextListener>
-
 
 </configuration>

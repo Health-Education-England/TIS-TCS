@@ -41,6 +41,9 @@ public class RevalidationMessageListener {
   public void receiveMessage(final String start) {
     if (start.equals("syncStart") && !exchange.equals("false")) {
       List<ConnectionInfoDto> connections = revalidationService.extractConnectionInfoForSync();
+      LOG.info("TCS to ES masterdoctorindex sync started. There are {} doctors extracted from TCS.",
+          connections.size());
+
       for (ConnectionInfoDto connection : connections) {
         rabbitTemplate.convertAndSend(exchange, routingKey, connection);
       }

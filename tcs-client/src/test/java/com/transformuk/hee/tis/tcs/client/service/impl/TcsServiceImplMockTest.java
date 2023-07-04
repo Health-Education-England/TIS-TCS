@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.client.service.impl;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -17,11 +18,13 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -218,5 +221,32 @@ public class TcsServiceImplMockTest {
     // Then.
     assertThat("Unexpected number of patched DTOs.", returnDtos.size(), is(1));
     assertThat("Unexpected patched DTOs.", returnDtos.get(0), is(dto));
+  }
+
+  @Test
+  public void shouldGetProgrammeMembershipbyUuidWhenFound() {
+    UUID uuid = UUID.randomUUID();
+
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
+    dto.setUuid(uuid);
+
+    ResponseEntity<ProgrammeMembershipDTO> response = ResponseEntity.ok(dto);
+    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    ProgrammeMembershipDTO returnDto = testObj.getProgrammeMembershipByUuid(uuid);
+    assertThat("Unexpected dto.", returnDto, is(dto));
+  }
+
+  @Test
+  public void shouldReturnNullWhenProgrammeMembershipNotFoundByUuid() {
+    UUID uuid = UUID.randomUUID();
+
+    ResponseEntity<ProgrammeMembershipDTO> response = ResponseEntity.notFound().build();
+    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    ProgrammeMembershipDTO returnDto = testObj.getProgrammeMembershipByUuid(uuid);
+    assertThat("Unexpected dto.", returnDto, nullValue());
   }
 }

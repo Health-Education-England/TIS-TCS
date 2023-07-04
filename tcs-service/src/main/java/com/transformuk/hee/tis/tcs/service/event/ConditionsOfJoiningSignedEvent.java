@@ -9,17 +9,17 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 public class ConditionsOfJoiningSignedEvent {
 
   @JsonProperty("programmeMembershipTisId")
-  private final Long programmeMembershipId;
+  private final Object id; //this may be a long or a UUID
   private final ConditionsOfJoiningDto conditionsOfJoining;
 
-  public ConditionsOfJoiningSignedEvent(Long programmeMembershipId,
+  public ConditionsOfJoiningSignedEvent(Object id,
       ConditionsOfJoiningDto conditionsOfJoining) {
-    this.programmeMembershipId = programmeMembershipId;
+    this.id = id;
     this.conditionsOfJoining = conditionsOfJoining;
   }
 
-  public Long getProgrammeMembershipId() {
-    return programmeMembershipId;
+  public Object getId() {
+    return id;
   }
 
   public ConditionsOfJoiningDto getConditionsOfJoining() {

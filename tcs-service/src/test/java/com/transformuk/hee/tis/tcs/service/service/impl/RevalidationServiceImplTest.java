@@ -200,6 +200,15 @@ public class RevalidationServiceImplTest {
   }
 
   @Test
+  public void findRevalidationRecordByGmcIdShouldRetrieveNullWhenNoDoctorFound() {
+    when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber("1000")).thenReturn(null);
+
+    RevalidationRecordDto result = testObj.findRevalidationByGmcId("1000");
+
+    assertThat(result, nullValue());
+  }
+
+  @Test
   public void findRevalidationRecordByGmcIdShouldRetrieveOne() {
     ConnectionInfoDto connectionInfoDto = ConnectionInfoDto.builder()
         .tcsPersonId(PERSON_ID)
@@ -538,7 +547,7 @@ public class RevalidationServiceImplTest {
     String querySql = stringArgCaptor.getValue();
     assertThat(querySql, containsString("where cd.id = " + PERSON_ID));
     assertThat(querySql, containsString("where pm.personId = " + PERSON_ID));
-    assertThat(querySql, containsString("where cm.personId = " + PERSON_ID));
+    assertThat(querySql, containsString("where cm2.personId = " + PERSON_ID));
     assertThat(querySql, not(containsString("ORDERBYCLAUSE")));
     assertThat(querySql, not(containsString("LIMITCLAUSE")));
     assertThat(result, notNullValue());

@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.28.0</version>
+  <version>6.30.3</version>
 
   <dependencies>
     <dependency>
@@ -81,7 +81,7 @@
     <dependency>
       <groupId>uk.nhs.tis</groupId>
       <artifactId>tcs-persistence</artifactId>
-      <version>2.24.0</version>
+      <version>2.25.0</version>
     </dependency>
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -311,10 +311,19 @@
       <artifactId>spring-boot-devtools</artifactId>
       <optional>true</optional>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.sentry</groupId>
+      <artifactId>sentry-spring-boot-starter</artifactId>
+      <version>${sentryVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.sentry</groupId>
+      <artifactId>sentry-logback</artifactId>
+      <version>${sentryVersion}</version>
     </dependency>
 
   </dependencies>
@@ -363,6 +372,8 @@
     <tis.shared.modules.version>2.3.0</tis.shared.modules.version>
     <undertow.version>2.0.15.Final</undertow.version>
     <validation-api.version>1.1.0.Final</validation-api.version>
+
+    <sentryVersion>6.22.0</sentryVersion>
   </properties>
 
   <build>
@@ -602,4 +613,11 @@
       </properties>
     </profile>
   </profiles>
+  <distributionManagement>
+    <repository>
+      <id>codeartifact</id>
+      <name>CodeArtifact</name>
+      <url>https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/</url>
+    </repository>
+  </distributionManagement>
 </project>

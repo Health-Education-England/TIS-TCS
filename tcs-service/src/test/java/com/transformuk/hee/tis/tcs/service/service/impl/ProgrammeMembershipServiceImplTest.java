@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -32,8 +33,13 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMap
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapperImpl;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,7 +94,6 @@ public class ProgrammeMembershipServiceImplTest {
   private ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
   private ProgrammeMembershipServiceImpl testObj;
   private ProgrammeMembershipMapper programmeMembershipMapper;
-  private CurriculumMembershipMapper curriculumMembershipMapper;
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock
@@ -107,8 +112,12 @@ public class ProgrammeMembershipServiceImplTest {
     ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
     CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper(
         conditionsOfJoiningMapper);
+    TrainingNumberMapper trainingNumberMapper = new TrainingNumberMapperImpl();
+    ReflectionTestUtils.setField(trainingNumberMapper, "programmeMapper",
+        new ProgrammeMapperImpl());
+    RotationMapper rotationMapper = new RotationMapperImpl();
     programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper,
-        conditionsOfJoiningMapper);
+        conditionsOfJoiningMapper, trainingNumberMapper, rotationMapper);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
@@ -261,6 +270,20 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(1, result.getCurriculumMemberships().size());
   }
 
+  @Test()
+  public void findOneByUuidShouldReturnProgrammeMembershipDTO() {
+    //given
+    when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(programmeMembership1));
+
+    //when
+    ProgrammeMembershipDTO result = testObj.findOne(PROGRAMME_MEMBERSHIP_ID_1);
+
+    //then
+    Assert.assertNotNull(result);
+    Assert.assertEquals(PROGRAMME_ID, result.getProgrammeId().longValue());
+    Assert.assertEquals(2, result.getCurriculumMemberships().size());
+  }
 
   @Test(expected = NullPointerException.class)
   public void findProgrammeMembershipsForTraineeShouldFailWhenTraineeIsNull() {
@@ -564,8 +587,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     verify(programmeMembershipRepositoryMock, times(1))
         .delete(any()); //since the last CM is deleted, so the PM is deleted too
-
+    verify(applicationEventPublisherMock, times(2)).publishEvent(any(
+        CurriculumMembershipDeletedEvent.class));
   }
-
-
 }

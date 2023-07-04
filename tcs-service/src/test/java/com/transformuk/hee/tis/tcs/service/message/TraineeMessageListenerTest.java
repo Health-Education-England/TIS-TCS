@@ -10,44 +10,56 @@ import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 
 class TraineeMessageListenerTest {
 
-  private static final Long ID = 40L;
+  private static final Long CURRICULUM_MEMBERSHIP_ID = 40L;
+  private static final UUID PROGRAMME_MEMBERSHIP_ID = UUID.randomUUID();
   private static final Instant SIGNED_AT = Instant.now();
 
   private TraineeMessageListener listener;
   private ConditionsOfJoiningService service;
+  private ConditionsOfJoiningDto dto;
 
   @BeforeEach
   void setUp() {
     service = mock(ConditionsOfJoiningService.class);
     listener = new TraineeMessageListener(service);
+    dto = new ConditionsOfJoiningDto();
+    dto.setSignedAt(SIGNED_AT);
+    dto.setVersion(GoldGuideVersion.GG9);
   }
 
   @Test
-  void shouldSaveSignedCojWhenEventValid() {
-    ConditionsOfJoiningDto dto = new ConditionsOfJoiningDto();
-    dto.setSignedAt(SIGNED_AT);
-    dto.setVersion(GoldGuideVersion.GG9);
-    ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(ID, dto);
+  void shouldSaveSignedCojWhenEventValidWithCmId() {
+    ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
+        CURRICULUM_MEMBERSHIP_ID, dto);
 
     listener.receiveMessage(event);
 
-    verify(service).save(ID, dto);
+    verify(service).save(CURRICULUM_MEMBERSHIP_ID, dto);
+  }
+
+  @Test
+  void shouldSaveSignedCojWhenEventValidWithPmId() {
+    ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
+        PROGRAMME_MEMBERSHIP_ID, dto);
+
+    listener.receiveMessage(event);
+
+    verify(service).save(PROGRAMME_MEMBERSHIP_ID, dto);
   }
 
   @Test
   void shouldNotRequeueMessageWhenEventArgumentsInvalid() {
-    ConditionsOfJoiningDto dto = new ConditionsOfJoiningDto();
-    dto.setSignedAt(SIGNED_AT);
-    dto.setVersion(GoldGuideVersion.GG9);
-    ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(ID, dto);
+    ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
+        CURRICULUM_MEMBERSHIP_ID, dto);
 
-    when(service.save(ID, dto)).thenThrow(IllegalArgumentException.class);
+    when(service.save(CURRICULUM_MEMBERSHIP_ID, dto)).thenThrow(IllegalArgumentException.class);
 
     assertThrows(AmqpRejectAndDontRequeueException.class, () -> listener.receiveMessage(event));
   }
