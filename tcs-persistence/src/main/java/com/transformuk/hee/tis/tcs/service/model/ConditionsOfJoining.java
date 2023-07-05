@@ -4,13 +4,14 @@ import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import lombok.Data;
 import org.hibernate.annotations.Type;
 
@@ -28,8 +29,8 @@ public class ConditionsOfJoining implements Serializable {
   @Enumerated(EnumType.STRING)
   private GoldGuideVersion version;
 
-  @OneToOne
-  @MapsId
+  @OneToOne(mappedBy = "conditionsOfJoining", cascade = CascadeType.REMOVE)
+  @PrimaryKeyJoinColumn(name = "programmeMembershipUuid")
   @JoinColumn(name = "programmeMembershipUuid")
   private ProgrammeMembership programmeMembership;
 }

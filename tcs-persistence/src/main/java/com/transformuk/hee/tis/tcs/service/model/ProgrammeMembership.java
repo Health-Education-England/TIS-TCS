@@ -70,8 +70,8 @@ public class ProgrammeMembership implements Serializable {
   @JoinColumn(name = "trainingNumberId")
   private TrainingNumber trainingNumber;
 
-  @OneToOne(mappedBy = "programmeMembership", cascade = CascadeType.REMOVE)
-  @PrimaryKeyJoinColumn
+  @OneToOne
+  @JoinColumn(name = "uuid")
   private ConditionsOfJoining conditionsOfJoining;
 
   @OneToMany(mappedBy = "programmeMembership", cascade = CascadeType.ALL, orphanRemoval = true)

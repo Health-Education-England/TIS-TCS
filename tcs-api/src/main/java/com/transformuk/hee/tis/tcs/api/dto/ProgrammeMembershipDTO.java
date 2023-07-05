@@ -20,6 +20,11 @@ import lombok.Data;
 @Data
 public class ProgrammeMembershipDTO implements Serializable {
 
+  /**
+   * @deprecated 2023-06 Taken from a non-deterministic child {@link CurriculumMembershipDTO}. Use
+   *     `uuid` instead.
+   */
+  @Deprecated
   private Long id;
 
   /**
