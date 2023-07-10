@@ -1,0 +1,12 @@
+ALTER TABLE `CurriculumMembership`
+  DROP COLUMN `programmeId`,
+  DROP COLUMN `programmeMembershipType`,
+  DROP COLUMN `programmeStartDate`,
+  DROP COLUMN `programmeEndDate`,
+  DROP COLUMN `personId`,
+  DROP COLUMN `rotation`,
+  DROP COLUMN `rotationId`,
+  DROP COLUMN `trainingPathway`,
+  DROP COLUMN `trainingNumberId`,
+  DROP COLUMN `leavingDestination`,
+  DROP COLUMN `leavingReason`;
