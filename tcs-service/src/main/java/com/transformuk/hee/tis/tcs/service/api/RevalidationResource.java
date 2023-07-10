@@ -9,6 +9,7 @@ import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -90,11 +91,16 @@ public class RevalidationResource {
       @PathVariable String gmcId) {
     LOG.debug("REST request to find Revalidation Connection Detail for a trainee: {}", gmcId);
 
-    if (!gmcId.isEmpty()) {
-      UrlDecoderUtil.decode(gmcId);
-      return ResponseEntity.ok(revalidationService.findAllConnectionsHistoryByGmcId(gmcId));
-    } else {
+    if (StringUtils.isEmpty(gmcId)) {
       return ResponseEntity.badRequest().body(null);
+    }
+
+    UrlDecoderUtil.decode(gmcId);
+    ConnectionDetailDto connectionDetailDto = revalidationService.findAllConnectionsHistoryByGmcId(gmcId);
+    if (connectionDetailDto != null) {
+      return ResponseEntity.ok(connectionDetailDto);
+    } else {
+      return ResponseEntity.notFound().build();
     }
   }
 
