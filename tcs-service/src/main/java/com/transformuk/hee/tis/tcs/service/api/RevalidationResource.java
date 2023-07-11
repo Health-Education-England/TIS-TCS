@@ -96,7 +96,8 @@ public class RevalidationResource {
     }
 
     UrlDecoderUtil.decode(gmcId);
-    ConnectionDetailDto connectionDetailDto = revalidationService.findAllConnectionsHistoryByGmcId(gmcId);
+    ConnectionDetailDto connectionDetailDto = revalidationService
+        .findAllConnectionsHistoryByGmcId(gmcId);
     if (connectionDetailDto != null) {
       return ResponseEntity.ok(connectionDetailDto);
     } else {

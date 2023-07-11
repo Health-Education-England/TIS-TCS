@@ -349,6 +349,16 @@ public class RevalidationServiceImplTest {
         is(PM_END_DATE));
   }
 
+
+  @Test
+  public void shouldReturnNullWhenGmcDetailsDontExistForGmcIdForFindConnectionsHistory() {
+    when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber(GMC_NUMBER)).thenReturn(null);
+
+    final ConnectionDetailDto result = testObj.findAllConnectionsHistoryByGmcId(GMC_NUMBER);
+
+    assertThat(result, is(nullValue()));
+  }
+
   @Test
   public void connectionStatusMustBeNoIfProgrammeStartDateIsTodayOrOlder() {
     when(gmcDetailsRepositoryMock.findByGmcNumberIn(GMC_IDS)).thenReturn(gmcDetailList);

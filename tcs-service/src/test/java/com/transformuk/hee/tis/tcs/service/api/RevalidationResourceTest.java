@@ -5,6 +5,7 @@ import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipTyp
 import static java.util.Arrays.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
@@ -279,6 +280,29 @@ public class RevalidationResourceTest {
     assertThat(
         contentConnectionDetailDto.getProgrammeHistory().get(0).getProgrammeMembershipEndDate(),
         is(PM_END_DATE));
+  }
+
+  @Test
+  public void shouldReturnBadRequestIfEmptyGmcNumberProvided() throws Exception {
+    MvcResult result =
+        restRevalidationMock
+            .perform(get("/api/revalidation/connection/detail/{gmcId}", ""))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+    assertThat(result.getResponse(), is(nullValue()));
+  }
+
+  @Test
+  public void shouldReturnNotFoundIfConnectionHistoryNotFound() throws Exception {
+    when(revalidationServiceImplMock.findAllConnectionsHistoryByGmcId(GMC_ID1))
+        .thenReturn(null);
+
+    MvcResult result =
+        restRevalidationMock
+            .perform(get("/api/revalidation/connection/detail/{gmcId}", GMC_ID1))
+            .andExpect(status().isNotFound())
+            .andReturn();
   }
 
   @Test
