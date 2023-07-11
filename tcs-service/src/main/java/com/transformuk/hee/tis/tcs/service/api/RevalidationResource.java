@@ -88,7 +88,7 @@ public class RevalidationResource {
   @GetMapping("/revalidation/connection/detail/{gmcId}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ConnectionDetailDto> getConnectionDetailForATrainee(
-      @PathVariable @NotBlank String gmcId) {
+      @PathVariable String gmcId) {
     LOG.debug("REST request to find Revalidation Connection Detail for a trainee: {}", gmcId);
 
     UrlDecoderUtil.decode(gmcId);
