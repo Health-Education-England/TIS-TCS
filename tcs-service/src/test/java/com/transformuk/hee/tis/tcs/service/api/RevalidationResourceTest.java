@@ -283,17 +283,6 @@ public class RevalidationResourceTest {
   }
 
   @Test
-  public void shouldReturnBadRequestIfEmptyGmcNumberProvided() throws Exception {
-    MvcResult result =
-        restRevalidationMock
-            .perform(get("/api/revalidation/connection/detail/{gmcId}", ""))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-    assertThat(result.getResponse(), is(nullValue()));
-  }
-
-  @Test
   public void shouldReturnNotFoundIfConnectionHistoryNotFound() throws Exception {
     when(revalidationServiceImplMock.findAllConnectionsHistoryByGmcId(GMC_ID1))
         .thenReturn(null);

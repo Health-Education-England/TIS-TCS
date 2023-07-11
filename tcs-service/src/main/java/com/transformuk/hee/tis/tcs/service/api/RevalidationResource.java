@@ -9,6 +9,7 @@ import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotBlank;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,12 +89,8 @@ public class RevalidationResource {
   @GetMapping("/revalidation/connection/detail/{gmcId}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ConnectionDetailDto> getConnectionDetailForATrainee(
-      @PathVariable String gmcId) {
+      @PathVariable @NotBlank String gmcId) {
     LOG.debug("REST request to find Revalidation Connection Detail for a trainee: {}", gmcId);
-
-    if (StringUtils.isEmpty(gmcId)) {
-      return ResponseEntity.badRequest().body(null);
-    }
 
     UrlDecoderUtil.decode(gmcId);
     ConnectionDetailDto connectionDetailDto = revalidationService
