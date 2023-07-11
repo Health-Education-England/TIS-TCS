@@ -154,6 +154,9 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     LOG.debug("GMCNo received from Connection History service: {}", gmcId);
     final GmcDetails gmcDetail = gmcDetailsRepository.findGmcDetailsByGmcNumber(gmcId);
+    if (gmcDetail == null) {
+      return null;
+    }
     final RevalidationRecordDto revalidationRecordDto = buildRevalidationRecord(gmcDetail);
 
     connectionDetailDto.setGmcNumber(revalidationRecordDto.getGmcNumber());
