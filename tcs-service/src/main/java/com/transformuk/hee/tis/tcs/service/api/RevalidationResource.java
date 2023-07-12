@@ -80,6 +80,7 @@ public class RevalidationResource {
 
   /**
    * GET  /revalidation/connection/detail/{gmcId} : Get revalidation connections details by gmcId.
+   * NOT CURRENTLY IN USE - intended for post-MVP programme history component for connections.
    *
    * @param gmcId the gmcId of trainee
    * @return reval connection details information by gmcId
