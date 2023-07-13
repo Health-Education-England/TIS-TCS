@@ -241,8 +241,6 @@ public class RevalidationServiceImpl implements RevalidationService {
     if (connectionInfoDtos.size() == 1) {
       return connectionInfoDtos.get(0);
     } else {
-      LOG.error("There are {} connectionInfoDtos found for personId: {}",
-          connectionInfoDtos.size(), personId);
       return null;
     }
   }
