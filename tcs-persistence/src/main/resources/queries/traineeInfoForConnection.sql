@@ -10,7 +10,8 @@ from (
     pm1.programmeEndDate,
     latestCm.curriculumEndDate,
     currentPmCounts.programmeNames as programmeName,
-    if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
+    if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner,
+    currentGrade.currentGrades
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
@@ -45,6 +46,16 @@ from (
     WHERECLAUSE(cm2, personId)
     group by cm2.programmeMembershipUuid
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
+  left join (
+    select traineeId, group_concat(distinct gradeAbbreviation order by gradeAbbreviation) currentGrades
+    from (
+      select traineeId, gradeAbbreviation, dateFrom, dateTo
+      from Placement pl
+      WHERECLAUSE(pl, id)
+    ) placement
+    where placement.dateFrom <= current_date() and placement.dateTo >= current_date()
+    group by placement.traineeId
+  ) currentGrade on cd.id = currentGrade.traineeId
   WHERECLAUSE(cd, id)
 ) as ot
 ORDERBYCLAUSE
