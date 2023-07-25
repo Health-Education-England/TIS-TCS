@@ -10,7 +10,7 @@ from (
     pm1.programmeEndDate,
     latestCm.curriculumEndDate,
     currentPmCounts.programmeNames as programmeName,
-    if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner,
+    if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
