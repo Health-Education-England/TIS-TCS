@@ -17,6 +17,8 @@ from (
     -- note: null values are filtered out by the condition below
     and lower(gmc.gmcNumber) <> 'unknown'
     and gmc.gmcNumber not like CONCAT('%', UNHEX('c2a0'), '%') -- filter out all gmc number with non-breaking space
+  inner join Placement pl on (pl.id = cd.id )
+    and lower(pl.gradeAbbreviation) <> 'f1'
   left join (
     -- count current PMs with combined programme names for each person
     select
