@@ -788,7 +788,7 @@ public class PostServiceImpl implements PostService {
     if (pageable.getSort() != null) {
       if (pageable.getSort().iterator().hasNext()) {
         Sort.Order order = pageable.getSort().iterator().next();
-        if ("currentTraineeSurname" .equalsIgnoreCase(order.getProperty())) {
+        if ("currentTraineeSurname".equalsIgnoreCase(order.getProperty())) {
           orderByClause.append(" ORDER BY ").append("surnames ").append(order.getDirection())
               .append(" ");
         } else {
@@ -837,7 +837,7 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  protected class PostViewRowMapper implements RowMapper<PostViewDTO> {
+  private abstract class BasePostRowMapper implements RowMapper<PostViewDTO> {
 
     @Override
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
@@ -854,14 +854,23 @@ public class PostServiceImpl implements PostService {
       if (rs.wasNull()) {
         view.setPrimarySiteId(null);
       }
-      view.setProgrammeNames(rs.getString("programmes"));
-      view.setFundingType(rs.getString("fundingType"));
       view.setNationalPostNumber(rs.getString("nationalPostNumber"));
       String status = rs.getString("status");
       if (StringUtils.isNotEmpty(status)) {
         view.setStatus(Status.valueOf(status));
       }
       view.setOwner(rs.getString("owner"));
+      return view;
+    }
+  }
+
+  protected class PostViewRowMapper extends BasePostRowMapper {
+
+    @Override
+    public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
+      PostViewDTO view = super.mapRow(rs, i);
+      view.setProgrammeNames(rs.getString("programmes"));
+      view.setFundingType(rs.getString("fundingType"));
       view.setIntrepidId(rs.getString("intrepidId"));
       view.setCurrentTraineeSurname(rs.getString("surnames"));
       view.setCurrentTraineeForenames(rs.getString("forenames"));
@@ -869,30 +878,11 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private class PostViewSearchMapper implements RowMapper<PostViewDTO> {
+  private class PostViewSearchMapper extends BasePostRowMapper {
 
     @Override
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
-      PostViewDTO view = new PostViewDTO();
-      view.setId(rs.getLong("id"));
-      view.setApprovedGradeId(rs.getLong("approvedGradeId"));
-      if (rs.wasNull()) {
-        view.setApprovedGradeId(null);
-      }
-      view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
-      view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
-      view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
-      view.setPrimarySiteId(rs.getLong("primarySiteId"));
-      if (rs.wasNull()) {
-        view.setPrimarySiteId(null);
-      }
-      view.setNationalPostNumber(rs.getString("nationalPostNumber"));
-      String status = rs.getString("status");
-      if (StringUtils.isNotEmpty(status)) {
-        view.setStatus(Status.valueOf(status));
-      }
-      view.setOwner(rs.getString("owner"));
-      return view;
+      return super.mapRow(rs, i);
     }
   }
 }
