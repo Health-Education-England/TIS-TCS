@@ -14,8 +14,14 @@ from (
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
-   -- note: null values are filtered out by the condition below
+    -- note: null values are filtered out by the condition below
     and lower(gmc.gmcNumber) <> 'unknown'
+    and gmc.gmcNumber not like CONCAT('%', UNHEX('c2a0'), '%') -- filter out all gmc number with non-breaking space
+  inner join Placement pl on (pl.traineeId = cd.id )
+    -- note: null values are filtered out by the condition below
+    and lower(pl.gradeAbbreviation) <> 'f1'
+    -- doctors with current placement only
+    and pl.dateFrom <= current_date() and pl.dateTo >= current_date()
   left join (
     -- count current PMs with combined programme names for each person
     select
@@ -45,18 +51,6 @@ from (
     WHERECLAUSE(cm2, personId)
     group by cm2.programmeMembershipUuid
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
-  inner join Placement pl on (pl.traineeId = cd.id )
-    select traineeId, group_concat(distinct gradeAbbreviation order by gradeAbbreviation) currentGrades
-    from (
-      select traineeId, gradeAbbreviation, dateFrom, dateTo
-      from Placement pl
-      WHERECLAUSE(pl, id)
-    ) placement
-    -- current placement
-    where placement.dateFrom <= current_date() and placement.dateTo >= current_date()
-    -- null placement grades are filtered out
-    and placement.gradeAbbreviation <> "F1"
-  ) currentGrade on cd.id = currentGrade.traineeId
   WHERECLAUSE(cd, id)
 ) as ot
 ORDERBYCLAUSE
