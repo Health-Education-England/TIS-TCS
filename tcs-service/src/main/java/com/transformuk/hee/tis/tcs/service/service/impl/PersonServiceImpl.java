@@ -920,10 +920,16 @@ public class PersonServiceImpl implements PersonService {
       view.setProgrammeNumber(rs.getString("programmeNumber"));
       view.setTrainingNumber(rs.getString("trainingNumber"));
       view.setGradeId(rs.getLong("gradeId"));
+      if (rs.wasNull()) {
+        view.setGradeId(null);
+      }
       view.setGradeAbbreviation(rs.getString("gradeAbbreviation"));
 
       view.setSiteCode(rs.getString("siteCode"));
       view.setSiteId(rs.getLong("siteId"));
+      if (rs.wasNull()) {
+        view.setSiteId(null);
+      }
       view.setPlacementType(rs.getString("placementType"));
       view.setSpecialty(rs.getString("specialty"));
       view.setRole(rs.getString("role"));

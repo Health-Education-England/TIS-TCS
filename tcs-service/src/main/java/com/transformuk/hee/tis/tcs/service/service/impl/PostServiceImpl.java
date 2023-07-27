@@ -844,10 +844,16 @@ public class PostServiceImpl implements PostService {
       PostViewDTO view = new PostViewDTO();
       view.setId(rs.getLong("id"));
       view.setApprovedGradeId(rs.getLong("approvedGradeId"));
+      if (rs.wasNull()) {
+        view.setApprovedGradeId(null);
+      }
       view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
       view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
       view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
       view.setPrimarySiteId(rs.getLong("primarySiteId"));
+      if (rs.wasNull()) {
+        view.setPrimarySiteId(null);
+      }
       view.setProgrammeNames(rs.getString("programmes"));
       view.setFundingType(rs.getString("fundingType"));
       view.setNationalPostNumber(rs.getString("nationalPostNumber"));
@@ -870,10 +876,16 @@ public class PostServiceImpl implements PostService {
       PostViewDTO view = new PostViewDTO();
       view.setId(rs.getLong("id"));
       view.setApprovedGradeId(rs.getLong("approvedGradeId"));
+      if (rs.wasNull()) {
+        view.setApprovedGradeId(null);
+      }
       view.setPrimarySpecialtyId(rs.getLong("primarySpecialtyId"));
       view.setPrimarySpecialtyCode(rs.getString("primarySpecialtyCode"));
       view.setPrimarySpecialtyName(rs.getString("primarySpecialtyName"));
       view.setPrimarySiteId(rs.getLong("primarySiteId"));
+      if (rs.wasNull()) {
+        view.setPrimarySiteId(null);
+      }
       view.setNationalPostNumber(rs.getString("nationalPostNumber"));
       String status = rs.getString("status");
       if (StringUtils.isNotEmpty(status)) {
