@@ -17,11 +17,15 @@ from (
    -- note: null values are filtered out by the condition below
     and lower(gmc.gmcNumber) <> 'unknown'
     and gmc.gmcNumber not like CONCAT('%', UNHEX('c2a0'), '%') -- filter out all gmc number with non-breaking space
-  inner join Placement pl on (pl.traineeId = cd.id )
-   -- note: null values are filtered out by the condition below
-    and lower(pl.gradeAbbreviation) <> 'f1'
-    -- doctors with current placement only
-    and pl.dateFrom <= current_date() and pl.dateTo >= current_date()
+  -- get only records with 1 or 0 placements, excluding F1
+  inner join (
+    select pl.traineeId
+      from Placement pl
+      where pl.gradeAbbreviation <> 'F1'
+      group by pl.traineeId
+      having count(traineeId) < 2
+      ) placements
+        on placements.traineeId = cd.id
   left join (
     -- count current PMs with combined programme names for each person
     select
