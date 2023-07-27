@@ -71,12 +71,12 @@ public class RevalidationMessageListenerTest {
   }
 
   @Test
-  public void shouldSendMsgForCurrentPmUpdate() {
+  public void shouldSendMsgForTraineeSyncUpdates() {
     setField(revalidationMessageListener, EXCHANGE, EXCHANGE);
     setField(revalidationMessageListener, ROUTING_KEY, ROUTING_KEY);
 
     List<String> personIdStrs = Lists.newArrayList("1", "2", "3");
-    revalidationMessageListener.receiveMessageNightlyPmSync(personIdStrs);
+    revalidationMessageListener.receiveMessageTraineeSyncChanges(personIdStrs);
 
     verify(revalidationService, times(3))
         .buildTcsConnectionInfo(personIdCaptor.capture());
