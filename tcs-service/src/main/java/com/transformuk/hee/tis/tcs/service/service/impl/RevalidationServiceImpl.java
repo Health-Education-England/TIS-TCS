@@ -228,10 +228,12 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     // $1 and $2 will be injected with the parenthesized match sub patterns from the RegEx
     final String whereClause = String.format("where $1.$2 = %s", personId);
+    final String individualPlacementClause = String.format("and pl.traineeId = %s", personId);
 
     final String query = sqlQuerySupplier
         .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
         .replaceAll(WHERE_CLAUSE_MACRO_REGEX, whereClause)
+        .replace("INDIVIDUALPLACEMENTCLAUSE", individualPlacementClause)
         .replace("ORDERBYCLAUSE", "")
         .replace("LIMITCLAUSE", "");
 
@@ -249,6 +251,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   public List<ConnectionInfoDto> extractConnectionInfoForSync() {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
         .replaceAll(WHERE_CLAUSE_MACRO_REGEX, "")
+        .replace("INDIVIDUALPLACEMENTCLAUSE", "")
         .replace("ORDERBYCLAUSE", "")
         .replace("LIMITCLAUSE", "");
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
