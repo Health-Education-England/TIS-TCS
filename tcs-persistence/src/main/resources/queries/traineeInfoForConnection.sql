@@ -8,13 +8,14 @@ from (
     pm1.programmeMembershipType,
     pm1.programmeStartDate,
     pm1.programmeEndDate,
+    placements.gradeAbbrvs,
     latestCm.curriculumEndDate,
     currentPmCounts.programmeNames as programmeName,
     if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
-    -- note: null values are filtered out by the condition below
+   -- note: null values are filtered out by the condition below
     and lower(gmc.gmcNumber) <> 'unknown'
     and gmc.gmcNumber not like CONCAT('%', UNHEX('c2a0'), '%') -- filter out all gmc number with non-breaking space
   left join (
@@ -46,8 +47,18 @@ from (
     WHERECLAUSE(cm2, personId)
     group by cm2.programmeMembershipUuid
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
+  left join (
+      select
+  		pl.traineeId,
+  		-- one row per trainee
+  		GROUP_CONCAT(pl.gradeAbbreviation SEPARATOR " ") gradeAbbrvs
+        from Placement pl
+        where pl.dateFrom <= current_date() and pl.dateTo >= current_date()
+        group by pl.traineeId
+        ) placements
+          on placements.traineeId = cd.id
   WHERECLAUSE(cd, id)
-) as ot
+) as ot where ot.gradeAbbrvs is null or ot.gradeAbbrvs not LIKE '%F1%' -- include trainees without current placements and exclude f1
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;
