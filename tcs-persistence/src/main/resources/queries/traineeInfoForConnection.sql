@@ -54,7 +54,7 @@ from (
   		GROUP_CONCAT(pl.gradeAbbreviation SEPARATOR " ") gradeAbbrvs
         from Placement pl
         where pl.dateFrom <= current_date() and pl.dateTo >= current_date()
-        INDIVIDUALPLACEMENTCLAUSE
+        ANDWHERECLAUSE(pl, traineeId)
         group by pl.traineeId
         ) placements
           on placements.traineeId = cd.id
