@@ -15,7 +15,7 @@ from (
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
-   -- note: null values are filtered out by the condition below
+    -- note: null values are filtered out by the condition below
     and lower(gmc.gmcNumber) <> 'unknown'
     and gmc.gmcNumber not like CONCAT('%', UNHEX('c2a0'), '%') -- filter out all gmc number with non-breaking space
   left join (
