@@ -68,6 +68,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -839,6 +840,7 @@ public class PostServiceImpl implements PostService {
 
   private abstract class BasePostRowMapper implements RowMapper<PostViewDTO> {
 
+    @NonNull
     @Override
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
       PostViewDTO view = new PostViewDTO();
@@ -864,6 +866,9 @@ public class PostServiceImpl implements PostService {
     }
   }
 
+  /**
+   * Creates a @link{PostViewDTO} with more detail that the summary for search results.
+   */
   protected class PostViewRowMapper extends BasePostRowMapper {
 
     @Override
@@ -878,11 +883,5 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private class PostViewSearchMapper extends BasePostRowMapper {
-
-    @Override
-    public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
-      return super.mapRow(rs, i);
-    }
-  }
+  private class PostViewSearchMapper extends BasePostRowMapper {}
 }
