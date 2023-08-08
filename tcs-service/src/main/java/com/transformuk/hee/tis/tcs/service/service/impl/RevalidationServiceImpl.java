@@ -73,15 +73,6 @@ public class RevalidationServiceImpl implements RevalidationService {
    */
   private static final String WHERE_CLAUSE_MACRO_REGEX =
       "WHERECLAUSE\\(\\s*(\\w+?)\\s*,\\s*(\\w+?)\\s*\\)";
-
-  /**
-   * This RegEx matches strings in format of ANDWHERECLAUSE(p, id).
-   * Whitespaces are allowed in the brackets.
-   * and it also recognises p and id as parenthesized match sub patterns.
-   */
-  private static final String AND_WHERE_CLAUSE_MACRO_REGEX =
-      "ANDWHERECLAUSE\\(\\s*(\\w+?)\\s*,\\s*(\\w+?)\\s*\\)";
-
   public static final int SIZE = 20;
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
@@ -236,12 +227,10 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     // $1 and $2 will be injected with the parenthesized match sub patterns from the RegEx
     final String whereClause = String.format("where $1.$2 = %s", personId);
-    final String andWhereClause = String.format("and where $1.$2 = %s", personId);
 
     final String query = sqlQuerySupplier
         .getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
         .replaceAll(WHERE_CLAUSE_MACRO_REGEX, whereClause)
-        .replaceAll(AND_WHERE_CLAUSE_MACRO_REGEX, andWhereClause)
         .replace("ORDERBYCLAUSE", "")
         .replace("LIMITCLAUSE", "");
 
@@ -259,7 +248,6 @@ public class RevalidationServiceImpl implements RevalidationService {
   public List<ConnectionInfoDto> extractConnectionInfoForSync() {
     final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.TRAINEE_CONNECTION_INFO)
         .replaceAll(WHERE_CLAUSE_MACRO_REGEX, "")
-        .replaceAll(AND_WHERE_CLAUSE_MACRO_REGEX, "")
         .replace("ORDERBYCLAUSE", "")
         .replace("LIMITCLAUSE", "");
     MapSqlParameterSource paramSource = new MapSqlParameterSource();

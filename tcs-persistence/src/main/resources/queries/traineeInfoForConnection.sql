@@ -8,7 +8,7 @@ from (
     pm1.programmeMembershipType,
     pm1.programmeStartDate,
     pm1.programmeEndDate,
-    placements.gradeAbbrvs,
+    currentGrade.currentgrades,
     latestCm.curriculumEndDate,
     currentPmCounts.programmeNames as programmeName,
     if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
@@ -51,15 +51,17 @@ from (
       select
   		pl.traineeId,
   		-- one row per trainee
-  		GROUP_CONCAT(pl.gradeAbbreviation SEPARATOR " ") gradeAbbrvs
+  		GROUP_CONCAT(distinct pl.gradeAbbreviation SEPARATOR " | ") currentGrades
+      from (
+        select traineeId, gradeAbbreviation, dateFrom, dateTo
         from Placement pl
-        where pl.dateFrom <= current_date() and pl.dateTo >= current_date()
-        ANDWHERECLAUSE(pl, traineeId)
-        group by pl.traineeId
-        ) placements
-          on placements.traineeId = cd.id
+        WHERECLAUSE(pl, id)
+      ) placement
+      where placement.dateFrom <= current_date() and placement.dateTo >= current_date()
+      group by placement.traineeId
+    ) currentGrade on cd.id = currentGrade.traineeId
   WHERECLAUSE(cd, id)
-) as ot where ot.gradeAbbrvs is null or ot.gradeAbbrvs not LIKE '%F1%' -- include trainees without current placements and exclude f1
+) as ot where ot.currentGrades is null or ot.currentGrades not regexp "[[:<:]]F1[[:>:]]" -- include trainees without current placements and exclude f1
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;
