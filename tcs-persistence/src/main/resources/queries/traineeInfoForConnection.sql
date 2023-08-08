@@ -49,13 +49,13 @@ from (
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
   left join (
       select
-  		pl.traineeId,
+  		placement.traineeId,
   		-- one row per trainee
-  		GROUP_CONCAT(distinct pl.gradeAbbreviation SEPARATOR " | ") currentGrades
+  		GROUP_CONCAT(distinct placement.gradeAbbreviation SEPARATOR " | ") currentGrades
       from (
         select traineeId, gradeAbbreviation, dateFrom, dateTo
         from Placement pl
-        WHERECLAUSE(pl, id)
+        WHERECLAUSE(pl, traineeId)
       ) placement
       where placement.dateFrom <= current_date() and placement.dateTo >= current_date()
       group by placement.traineeId
