@@ -26,6 +26,11 @@ public class PlacementElasticSearchEventListener {
   @Autowired
   private RevalidationRabbitService revalidationRabbitService;
 
+  /**
+   * handle Placement saved event.
+   *
+   * @param event details of the placement saved event
+   */
   @EventListener
   public void handlePlacementSavedEvent(PlacementSavedEvent event) {
     LOG.info("Received PlacementSavedEvent for id [{}]", event.getPlacementDTO().getId());
@@ -35,6 +40,11 @@ public class PlacementElasticSearchEventListener {
     );
   }
 
+  /**
+   * handle Placement deleted event.
+   *
+   * @param event details of the placement deleted event
+   */
   @EventListener
   public void handlePlacementDeletedEvent(PlacementDeletedEvent event) {
     LOG.info("Received PlacementDeleteEvent for placement id [{}]", event.getPlacementId());
