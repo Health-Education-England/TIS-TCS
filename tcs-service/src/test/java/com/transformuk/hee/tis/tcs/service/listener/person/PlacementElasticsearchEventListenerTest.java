@@ -56,7 +56,7 @@ public class PlacementElasticsearchEventListenerTest {
   @Test
   public void shouldHandlePersonDeletedEvent() {
     testObj.handlePlacementDeletedEvent(deletedEvent);
-    verify(personElasticSearchService).deletePersonDocument(PERSONID);
+    verify(personElasticSearchService).updatePersonDocument(PERSONID);
     verify(revalidationRabbitService).updateReval(revalidationService.buildTcsConnectionInfo(PERSONID));
   }
 }
