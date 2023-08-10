@@ -39,7 +39,8 @@ public class PlacementElasticsearchEventListenerTest {
   @Before
   public void setup() {
     source = new PlacementDTO();
-    source.setId(PERSONID);
+    source.setId(PLACEMENTID);
+    source.setTraineeId(PERSONID);
 
     savedEvent = new PlacementSavedEvent(source);
     deletedEvent = new PlacementDeletedEvent(PLACEMENTID, PERSONID);
