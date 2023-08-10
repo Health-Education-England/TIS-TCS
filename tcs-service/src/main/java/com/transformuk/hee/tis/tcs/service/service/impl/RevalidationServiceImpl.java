@@ -66,6 +66,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final String PROGRAMME_NAME_FIELD = "programmeName";
   private static final String PROGRAMME_START_DATE_FIELD = "programmeStartDate";
   private static final String SURNAME_FIELD = "surname";
+  private static final String PLACEMENT_GRADE_FIELD = "currentgrades";
   /**
    * This RegEx matches strings in format of WHERECLAUSE(p, id).
    * Whitespaces are allowed in the brackets.
@@ -419,6 +420,7 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeMembershipStartDate(start)
           .programmeMembershipEndDate(end)
           .curriculumEndDate(curriculumEnd)
+          .placementGrade(PLACEMENT_GRADE_FIELD)
           .dataSource("TCS")
           .build();
     }

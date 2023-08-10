@@ -61,7 +61,7 @@ from (
       group by placement.traineeId
     ) currentGrade on cd.id = currentGrade.traineeId
   WHERECLAUSE(cd, id)
-) as ot where ot.currentGrades is null or ot.currentGrades not regexp "[[:<:]]F1[[:>:]]" -- include trainees without current placements and exclude f1
+) as ot
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;
