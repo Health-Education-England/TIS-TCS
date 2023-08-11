@@ -96,6 +96,7 @@ public class RevalidationServiceImplTest {
   private static final LocalDate PM_END_DATE = now().plusDays(10);
   private static final LocalDate EXPIRED_PM_START_DATE = now().minusYears(1);
   private static final LocalDate EXPIRED_PM_END_DATE = now().minusMonths(6);
+  private static final String PLACEMENT_GRADE = "ST1";
 
   GradeDTO gradeDTO;
   List<GradeDTO> grades;
@@ -197,6 +198,7 @@ public class RevalidationServiceImplTest {
     connectionMap.put("programmeMembershipType",VISITOR);
     connectionMap.put("programmeStartDate",EXPIRED_PM_START_DATE);
     connectionMap.put("programmeEndDate",EXPIRED_PM_END_DATE);
+    connectionMap.put("currentgrades", PLACEMENT_GRADE);
   }
 
   @Test
@@ -307,6 +309,7 @@ public class RevalidationServiceImplTest {
         .curriculumEndDate(CURRICULUM_END_DATE)
         .programmeMembershipType(PROGRAMME_MEMBERSHIP_TYPE.toString())
         .programmeName(PROGRAMME_NAME)
+        .placementGrade(PLACEMENT_GRADE)
         .build();
 
     final List<CurriculumMembership> curriculumMembershipList = new ArrayList<>();
@@ -558,6 +561,7 @@ public class RevalidationServiceImplTest {
     assertThat(querySql, containsString("where cd.id = " + PERSON_ID));
     assertThat(querySql, containsString("where pm.personId = " + PERSON_ID));
     assertThat(querySql, containsString("where cm2.personId = " + PERSON_ID));
+    assertThat(querySql, containsString("where pl.traineeId = " + PERSON_ID));
     assertThat(querySql, not(containsString("ORDERBYCLAUSE")));
     assertThat(querySql, not(containsString("LIMITCLAUSE")));
     assertThat(result, notNullValue());
