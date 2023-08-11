@@ -420,7 +420,7 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeMembershipStartDate(start)
           .programmeMembershipEndDate(end)
           .curriculumEndDate(curriculumEnd)
-          .placementGrade(PLACEMENT_GRADE_FIELD)
+          .placementGrade(rs.getString(PLACEMENT_GRADE_FIELD))
           .dataSource("TCS")
           .build();
     }
