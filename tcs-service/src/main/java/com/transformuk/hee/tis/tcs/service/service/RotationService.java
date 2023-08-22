@@ -46,4 +46,6 @@ public interface RotationService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  List<RotationDTO> findRotationsByNameAndProgrammeId(String name, Long programmeId);
 }

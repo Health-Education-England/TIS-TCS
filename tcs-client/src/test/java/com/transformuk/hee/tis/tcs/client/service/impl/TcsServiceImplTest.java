@@ -16,6 +16,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import java.time.LocalDate;
@@ -37,10 +38,13 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.cloud.contract.wiremock.WireMockSpring;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.core.parameters.P;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -332,5 +336,26 @@ public class TcsServiceImplTest {
     exceptionRule.expectMessage("404 Not Found");
     // RestTemplate hasn't been set up to find any specialty, so should throw exception
     testObj.getSpecialtyById(20L);
+  }
+
+  @Test
+  public void patchProgrammeMembershipShouldReturnSavedDto() {
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
+
+    String url = "http://localhost:9999/tcs/api/bulk-programme-membership";
+
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<ProgrammeMembershipDTO> httpEntity = new HttpEntity<>(dto, headers);
+    ResponseEntity responseEntity = new ResponseEntity(dto, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,
+        new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
+        });
+
+    ProgrammeMembershipDTO result = testObj.patchProgrammeMembership(dto);
+
+    assertThat("Unexpected result", result, is(dto));
+    verify(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,
+        new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
+        });
   }
 }

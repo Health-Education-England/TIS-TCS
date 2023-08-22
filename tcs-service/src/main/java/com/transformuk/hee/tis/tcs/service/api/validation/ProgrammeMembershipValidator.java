@@ -1,7 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
+import com.transformuk.hee.tis.tcs.api.enumeration.TrainingPathway;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -9,10 +13,14 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.RotationService;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,20 +36,25 @@ public class ProgrammeMembershipValidator {
 
   private static final String PROGRAMME_MEMBERSHIP_DTO_NAME = "ProgrammeMembershipDTO";
 
+  protected static final String TRAINING_PATHWAY_NOT_FOUND = "Training pathway with code %s does not exist.";
+
   private PersonRepository personRepository;
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
   private RotationService rotationService;
+  private final ReferenceService referenceService;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
       ProgrammeRepository programmeRepository,
       CurriculumRepository curriculumRepository,
-      RotationService rotationService) {
+      RotationService rotationService,
+      ReferenceService referenceService) {
     this.personRepository = personRepository;
     this.programmeRepository = programmeRepository;
     this.curriculumRepository = curriculumRepository;
     this.rotationService = rotationService;
+    this.referenceService = referenceService;
   }
 
   /**
@@ -68,6 +81,124 @@ public class ProgrammeMembershipValidator {
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
+  }
+
+  public void validateForBulk(ProgrammeMembershipDTO programmeMembershipDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+
+    fieldErrors.addAll(checkRotationExists(programmeMembershipDto));
+    fieldErrors.addAll(checkProgrammeDates(programmeMembershipDto));
+    fieldErrors.addAll(checkLeavingReason(programmeMembershipDto));
+    fieldErrors.addAll(checkTrainingPathway(programmeMembershipDto));
+    fieldErrors.addAll(checkProgrammeDatesWithCurriculumDates(programmeMembershipDto));
+
+    Optional<String> optionalProgrammeMembershipTypeErr =
+        programmeMembershipDto.getMessageList().stream().filter(s ->
+            s.matches("Programme membership type with code \\w+ does not exist.")).findFirst();
+    if (!optionalProgrammeMembershipTypeErr.isPresent()) {
+      fieldErrors.addAll(checkProgrammeMembershipType(programmeMembershipDto));
+    }
+
+    fieldErrors.forEach(err -> {
+      programmeMembershipDto.addMessage(err.getDefaultMessage());
+    });
+  }
+
+  private List<FieldError> checkRotationExists(ProgrammeMembershipDTO programmeMembershipDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+
+    if (programmeMembershipDto.getRotation() == null
+        || StringUtils.isEmpty(programmeMembershipDto.getRotation().getName())) {
+      return fieldErrors;
+    }
+
+    String rotationName = programmeMembershipDto.getRotation().getName();
+    Long programmeId = programmeMembershipDto.getProgrammeId();
+    List<RotationDTO> rotationDtos = rotationService.findRotationsByNameAndProgrammeId(
+        rotationName, programmeId);
+    if (rotationDtos.isEmpty()) {
+      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
+          String.format("Rotation with name (%s) does not exist for programmeId (%s).",
+              rotationName, programmeId)));
+    } else if (rotationDtos.size() > 1) {
+      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
+          String.format("Multiple rotations with name (%s) found for programmeId (%s).",
+              rotationName, programmeId)));
+    } else if (programmeMembershipDto.getRotation().getId() == null) {
+      programmeMembershipDto.setRotation(rotationDtos.get(0));
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkProgrammeDatesWithCurriculumDates(ProgrammeMembershipDTO programmeMembershipDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+
+    LocalDate pmStartDate = programmeMembershipDto.getProgrammeStartDate();
+    LocalDate pmEndDate = programmeMembershipDto.getProgrammeEndDate();
+
+    List<CurriculumMembershipDTO> curriculumMembershipDtos = programmeMembershipDto.getCurriculumMemberships();
+    curriculumMembershipDtos.forEach(cm -> {
+      LocalDate cmStartDate = cm.getCurriculumStartDate();
+      LocalDate cmEndDate = cm.getCurriculumEndDate();
+      if (cmStartDate.isBefore(pmStartDate)) {
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeStartDate",
+            "Programme start date must be before any curriculum start date."));
+      }
+      if (cmEndDate.isAfter(pmEndDate)) {
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeStartDate",
+            "Programme end date must be after any curriculum end date."));
+      }
+    });
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkProgrammeMembershipType(ProgrammeMembershipDTO programmeMembershipDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    ProgrammeMembershipType programmeMembershipType = programmeMembershipDto.getProgrammeMembershipType();
+    if (programmeMembershipType != null) {
+      Map<String, Boolean> programmeMembershipsExistMap = referenceService.programmeMembershipTypesExist(
+          Collections.singletonList(programmeMembershipType.name()), true);
+      notExistsStringFieldErrors(fieldErrors, programmeMembershipsExistMap,
+          "programmeMembershipType", "Programme membership type");
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkLeavingReason(ProgrammeMembershipDTO programmeMembershipDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    String leavingReason = programmeMembershipDto.getLeavingReason();
+    if (StringUtils.isNotEmpty(leavingReason)) {
+      Map<String, Boolean> leavingReasonsExistMap = referenceService.leavingReasonsExist(
+          Collections.singletonList(leavingReason), true);
+      notExistsStringFieldErrors(fieldErrors, leavingReasonsExistMap, "leavingReason",
+          "Leaving reason");
+    }
+    return fieldErrors;
+  }
+
+  private void notExistsStringFieldErrors(final List<FieldError> fieldErrors,
+      final Map<String, Boolean> codesExistsMap,
+      final String field, final String entityName) {
+    codesExistsMap.forEach((k, v) -> {
+      if (!v) {
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
+            String.format("%s with code %s does not exist.", entityName, k)));
+      }
+    });
+  }
+
+  private List<FieldError> checkTrainingPathway(ProgrammeMembershipDTO programmeMembershipDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    String trainingPathway = programmeMembershipDto.getTrainingPathway();
+    if (StringUtils.isNotEmpty(trainingPathway)) {
+      TrainingPathway trainingPathwayEnum = TrainingPathway.fromString(
+          programmeMembershipDto.getTrainingPathway());
+      if (trainingPathwayEnum == null) {
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "trainingPathway",
+            String.format("Training pathway with code %s does not exist.", trainingPathway)));
+      }
+    }
+    return fieldErrors;
   }
 
   /**

@@ -133,6 +133,24 @@ public class TcsServiceImplMockTest {
   }
 
   @Test
+  public void patchProgrammeMembershipShouldReturnResponseBody() {
+    // Given.
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
+
+    ProgrammeMembershipDTO patchedDto = new ProgrammeMembershipDTO();
+    ResponseEntity<ProgrammeMembershipDTO> response = ResponseEntity.ok(patchedDto);
+
+    when(restTemplateMock.exchange(anyString(), same(HttpMethod.PATCH), any(HttpEntity.class), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    ProgrammeMembershipDTO returnedDto = testObj.patchProgrammeMembership(dto);
+
+    // Then.
+    assertThat("Unexpected patched DTO.", returnedDto, is(patchedDto));
+  }
+
+  @Test
   public void createTrainerApprovalShouldReturnResponseBody() {
     // Given.
     TrainerApprovalDTO dto = new TrainerApprovalDTO();

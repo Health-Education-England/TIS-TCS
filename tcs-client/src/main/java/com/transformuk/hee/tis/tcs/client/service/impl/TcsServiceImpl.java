@@ -104,6 +104,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_FUNDINGS = "/api/post-fundings/";
   private static final String API_ABSENCE = "/api/absence/";
   private static final String API_ABSENCE_BY_ABS_ID = API_ABSENCE + "absenceId/";
+  private static final String API_PROGRAMME_MEMBERSHIP_BULK = "/api/bulk-programme-membership";
   private static final Map<Class, ParameterizedTypeReference> classToParamTypeRefMap;
   private static String curriculumJsonQuerystringURLEncoded, programmeJsonQuerystringURLEncoded,
       specialtyJsonQuerystringURLEncoded, specialtyJsonQuerystringAndSpecialtyTypeURLEncoded,
@@ -435,6 +436,15 @@ public class TcsServiceImpl extends AbstractClientService {
 
     return tcsRestTemplate.exchange(serviceUrl + API_PEOPLE_BULK, HttpMethod.PATCH, httpEntity,
         new ParameterizedTypeReference<List<PersonDTO>>() {
+        }).getBody();
+  }
+
+  public ProgrammeMembershipDTO patchProgrammeMembership(ProgrammeMembershipDTO programmeMembershipDto) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<ProgrammeMembershipDTO> httpEntity = new HttpEntity<>(programmeMembershipDto, headers);
+
+    return tcsRestTemplate.exchange(serviceUrl + API_PROGRAMME_MEMBERSHIP_BULK, HttpMethod.PATCH, httpEntity,
+        new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
         }).getBody();
   }
 

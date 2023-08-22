@@ -171,4 +171,9 @@ public class RotationServiceImpl implements RotationService {
       rd.setProgrammeNumber(p.getProgrammeNumber());
     }
   }
+
+  public List<RotationDTO> findRotationsByNameAndProgrammeId(String name, Long programmeId) {
+    List<Rotation> rotations = rotationRepository.findByNameAndProgrammeId(name, programmeId);
+    return rotationMapper.toDto(rotations);
+  }
 }

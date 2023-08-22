@@ -226,6 +226,23 @@ public class ProgrammeMembershipResource {
         .body(results);
   }
 
+  @PatchMapping("/bulk-programme-membership")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<ProgrammeMembershipDTO> patchProgrammeMembership(
+      @RequestBody ProgrammeMembershipDTO programmeMembershipDto) {
+    log.debug("REST request to update programme membership via bulk upload : {}",
+        programmeMembershipDto);
+
+    try {
+      ProgrammeMembershipDTO result = programmeMembershipService.patch(programmeMembershipDto);
+      return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
+          programmeMembershipDto.getUuid().toString())).body(result);
+    } catch (Exception e) {
+      log.error("An exception was thrown when updating when updating programmeMembership ({}) "
+              + "by bulk upload", programmeMembershipDto.getUuid(), e);
+      throw e;
+    }
+  }
 
   /**
    * GET /trainee/:traineeId/programme/:programmeId/programme-memberships : get all the

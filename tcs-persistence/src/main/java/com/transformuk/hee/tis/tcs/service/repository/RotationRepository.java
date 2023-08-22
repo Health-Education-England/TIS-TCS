@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,4 +18,5 @@ public interface RotationRepository extends JpaRepository<Rotation, Long>,
 
   Optional<Rotation> findByIdAndProgrammeId(Long id, Long programmeId);
 
+  List<Rotation> findByNameAndProgrammeId(String name, Long programmeId);
 }

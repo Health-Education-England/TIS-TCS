@@ -95,4 +95,5 @@ public interface ProgrammeMembershipService {
    */
   List<ProgrammeMembershipDTO> findProgrammeMembershipsByProgramme(Long programmeId);
 
+  ProgrammeMembershipDTO patch(ProgrammeMembershipDTO programmeMembershipDto);
 }
