@@ -1326,7 +1326,7 @@ class ProgrammeMembershipResourceIntTest {
     programmeMembershipDto.setTrainingPathway("CCT");
 
     // when
-    restProgrammeMembershipMockMvc.perform(patch("/api//bulk-programme-membership")
+    restProgrammeMembershipMockMvc.perform(patch("/api/bulk-programme-membership")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDto)))
         .andExpect(status().isOk());
