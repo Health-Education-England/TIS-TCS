@@ -1,5 +1,9 @@
 package com.transformuk.hee.tis.tcs.api.enumeration;
 
+/**
+ * TrainingPathway is not in Reference service.
+ * And this enumeration is added for validation purpose.
+ */
 public enum TrainingPathway {
   CCT("CCT"),
   CESR("CESR"),

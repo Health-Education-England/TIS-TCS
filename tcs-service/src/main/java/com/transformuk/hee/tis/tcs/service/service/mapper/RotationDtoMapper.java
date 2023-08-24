@@ -7,6 +7,9 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+/**
+ * Mapper for copying fields from a rotation source dto to the target dto.
+ */
 @Mapper(componentModel = "spring")
 public interface RotationDtoMapper {
 

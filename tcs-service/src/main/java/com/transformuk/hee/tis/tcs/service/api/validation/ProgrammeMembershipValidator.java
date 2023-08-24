@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class ProgrammeMembershipValidator {
 
-  private static final String PROGRAMME_MEMBERSHIP_DTO_NAME = "ProgrammeMembershipDTO";
   protected static final String ROTATION_NOT_EXiSTS =
       "Rotation with name (%s) does not exist for programmeId (%s).";
   protected static final String MULTIPLE_ROTATIONS_FOUND =
@@ -48,12 +46,12 @@ public class ProgrammeMembershipValidator {
   protected static final String STRING_CODE_NOT_EXISTS = "%s with code %s does not exist.";
   protected static final String TRAINING_PATHWAY_NOT_EXISTS =
       "Training pathway with code %s does not exist.";
-
-  private PersonRepository personRepository;
-  private ProgrammeRepository programmeRepository;
-  private CurriculumRepository curriculumRepository;
-  private RotationService rotationService;
-  private ReferenceService referenceService;
+  private static final String PROGRAMME_MEMBERSHIP_DTO_NAME = "ProgrammeMembershipDTO";
+  private final PersonRepository personRepository;
+  private final ProgrammeRepository programmeRepository;
+  private final CurriculumRepository curriculumRepository;
+  private final RotationService rotationService;
+  private final ReferenceService referenceService;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
@@ -94,6 +92,11 @@ public class ProgrammeMembershipValidator {
     }
   }
 
+  /**
+   * Custom validation on the programmeMembershipDTO from bulk upload.
+   *
+   * @param programmeMembershipDto the Dto to check
+   */
   public void validateForBulk(ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
@@ -109,6 +112,12 @@ public class ProgrammeMembershipValidator {
     });
   }
 
+  /**
+   * Check if the role name exists for the programme id.
+   *
+   * @param programmeMembershipDto the Dto to check
+   * @return a list of field errors
+   */
   private List<FieldError> checkRotationExists(ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
@@ -133,13 +142,23 @@ public class ProgrammeMembershipValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkProgrammeDatesWithCurriculumDates(ProgrammeMembershipDTO programmeMembershipDto) {
+  /**
+   * Check if the programme start date is earlier than every curriculum start date.
+   * And the programme end date is later than every curriculum end date.
+   *
+   * @param programmeMembershipDto the dto to check
+   * @return a list of field errors
+   */
+  private List<FieldError> checkProgrammeDatesWithCurriculumDates(
+      ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
     LocalDate pmStartDate = programmeMembershipDto.getProgrammeStartDate();
     LocalDate pmEndDate = programmeMembershipDto.getProgrammeEndDate();
 
-    List<CurriculumMembershipDTO> curriculumMembershipDtos = programmeMembershipDto.getCurriculumMemberships();
+    List<CurriculumMembershipDTO> curriculumMembershipDtos =
+        programmeMembershipDto.getCurriculumMemberships();
+
     if (curriculumMembershipDtos != null) {
       curriculumMembershipDtos.forEach(cm -> {
         LocalDate cmStartDate = cm.getCurriculumStartDate();
@@ -157,18 +176,35 @@ public class ProgrammeMembershipValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkProgrammeMembershipType(ProgrammeMembershipDTO programmeMembershipDto) {
+  /**
+   * Check if programme membership type exists and is current in Reference service.
+   * The enumeration helps do the first check, and this step would be a further check on Reference.
+   *
+   * @param programmeMembershipDto the dto to check
+   * @return a list of field errors
+   */
+  private List<FieldError> checkProgrammeMembershipType(
+      ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    ProgrammeMembershipType programmeMembershipType = programmeMembershipDto.getProgrammeMembershipType();
+    ProgrammeMembershipType programmeMembershipType =
+        programmeMembershipDto.getProgrammeMembershipType();
+
     if (programmeMembershipType != null) {
-      Map<String, Boolean> programmeMembershipsExistMap = referenceService.programmeMembershipTypesExist(
-          Collections.singletonList(programmeMembershipType.name()), true);
+      Map<String, Boolean> programmeMembershipsExistMap =
+          referenceService.programmeMembershipTypesExist(
+              Collections.singletonList(programmeMembershipType.name()), true);
       notExistsStringFieldErrors(fieldErrors, programmeMembershipsExistMap,
           "programmeMembershipType", "Programme membership type");
     }
     return fieldErrors;
   }
 
+  /**
+   * Check if leaving reason exists and is current in Reference service.
+   *
+   * @param programmeMembershipDto the dto to check
+   * @return a list of field errors
+   */
   private List<FieldError> checkLeavingReason(ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String leavingReason = programmeMembershipDto.getLeavingReason();
@@ -192,6 +228,12 @@ public class ProgrammeMembershipValidator {
     });
   }
 
+  /**
+   * Check if training pathway is allowed in the enumeration.
+   *
+   * @param programmeMembershipDto the dto to check
+   * @return a list of field errors
+   */
   private List<FieldError> checkTrainingPathway(ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String trainingPathway = programmeMembershipDto.getTrainingPathway();

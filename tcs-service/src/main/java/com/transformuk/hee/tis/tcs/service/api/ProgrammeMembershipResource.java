@@ -226,6 +226,12 @@ public class ProgrammeMembershipResource {
         .body(results);
   }
 
+  /**
+   * PATCH /bulk-programme-membership : patch a programme membership via bulk upload
+   *
+   * @param programmeMembershipDto the dto to patch
+   * @return the ResponseEntity with status 200 (OK) and with body the patched dto
+   */
   @PatchMapping("/bulk-programme-membership")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ProgrammeMembershipDTO> patchProgrammeMembership(

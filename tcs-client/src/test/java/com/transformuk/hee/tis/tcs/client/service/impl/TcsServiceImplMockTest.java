@@ -140,8 +140,8 @@ public class TcsServiceImplMockTest {
     ProgrammeMembershipDTO patchedDto = new ProgrammeMembershipDTO();
     ResponseEntity<ProgrammeMembershipDTO> response = ResponseEntity.ok(patchedDto);
 
-    when(restTemplateMock.exchange(anyString(), same(HttpMethod.PATCH), any(HttpEntity.class), any(
-        ParameterizedTypeReference.class))).thenReturn(response);
+    when(restTemplateMock.exchange(anyString(), same(HttpMethod.PATCH), any(HttpEntity.class),
+        any(ParameterizedTypeReference.class))).thenReturn(response);
 
     // When.
     ProgrammeMembershipDTO returnedDto = testObj.patchProgrammeMembership(dto);

@@ -411,7 +411,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       programmeMembershipDto.addMessage("Programme membership id not found.");
       return programmeMembershipDto;
     }
-    programmeMembershipDtoMapper.copyIfNotNull(programmeMembershipDto, programmeMembershipDtoFromDb);
+    programmeMembershipDtoMapper.copyIfNotNull(programmeMembershipDto,
+        programmeMembershipDtoFromDb);
     programmeMembershipValidator.validateForBulk(programmeMembershipDtoFromDb);
 
     ProgrammeMembershipDTO returnDto;

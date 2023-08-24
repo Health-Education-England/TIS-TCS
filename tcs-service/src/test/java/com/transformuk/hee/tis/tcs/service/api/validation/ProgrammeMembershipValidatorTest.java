@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.assertj.core.util.Lists;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,13 +43,12 @@ class ProgrammeMembershipValidatorTest {
   private static final Long PROGRAMME_ID = 1L;
   private static final LocalDate START_DATE = LocalDate.of(2023, Month.AUGUST, 23);
   private static final LocalDate END_DATE = LocalDate.of(2024, Month.AUGUST, 23);
-
-  @InjectMocks
-  private ProgrammeMembershipValidator validator;
   @Mock
   RotationService rotationServiceMock;
   @Mock
   ReferenceService referenceServiceMock;
+  @InjectMocks
+  private ProgrammeMembershipValidator validator;
 
   @Test
   void shouldAddNoErrorsWhenAllValidationPasses() {
@@ -185,7 +183,8 @@ class ProgrammeMembershipValidatorTest {
         "Programme membership type", INVALID_PROGRAMME_MEMBERSHIP_TYPE));
 
     validator.validateForBulk(pmDto);
-    verify(referenceServiceMock, never()).programmeMembershipTypesExist(any(List.class), any(Boolean.class));
+    verify(referenceServiceMock, never()).programmeMembershipTypesExist(any(List.class),
+        any(Boolean.class));
     assertEquals(1, pmDto.getMessageList().size());
   }
 }

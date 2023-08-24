@@ -7,6 +7,9 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+/**
+ * Mapper for copying fields from a programme membership source dto to the target dto.
+ */
 @Mapper(componentModel = "spring", uses = {RotationDtoMapper.class})
 public interface ProgrammeMembershipDtoMapper {
 
