@@ -408,7 +408,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   public ProgrammeMembershipDTO patch(ProgrammeMembershipDTO programmeMembershipDto) {
     ProgrammeMembershipDTO programmeMembershipDtoFromDb = findOne(programmeMembershipDto.getUuid());
     if (programmeMembershipDtoFromDb == null) {
-      programmeMembershipDto.addMessage("programme membership id not found.");
+      programmeMembershipDto.addMessage("Programme membership id not found.");
       return programmeMembershipDto;
     }
     programmeMembershipDtoMapper.copyIfNotNull(programmeMembershipDto, programmeMembershipDtoFromDb);
@@ -416,7 +416,6 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
     ProgrammeMembershipDTO returnDto;
     if (programmeMembershipDtoFromDb.getMessageList().isEmpty()) {
-
       returnDto = save(programmeMembershipDtoFromDb);
     } else {
       programmeMembershipDto.setMessageList(programmeMembershipDtoFromDb.getMessageList());

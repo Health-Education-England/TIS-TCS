@@ -35,14 +35,25 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class ProgrammeMembershipValidator {
 
   private static final String PROGRAMME_MEMBERSHIP_DTO_NAME = "ProgrammeMembershipDTO";
-
-  protected static final String TRAINING_PATHWAY_NOT_FOUND = "Training pathway with code %s does not exist.";
+  protected static final String ROTATION_NOT_EXiSTS =
+      "Rotation with name (%s) does not exist for programmeId (%s).";
+  protected static final String MULTIPLE_ROTATIONS_FOUND =
+      "Multiple rotations with name (%s) found for programmeId (%s).";
+  protected static final String PM_START_DATE_LATER_THAN_END_DATE =
+      "Programme Start Date must be before the End Date";
+  protected static final String PM_START_DATE_LATER_THAN_CM_START_DATE =
+      "Programme start date must be before any curriculum start date.";
+  protected static final String PM_END_DATE_EARLIER_THAN_CM_END_DATE =
+      "Programme end date must be after any curriculum end date.";
+  protected static final String STRING_CODE_NOT_EXISTS = "%s with code %s does not exist.";
+  protected static final String TRAINING_PATHWAY_NOT_EXISTS =
+      "Training pathway with code %s does not exist.";
 
   private PersonRepository personRepository;
   private ProgrammeRepository programmeRepository;
   private CurriculumRepository curriculumRepository;
   private RotationService rotationService;
-  private final ReferenceService referenceService;
+  private ReferenceService referenceService;
 
   @Autowired
   public ProgrammeMembershipValidator(PersonRepository personRepository,
@@ -91,13 +102,7 @@ public class ProgrammeMembershipValidator {
     fieldErrors.addAll(checkLeavingReason(programmeMembershipDto));
     fieldErrors.addAll(checkTrainingPathway(programmeMembershipDto));
     fieldErrors.addAll(checkProgrammeDatesWithCurriculumDates(programmeMembershipDto));
-
-    Optional<String> optionalProgrammeMembershipTypeErr =
-        programmeMembershipDto.getMessageList().stream().filter(s ->
-            s.matches("Programme membership type with code \\w+ does not exist.")).findFirst();
-    if (!optionalProgrammeMembershipTypeErr.isPresent()) {
-      fieldErrors.addAll(checkProgrammeMembershipType(programmeMembershipDto));
-    }
+    fieldErrors.addAll(checkProgrammeMembershipType(programmeMembershipDto));
 
     fieldErrors.forEach(err -> {
       programmeMembershipDto.addMessage(err.getDefaultMessage());
@@ -114,16 +119,14 @@ public class ProgrammeMembershipValidator {
 
     String rotationName = programmeMembershipDto.getRotation().getName();
     Long programmeId = programmeMembershipDto.getProgrammeId();
-    List<RotationDTO> rotationDtos = rotationService.findRotationsByNameAndProgrammeId(
+    List<RotationDTO> rotationDtos = rotationService.getCurrentRotationsByNameAndProgrammeId(
         rotationName, programmeId);
     if (rotationDtos.isEmpty()) {
       fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
-          String.format("Rotation with name (%s) does not exist for programmeId (%s).",
-              rotationName, programmeId)));
+          String.format(ROTATION_NOT_EXiSTS, rotationName, programmeId)));
     } else if (rotationDtos.size() > 1) {
       fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
-          String.format("Multiple rotations with name (%s) found for programmeId (%s).",
-              rotationName, programmeId)));
+          String.format(MULTIPLE_ROTATIONS_FOUND, rotationName, programmeId)));
     } else if (programmeMembershipDto.getRotation().getId() == null) {
       programmeMembershipDto.setRotation(rotationDtos.get(0));
     }
@@ -137,18 +140,20 @@ public class ProgrammeMembershipValidator {
     LocalDate pmEndDate = programmeMembershipDto.getProgrammeEndDate();
 
     List<CurriculumMembershipDTO> curriculumMembershipDtos = programmeMembershipDto.getCurriculumMemberships();
-    curriculumMembershipDtos.forEach(cm -> {
-      LocalDate cmStartDate = cm.getCurriculumStartDate();
-      LocalDate cmEndDate = cm.getCurriculumEndDate();
-      if (cmStartDate.isBefore(pmStartDate)) {
-        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeStartDate",
-            "Programme start date must be before any curriculum start date."));
-      }
-      if (cmEndDate.isAfter(pmEndDate)) {
-        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeStartDate",
-            "Programme end date must be after any curriculum end date."));
-      }
-    });
+    if (curriculumMembershipDtos != null) {
+      curriculumMembershipDtos.forEach(cm -> {
+        LocalDate cmStartDate = cm.getCurriculumStartDate();
+        LocalDate cmEndDate = cm.getCurriculumEndDate();
+        if (cmStartDate.isBefore(pmStartDate)) {
+          fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeStartDate",
+              PM_START_DATE_LATER_THAN_CM_START_DATE));
+        }
+        if (cmEndDate.isAfter(pmEndDate)) {
+          fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "programmeStartDate",
+              PM_END_DATE_EARLIER_THAN_CM_END_DATE));
+        }
+      });
+    }
     return fieldErrors;
   }
 
@@ -182,7 +187,7 @@ public class ProgrammeMembershipValidator {
     codesExistsMap.forEach((k, v) -> {
       if (!v) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
-            String.format("%s with code %s does not exist.", entityName, k)));
+            String.format(STRING_CODE_NOT_EXISTS, entityName, k)));
       }
     });
   }
@@ -195,7 +200,7 @@ public class ProgrammeMembershipValidator {
           programmeMembershipDto.getTrainingPathway());
       if (trainingPathwayEnum == null) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "trainingPathway",
-            String.format("Training pathway with code %s does not exist.", trainingPathway)));
+            String.format(TRAINING_PATHWAY_NOT_EXISTS, trainingPathway)));
       }
     }
     return fieldErrors;
@@ -253,9 +258,9 @@ public class ProgrammeMembershipValidator {
     LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
     LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
 
-    if (startDate.isAfter(endDate)) {
+    if (startDate != null && startDate.isAfter(endDate)) {
       fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
-          "Programme Start Date must be before the End Date"));
+          PM_START_DATE_LATER_THAN_END_DATE));
     }
     return fieldErrors;
   }

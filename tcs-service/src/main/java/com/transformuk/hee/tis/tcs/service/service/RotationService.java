@@ -47,5 +47,5 @@ public interface RotationService {
    */
   void delete(Long id);
 
-  List<RotationDTO> findRotationsByNameAndProgrammeId(String name, Long programmeId);
+  List<RotationDTO> getCurrentRotationsByNameAndProgrammeId(String name, Long programmeId);
 }

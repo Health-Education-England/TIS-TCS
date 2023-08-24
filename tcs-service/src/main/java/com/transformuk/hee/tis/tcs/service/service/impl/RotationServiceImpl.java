@@ -172,8 +172,9 @@ public class RotationServiceImpl implements RotationService {
     }
   }
 
-  public List<RotationDTO> findRotationsByNameAndProgrammeId(String name, Long programmeId) {
-    List<Rotation> rotations = rotationRepository.findByNameAndProgrammeId(name, programmeId);
+  public List<RotationDTO> getCurrentRotationsByNameAndProgrammeId(String name, Long programmeId) {
+    List<Rotation> rotations = rotationRepository.findCurrentByNameAndProgrammeId(name,
+        programmeId);
     return rotationMapper.toDto(rotations);
   }
 }
