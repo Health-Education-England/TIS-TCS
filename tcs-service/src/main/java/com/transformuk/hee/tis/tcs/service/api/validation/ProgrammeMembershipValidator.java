@@ -220,7 +220,7 @@ public class ProgrammeMembershipValidator {
       final Map<String, Boolean> codesExistsMap,
       final String field, final String entityName) {
     codesExistsMap.forEach((k, v) -> {
-      if (v != null) {
+      if (v == false) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
             String.format(STRING_CODE_NOT_EXISTS, entityName, k)));
       }
