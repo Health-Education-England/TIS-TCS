@@ -299,7 +299,7 @@ public class ProgrammeMembershipValidator {
     LocalDate startDate = programmeMembershipDto.getProgrammeStartDate();
     LocalDate endDate = programmeMembershipDto.getProgrammeEndDate();
 
-    if (startDate != null && startDate.isAfter(endDate)) {
+    if (startDate.isAfter(endDate)) {
       fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "Programme Start Date",
           PM_START_DATE_LATER_THAN_END_DATE));
     }

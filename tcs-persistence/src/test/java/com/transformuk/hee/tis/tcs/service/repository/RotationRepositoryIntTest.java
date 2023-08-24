@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class)
-public class RotationRepositoryTest {
+public class RotationRepositoryIntTest {
 
   private static final String ROTATION_NAME = "rotationName";
   private static final Long PROGRAMME_ID = 1L;

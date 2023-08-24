@@ -159,6 +159,8 @@ class ProgrammeMembershipValidatorTest {
     ProgrammeMembershipDTO pmDto = new ProgrammeMembershipDTO();
     pmDto.setId(PROGRAMME_MEMBERSHIP_ID);
     pmDto.setProgrammeId(PROGRAMME_ID);
+    pmDto.setProgrammeStartDate(START_DATE);
+    pmDto.setProgrammeEndDate(END_DATE);
     RotationDTO rotationDto = new RotationDTO();
     rotationDto.setName(DEFAULT_ROTATION_NAME);
     pmDto.setRotation(rotationDto);
@@ -179,6 +181,8 @@ class ProgrammeMembershipValidatorTest {
   void shouldNotCheckAgainWhenPmTypeNotExistErrorAlreadyExists() {
     ProgrammeMembershipDTO pmDto = new ProgrammeMembershipDTO();
     pmDto.setId(PROGRAMME_MEMBERSHIP_ID);
+    pmDto.setProgrammeStartDate(START_DATE);
+    pmDto.setProgrammeEndDate(END_DATE);
     pmDto.addMessage(String.format(ProgrammeMembershipValidator.STRING_CODE_NOT_EXISTS,
         "Programme membership type", INVALID_PROGRAMME_MEMBERSHIP_TYPE));
 

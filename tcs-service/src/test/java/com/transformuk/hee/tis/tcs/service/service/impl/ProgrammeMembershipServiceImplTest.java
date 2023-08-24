@@ -4,9 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,7 +59,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
@@ -631,14 +628,12 @@ public class ProgrammeMembershipServiceImplTest {
 
     when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
         .thenReturn(Optional.of(programmeMembership1));
-    lenient().doNothing().when(programmeMembershipValidatorMock).validateForBulk(argThat(
-        new ArgumentMatcher<ProgrammeMembershipDTO>() {
-          @Override
-          public boolean matches(ProgrammeMembershipDTO programmeMembershipDto) {
-            programmeMembershipDto.addMessage("default error");
-            return false;
-          }
-        }));
+
+    doAnswer(i -> {
+      ProgrammeMembershipDTO arg = (ProgrammeMembershipDTO)i.getArguments()[0];
+      arg.addMessage("default error");
+      return null;
+    }).when(programmeMembershipValidatorMock).validateForBulk(any(ProgrammeMembershipDTO.class));
 
     ProgrammeMembershipDTO returnDto = testObj.patch(dto);
     Assert.assertEquals(1, returnDto.getMessageList().size());
@@ -651,12 +646,12 @@ public class ProgrammeMembershipServiceImplTest {
 
     when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
         .thenReturn(Optional.of(programmeMembership1));
-    doNothing().when(programmeMembershipValidatorMock).validateForBulk(any());
 
     when(programmeMembershipRepositoryMock.save(any())).thenReturn(programmeMembership1);
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
 
     ProgrammeMembershipDTO returnDto = testObj.patch(dto);
+    verify(programmeMembershipValidatorMock).validateForBulk(any());
     Assert.assertEquals(0, returnDto.getMessageList().size());
   }
 }
