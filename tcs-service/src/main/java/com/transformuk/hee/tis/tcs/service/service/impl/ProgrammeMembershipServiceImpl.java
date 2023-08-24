@@ -405,6 +405,12 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     }
   }
 
+  /**
+   * patch a programme membership.
+   *
+   * @param programmeMembershipDto the dto to patch
+   * @return the patched dto
+   */
   public ProgrammeMembershipDTO patch(ProgrammeMembershipDTO programmeMembershipDto) {
     ProgrammeMembershipDTO programmeMembershipDtoFromDb = findOne(programmeMembershipDto.getUuid());
     if (programmeMembershipDtoFromDb == null) {

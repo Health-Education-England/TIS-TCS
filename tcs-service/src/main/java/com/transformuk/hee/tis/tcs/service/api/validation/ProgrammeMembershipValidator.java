@@ -33,7 +33,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class ProgrammeMembershipValidator {
 
-  protected static final String ROTATION_NOT_EXiSTS =
+  protected static final String ROTATION_NOT_EXISTS =
       "Rotation with name (%s) does not exist for programmeId (%s).";
   protected static final String MULTIPLE_ROTATIONS_FOUND =
       "Multiple rotations with name (%s) found for programmeId (%s).";
@@ -47,6 +47,7 @@ public class ProgrammeMembershipValidator {
   protected static final String TRAINING_PATHWAY_NOT_EXISTS =
       "Training pathway with code %s does not exist.";
   private static final String PROGRAMME_MEMBERSHIP_DTO_NAME = "ProgrammeMembershipDTO";
+  private static final String ROTATION_FIELD_NAME = "rotation";
   private final PersonRepository personRepository;
   private final ProgrammeRepository programmeRepository;
   private final CurriculumRepository curriculumRepository;
@@ -107,9 +108,7 @@ public class ProgrammeMembershipValidator {
     fieldErrors.addAll(checkProgrammeDatesWithCurriculumDates(programmeMembershipDto));
     fieldErrors.addAll(checkProgrammeMembershipType(programmeMembershipDto));
 
-    fieldErrors.forEach(err -> {
-      programmeMembershipDto.addMessage(err.getDefaultMessage());
-    });
+    fieldErrors.forEach(err -> programmeMembershipDto.addMessage(err.getDefaultMessage()));
   }
 
   /**
@@ -131,10 +130,10 @@ public class ProgrammeMembershipValidator {
     List<RotationDTO> rotationDtos = rotationService.getCurrentRotationsByNameAndProgrammeId(
         rotationName, programmeId);
     if (rotationDtos.isEmpty()) {
-      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
-          String.format(ROTATION_NOT_EXiSTS, rotationName, programmeId)));
+      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, ROTATION_FIELD_NAME,
+          String.format(ROTATION_NOT_EXISTS, rotationName, programmeId)));
     } else if (rotationDtos.size() > 1) {
-      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
+      fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, ROTATION_FIELD_NAME,
           String.format(MULTIPLE_ROTATIONS_FOUND, rotationName, programmeId)));
     } else if (programmeMembershipDto.getRotation().getId() == null) {
       programmeMembershipDto.setRotation(rotationDtos.get(0));
@@ -221,7 +220,7 @@ public class ProgrammeMembershipValidator {
       final Map<String, Boolean> codesExistsMap,
       final String field, final String entityName) {
     codesExistsMap.forEach((k, v) -> {
-      if (!v) {
+      if (v != null) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, field,
             String.format(STRING_CODE_NOT_EXISTS, entityName, k)));
       }
@@ -364,7 +363,7 @@ public class ProgrammeMembershipValidator {
         && programmeMembershipDTO.getRotation().getId() != null) {
       if (!rotationService.rotationExists(programmeMembershipDTO.getRotation().getId(),
           programmeMembershipDTO.getProgrammeId())) {
-        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "rotation",
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, ROTATION_FIELD_NAME,
             String.format("Rotation with name (%1$s) does not exist for programmeId (%2$s)",
                 programmeMembershipDTO.getRotation(), programmeMembershipDTO.getProgrammeId())));
       }

@@ -227,7 +227,7 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * PATCH /bulk-programme-membership : patch a programme membership via bulk upload
+   * PATCH /bulk-programme-membership : patch a programme membership via bulk upload.
    *
    * @param programmeMembershipDto the dto to patch
    * @return the ResponseEntity with status 200 (OK) and with body the patched dto
@@ -236,18 +236,12 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ProgrammeMembershipDTO> patchProgrammeMembership(
       @RequestBody ProgrammeMembershipDTO programmeMembershipDto) {
-    log.debug("REST request to update programme membership via bulk upload : {}",
+    log.debug("REST request to patch programme membership via bulk upload : {}",
         programmeMembershipDto);
 
-    try {
-      ProgrammeMembershipDTO result = programmeMembershipService.patch(programmeMembershipDto);
-      return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
-          programmeMembershipDto.getUuid().toString())).body(result);
-    } catch (Exception e) {
-      log.error("An exception was thrown when updating when updating programmeMembership ({}) "
-              + "by bulk upload", programmeMembershipDto.getUuid(), e);
-      throw e;
-    }
+    ProgrammeMembershipDTO result = programmeMembershipService.patch(programmeMembershipDto);
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
+        programmeMembershipDto.getUuid().toString())).body(result);
   }
 
   /**

@@ -20,6 +20,12 @@ public enum TrainingPathway {
     return text;
   }
 
+  /**
+   * Map a string text to the enumeration.
+   *
+   * @param text the string text to map
+   * @return the enum value, if not found, return null
+   */
   public static TrainingPathway fromString(String text) {
     for (TrainingPathway trainingPathway : TrainingPathway.values()) {
       if (trainingPathway.text.equalsIgnoreCase(text)) {

@@ -439,6 +439,13 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
+  /**
+   * Patch a programme membership dto.
+   * Currently, this method is used in generic upload for programme membership bulk update.
+   *
+   * @param programmeMembershipDto the dto to patch
+   * @return the updated dto or the validated dto with error messages
+   */
   public ProgrammeMembershipDTO patchProgrammeMembership(
       ProgrammeMembershipDTO programmeMembershipDto) {
     HttpHeaders headers = new HttpHeaders();
