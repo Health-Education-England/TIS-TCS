@@ -46,4 +46,13 @@ public interface RotationService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * Get rotations list by rotation name and programmeId.
+   *
+   * @param name        rotation name
+   * @param programmeId the id of programme that the rotation is linked with
+   * @return the patched entity
+   */
+  List<RotationDTO> getCurrentRotationsByNameAndProgrammeId(String name, Long programmeId);
 }

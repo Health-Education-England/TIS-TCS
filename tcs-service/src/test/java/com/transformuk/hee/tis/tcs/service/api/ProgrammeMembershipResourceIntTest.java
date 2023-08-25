@@ -8,11 +8,13 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
@@ -49,6 +51,7 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,6 +59,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -158,6 +162,9 @@ class ProgrammeMembershipResourceIntTest {
   @Autowired
   private RotationService rotationService;
 
+  @MockBean
+  private ReferenceServiceImpl referenceService;
+
   private ProgrammeMembershipValidator programmeMembershipValidator;
 
   @Autowired
@@ -226,7 +233,7 @@ class ProgrammeMembershipResourceIntTest {
   void setup() {
     MockitoAnnotations.initMocks(this);
     programmeMembershipValidator = new ProgrammeMembershipValidator(personRepository,
-        programmeRepository, curriculumRepository, rotationService);
+        programmeRepository, curriculumRepository, rotationService, referenceService);
     ProgrammeMembershipResource programmeMembershipResource = new ProgrammeMembershipResource(
         programmeMembershipService,
         programmeMembershipValidator);
@@ -1292,5 +1299,42 @@ class ProgrammeMembershipResourceIntTest {
   @Transactional
   void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(CurriculumMembership.class);
+  }
+
+  @Test
+  @Transactional
+  void shouldPatchProgrammeMembership() throws Exception {
+    // given
+    programmeMembershipRepository.deleteAll();
+    Person personSaved = personRepository.saveAndFlush(person);
+
+    // Initialise and save a current programmeMembership
+    programmeMembership.setPerson(personSaved);
+    LocalDate today = LocalDate.now();
+    programmeMembership.setProgrammeStartDate(today.minusDays(2));
+    programmeMembership.setProgrammeEndDate(today.plusDays(2));
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumStartDate(today.minusDays(1));
+    curriculumMembership.setCurriculumEndDate(today.plusDays(1));
+    ProgrammeMembership programmeMembershipSaved = programmeMembershipRepository
+        .saveAndFlush(programmeMembership);
+
+    // Prepare the programmeMembershipDto to patch
+    ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipMapper
+        .toDto(programmeMembershipSaved);
+    programmeMembershipDto.setTrainingPathway("CCT");
+
+    // when
+    restProgrammeMembershipMockMvc.perform(patch("/api/bulk-programme-membership")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDto)))
+        .andExpect(status().isOk());
+
+    Optional<ProgrammeMembership> optionalProgrammeMembership =
+        programmeMembershipRepository.findByUuid(programmeMembershipSaved.getUuid());
+    Assert.assertEquals(true, optionalProgrammeMembership.isPresent());
+    ProgrammeMembership updatedProgrammeMembership = optionalProgrammeMembership.get();
+    Assert.assertEquals("CCT", updatedProgrammeMembership.getTrainingPathway());
   }
 }

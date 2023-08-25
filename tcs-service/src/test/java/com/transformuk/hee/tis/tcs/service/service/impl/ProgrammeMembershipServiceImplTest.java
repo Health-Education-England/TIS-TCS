@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,6 +17,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
@@ -35,6 +37,8 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapperImpl;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipDtoMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipDtoMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RotationMapperImpl;
@@ -111,6 +115,8 @@ public class ProgrammeMembershipServiceImplTest {
   private ApplicationEventPublisher applicationEventPublisherMock;
   @Mock
   private PersonRepository personRepositoryMock;
+  @Mock
+  private ProgrammeMembershipValidator programmeMembershipValidatorMock;
 
   @Before
   public void setup() {
@@ -126,12 +132,15 @@ public class ProgrammeMembershipServiceImplTest {
         conditionsOfJoiningMapper,
         conditionsOfJoiningRepositoryMock, trainingNumberMapper, rotationMapper);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
+    ProgrammeMembershipDtoMapper programmeMembershipDtoMapper =
+        new ProgrammeMembershipDtoMapperImpl();
+
     ReflectionTestUtils.setField(curriculumMapper, "specialtyMapper",
         new SpecialtyMapperImpl());
     testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock,
         curriculumMembershipRepositoryMock, programmeMembershipMapper, curriculumMembershipMapper,
         curriculumRepositoryMock, curriculumMapper, applicationEventPublisherMock,
-        personRepositoryMock);
+        personRepositoryMock, programmeMembershipValidatorMock, programmeMembershipDtoMapper);
 
     initialiseData();
   }
@@ -596,5 +605,53 @@ public class ProgrammeMembershipServiceImplTest {
         .delete(any()); //since the last CM is deleted, so the PM is deleted too
     verify(applicationEventPublisherMock, times(2)).publishEvent(any(
         CurriculumMembershipDeletedEvent.class));
+  }
+
+  @Test
+  public void shouldReturnDtoWithErrorWhenIdNotFound() {
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
+    dto.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
+
+    when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.empty());
+
+    ProgrammeMembershipDTO returnDto = testObj.patch(dto);
+    Assert.assertEquals(1, returnDto.getMessageList().size());
+    Assert.assertEquals("Programme membership id not found.",
+        returnDto.getMessageList().get(0));
+  }
+
+  @Test
+  public void shouldReturnDtoWithErrorWhenPatchPmValidationFails() {
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
+    dto.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
+
+    when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(programmeMembership1));
+
+    doAnswer(i -> {
+      ProgrammeMembershipDTO arg = (ProgrammeMembershipDTO)i.getArguments()[0];
+      arg.addMessage("default error");
+      return null;
+    }).when(programmeMembershipValidatorMock).validateForBulk(any(ProgrammeMembershipDTO.class));
+
+    ProgrammeMembershipDTO returnDto = testObj.patch(dto);
+    Assert.assertEquals(1, returnDto.getMessageList().size());
+  }
+
+  @Test
+  public void shouldPatchProgrammeMembership() {
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
+    dto.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
+
+    when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(programmeMembership1));
+
+    when(programmeMembershipRepositoryMock.save(any())).thenReturn(programmeMembership1);
+    when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+
+    ProgrammeMembershipDTO returnDto = testObj.patch(dto);
+    verify(programmeMembershipValidatorMock).validateForBulk(any());
+    Assert.assertEquals(0, returnDto.getMessageList().size());
   }
 }
