@@ -59,6 +59,14 @@ public interface PlacementService {
   PlacementDetailsDTO getDetails(Long id);
 
   /**
+   * Get a list containing at most a single placement summary given the placement ID
+   *
+   * @param id the placement ID
+   * @return the placement summary if found
+   */
+  List<PlacementSummaryDTO> getSummary(Long id);
+
+  /**
    * Updates an existing placement
    *
    * @param placementDetailsDTO the placement details to save

@@ -27,6 +27,7 @@ public class SqlQuerySupplier {
   public static final String SEARCH_POST_VIEW = "queries/searchPostView.sql";
   public static final String TRAINEE_PLACEMENT_SUMMARY = "queries/placementSummaryForTrainee.sql";
   public static final String PLACEMENT_DETAILS = "queries/placementDetails.sql";
+  public static final String PLACEMENT_SUMMARY = "queries/placementSummary.sql";
   public static final String PLACEMENT_SUPERVISOR = "queries/placementSupervisor.sql";
   public static final String POST_PLACEMENT_SUMMARY = "queries/placementSummaryForPost.sql";
   public static final String PERSON_PLACEMENT_EMPLOYINGBODY = "queries/personPlacementEmployingBody.sql";

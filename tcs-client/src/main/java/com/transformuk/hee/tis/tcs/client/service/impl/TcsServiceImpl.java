@@ -72,6 +72,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_TRAINER_APPROVAL = "/api/trainer-approvals";
   private static final String API_PERSON_TRAINER_APPROVALS = "/api/people/%d/trainer-approvals";
   private static final String API_PLACEMENT = "/api/placement/";
+  private static final String API_PLACEMENT_SUMMARY = "/api/placements/%d/summary";
   private static final String API_PLACEMENTS = "/api/placements/";
   private static final String API_POSTS = "/api/posts/";
   private static final String API_PLACEMENT_COMMENT = "/api/placementComment/";
@@ -378,7 +379,8 @@ public class TcsServiceImpl extends AbstractClientService {
   }
 
   public PlacementSummaryDTO getPlacementSummaryById(Long id) {
-    return tcsRestTemplate.exchange(serviceUrl + API_PLACEMENTS + id,
+    String uri = String.format(API_PLACEMENT_SUMMARY, id);
+    return tcsRestTemplate.exchange(serviceUrl + uri,
         HttpMethod.GET, null, new ParameterizedTypeReference<PlacementSummaryDTO>() {
         }).getBody();
   }

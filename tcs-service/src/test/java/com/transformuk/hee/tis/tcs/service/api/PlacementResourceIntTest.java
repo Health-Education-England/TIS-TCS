@@ -37,6 +37,7 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.AsyncReferenceService;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonBasicDetailsRepositoryAccessor;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
@@ -202,6 +203,8 @@ public class PlacementResourceIntTest {
 
   private PlacementDetailsDecorator placementDetailsDecorator;
 
+  private PlacementSummaryDecorator placementSummaryDecorator;
+
   private MockMvc restPlacementMockMvc;
 
   private PlacementDetails placementDetails;
@@ -292,9 +295,10 @@ public class PlacementResourceIntTest {
         personRepository, placementRepository, specialtyRepository);
     placementDetailsDecorator = new PlacementDetailsDecorator(asyncReferenceService,
         asyncPersonBasicDetailsRepository, postRepository);
+    placementSummaryDecorator = new PlacementSummaryDecorator(asyncReferenceService);
     final PlacementResource placementResource = new PlacementResource(placementService,
-        placementValidator, placementDetailsDecorator, placementPlannerServiceImp,
-        permissionService);
+        placementValidator, placementDetailsDecorator, placementSummaryDecorator,
+        placementPlannerServiceImp, permissionService);
     this.restPlacementMockMvc = MockMvcBuilders.standaloneSetup(placementResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

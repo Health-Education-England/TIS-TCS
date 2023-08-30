@@ -3,9 +3,11 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
+import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
@@ -22,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,17 +69,20 @@ public class PlacementResource {
   private final PlacementService placementService;
   private final PlacementValidator placementValidator;
   private final PlacementDetailsDecorator placementDetailsDecorator;
+  private final PlacementSummaryDecorator placementSummaryDecorator;
   private final PlacementPlannerServiceImp placementPlannerService;
   private final PermissionService permissionService;
 
   public PlacementResource(final PlacementService placementService,
       final PlacementValidator placementValidator,
       final PlacementDetailsDecorator placementDetailsDecorator,
+      final PlacementSummaryDecorator placementSummaryDecorator,
       PlacementPlannerServiceImp placementPlannerService,
       PermissionService permissionService) {
     this.placementService = placementService;
     this.placementValidator = placementValidator;
     this.placementDetailsDecorator = placementDetailsDecorator;
+    this.placementSummaryDecorator = placementSummaryDecorator;
     this.placementPlannerService = placementPlannerService;
     this.permissionService = permissionService;
   }
@@ -168,6 +174,21 @@ public class PlacementResource {
     final PlacementDetailsDTO placementDetailsDTO = placementService.getDetails(id);
     return ResponseUtil.wrapOrNotFound(
         Optional.ofNullable(placementDetailsDecorator.decorate(placementDetailsDTO)));
+  }
+
+  /**
+   * GET  /placements/{id}/summary : get the summary of the "id" placement.
+   *
+   * @param id the id of the placementSummaryDTO to retrieve
+   * @return the ResponseEntity with status 200 (OK) and the placement in body
+   */
+  @GetMapping("/placements/{id}/summary")
+  @PreAuthorize("hasAuthority('tcs:view:entities')")
+  public ResponseEntity<PlacementSummaryDTO> getPlacementSummary(@PathVariable final Long id) {
+    log.debug("REST request to get Placement Summary : {}", id);
+    final List<PlacementSummaryDTO> placementSummaryDtoList = placementService.getSummary(id);
+    return ResponseUtil.wrapOrNotFound(
+        Optional.ofNullable(placementSummaryDecorator.decorate(placementSummaryDtoList).get(0)));
   }
 
   /**
