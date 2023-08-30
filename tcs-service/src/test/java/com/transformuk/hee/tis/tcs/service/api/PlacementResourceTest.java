@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PlacementValidator;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PersonDTO;
 import com.transformuk.hee.tis.tcs.service.dto.placementmanager.PlacementDTO;
@@ -89,6 +90,8 @@ public class PlacementResourceTest {
   @MockBean
   private PlacementDetailsDecorator placementDetailsDecoratorMock;
   @MockBean
+  private PlacementSummaryDecorator placementSummaryDecoratorMock;
+  @MockBean
   private PlacementPlannerServiceImp placementPlannerServiceMock;
   @MockBean
   private PermissionService permissionServiceMock;
@@ -106,7 +109,8 @@ public class PlacementResourceTest {
   @Before
   public void setup() {
     placementResource = new PlacementResource(placementServiceMock, placementValidatorMock,
-        placementDetailsDecoratorMock, placementPlannerServiceMock, permissionServiceMock);
+        placementDetailsDecoratorMock, placementSummaryDecoratorMock,
+        placementPlannerServiceMock, permissionServiceMock);
     mockMvc = MockMvcBuilders.standaloneSetup(placementResource).build();
 
     setupData();

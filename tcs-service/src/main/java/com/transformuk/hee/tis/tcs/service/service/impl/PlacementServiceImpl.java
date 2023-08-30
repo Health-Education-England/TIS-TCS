@@ -568,6 +568,24 @@ public class PlacementServiceImpl implements PlacementService {
     return placementDetailsDTO;
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public List<PlacementSummaryDTO> getSummary(final Long placementId) {
+    final String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PLACEMENT_SUMMARY);
+    List<PlacementSummaryDTO> resultList;
+
+    Map<String, Object> params = Maps.newHashMap();
+    params.put("id", placementId);
+    PlacementRowMapper placementRowMapper = new PlacementRowMapper();
+    resultList = namedParameterJdbcTemplate.query(query, params, placementRowMapper);
+    resultList
+        .forEach(p -> p.setPlacementStatus(getPlacementStatus(p.getDateFrom(), p.getDateTo())));
+    resultList = filterPlacements(resultList);
+
+    populateEsrEventsForPlacementSummary(resultList);
+    return resultList;
+  }
+
   /**
    * Delete the  placement by id.
    *
