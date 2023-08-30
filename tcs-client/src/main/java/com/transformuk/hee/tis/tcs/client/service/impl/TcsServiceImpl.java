@@ -377,6 +377,12 @@ public class TcsServiceImpl extends AbstractClientService {
         }).getBody();
   }
 
+  public PlacementSummaryDTO getPlacementSummaryById(Long id) {
+    return tcsRestTemplate.exchange(serviceUrl + API_PLACEMENTS + id,
+        HttpMethod.GET, null, new ParameterizedTypeReference<PlacementSummaryDTO>() {
+        }).getBody();
+  }
+
   public PostDTO getPostById(Long id) {
     return tcsRestTemplate.exchange(serviceUrl + API_POSTS + id,
         HttpMethod.GET, null, new ParameterizedTypeReference<PostDTO>() {

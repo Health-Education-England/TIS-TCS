@@ -222,6 +222,23 @@ public class TcsServiceImplMockTest {
   }
 
   @Test
+  public void getPlacementSummaryByIdShouldReturnResponse() {
+    PlacementSummaryDTO dto = new PlacementSummaryDTO();
+    dto.setPlacementId(1L);
+    dto.setTraineeId(2L);
+
+    ResponseEntity<PlacementSummaryDTO> response = ResponseEntity.ok(dto);
+    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    PlacementSummaryDTO returnDto = testObj.getPlacementSummaryById(2L);
+    // Then.
+    assertThat("Unexpected placement ID", returnDto.getPlacementId(), is(1L));
+    assertThat("Unexpected placement trainee ID", returnDto.getTraineeId(), is(2L));
+  }
+
+  @Test
   public void getProgrammeMembershipDetailsByIds() {
     ProgrammeMembershipCurriculaDTO dto = new ProgrammeMembershipCurriculaDTO();
     dto.setId(1L);
