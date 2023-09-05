@@ -19,7 +19,7 @@ public interface RotationRepository extends JpaRepository<Rotation, Long>,
 
   Optional<Rotation> findByIdAndProgrammeId(Long id, Long programmeId);
 
-  @Query(value = "select r from Rotation r where r.name = ?1 and r.programmeId = ?2 "
+  @Query(value = "select r from Rotation r where lower(r.name) = lower(?1) and r.programmeId = ?2 "
       + "and r.status = 'Current'")
   List<Rotation> findCurrentByNameAndProgrammeId(String name, Long programmeId);
 }

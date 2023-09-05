@@ -71,9 +71,9 @@ class ProgrammeMembershipValidatorTest {
     when(rotationServiceMock.getCurrentRotationsByNameAndProgrammeId(DEFAULT_ROTATION_NAME,
         PROGRAMME_ID)).thenReturn(Lists.newArrayList(rotationDto));
 
-    Map<String, Boolean> leavingReasonsExistMap = new HashMap<>();
-    leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, true);
-    when(referenceServiceMock.leavingReasonsExist(Lists.newArrayList(DEFAULT_LEAVING_REASON),
+    Map<String, String> leavingReasonsExistMap = new HashMap<>();
+    leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, DEFAULT_LEAVING_REASON);
+    when(referenceServiceMock.leavingReasonsMatch(Lists.newArrayList(DEFAULT_LEAVING_REASON),
         true)).thenReturn(leavingReasonsExistMap);
 
     Map<String, Boolean> programmeMembershipsExistMap = new HashMap<>();
@@ -108,9 +108,9 @@ class ProgrammeMembershipValidatorTest {
         PROGRAMME_ID)).thenReturn(Lists.newArrayList());
 
     // leaving reason not exists
-    Map<String, Boolean> leavingReasonsExistMap = new HashMap<>();
-    leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, false);
-    when(referenceServiceMock.leavingReasonsExist(Lists.newArrayList(DEFAULT_LEAVING_REASON),
+    Map<String, String> leavingReasonsExistMap = new HashMap<>();
+    leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, "");
+    when(referenceServiceMock.leavingReasonsMatch(Lists.newArrayList(DEFAULT_LEAVING_REASON),
         true)).thenReturn(leavingReasonsExistMap);
 
     // programme membership not exists
