@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class ProgrammeMembershipDtoMapperTest {
 
@@ -46,8 +45,6 @@ class ProgrammeMembershipDtoMapperTest {
   @BeforeEach
   void setUp() {
     mapper = new ProgrammeMembershipDtoMapperImpl();
-    ReflectionTestUtils.setField(mapper, "rotationDtoMapper",
-        new RotationDtoMapperImpl());
 
     source = new ProgrammeMembershipDTO();
     source.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE_1);
