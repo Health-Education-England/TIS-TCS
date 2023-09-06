@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,8 +32,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ProgrammeMembershipValidatorTest {
 
   private static final String DEFAULT_ROTATION_NAME = "rotation";
-  private static final String DEFAULT_LEAVING_REASON = "leavingReason";
-  private static final String DEFAULT_TRAINING_PATHWAY = "CCT";
+  private static final String DEFAULT_LEAVING_REASON = "LeavingReason";
+  private static final String DEFAULT_TRAINING_PATHWAY = "N/A";
   private static final String INVALID_TRAINING_PATHWAY = "AAA";
   private static final ProgrammeMembershipType DEFAULT_PROGRAMME_MEMBERSHIP_TYPE =
       ProgrammeMembershipType.ACADEMIC;
@@ -72,7 +73,7 @@ class ProgrammeMembershipValidatorTest {
         PROGRAMME_ID)).thenReturn(Lists.newArrayList(rotationDto));
 
     Map<String, String> leavingReasonsExistMap = new HashMap<>();
-    leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, DEFAULT_LEAVING_REASON);
+    leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, DEFAULT_LEAVING_REASON.toUpperCase());
     when(referenceServiceMock.leavingReasonsMatch(Lists.newArrayList(DEFAULT_LEAVING_REASON),
         true)).thenReturn(leavingReasonsExistMap);
 
@@ -83,10 +84,13 @@ class ProgrammeMembershipValidatorTest {
 
     validator.validateForBulk(pmDto);
     assertEquals(0, pmDto.getMessageList().size());
+    assertEquals(DEFAULT_TRAINING_PATHWAY, pmDto.getTrainingPathway());
+    assertNull(pmDto.getRotation().getId());
+    assertEquals(DEFAULT_ROTATION_NAME, pmDto.getRotation().getName());
   }
 
   @Test
-  void shouldAddErrorsWhenValidationfails() {
+  void shouldAddErrorsWhenValidationFails() {
     ProgrammeMembershipDTO pmDto = new ProgrammeMembershipDTO();
     pmDto.setId(PROGRAMME_MEMBERSHIP_ID);
     pmDto.setProgrammeId(PROGRAMME_ID);
@@ -155,7 +159,7 @@ class ProgrammeMembershipValidatorTest {
   }
 
   @Test
-  void shouldAddErrorWhenMutipleRotationsFound() {
+  void shouldAddErrorWhenMultipleRotationsFound() {
     ProgrammeMembershipDTO pmDto = new ProgrammeMembershipDTO();
     pmDto.setId(PROGRAMME_MEMBERSHIP_ID);
     pmDto.setProgrammeId(PROGRAMME_ID);

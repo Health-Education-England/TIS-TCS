@@ -250,7 +250,7 @@ public class ProgrammeMembershipValidator {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "trainingPathway",
             String.format(TRAINING_PATHWAY_NOT_EXISTS, trainingPathway)));
       } else {
-        programmeMembershipDto.setTrainingPathway(trainingPathwayEnum.name());
+        programmeMembershipDto.setTrainingPathway(trainingPathwayEnum.toString());
       }
     }
     return fieldErrors;

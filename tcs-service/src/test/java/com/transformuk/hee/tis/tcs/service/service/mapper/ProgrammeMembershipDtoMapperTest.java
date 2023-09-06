@@ -36,6 +36,7 @@ class ProgrammeMembershipDtoMapperTest {
 
   private static final String ROTATION_NAME_1 = "rotation1";
   private static final String ROTATION_NAME_2 = "rotation2";
+  private static final Long ROTATION_ID_2 = 1L;
   private static final String ERR_MSG = "error";
 
   private ProgrammeMembershipDtoMapper mapper;
@@ -66,6 +67,7 @@ class ProgrammeMembershipDtoMapperTest {
     target.setProgrammeStartDate(PROGRAMME_START_DATE_2);
     target.setProgrammeEndDate(PROGRAMME_END_DATE_2);
     RotationDTO targetRotationDto = new RotationDTO();
+    targetRotationDto.setId(ROTATION_ID_2);
     targetRotationDto.setName(ROTATION_NAME_2);
     target.setRotation(targetRotationDto);
   }
@@ -81,6 +83,7 @@ class ProgrammeMembershipDtoMapperTest {
     Assert.assertEquals(PROGRAMME_START_DATE_1, target.getProgrammeStartDate());
     Assert.assertEquals(PROGRAMME_END_DATE_1, target.getProgrammeEndDate());
     Assert.assertEquals(ROTATION_NAME_1, target.getRotation().getName());
+    Assert.assertNull(target.getRotation().getId());
     Assert.assertEquals(1, target.getMessageList().size());
     Assert.assertEquals(ERR_MSG, target.getMessageList().get(0));
   }
