@@ -62,6 +62,12 @@ from (
     ) currentGrade on cd.id = currentGrade.traineeId
   WHERECLAUSE(cd, id)
 ) as ot
+-- Filter based on "role" from the "Person" table
+where ot.personId not in (
+  select distinct p.id
+  from Person p
+  where lower(p.role) like '%dummy%' or lower(p.role) like '%placeholder%'
+)
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;
