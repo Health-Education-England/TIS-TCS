@@ -207,11 +207,18 @@ public class ProgrammeMembershipValidator {
   private List<FieldError> checkLeavingReason(ProgrammeMembershipDTO programmeMembershipDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
     String leavingReason = programmeMembershipDto.getLeavingReason();
+
     if (StringUtils.isNotEmpty(leavingReason)) {
-      Map<String, Boolean> leavingReasonsExistMap = referenceService.leavingReasonsExist(
+      Map<String, String> leavingReasonsMatchMap = referenceService.leavingReasonsMatch(
           Collections.singletonList(leavingReason), true);
-      notExistsStringFieldErrors(fieldErrors, leavingReasonsExistMap, "leavingReason",
-          "Leaving reason");
+
+      String matchedLeavingReason = leavingReasonsMatchMap.get(leavingReason);
+      if (StringUtils.isEmpty(matchedLeavingReason)) {
+        fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "leavingReason",
+            String.format(STRING_CODE_NOT_EXISTS, "Leaving reason", leavingReason)));
+      } else {
+        programmeMembershipDto.setLeavingReason(matchedLeavingReason);
+      }
     }
     return fieldErrors;
   }
@@ -242,6 +249,8 @@ public class ProgrammeMembershipValidator {
       if (trainingPathwayEnum == null) {
         fieldErrors.add(new FieldError(PROGRAMME_MEMBERSHIP_DTO_NAME, "trainingPathway",
             String.format(TRAINING_PATHWAY_NOT_EXISTS, trainingPathway)));
+      } else {
+        programmeMembershipDto.setTrainingPathway(trainingPathwayEnum.toString());
       }
     }
     return fieldErrors;

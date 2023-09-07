@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -1324,6 +1325,10 @@ class ProgrammeMembershipResourceIntTest {
     ProgrammeMembershipDTO programmeMembershipDto = programmeMembershipMapper
         .toDto(programmeMembershipSaved);
     programmeMembershipDto.setTrainingPathway("CCT");
+    programmeMembershipDto.setLeavingReason(UPDATED_LEAVING_REASON);
+
+    when(referenceService.leavingReasonsMatch(Lists.newArrayList(UPDATED_LEAVING_REASON), true))
+        .thenReturn(Collections.singletonMap(UPDATED_LEAVING_REASON, UPDATED_LEAVING_REASON));
 
     // when
     restProgrammeMembershipMockMvc.perform(patch("/api/bulk-programme-membership")
@@ -1336,5 +1341,6 @@ class ProgrammeMembershipResourceIntTest {
     Assert.assertEquals(true, optionalProgrammeMembership.isPresent());
     ProgrammeMembership updatedProgrammeMembership = optionalProgrammeMembership.get();
     Assert.assertEquals("CCT", updatedProgrammeMembership.getTrainingPathway());
+    Assert.assertEquals(UPDATED_LEAVING_REASON, updatedProgrammeMembership.getLeavingReason());
   }
 }
