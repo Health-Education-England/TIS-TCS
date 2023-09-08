@@ -38,11 +38,11 @@ public class ProgrammeMembershipValidator {
   protected static final String MULTIPLE_ROTATIONS_FOUND =
       "Multiple rotations with name (%s) found for programmeId (%s).";
   protected static final String PM_START_DATE_LATER_THAN_END_DATE =
-      "Programme Start Date must be before the End Date";
+      "Programme start date must not be later than the end date.";
   protected static final String PM_START_DATE_LATER_THAN_CM_START_DATE =
-      "Programme start date must be before any curriculum start date.";
+      "Programme start date must not be later than any curriculum start date.";
   protected static final String PM_END_DATE_EARLIER_THAN_CM_END_DATE =
-      "Programme end date must be after any curriculum end date.";
+      "Programme end date must not be earlier than any curriculum end date.";
   protected static final String STRING_CODE_NOT_EXISTS = "%s with code %s does not exist.";
   protected static final String TRAINING_PATHWAY_NOT_EXISTS =
       "Training pathway with code %s does not exist.";
