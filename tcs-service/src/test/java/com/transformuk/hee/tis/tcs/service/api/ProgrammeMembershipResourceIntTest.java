@@ -595,7 +595,7 @@ class ProgrammeMembershipResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(content().string(containsString(
-            "Programme Start Date must be before the End Date")));
+            "Programme start date must not be later than the end date.")));
 
     // Validate the ProgrammeMembershipRepository has NOT changed or saved as CurriculumMembership
     List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
