@@ -51,9 +51,9 @@ from (
       select
   		placement.traineeId,
   		-- one row per trainee
-  		GROUP_CONCAT(distinct placement.gradeAbbreviation SEPARATOR " | ") currentGrades
+  		GROUP_CONCAT(distinct placement.gradeId SEPARATOR " | ") currentGrades
       from (
-        select traineeId, gradeAbbreviation, dateFrom, dateTo
+        select traineeId, gradeId, dateFrom, dateTo
         from Placement pl
         WHERECLAUSE(pl, traineeId)
       ) placement
