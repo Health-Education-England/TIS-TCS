@@ -16,7 +16,7 @@ from (
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
     -- note: null values are filtered out by the condition below
-    and lower(gmc.gmcNumber) <> 'unknown'
+    and lower(gmc.gmcNumber) <> 'unknown' and lower(gmc.gmcNumber) <> 'na' and lower(gmc.gmcNumber) <> 'n/a'
     and gmc.gmcNumber not like CONCAT('%', UNHEX('c2a0'), '%') -- filter out all gmc number with non-breaking space
   left join (
     -- count current PMs with combined programme names for each person
