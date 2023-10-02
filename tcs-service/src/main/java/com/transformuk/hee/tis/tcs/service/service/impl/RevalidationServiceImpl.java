@@ -240,6 +240,8 @@ public class RevalidationServiceImpl implements RevalidationService {
         .query(query, paramSource, new RevalidationConnectionInfoMapper());
     if (connectionInfoDtos.size() == 1) {
       return connectionInfoDtos.get(0);
+    } else if (connectionInfoDtos.isEmpty()) {
+      return ConnectionInfoDto.builder().tcsPersonId(personId).build();
     } else {
       return null;
     }
