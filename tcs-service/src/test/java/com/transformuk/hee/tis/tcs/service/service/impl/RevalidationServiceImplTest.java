@@ -585,6 +585,21 @@ public class RevalidationServiceImplTest {
   }
 
   @Test
+  public void shouldReturnNullWhenSqlReturnsMultiple() {
+    ConnectionInfoDto connectionInfoDto1 = ConnectionInfoDto.builder().build();
+    ConnectionInfoDto connectionInfoDto2 = ConnectionInfoDto.builder().build();
+    when(namedParameterJdbcTemplateMock.query(
+        anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(Lists.newArrayList(connectionInfoDto1, connectionInfoDto2));
+
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    verify(namedParameterJdbcTemplateMock).query(anyString(),
+        any(MapSqlParameterSource.class), any(RowMapper.class));
+
+    assertThat(result, nullValue());
+  }
+
+  @Test
   public void shouldExtractTraineeConnectionInfo() {
     when(namedParameterJdbcTemplateMock.query(
           anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
