@@ -5,6 +5,7 @@ import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipTyp
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -568,16 +569,19 @@ public class RevalidationServiceImplTest {
   }
 
   @Test
-  public void shouldReturnNullWhenBuildTcsConnectionInfo() {
+  public void shouldReturnDtoOnlyWithTisPersonIdWhenSqlFilterOutRecord() {
     when(namedParameterJdbcTemplateMock.query(
-          anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
         .thenReturn(Lists.newArrayList());
 
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
     verify(namedParameterJdbcTemplateMock).query(anyString(),
         any(MapSqlParameterSource.class), any(RowMapper.class));
 
-    assertThat(result, nullValue());
+    assertThat(result, notNullValue());
+    assertThat(result.getTcsPersonId(), equalTo(PERSON_ID));
+    assertThat(result.getGmcReferenceNumber(), nullValue());
+    assertThat(result.getProgrammeName(), nullValue());
   }
 
   @Test
