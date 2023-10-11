@@ -240,7 +240,12 @@ public class RevalidationServiceImpl implements RevalidationService {
         .query(query, paramSource, new RevalidationConnectionInfoMapper());
     if (connectionInfoDtos.size() == 1) {
       return connectionInfoDtos.get(0);
+    } else if (connectionInfoDtos.isEmpty()) {
+      return ConnectionInfoDto.builder().tcsPersonId(personId).build();
     } else {
+      LOG.error("Found multiple TIS records via 'traineeInfoForConnection.sql' for personId: {}. "
+              + "Please note: this data update in TIS won't be sent to Reval.",
+          personId);
       return null;
     }
   }
