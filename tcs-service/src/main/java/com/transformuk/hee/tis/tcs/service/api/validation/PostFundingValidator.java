@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 public class PostFundingValidator {
 
   protected static final String FUNDING_TYPE_EMPTY = "funding type is empty";
-  protected static final String FUNDING_TYPE_NOT_OTHER_OR_NOT_ACADEMIC_ERROR =
-      "funding type specified filled although type is not Other or not an academic type.";
+  protected static final String FUNDING_DETAILS_NOT_ALLOWED =
+      "funding details is not allowed for the funding type specified.";
   protected static final String FUNDING_TYPE_NOT_FOUND_ERROR = "funding type does not exist.";
   protected static final String FUNDING_TYPE_MULTIPLE_FOUND_ERROR = "found multiple funding type.";
 
@@ -65,10 +65,9 @@ public class PostFundingValidator {
   }
 
   private void checkInfoForFundingType(PostFundingDTO pfDto, FundingTypeDTO matchedFundingTypeDto) {
-    // Only when fundingType is Other or an academic type, the info(fundingDetails) is enabled.
-    if (!(pfDto.getFundingType().equals("Other") || matchedFundingTypeDto.isAcademic())
-        && pfDto.getInfo() != null) {
-      pfDto.getMessageList().add(FUNDING_TYPE_NOT_OTHER_OR_NOT_ACADEMIC_ERROR);
+    // Should not have fundingDetails populdated when allowDetails in FundingType reference is false
+    if (!matchedFundingTypeDto.isAllowDetails() && pfDto.getInfo() != null) {
+      pfDto.getMessageList().add(FUNDING_DETAILS_NOT_ALLOWED);
     }
   }
 }
