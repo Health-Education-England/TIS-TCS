@@ -66,7 +66,7 @@ public class PostFundingValidatorTest {
   public void setup() {
     fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setId(FUNDING_TYPE_ID);
-    fundingTypeDTO.setAcademic(false);
+    fundingTypeDTO.setAllowDetails(false);
     fundingTypeDTO.setLabel(FUNDING_TYPE_LABEL);
 
     multipleFundingTypeDTO = new FundingTypeDTO();
@@ -76,7 +76,7 @@ public class PostFundingValidatorTest {
     academicFundingTypeDto = new FundingTypeDTO();
     academicFundingTypeDto.setId(FUNDING_TYPE_ID);
     academicFundingTypeDto.setLabel(FUNDING_TYPE_LABEL4);
-    academicFundingTypeDto.setAcademic(true);
+    academicFundingTypeDto.setAllowDetails(true);
 
     when(referenceService.findCurrentFundingTypesByLabelIn(
         Collections.singleton(FUNDING_TYPE_LABEL)))
@@ -115,7 +115,7 @@ public class PostFundingValidatorTest {
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
     assertThat(
         result.get(0).getMessageList()
-            .contains(PostFundingValidator.FUNDING_TYPE_NOT_OTHER_OR_NOT_ACADEMIC_ERROR),
+            .contains(PostFundingValidator.FUNDING_DETAILS_NOT_ALLOWED),
         is(true));
   }
 
