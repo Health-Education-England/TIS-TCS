@@ -184,12 +184,24 @@ jobs:
           image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
+        id: ecs-deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: tis-tcs
           cluster: tis-preprod
           wait-for-service-stability: true
+
+      - name: Verify ECS deployment
+        run: |
+          CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster tis-preprod --service tis-tcs --query services[0].deployments[0].taskDefinition | jq -r ".")
+          NEW_TASK_DEF_ARN=${{ steps.ecs-deploy.outputs.task-definition-arn }}
+          echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+          echo "New task arn: $NEW_TASK_DEF_ARN"
+          if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+            echo "Deployment failed."
+            exit 1
+          fi
 
   deploy-prod:
     name: Deploy production definition
@@ -220,12 +232,24 @@ jobs:
           image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
+        id: ecs-deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: tis-tcs
           cluster: tis-prod
           wait-for-service-stability: true
+
+      - name: Verify ECS deployment
+        run: |
+          CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster tis-prod --service tis-tcs --query services[0].deployments[0].taskDefinition | jq -r ".")
+          NEW_TASK_DEF_ARN=${{ steps.ecs-deploy.outputs.task-definition-arn }}
+          echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+          echo "New task arn: $NEW_TASK_DEF_ARN"
+          if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+            echo "Deployment failed."
+            exit 1
+          fi
 
   deploy-nimdta:
     name: Deploy NIMDTA definition
@@ -235,14 +259,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: eu-west-2
           role-to-assume: arn:aws:iam::430723991443:role/github-actions-deployer-role
+
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -250,10 +277,23 @@ jobs:
           task-definition: .aws/tis-tcs-nimdta.json
           container-name: tis-tcs
           image: ${{ steps.login-ecr.outputs.registry }}/tcs:${{ github.sha }}
+
       - name: Deploy Amazon ECS task definition
+        id: ecs-deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: tis-tcs
           cluster: tis-nimdta
           wait-for-service-stability: true
+
+      - name: Verify ECS deployment
+        run: |
+          CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster tis-nimdta --service tis-tcs --query services[0].deployments[0].taskDefinition | jq -r ".")
+          NEW_TASK_DEF_ARN=${{ steps.ecs-deploy.outputs.task-definition-arn }}
+          echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+          echo "New task arn: $NEW_TASK_DEF_ARN"
+          if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+            echo "Deployment failed."
+            exit 1
+          fi
