@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +25,7 @@ public class PostFundingValidatorTest {
 
   Long FUNDING_TYPE_ID = 2L;
   String FUNDING_TYPE_LABEL = "1234funding";
-  String FUNDING_SUBTYPE_UUID = "c5223f14-beda-4794-b220-c725b972c9af";
+  UUID FUNDING_SUBTYPE_UUID = UUID.randomUUID();
   String FUNDING_TYPE_LABEL2 = "5678funding";
   String FUNDING_TYPE_LABEL3 = "8910funding";
   String FUNDING_TYPE_LABEL4 = "academicFunding";
@@ -45,7 +46,7 @@ public class PostFundingValidatorTest {
   @InjectMocks
   private PostFundingValidator postFundingValidator;
 
-  private PostFundingDTO buildMockFundingTypeDTO(Long id, String fundingType, String fundingSubType, String info,
+  private PostFundingDTO buildMockFundingTypeDTO(Long id, String fundingType, UUID fundingSubType, String info,
       String fundingBodyId) {
     PostFundingDTO result = new PostFundingDTO();
     result.setId(id);

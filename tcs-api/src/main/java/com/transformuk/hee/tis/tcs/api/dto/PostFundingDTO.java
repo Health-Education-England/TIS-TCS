@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.Data;
 
 /**
@@ -19,7 +20,7 @@ public class PostFundingDTO implements Serializable {
 
   private String fundingType;
 
-  private String fundingSubType;
+  private UUID fundingSubType;
 
   private String info;
 
