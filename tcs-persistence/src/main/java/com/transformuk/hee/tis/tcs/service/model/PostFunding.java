@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,6 +36,9 @@ public class PostFunding implements Serializable {
 
   @Column(name = "fundingType")
   private String fundingType;
+
+  @Column(name = "fundingSubType")
+  private UUID fundingSubType;
 
   @Column(name = "info")
   private String info;
