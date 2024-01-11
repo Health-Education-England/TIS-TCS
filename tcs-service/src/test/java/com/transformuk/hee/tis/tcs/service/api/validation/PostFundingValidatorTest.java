@@ -24,6 +24,7 @@ public class PostFundingValidatorTest {
 
   Long FUNDING_TYPE_ID = 2L;
   String FUNDING_TYPE_LABEL = "1234funding";
+  String FUNDING_SUBTYPE_UUID = "c5223f14-beda-4794-b220-c725b972c9af";
   String FUNDING_TYPE_LABEL2 = "5678funding";
   String FUNDING_TYPE_LABEL3 = "8910funding";
   String FUNDING_TYPE_LABEL4 = "academicFunding";
@@ -44,11 +45,12 @@ public class PostFundingValidatorTest {
   @InjectMocks
   private PostFundingValidator postFundingValidator;
 
-  private PostFundingDTO buildMockFundingTypeDTO(Long id, String fundingType, String info,
+  private PostFundingDTO buildMockFundingTypeDTO(Long id, String fundingType, String fundingSubType, String info,
       String fundingBodyId) {
     PostFundingDTO result = new PostFundingDTO();
     result.setId(id);
     result.setFundingType(fundingType);
+    result.setFundingSubType(fundingSubType);
     result.setInfo(info);
     result.setFundingBodyId(fundingBodyId);
     result.setStartDate(LocalDate.now());
@@ -91,12 +93,12 @@ public class PostFundingValidatorTest {
         Collections.singleton(FUNDING_TYPE_LABEL4)))
         .thenReturn(Collections.singletonList(academicFundingTypeDto));
 
-    validDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, null, "foo");
-    fundingTypeMissingDTO = buildMockFundingTypeDTO(1L, null, "info", "foo");
-    notOtherDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, "info", "foo");
-    academicTypeDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL4, "info", "foo");
-    fundingTypeFilledDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL2, null, "foo");
-    multipleFundingTypesDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL3, "info", "foo");
+    validDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, FUNDING_SUBTYPE_UUID, null, "foo");
+    fundingTypeMissingDTO = buildMockFundingTypeDTO(1L, null, null, "info", "foo");
+    notOtherDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL, FUNDING_SUBTYPE_UUID, "info", "foo");
+    academicTypeDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL4, FUNDING_SUBTYPE_UUID,"info", "foo");
+    fundingTypeFilledDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL2, FUNDING_SUBTYPE_UUID,null, "foo");
+    multipleFundingTypesDTO = buildMockFundingTypeDTO(1L, FUNDING_TYPE_LABEL3, null,"info", "foo");
   }
 
   @Test

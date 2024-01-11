@@ -36,6 +36,9 @@ public class PostFunding implements Serializable {
   @Column(name = "fundingType")
   private String fundingType;
 
+  @Column(name = "fundingSubType")
+  private String fundingSubType;
+
   @Column(name = "info")
   private String info;
 
