@@ -1,1 +1,1 @@
-ALTER TABLE `PostFunding` ADD `fundingSubType` varchar(36);
+ALTER TABLE `PostFunding` ADD COLUMN `fundingSubType` varchar(36);
