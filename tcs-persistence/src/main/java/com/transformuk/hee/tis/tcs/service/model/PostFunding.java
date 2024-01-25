@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 /**
  * A PostFunding.
@@ -37,6 +38,7 @@ public class PostFunding implements Serializable {
   @Column(name = "fundingType")
   private String fundingType;
 
+  @Type(type = "org.hibernate.type.UUIDCharType")
   @Column(name = "fundingSubType")
   private UUID fundingSubType;
 
