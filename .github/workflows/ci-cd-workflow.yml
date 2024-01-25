@@ -24,7 +24,7 @@ jobs:
         with:
           cache: maven
           distribution: temurin
-          java-version: 11
+          java-version: 17
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -102,7 +102,7 @@ jobs:
         with:
           cache: maven
           distribution: temurin
-          java-version: 11
+          java-version: 17
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2

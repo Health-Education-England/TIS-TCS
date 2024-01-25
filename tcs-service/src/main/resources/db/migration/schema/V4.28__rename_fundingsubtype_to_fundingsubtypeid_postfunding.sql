@@ -1,0 +1,1 @@
+ALTER TABLE `PostFunding` CHANGE `fundingSubType` `fundingSubTypeId` varchar(36);
