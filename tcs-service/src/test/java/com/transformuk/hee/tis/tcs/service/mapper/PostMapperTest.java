@@ -2,10 +2,13 @@ package com.transformuk.hee.tis.tcs.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,10 +36,17 @@ public class PostMapperTest {
     postEsrEvent.setPositionNumber(1L);
     postEsrEvent.setStatus(PostEsrEventStatus.DELETED);
     postEsrEvent.setPositionId(2L);
+
+    UUID fundingSubTypeId = UUID.randomUUID();
+    PostFunding postFunding = new PostFunding();
+    postFunding.setFundingSubType(fundingSubTypeId);
+
     Post post = new Post();
     post.setId(3L);
     post.setPostEsrEvents(Collections.singleton(postEsrEvent));
+    post.getFundings().add(postFunding);
     postEsrEvent.setPost(post);
+    postFunding.setPost(post);
 
     //when
     PostDTO postDTO = postMapper.postToPostDTO(post);
@@ -49,5 +59,30 @@ public class PostMapperTest {
     assertThat(postEsrEventDto.getPositionNumber()).isEqualTo(1L);
     assertThat(postEsrEventDto.getStatus()).isEqualTo(PostEsrEventStatus.DELETED);
     assertThat(postEsrEventDto.getPositionId()).isEqualTo(2L);
+
+    assertThat(postDTO.getFundings()).hasSize(1);
+    PostFundingDTO postFundingDto = postDTO.getFundings().iterator().next();
+    assertThat(postFundingDto.getFundingSubType()).isEqualTo(fundingSubTypeId);
+  }
+
+  @Test
+  public void postDtoToPostTest() {
+    //given
+    UUID fundingSubTypeId = UUID.randomUUID();
+    PostFundingDTO postFundingDto = new PostFundingDTO();
+    postFundingDto.setFundingSubType(fundingSubTypeId);
+
+    PostDTO postDto = new PostDTO();
+    postDto.setId(3L);
+    postDto.setFundings(Collections.singleton(postFundingDto));
+    postFundingDto.setPostId(3L);
+
+    //when
+    Post post = postMapper.postDTOToPost(postDto);
+
+    //then
+    assertThat(post.getFundings()).hasSize(1);
+    PostFunding postFunding = post.getFundings().iterator().next();
+    assertThat(postFunding.getFundingSubType()).isEqualTo(fundingSubTypeId);
   }
 }
