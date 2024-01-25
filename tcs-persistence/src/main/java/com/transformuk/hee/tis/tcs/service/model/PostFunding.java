@@ -40,7 +40,7 @@ public class PostFunding implements Serializable {
 
   @Type(type = "org.hibernate.type.UUIDCharType")
   @Column(name = "fundingSubType")
-  private UUID fundingSubType;
+  private UUID fundingSubTypeId;
 
   @Column(name = "info")
   private String info;

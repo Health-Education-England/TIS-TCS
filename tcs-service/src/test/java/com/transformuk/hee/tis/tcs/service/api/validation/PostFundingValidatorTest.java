@@ -51,7 +51,7 @@ public class PostFundingValidatorTest {
     PostFundingDTO result = new PostFundingDTO();
     result.setId(id);
     result.setFundingType(fundingType);
-    result.setFundingSubType(fundingSubType);
+    result.setFundingSubTypeId(fundingSubType);
     result.setInfo(info);
     result.setFundingBodyId(fundingBodyId);
     result.setStartDate(LocalDate.now());

@@ -39,7 +39,7 @@ public class PostMapperTest {
 
     UUID fundingSubTypeId = UUID.randomUUID();
     PostFunding postFunding = new PostFunding();
-    postFunding.setFundingSubType(fundingSubTypeId);
+    postFunding.setFundingSubTypeId(fundingSubTypeId);
 
     Post post = new Post();
     post.setId(3L);
@@ -62,7 +62,7 @@ public class PostMapperTest {
 
     assertThat(postDTO.getFundings()).hasSize(1);
     PostFundingDTO postFundingDto = postDTO.getFundings().iterator().next();
-    assertThat(postFundingDto.getFundingSubType()).isEqualTo(fundingSubTypeId);
+    assertThat(postFundingDto.getFundingSubTypeId()).isEqualTo(fundingSubTypeId);
   }
 
   @Test
@@ -70,7 +70,7 @@ public class PostMapperTest {
     //given
     UUID fundingSubTypeId = UUID.randomUUID();
     PostFundingDTO postFundingDto = new PostFundingDTO();
-    postFundingDto.setFundingSubType(fundingSubTypeId);
+    postFundingDto.setFundingSubTypeId(fundingSubTypeId);
 
     PostDTO postDto = new PostDTO();
     postDto.setId(3L);
@@ -83,6 +83,6 @@ public class PostMapperTest {
     //then
     assertThat(post.getFundings()).hasSize(1);
     PostFunding postFunding = post.getFundings().iterator().next();
-    assertThat(postFunding.getFundingSubType()).isEqualTo(fundingSubTypeId);
+    assertThat(postFunding.getFundingSubTypeId()).isEqualTo(fundingSubTypeId);
   }
 }
