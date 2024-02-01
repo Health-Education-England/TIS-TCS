@@ -48,7 +48,7 @@ public class PostFundingValidator {
       FundingTypeDTO matchedFundingTypeDto = checkFundingTypeExists(pfDto, fundingTypeDtos);
       if (matchedFundingTypeDto != null) {
         checkInfoForFundingType(pfDto, matchedFundingTypeDto);
-        checkAndSetFundingSubType(pfDto, matchedFundingTypeDto.getId());
+        checkFundingSubType(pfDto, matchedFundingTypeDto.getId());
       }
     }
     return checkList;
@@ -76,14 +76,14 @@ public class PostFundingValidator {
     }
   }
 
-  private void checkAndSetFundingSubType(PostFundingDTO pfDto, Long fundingTypeId) {
+  private void checkFundingSubType(PostFundingDTO pfDto, Long fundingTypeId) {
     UUID fundingSubTypeId = pfDto.getFundingSubTypeId();
     if (fundingSubTypeId != null) {
       List<FundingSubTypeDto> allCurrentFundingSubTypes =
           referenceService.findCurrentFundingSubTypesForFundingTypeId(fundingTypeId);
-      FundingSubTypeDto foundFundingSubTypes = allCurrentFundingSubTypes.stream()
-          .filter(dto -> dto.getId().equals(fundingSubTypeId)).findFirst().orElse(null);
-      if (foundFundingSubTypes == null) {
+      boolean isFound = allCurrentFundingSubTypes.stream()
+          .anyMatch(dto -> dto.getId().equals(fundingSubTypeId));
+      if (!isFound) {
         pfDto.getMessageList().add(FUNDING_SUB_TYPE_NOT_FOUND);
       }
     }

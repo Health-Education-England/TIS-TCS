@@ -53,8 +53,7 @@ public class PostFundingValidatorTest {
   private PostFundingValidator postFundingValidator;
 
   private PostFundingDTO buildMockFundingTypeDTO(Long id, String fundingType, UUID fundingSubType,
-      String info,
-      String fundingBodyId) {
+      String info, String fundingBodyId) {
     PostFundingDTO result = new PostFundingDTO();
     result.setId(id);
     result.setFundingType(fundingType);
