@@ -26,7 +26,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class PostFundingValidatorTest {
 
   private final static Long FUNDING_TYPE_ID = 2L;
-  private final static Long FUNDING_TYPE_ID2 = 3L;
   private final static String FUNDING_TYPE_LABEL = "1234funding";
   private final static String FUNDING_TYPE_LABEL2 = "5678funding";
   private final static String FUNDING_TYPE_LABEL3 = "8910funding";
