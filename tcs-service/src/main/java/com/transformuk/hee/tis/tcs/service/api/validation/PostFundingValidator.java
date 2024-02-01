@@ -1,10 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class PostFundingValidator {
 
-  protected static final String FUNDING_TYPE_EMPTY = "funding type is empty";
+  protected static final String FUNDING_TYPE_EMPTY = "Funding type is empty";
   protected static final String FUNDING_DETAILS_NOT_ALLOWED =
-      "funding details is not allowed for the funding type specified.";
-  protected static final String FUNDING_TYPE_NOT_FOUND_ERROR = "funding type does not exist.";
-  protected static final String FUNDING_TYPE_MULTIPLE_FOUND_ERROR = "found multiple funding type.";
+      "Funding details is not allowed for the funding type specified.";
+  protected static final String FUNDING_TYPE_NOT_FOUND_ERROR = "Funding type does not exist.";
+  protected static final String FUNDING_TYPE_MULTIPLE_FOUND_ERROR = "Found multiple funding types.";
+  protected static final String FUNDING_SUB_TYPE_NOT_FOUND =
+      "Funding sub type not found for this funding type";
 
   @Autowired
   private ReferenceServiceImpl referenceService;
@@ -44,6 +48,7 @@ public class PostFundingValidator {
       FundingTypeDTO matchedFundingTypeDto = checkFundingTypeExists(pfDto, fundingTypeDtos);
       if (matchedFundingTypeDto != null) {
         checkInfoForFundingType(pfDto, matchedFundingTypeDto);
+        checkAndSetFundingSubType(pfDto, matchedFundingTypeDto.getId());
       }
     }
     return checkList;
@@ -52,7 +57,7 @@ public class PostFundingValidator {
   private FundingTypeDTO checkFundingTypeExists(PostFundingDTO pfDto,
       List<FundingTypeDTO> fundingTypeDtos) {
     List<FundingTypeDTO> filteredFundingTypeDtos = fundingTypeDtos.stream().filter(
-        fundingTypeDto -> StringUtils.equals(fundingTypeDto.getLabel(), pfDto.getFundingType()))
+            fundingTypeDto -> StringUtils.equals(fundingTypeDto.getLabel(), pfDto.getFundingType()))
         .collect(Collectors.toList());
     if (filteredFundingTypeDtos.size() == 1) {
       return filteredFundingTypeDtos.get(0);
@@ -65,9 +70,22 @@ public class PostFundingValidator {
   }
 
   private void checkInfoForFundingType(PostFundingDTO pfDto, FundingTypeDTO matchedFundingTypeDto) {
-    // Should not have fundingDetails populdated when allowDetails in FundingType reference is false
+    // Should not have fundingDetails populated when allowDetails in FundingType reference is false
     if (!matchedFundingTypeDto.isAllowDetails() && pfDto.getInfo() != null) {
       pfDto.getMessageList().add(FUNDING_DETAILS_NOT_ALLOWED);
+    }
+  }
+
+  private void checkAndSetFundingSubType(PostFundingDTO pfDto, Long fundingTypeId) {
+    UUID fundingSubTypeId = pfDto.getFundingSubTypeId();
+    if (fundingSubTypeId != null) {
+      List<FundingSubTypeDto> allCurrentFundingSubTypes =
+          referenceService.findCurrentFundingSubTypesForFundingTypeId(fundingTypeId);
+      FundingSubTypeDto foundFundingSubTypes = allCurrentFundingSubTypes.stream()
+          .filter(dto -> dto.getId().equals(fundingSubTypeId)).findFirst().orElse(null);
+      if (foundFundingSubTypes == null) {
+        pfDto.getMessageList().add(FUNDING_SUB_TYPE_NOT_FOUND);
+      }
     }
   }
 }
