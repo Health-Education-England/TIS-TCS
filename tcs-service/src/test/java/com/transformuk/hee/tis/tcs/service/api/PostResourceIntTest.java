@@ -1335,7 +1335,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$.[0].messageList", hasSize(0)))
         .andExpect(jsonPath("$.[1].messageList", hasSize(1)))
-        .andExpect(jsonPath("$.[1].messageList.[0]", is("funding type does not exist.")));
+        .andExpect(jsonPath("$.[1].messageList.[0]", is("Funding type does not exist.")));
   }
 
   @Test
