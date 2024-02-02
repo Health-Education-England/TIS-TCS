@@ -81,9 +81,9 @@ public class PostFundingValidator {
     if (fundingSubTypeId != null) {
       List<FundingSubTypeDto> allCurrentFundingSubTypes =
           referenceService.findCurrentFundingSubTypesForFundingTypeId(fundingTypeId);
-      boolean isFound = allCurrentFundingSubTypes.stream()
-          .anyMatch(dto -> dto.getId().equals(fundingSubTypeId));
-      if (!isFound) {
+      boolean notFound = allCurrentFundingSubTypes.stream()
+          .noneMatch(dto -> dto.getId().equals(fundingSubTypeId));
+      if (notFound) {
         pfDto.getMessageList().add(FUNDING_SUB_TYPE_NOT_FOUND);
       }
     }
