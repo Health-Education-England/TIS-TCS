@@ -334,7 +334,7 @@ public class PostServiceImpl implements PostService {
 
           // prepare a list
           List<PostFundingDTO> checkList = new ArrayList<>(postFundingDTOS);
-          checkList = postFundingValidator.validateFundingType(checkList);
+          checkList = postFundingValidator.validatePostFundings(checkList);
           // patch update
           for (PostFundingDTO pfDTO : checkList) {
             if (pfDTO.getMessageList().size() == 0) {

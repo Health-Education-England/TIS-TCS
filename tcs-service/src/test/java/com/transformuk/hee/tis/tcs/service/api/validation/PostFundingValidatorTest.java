@@ -119,7 +119,7 @@ public class PostFundingValidatorTest {
   public void testValidateFailsIfIdIsEmpty() {
     pfDTOs = buildCheckedList(fundingTypeMissingDTO);
 
-    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    List<PostFundingDTO> result = postFundingValidator.validatePostFundings(pfDTOs);
 
     assertThat(result.get(0).getMessageList().contains(PostFundingValidator.FUNDING_TYPE_EMPTY),
         is(true));
@@ -128,7 +128,7 @@ public class PostFundingValidatorTest {
   @Test
   public void testValidateFailsInfoGivenForFundingTypeNotOtherOrNotAcademic() {
     pfDTOs = buildCheckedList(notOtherDTO);
-    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    List<PostFundingDTO> result = postFundingValidator.validatePostFundings(pfDTOs);
     assertThat(
         result.get(0).getMessageList()
             .contains(PostFundingValidator.FUNDING_DETAILS_NOT_ALLOWED),
@@ -138,7 +138,7 @@ public class PostFundingValidatorTest {
   @Test
   public void testValidateFailsIfFundingTypeNotFound() {
     pfDTOs = buildCheckedList(fundingTypeFilledDTO);
-    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    List<PostFundingDTO> result = postFundingValidator.validatePostFundings(pfDTOs);
     assertThat(
         result.get(0).getMessageList().contains(PostFundingValidator.FUNDING_TYPE_NOT_FOUND_ERROR),
         is(true));
@@ -147,7 +147,7 @@ public class PostFundingValidatorTest {
   @Test
   public void testValidateFailsIfFundingTypeIsNotUnique() {
     pfDTOs = buildCheckedList(multipleFundingTypesDTO);
-    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    List<PostFundingDTO> result = postFundingValidator.validatePostFundings(pfDTOs);
     assertThat(result.get(0).getMessageList()
         .contains(PostFundingValidator.FUNDING_TYPE_MULTIPLE_FOUND_ERROR), is(true));
   }
@@ -155,14 +155,14 @@ public class PostFundingValidatorTest {
   @Test
   public void testValidateSuccessfully() {
     pfDTOs = buildCheckedList(validDTO);
-    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    List<PostFundingDTO> result = postFundingValidator.validatePostFundings(pfDTOs);
     assertThat(result.get(0).getMessageList().isEmpty(), is(true));
   }
 
   @Test
   public void testValidateOKInfoGivenForFundingTypeAcademic() {
     pfDTOs = buildCheckedList(academicTypeDTO);
-    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    List<PostFundingDTO> result = postFundingValidator.validatePostFundings(pfDTOs);
     assertThat(result.get(0).getMessageList().isEmpty(), is(true));
   }
 
@@ -170,7 +170,7 @@ public class PostFundingValidatorTest {
   public void testValidateFailsIfFundingSubTypeNotFound() {
     pfDTOs = buildCheckedList(fundingSubTypeNotFoundDto);
 
-    List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+    List<PostFundingDTO> result = postFundingValidator.validatePostFundings(pfDTOs);
     List<String> errorMsgList = result.get(0).getMessageList();
     assertThat(errorMsgList.size(), is(1));
     assertThat(errorMsgList.contains(PostFundingValidator.FUNDING_SUB_TYPE_NOT_FOUND), is(true));

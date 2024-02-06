@@ -26,7 +26,7 @@ public class PostFundingValidator {
   @Autowired
   private ReferenceServiceImpl referenceService;
 
-  public List<PostFundingDTO> validateFundingType(List<PostFundingDTO> checkList) {
+  public List<PostFundingDTO> validatePostFundings(List<PostFundingDTO> checkList) {
     if (checkList.isEmpty()) {
       return checkList;
     }
@@ -36,22 +36,26 @@ public class PostFundingValidator {
     List<FundingTypeDTO> fundingTypeDtos = referenceService
         .findCurrentFundingTypesByLabelIn(labels);
 
-    // check if the funding type is unique in the fundingType table in reference
-    for (PostFundingDTO pfDto : checkList) {
-
-      // check if funding type is empty
-      if (StringUtils.isEmpty(pfDto.getFundingType())) {
-        pfDto.getMessageList().add(FUNDING_TYPE_EMPTY);
-        break;
-      }
-
-      FundingTypeDTO matchedFundingTypeDto = checkFundingTypeExists(pfDto, fundingTypeDtos);
-      if (matchedFundingTypeDto != null) {
-        checkInfoForFundingType(pfDto, matchedFundingTypeDto);
-        checkFundingSubType(pfDto, matchedFundingTypeDto.getId());
-      }
+    for(PostFundingDTO pfDto: checkList) {
+      checkFundingTypeAndSubtype(pfDto, fundingTypeDtos);
     }
     return checkList;
+  }
+
+  public PostFundingDTO checkFundingTypeAndSubtype(PostFundingDTO pfDto, List<FundingTypeDTO> fundingTypeDtos) {
+
+    // check if funding type is empty
+    if (StringUtils.isEmpty(pfDto.getFundingType())) {
+      pfDto.getMessageList().add(FUNDING_TYPE_EMPTY);
+      return pfDto;
+    }
+
+    FundingTypeDTO matchedFundingTypeDto = checkFundingTypeExists(pfDto, fundingTypeDtos);
+    if (matchedFundingTypeDto != null) {
+      checkInfoForFundingType(pfDto, matchedFundingTypeDto);
+      checkFundingSubType(pfDto, matchedFundingTypeDto.getId());
+    }
+    return pfDto;
   }
 
   private FundingTypeDTO checkFundingTypeExists(PostFundingDTO pfDto,

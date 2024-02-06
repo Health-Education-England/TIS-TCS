@@ -509,7 +509,7 @@ public class PostServiceImplTest {
     PostDTO postDTOInDBMock = mock(PostDTO.class);
     List<PostFundingDTO> checkList = new ArrayList<>(postFundingDTOs);
     doReturn(postDTOInDBMock).when(testObj).findOne(any());
-    when(postFundingValidatorMock.validateFundingType(checkList)).thenReturn(checkList);
+    when(postFundingValidatorMock.validatePostFundings(checkList)).thenReturn(checkList);
     doReturn(postDTOInDBMock).when(testObj).update(any());
     List<PostFundingDTO> retList = testObj.patchPostFundings(postDTO);
     Assert.assertEquals(checkList, retList);
