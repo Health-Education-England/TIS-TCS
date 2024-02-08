@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,8 +22,11 @@ public class PostFundingValidator {
   protected static final String FUNDING_SUB_TYPE_NOT_FOUND =
       "Funding sub type not found for this funding type";
 
-  @Autowired
   private ReferenceServiceImpl referenceService;
+
+  public PostFundingValidator(ReferenceServiceImpl referenceService) {
+    this.referenceService = referenceService;
+  }
 
   public List<PostFundingDTO> validateFundingType(List<PostFundingDTO> checkList) {
     if (checkList.isEmpty()) {
