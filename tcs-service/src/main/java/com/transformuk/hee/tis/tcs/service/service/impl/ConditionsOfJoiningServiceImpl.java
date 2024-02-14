@@ -55,11 +55,13 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
     LOG.info("Request received to save Conditions of Joining for id {}.", id);
     try {
       // Deprecated structure and will be removed. JIRA - TIS21-2446: ProgrammeMembership refactor
-      programmeMembership = StringUtils.isNumeric(id.toString()) ?
-          curriculumMembershipRepository.getOne(Long.parseLong(id.toString())).getProgrammeMembership() :
-          programmeMembershipRepository.getOne(UUID.fromString(id.toString()));
+      programmeMembership =
+          StringUtils.isNumeric(id.toString()) ? curriculumMembershipRepository
+              .getOne(Long.parseLong(id.toString())).getProgrammeMembership()
+              : programmeMembershipRepository.getOne(UUID.fromString(id.toString()));
     } catch (EntityNotFoundException e) {
-      throw new IllegalArgumentException(String.format("Programme Membership %s not found.", id), e);
+      throw new IllegalArgumentException(String.format("Programme Membership %s not found.", id),
+          e);
     }
 
     UUID programmeMembershipUuid = programmeMembership.getUuid();

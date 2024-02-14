@@ -22,6 +22,8 @@ import lombok.Data;
 public class ProgrammeMembershipDTO implements Serializable {
 
   /**
+   * This field does not identify a Programme Membership and may be null.
+   *
    * @deprecated 2023-06 Taken from a non-deterministic child {@link CurriculumMembershipDTO}. Use
    *     `uuid` instead.
    */
