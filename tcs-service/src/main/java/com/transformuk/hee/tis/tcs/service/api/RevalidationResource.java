@@ -80,6 +80,7 @@ public class RevalidationResource {
 
   /**
    * GET  /revalidation/connection/detail/{gmcId} : Get revalidation connections details by gmcId.
+   * NOT CURRENTLY IN USE - intended for post-MVP programme history component for connections.
    *
    * @param gmcId the gmcId of trainee
    * @return reval connection details information by gmcId
@@ -90,11 +91,13 @@ public class RevalidationResource {
       @PathVariable String gmcId) {
     LOG.debug("REST request to find Revalidation Connection Detail for a trainee: {}", gmcId);
 
-    if (!gmcId.isEmpty()) {
-      UrlDecoderUtil.decode(gmcId);
-      return ResponseEntity.ok(revalidationService.findAllConnectionsHistoryByGmcId(gmcId));
+    UrlDecoderUtil.decode(gmcId);
+    ConnectionDetailDto connectionDetailDto = revalidationService
+        .findAllConnectionsHistoryByGmcId(gmcId);
+    if (connectionDetailDto != null) {
+      return ResponseEntity.ok(connectionDetailDto);
     } else {
-      return ResponseEntity.badRequest().body(null);
+      return ResponseEntity.notFound().build();
     }
   }
 

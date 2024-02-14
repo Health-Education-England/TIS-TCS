@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
@@ -21,6 +22,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipReposit
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,6 +61,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final CurriculumMapper curriculumMapper;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final PersonRepository personRepository;
+  private final ProgrammeMembershipValidator programmeMembershipValidator;
+  private final ProgrammeMembershipDtoMapper programmeMembershipDtoMapper;
 
   /**
    * Initialise the ProgrammeMembershipService.
@@ -71,6 +75,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
    * @param curriculumMapper               the CurriculumMapper
    * @param applicationEventPublisher      the ApplicationEventPublisher
    * @param personRepository               the PersonRepository
+   * @param programmeMembershipValidator   the ProgrammeMembershipValidator
+   * @param programmeMembershipDtoMapper   the ProgrammeMembershipDtoMapper
    */
   public ProgrammeMembershipServiceImpl(
       ProgrammeMembershipRepository programmeMembershipRepository,
@@ -79,7 +85,9 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       CurriculumMembershipMapper curriculumMembershipMapper,
       CurriculumRepository curriculumRepository, CurriculumMapper curriculumMapper,
       ApplicationEventPublisher applicationEventPublisher,
-      PersonRepository personRepository) {
+      PersonRepository personRepository,
+      ProgrammeMembershipValidator programmeMembershipValidator,
+      ProgrammeMembershipDtoMapper programmeMembershipDtoMapper) {
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.programmeMembershipMapper = programmeMembershipMapper;
@@ -88,6 +96,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     this.curriculumMapper = curriculumMapper;
     this.applicationEventPublisher = applicationEventPublisher;
     this.personRepository = personRepository;
+    this.programmeMembershipValidator = programmeMembershipValidator;
+    this.programmeMembershipDtoMapper = programmeMembershipDtoMapper;
   }
 
   /**
@@ -393,5 +403,31 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       person.setStatus(newStatus);
       personRepository.save(person);
     }
+  }
+
+  /**
+   * patch a programme membership.
+   *
+   * @param programmeMembershipDto the dto to patch
+   * @return the patched dto
+   */
+  public ProgrammeMembershipDTO patch(ProgrammeMembershipDTO programmeMembershipDto) {
+    ProgrammeMembershipDTO programmeMembershipDtoFromDb = findOne(programmeMembershipDto.getUuid());
+    if (programmeMembershipDtoFromDb == null) {
+      programmeMembershipDto.addMessage("Programme membership id not found.");
+      return programmeMembershipDto;
+    }
+    programmeMembershipDtoMapper.copyIfNotNull(programmeMembershipDto,
+        programmeMembershipDtoFromDb);
+    programmeMembershipValidator.validateForBulk(programmeMembershipDtoFromDb);
+
+    ProgrammeMembershipDTO returnDto;
+    if (programmeMembershipDtoFromDb.getMessageList().isEmpty()) {
+      returnDto = save(programmeMembershipDtoFromDb);
+    } else {
+      programmeMembershipDto.setMessageList(programmeMembershipDtoFromDb.getMessageList());
+      returnDto = programmeMembershipDto;
+    }
+    return returnDto;
   }
 }

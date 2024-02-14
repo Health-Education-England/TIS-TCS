@@ -186,6 +186,7 @@ public class PostMapper {
       result.setEndDate(postFunding.getEndDate());
       result.setIntrepidId(postFunding.getIntrepidId());
       result.setFundingBodyId(postFunding.getFundingBodyId());
+      result.setFundingSubTypeId(postFunding.getFundingSubTypeId());
     }
     return result;
   }
@@ -345,6 +346,7 @@ public class PostMapper {
       result.setEndDate(postFundingDTO.getEndDate());
       result.setIntrepidId(postFundingDTO.getIntrepidId());
       result.setFundingBodyId(postFundingDTO.getFundingBodyId());
+      result.setFundingSubTypeId(postFundingDTO.getFundingSubTypeId());
     }
     return result;
   }

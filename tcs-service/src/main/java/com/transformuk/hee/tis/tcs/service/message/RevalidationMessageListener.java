@@ -52,13 +52,13 @@ public class RevalidationMessageListener {
   }
 
   /**
-   * Receive personIds from Rabbit queue and populate currentPm and export to Reval.
+   * Receive personIds from Rabbit queue for trainee changes to export to Reval.
    *
-   * @param personIds the personIds whose currentPm changes nightly
+   * @param personIds the personIds for trainees that have changed
    */
-  @RabbitListener(queues = "${app.rabbit.reval.queue.currentpm.update.tcs}")
-  public void receiveMessageNightlyPmSync(final List<String> personIds) {
-    LOG.info("Received {} personIds and start to sync currentPm.", personIds.size());
+  @RabbitListener(queues = "${app.rabbit.reval.queue.trainee.update.tcs}")
+  public void receiveMessageTraineeSyncChanges(final List<String> personIds) {
+    LOG.info("Received {} personIds to update trainees in reval.", personIds.size());
     personIds.forEach(id -> revalidationRabbitService.updateReval(
         revalidationService.buildTcsConnectionInfo(Long.valueOf(id))));
   }

@@ -5,6 +5,7 @@ import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipTyp
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -96,6 +97,7 @@ public class RevalidationServiceImplTest {
   private static final LocalDate PM_END_DATE = now().plusDays(10);
   private static final LocalDate EXPIRED_PM_START_DATE = now().minusYears(1);
   private static final LocalDate EXPIRED_PM_END_DATE = now().minusMonths(6);
+  private static final String PLACEMENT_GRADE = "ST1";
 
   GradeDTO gradeDTO;
   List<GradeDTO> grades;
@@ -197,6 +199,7 @@ public class RevalidationServiceImplTest {
     connectionMap.put("programmeMembershipType",VISITOR);
     connectionMap.put("programmeStartDate",EXPIRED_PM_START_DATE);
     connectionMap.put("programmeEndDate",EXPIRED_PM_END_DATE);
+    connectionMap.put("currentgrades", PLACEMENT_GRADE);
   }
 
   @Test
@@ -307,6 +310,7 @@ public class RevalidationServiceImplTest {
         .curriculumEndDate(CURRICULUM_END_DATE)
         .programmeMembershipType(PROGRAMME_MEMBERSHIP_TYPE.toString())
         .programmeName(PROGRAMME_NAME)
+        .placementGrade(PLACEMENT_GRADE)
         .build();
 
     final List<CurriculumMembership> curriculumMembershipList = new ArrayList<>();
@@ -347,6 +351,16 @@ public class RevalidationServiceImplTest {
         is(PM_START_DATE));
     assertThat(result.getProgrammeHistory().get(1).getProgrammeMembershipEndDate(),
         is(PM_END_DATE));
+  }
+
+
+  @Test
+  public void shouldReturnNullWhenGmcDetailsDontExistForGmcIdForFindConnectionsHistory() {
+    when(gmcDetailsRepositoryMock.findGmcDetailsByGmcNumber(GMC_NUMBER)).thenReturn(null);
+
+    final ConnectionDetailDto result = testObj.findAllConnectionsHistoryByGmcId(GMC_NUMBER);
+
+    assertThat(result, is(nullValue()));
   }
 
   @Test
@@ -548,16 +562,35 @@ public class RevalidationServiceImplTest {
     assertThat(querySql, containsString("where cd.id = " + PERSON_ID));
     assertThat(querySql, containsString("where pm.personId = " + PERSON_ID));
     assertThat(querySql, containsString("where cm2.personId = " + PERSON_ID));
+    assertThat(querySql, containsString("where pl.traineeId = " + PERSON_ID));
     assertThat(querySql, not(containsString("ORDERBYCLAUSE")));
     assertThat(querySql, not(containsString("LIMITCLAUSE")));
     assertThat(result, notNullValue());
   }
 
   @Test
-  public void shouldReturnNullWhenBuildTcsConnectionInfo() {
+  public void shouldReturnDtoOnlyWithTisPersonIdWhenSqlFilterOutRecord() {
     when(namedParameterJdbcTemplateMock.query(
-          anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
         .thenReturn(Lists.newArrayList());
+
+    ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
+    verify(namedParameterJdbcTemplateMock).query(anyString(),
+        any(MapSqlParameterSource.class), any(RowMapper.class));
+
+    assertThat(result, notNullValue());
+    assertThat(result.getTcsPersonId(), equalTo(PERSON_ID));
+    assertThat(result.getGmcReferenceNumber(), nullValue());
+    assertThat(result.getProgrammeName(), nullValue());
+  }
+
+  @Test
+  public void shouldReturnNullWhenSqlReturnsMultiple() {
+    ConnectionInfoDto connectionInfoDto1 = ConnectionInfoDto.builder().build();
+    ConnectionInfoDto connectionInfoDto2 = ConnectionInfoDto.builder().build();
+    when(namedParameterJdbcTemplateMock.query(
+        anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
+        .thenReturn(Lists.newArrayList(connectionInfoDto1, connectionInfoDto2));
 
     ConnectionInfoDto result = testObj.buildTcsConnectionInfo(PERSON_ID);
     verify(namedParameterJdbcTemplateMock).query(anyString(),

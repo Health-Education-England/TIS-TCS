@@ -95,4 +95,11 @@ public interface ProgrammeMembershipService {
    */
   List<ProgrammeMembershipDTO> findProgrammeMembershipsByProgramme(Long programmeId);
 
+  /**
+   * patch a programme membership.
+   *
+   * @param programmeMembershipDto the dto to patch
+   * @return the patched dto
+   */
+  ProgrammeMembershipDTO patch(ProgrammeMembershipDTO programmeMembershipDto);
 }

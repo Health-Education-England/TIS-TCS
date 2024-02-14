@@ -8,14 +8,16 @@ from (
     pm1.programmeMembershipType,
     pm1.programmeStartDate,
     pm1.programmeEndDate,
+    currentGrade.currentGrades,
     latestCm.curriculumEndDate,
     currentPmCounts.programmeNames as programmeName,
     if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
-   -- note: null values are filtered out by the condition below
-    and lower(gmc.gmcNumber) <> 'unknown'
+    -- note: null values are filtered out by the condition below
+    and lower(gmc.gmcNumber) <> 'unknown' and lower(gmc.gmcNumber) <> 'na' and lower(gmc.gmcNumber) <> 'n/a'
+    and gmc.gmcNumber not like CONCAT('%', UNHEX('c2a0'), '%') -- filter out all gmc number with non-breaking space
   left join (
     -- count current PMs with combined programme names for each person
     select
@@ -45,8 +47,27 @@ from (
     WHERECLAUSE(cm2, personId)
     group by cm2.programmeMembershipUuid
   ) latestCm on latestCm.programmeMembershipUuid = pm1.uuid
+  left join (
+      select
+  		placement.traineeId,
+  		-- one row per trainee
+  		GROUP_CONCAT(distinct placement.gradeId SEPARATOR " | ") currentGrades
+      from (
+        select traineeId, gradeId, dateFrom, dateTo
+        from Placement pl
+        WHERECLAUSE(pl, traineeId)
+      ) placement
+      where placement.dateFrom <= current_date() and placement.dateTo >= current_date()
+      group by placement.traineeId
+    ) currentGrade on cd.id = currentGrade.traineeId
   WHERECLAUSE(cd, id)
 ) as ot
+-- Filter based on "role" from the "Person" table
+where ot.personId not in (
+  select distinct p.id
+  from Person p
+  where lower(p.role) like '%dummy%' or lower(p.role) like '%placeholder%'
+)
 ORDERBYCLAUSE
 LIMITCLAUSE
 ;

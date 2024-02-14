@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 /**
  * A PostFunding.
@@ -35,6 +37,10 @@ public class PostFunding implements Serializable {
 
   @Column(name = "fundingType")
   private String fundingType;
+
+  @Type(type = "org.hibernate.type.UUIDCharType")
+  @Column(name = "fundingSubTypeId")
+  private UUID fundingSubTypeId;
 
   @Column(name = "info")
   private String info;

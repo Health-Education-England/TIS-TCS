@@ -66,6 +66,7 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final String PROGRAMME_NAME_FIELD = "programmeName";
   private static final String PROGRAMME_START_DATE_FIELD = "programmeStartDate";
   private static final String SURNAME_FIELD = "surname";
+  private static final String PLACEMENT_GRADE_FIELD = "currentGrades";
   /**
    * This RegEx matches strings in format of WHERECLAUSE(p, id).
    * Whitespaces are allowed in the brackets.
@@ -73,7 +74,6 @@ public class RevalidationServiceImpl implements RevalidationService {
    */
   private static final String WHERE_CLAUSE_MACRO_REGEX =
       "WHERECLAUSE\\(\\s*(\\w+?)\\s*,\\s*(\\w+?)\\s*\\)";
-
   public static final int SIZE = 20;
   private static final Logger LOG = LoggerFactory.getLogger(RevalidationServiceImpl.class);
   private static final List<String> placementTypes = asList("In post", "In Post - Acting Up",
@@ -154,6 +154,9 @@ public class RevalidationServiceImpl implements RevalidationService {
 
     LOG.debug("GMCNo received from Connection History service: {}", gmcId);
     final GmcDetails gmcDetail = gmcDetailsRepository.findGmcDetailsByGmcNumber(gmcId);
+    if (gmcDetail == null) {
+      return null;
+    }
     final RevalidationRecordDto revalidationRecordDto = buildRevalidationRecord(gmcDetail);
 
     connectionDetailDto.setGmcNumber(revalidationRecordDto.getGmcNumber());
@@ -237,9 +240,12 @@ public class RevalidationServiceImpl implements RevalidationService {
         .query(query, paramSource, new RevalidationConnectionInfoMapper());
     if (connectionInfoDtos.size() == 1) {
       return connectionInfoDtos.get(0);
+    } else if (connectionInfoDtos.isEmpty()) {
+      return ConnectionInfoDto.builder().tcsPersonId(personId).build();
     } else {
-      LOG.error("There are {} connectionInfoDtos found for personId: {}",
-          connectionInfoDtos.size(), personId);
+      LOG.error("Found multiple TIS records via 'traineeInfoForConnection.sql' for personId: {}. "
+              + "Please note: this data update in TIS won't be sent to Reval.",
+          personId);
       return null;
     }
   }
@@ -419,6 +425,7 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeMembershipStartDate(start)
           .programmeMembershipEndDate(end)
           .curriculumEndDate(curriculumEnd)
+          .placementGrade(rs.getString(PLACEMENT_GRADE_FIELD))
           .dataSource("TCS")
           .build();
     }

@@ -3,11 +3,13 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,9 +42,12 @@ public class PostFundingResource {
   private static final String ENTITY_NAME = "postFunding";
   private final Logger log = LoggerFactory.getLogger(PostFundingResource.class);
   private final PostFundingService postFundingService;
+  private final PostFundingValidator postFundingValidator;
 
-  public PostFundingResource(PostFundingService postFundingService) {
+  public PostFundingResource(PostFundingService postFundingService,
+      PostFundingValidator postFundingValidator) {
     this.postFundingService = postFundingService;
+    this.postFundingValidator = postFundingValidator;
   }
 
   /**
@@ -86,10 +91,14 @@ public class PostFundingResource {
     if (postFundingDTO.getId() == null) {
       return createPostFunding(postFundingDTO);
     }
-    PostFundingDTO result = postFundingService.save(postFundingDTO);
+    PostFundingDTO returnedPostFundingDto =
+        postFundingValidator.validateFundingType(Arrays.asList(postFundingDTO)).get(0);
+    if (returnedPostFundingDto.getMessageList().isEmpty()) {
+      returnedPostFundingDto = postFundingService.save(postFundingDTO);
+    }
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postFundingDTO.getId().toString()))
-        .body(result);
+        .body(returnedPostFundingDto);
   }
 
   /**
