@@ -9,6 +9,8 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipReposit
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +55,11 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
     LOG.info("Request received to save Conditions of Joining for id {}.", id);
     try {
       // Deprecated structure and will be removed. JIRA - TIS21-2446: ProgrammeMembership refactor
-      programmeMembership = curriculumMembershipRepository.getOne(Long.parseLong(id.toString()))
-          .getProgrammeMembership();
-    } catch (NumberFormatException e) {
-      programmeMembership = programmeMembershipRepository.getOne(UUID.fromString(id.toString()));
-    }
-
-    if (programmeMembership == null) {
-      throw new IllegalArgumentException(String.format("Programme Membership %s not found.", id));
+      programmeMembership = StringUtils.isNumeric(id.toString()) ?
+          curriculumMembershipRepository.getOne(Long.parseLong(id.toString())).getProgrammeMembership() :
+          programmeMembershipRepository.getOne(UUID.fromString(id.toString()));
+    } catch (EntityNotFoundException e) {
+      throw new IllegalArgumentException(String.format("Programme Membership %s not found.", id), e);
     }
 
     UUID programmeMembershipUuid = programmeMembership.getUuid();

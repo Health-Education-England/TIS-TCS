@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
-import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
@@ -21,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.time.Instant;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -53,7 +53,8 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenCurriculumMembershipIdNotFound() {
-    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(null);
+    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenThrow(
+        new EntityNotFoundException("Expected"));
 
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save(CURRICULUM_MEMBERSHIP_ID, coj));
@@ -62,7 +63,8 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenProgrammeMembershipIdNotFound() {
-    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(null);
+    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenThrow(
+        new EntityNotFoundException("Expected"));
 
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID, coj));

@@ -8,8 +8,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,7 +52,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
@@ -89,9 +88,6 @@ class ProgrammeMembershipResourceIntTest {
   private static final String UPDATED_INTREPID_ID = "BBBBBBBBBB";
   private static final String ANOTHER_INTREPID_ID = "CCCCCCCCCC";
 
-  private static final String DEFAULT_ROTATION = "AAAAAAAAAA";
-  private static final String UPDATED_ROTATION = "BBBBBBBBBB";
-
   private static final LocalDate DEFAULT_CURRICULUM_START_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_CURRICULUM_START_DATE = LocalDate
       .now(ZoneId.systemDefault());
@@ -104,8 +100,6 @@ class ProgrammeMembershipResourceIntTest {
   private static final Integer UPDATED_PERIOD_OF_GRACE = 2;
 
   private static final LocalDate DEFAULT_PROGRAMME_START_DATE = LocalDate.ofEpochDay(0L);
-  private static final LocalDate UPDATED_PROGRAMME_START_DATE = LocalDate
-      .now(ZoneId.systemDefault());
 
   private static final LocalDate DEFAULT_CURRICULUM_COMPLETION_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_CURRICULUM_COMPLETION_DATE = LocalDate
@@ -115,7 +109,6 @@ class ProgrammeMembershipResourceIntTest {
   private static final LocalDate UPDATED_PROGRAMME_END_DATE = LocalDate.now(ZoneId.systemDefault());
 
   private static final String DEFAULT_LEAVING_DESTINATION = "AAAAAAAAAA";
-  private static final String UPDATED_LEAVING_DESTINATION = "BBBBBBBBBB";
 
   private static final String DEFAULT_LEAVING_REASON = "AAAAAAAAAA";
   private static final String UPDATED_LEAVING_REASON = "BBBBBBBBBB";
@@ -175,9 +168,6 @@ class ProgrammeMembershipResourceIntTest {
   private ProgrammeMembershipValidator programmeMembershipValidator;
 
   @Autowired
-  private EntityManager em;
-
-  @Autowired
   private PersonMapper personMapper;
 
   private Person person;
@@ -227,14 +217,6 @@ class ProgrammeMembershipResourceIntTest {
   static Person createPersonEntity() {
     return new Person().intrepidId(DEFAULT_INTREPID_ID);
   }
-
-  /**
-   * Create Rotation entity
-   */
-  static Rotation createRotationEntity() {
-    return new Rotation().name(DEFAULT_ROTATION).status(Status.CURRENT);
-  }
-
 
   @BeforeEach
   void setup() {
@@ -822,10 +804,8 @@ class ProgrammeMembershipResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("curriculumId"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").
-            value(String.format(
-                "The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made",
-                notAssociatedCurriculum.getId())));
+        .andExpect(jsonPath("$.fieldErrors[0].message").value(
+            "The selected Programme and Curriculum are not linked. They must be linked before a Programme Membership can be made"));
   }
 
   @Test
@@ -1323,6 +1303,7 @@ class ProgrammeMembershipResourceIntTest {
 
     ConditionsOfJoining coj = new ConditionsOfJoining();
     coj.setProgrammeMembership(programmeMembership);
+    coj.setProgrammeMembershipUuid(programmeMembership.getUuid());
     conditionsOfJoiningRepository.saveAndFlush(coj);
     // Verifies entity is persisted as well as setting the expected UUID.
     UUID expectedCojUuid = conditionsOfJoiningRepository.getOne(programmeMembership.getUuid())
