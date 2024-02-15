@@ -17,7 +17,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 
 class TraineeMessageListenerTest {
 
-  private static final UUID PROGRAMME_MEMBERSHIP_ID = UUID.randomUUID();
+  private static final String PROGRAMME_MEMBERSHIP_ID = UUID.randomUUID().toString();
   private static final Instant SIGNED_AT = Instant.now();
 
   private TraineeMessageListener listener;
