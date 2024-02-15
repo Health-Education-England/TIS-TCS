@@ -8,11 +8,11 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 public interface ConditionsOfJoiningService {
 
   /**
-   * Save a Conditions of Joining from its DTO and related programme membership ID/UUID.
+   * Save a Conditions of Joining from its DTO and related programme membership UUID.
    *
-   * @param id  the programme membership ID or UUID
+   * @param id  the programme membership UUID as a string
    * @param dto the Conditions Of Joining DTO
    * @return the saved Conditions of Joining DTO
    */
-  ConditionsOfJoiningDto save(Object id, ConditionsOfJoiningDto dto);
+  ConditionsOfJoiningDto save(String id, ConditionsOfJoiningDto dto);
 }

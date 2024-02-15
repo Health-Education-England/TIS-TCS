@@ -17,7 +17,6 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 
 class TraineeMessageListenerTest {
 
-  private static final Long CURRICULUM_MEMBERSHIP_ID = 40L;
   private static final UUID PROGRAMME_MEMBERSHIP_ID = UUID.randomUUID();
   private static final Instant SIGNED_AT = Instant.now();
 
@@ -35,16 +34,6 @@ class TraineeMessageListenerTest {
   }
 
   @Test
-  void shouldSaveSignedCojWhenEventValidWithCmId() {
-    ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
-        CURRICULUM_MEMBERSHIP_ID, dto);
-
-    listener.receiveMessage(event);
-
-    verify(service).save(CURRICULUM_MEMBERSHIP_ID, dto);
-  }
-
-  @Test
   void shouldSaveSignedCojWhenEventValidWithPmId() {
     ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
         PROGRAMME_MEMBERSHIP_ID, dto);
@@ -57,9 +46,9 @@ class TraineeMessageListenerTest {
   @Test
   void shouldNotRequeueMessageWhenEventArgumentsInvalid() {
     ConditionsOfJoiningSignedEvent event = new ConditionsOfJoiningSignedEvent(
-        CURRICULUM_MEMBERSHIP_ID, dto);
+        PROGRAMME_MEMBERSHIP_ID, dto);
 
-    when(service.save(CURRICULUM_MEMBERSHIP_ID, dto)).thenThrow(IllegalArgumentException.class);
+    when(service.save(PROGRAMME_MEMBERSHIP_ID, dto)).thenThrow(IllegalArgumentException.class);
 
     assertThrows(AmqpRejectAndDontRequeueException.class, () -> listener.receiveMessage(event));
   }

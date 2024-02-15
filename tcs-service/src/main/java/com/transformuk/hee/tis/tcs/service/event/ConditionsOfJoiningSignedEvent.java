@@ -9,16 +9,16 @@ import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 public class ConditionsOfJoiningSignedEvent {
 
   @JsonProperty("programmeMembershipTisId")
-  private final Object id; //this may be a long or a UUID
+  private final String id;
   private final ConditionsOfJoiningDto conditionsOfJoining;
 
-  public ConditionsOfJoiningSignedEvent(Object id,
+  public ConditionsOfJoiningSignedEvent(String id,
       ConditionsOfJoiningDto conditionsOfJoining) {
     this.id = id;
     this.conditionsOfJoining = conditionsOfJoining;
   }
 
-  public Object getId() {
+  public String getId() {
     return id;
   }
 

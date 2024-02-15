@@ -43,14 +43,10 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
   }
 
   @Override
-  public ConditionsOfJoiningDto save(Object id, ConditionsOfJoiningDto dto) {
+  public ConditionsOfJoiningDto save(String id, ConditionsOfJoiningDto dto) {
     ProgrammeMembershipDTO programmeMembership;
-    LOG.info("Request received to save Conditions of Joining for id {}.", id);
-    try {
-      programmeMembership = programmeMembershipService.findOne(Long.parseLong(id.toString()));
-    } catch (NumberFormatException e) {
-      programmeMembership = programmeMembershipService.findOne(UUID.fromString(id.toString()));
-    }
+    LOG.info("Request received to save Conditions of Joining for UUID {}.", id);
+    programmeMembership = programmeMembershipService.findOne(UUID.fromString(id));
 
     if (programmeMembership == null) {
       throw new IllegalArgumentException(
