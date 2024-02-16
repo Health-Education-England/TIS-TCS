@@ -10,7 +10,6 @@ import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -49,12 +48,11 @@ public class CurriculumMembershipMapperTest {
     cm1.setProgrammeMembership(pm1);
     cm2.setProgrammeMembership(pm2);
     pm1.setCurriculumMemberships(Sets.newLinkedHashSet(cm1));
+    pm1.setConditionsOfJoining(conditionsOfJoining);
     pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2));
 
     ConditionsOfJoiningDto conditionsOfJoiningDto = new ConditionsOfJoiningDto();
 
-    when(conditionsOfJoiningRepositoryMock.findById(pmID))
-        .thenReturn(Optional.of(conditionsOfJoining));
     when(conditionsOfJoiningMapperMock.toDto(conditionsOfJoining))
         .thenReturn(conditionsOfJoiningDto);
 

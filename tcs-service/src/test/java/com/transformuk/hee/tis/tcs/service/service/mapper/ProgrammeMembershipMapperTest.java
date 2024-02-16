@@ -9,9 +9,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
-import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -32,9 +30,6 @@ public class ProgrammeMembershipMapperTest {
 
   @Mock
   ConditionsOfJoiningMapper conditionsOfJoiningMapperMock;
-
-  @Mock
-  ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
 
   @InjectMocks
   private ProgrammeMembershipMapper testObj;
@@ -63,6 +58,7 @@ public class ProgrammeMembershipMapperTest {
     cm1.setProgrammeMembership(pm1);
     cm2.setProgrammeMembership(pm2);
     cm3.setProgrammeMembership(pm2);
+    pm1.setConditionsOfJoining(conditionsOfJoining);
     pm1.setCurriculumMemberships(Sets.newLinkedHashSet(cm1));
     pm2.setCurriculumMemberships(Sets.newLinkedHashSet(cm2, cm3));
 
@@ -81,8 +77,6 @@ public class ProgrammeMembershipMapperTest {
         .thenReturn(cmDTO2);
     when(curriculumMembershipMapperMock.curriculumMembershipToCurriculumMembershipDto(cm3))
         .thenReturn(cmDTO3);
-    when(conditionsOfJoiningRepositoryMock.findById(pmID))
-        .thenReturn(Optional.of(conditionsOfJoining));
     when(conditionsOfJoiningMapperMock.toDto(conditionsOfJoining))
         .thenReturn(conditionsOfJoiningDto);
 

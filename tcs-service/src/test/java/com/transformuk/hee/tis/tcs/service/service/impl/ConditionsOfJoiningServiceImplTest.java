@@ -10,14 +10,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
-import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.time.Instant;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -30,17 +33,19 @@ class ConditionsOfJoiningServiceImplTest {
 
   private ConditionsOfJoiningService conditionsOfJoiningService;
   private ConditionsOfJoiningRepository repository;
-  private ProgrammeMembershipService programmeMembershipService;
+  private ProgrammeMembershipRepository programmeMembershipRepository;
+  private CurriculumMembershipRepository curriculumMembershipRepository;
   private ConditionsOfJoiningDto coj;
 
   @BeforeEach
   void setUp() {
     repository = mock(ConditionsOfJoiningRepository.class);
     ConditionsOfJoiningMapper mapper = Mappers.getMapper(ConditionsOfJoiningMapper.class);
-    programmeMembershipService = mock(ProgrammeMembershipService.class);
+    programmeMembershipRepository = mock(ProgrammeMembershipRepository.class);
+    curriculumMembershipRepository = mock(CurriculumMembershipRepository.class);
 
     conditionsOfJoiningService = new ConditionsOfJoiningServiceImpl(repository, mapper,
-        programmeMembershipService);
+        programmeMembershipRepository, curriculumMembershipRepository);
     coj = new ConditionsOfJoiningDto();
     coj.setSignedAt(SIGNED_AT);
     coj.setVersion(GoldGuideVersion.GG9);
@@ -48,7 +53,8 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenCurriculumMembershipIdNotFound() {
-    when(programmeMembershipService.findOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(null);
+    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenThrow(
+        new EntityNotFoundException("Expected"));
 
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save(CURRICULUM_MEMBERSHIP_ID, coj));
@@ -57,7 +63,8 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenProgrammeMembershipIdNotFound() {
-    when(programmeMembershipService.findOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(null);
+    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenThrow(
+        new EntityNotFoundException("Expected"));
 
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID, coj));
@@ -73,11 +80,13 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldSaveTheConditionsOfJoiningAgainstTheProgrammeMembershipFromCmId() {
-    ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
-    programmeMembershipDto.setUuid(PROGRAMME_MEMBERSHIP_UUID);
+    ProgrammeMembership programmeMembership = new ProgrammeMembership();
+    programmeMembership.setUuid(PROGRAMME_MEMBERSHIP_UUID);
+    CurriculumMembership curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setProgrammeMembership(programmeMembership);
 
-    when(programmeMembershipService.findOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
-        programmeMembershipDto);
+    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
+        curriculumMembership);
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
 
     ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(CURRICULUM_MEMBERSHIP_ID,
@@ -93,11 +102,11 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldSaveTheConditionsOfJoiningAgainstTheProgrammeMembershipFromPmId() {
-    ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
-    programmeMembershipDto.setUuid(PROGRAMME_MEMBERSHIP_UUID);
+    ProgrammeMembership programmeMembership = new ProgrammeMembership();
+    programmeMembership.setUuid(PROGRAMME_MEMBERSHIP_UUID);
 
-    when(programmeMembershipService.findOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(
-        programmeMembershipDto);
+    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(
+        programmeMembership);
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
 
     ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID,
@@ -115,11 +124,13 @@ class ConditionsOfJoiningServiceImplTest {
   void saveShouldReplaceAnyProvidedProgrammeMembershipUuid() {
     coj.setProgrammeMembershipUuid(UUID.randomUUID());
 
-    ProgrammeMembershipDTO programmeMembershipDto = new ProgrammeMembershipDTO();
-    programmeMembershipDto.setUuid(PROGRAMME_MEMBERSHIP_UUID);
+    ProgrammeMembership programmeMembership = new ProgrammeMembership();
+    programmeMembership.setUuid(PROGRAMME_MEMBERSHIP_UUID);
+    CurriculumMembership curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setProgrammeMembership(programmeMembership);
 
-    when(programmeMembershipService.findOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
-        programmeMembershipDto);
+    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
+        curriculumMembership);
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
 
     ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(CURRICULUM_MEMBERSHIP_ID,

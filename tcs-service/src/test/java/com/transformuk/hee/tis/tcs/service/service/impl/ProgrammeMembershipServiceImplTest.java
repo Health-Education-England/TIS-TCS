@@ -25,7 +25,6 @@ import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
-import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -96,13 +95,9 @@ public class ProgrammeMembershipServiceImplTest {
   private final Programme programme = new Programme();
   private final PersonDTO personDto = new PersonDTO();
   private final Person person = new Person();
-  @Mock
-  ConditionsOfJoiningRepository conditionsOfJoiningRepositoryMock;
   private ProgrammeMembershipDTO programmeMembershipDto1 = new ProgrammeMembershipDTO();
   private ProgrammeMembershipServiceImpl testObj;
   private ProgrammeMembershipMapper programmeMembershipMapper;
-  private CurriculumMembershipMapper curriculumMembershipMapper;
-  private ConditionsOfJoiningMapper conditionsOfJoiningMapper;
   @Mock
   private ProgrammeMembershipRepository programmeMembershipRepositoryMock;
   @Mock
@@ -120,17 +115,15 @@ public class ProgrammeMembershipServiceImplTest {
 
   @Before
   public void setup() {
-    conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
-    curriculumMembershipMapper = new CurriculumMembershipMapper(conditionsOfJoiningMapper,
-        conditionsOfJoiningRepositoryMock);
+    ConditionsOfJoiningMapper conditionsOfJoiningMapper = new ConditionsOfJoiningMapperImpl();
+    CurriculumMembershipMapper curriculumMembershipMapper = new CurriculumMembershipMapper(
+        conditionsOfJoiningMapper);
     TrainingNumberMapper trainingNumberMapper = new TrainingNumberMapperImpl();
     ReflectionTestUtils.setField(trainingNumberMapper, "programmeMapper",
         new ProgrammeMapperImpl());
     RotationMapper rotationMapper = new RotationMapperImpl();
-
     programmeMembershipMapper = new ProgrammeMembershipMapper(curriculumMembershipMapper,
-        conditionsOfJoiningMapper,
-        conditionsOfJoiningRepositoryMock, trainingNumberMapper, rotationMapper);
+        conditionsOfJoiningMapper, trainingNumberMapper, rotationMapper);
     CurriculumMapper curriculumMapper = new CurriculumMapperImpl();
     ProgrammeMembershipDtoMapper programmeMembershipDtoMapper =
         new ProgrammeMembershipDtoMapperImpl();

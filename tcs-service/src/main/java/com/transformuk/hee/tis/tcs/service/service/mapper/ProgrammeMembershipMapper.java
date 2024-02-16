@@ -5,17 +5,14 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
-import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
-import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -28,25 +25,21 @@ public class ProgrammeMembershipMapper {
 
   CurriculumMembershipMapper curriculumMembershipMapper;
   ConditionsOfJoiningMapper conditionsOfJoiningMapper;
-  ConditionsOfJoiningRepository conditionsOfJoiningRepository;
   TrainingNumberMapper trainingNumberMapper;
   RotationMapper rotationMapper;
 
   /**
    * Initialise the ProgrammeMembership mapper.
    *
-   * @param curriculumMembershipMapper    the Curriculum Membership mapper
-   * @param conditionsOfJoiningMapper     the Conditions of Joining mapper
-   * @param conditionsOfJoiningRepository the Conditions of Joining repository
+   * @param curriculumMembershipMapper the Curriculum Membership mapper
+   * @param conditionsOfJoiningMapper  the Conditions of Joining mapper
    */
   public ProgrammeMembershipMapper(CurriculumMembershipMapper curriculumMembershipMapper,
       ConditionsOfJoiningMapper conditionsOfJoiningMapper,
-      ConditionsOfJoiningRepository conditionsOfJoiningRepository,
       TrainingNumberMapper trainingNumberMapper,
       RotationMapper rotationMapper) {
     this.curriculumMembershipMapper = curriculumMembershipMapper;
     this.conditionsOfJoiningMapper = conditionsOfJoiningMapper;
-    this.conditionsOfJoiningRepository = conditionsOfJoiningRepository;
     this.trainingNumberMapper = trainingNumberMapper;
     this.rotationMapper = rotationMapper;
   }
@@ -203,12 +196,8 @@ public class ProgrammeMembershipMapper {
 
     dto.setCurriculumMemberships(new ArrayList<>());
 
-    if (dto.getUuid() != null) {
-      Optional<ConditionsOfJoining> conditionsOfJoiningOptional
-          = conditionsOfJoiningRepository.findById(dto.getUuid());
-      conditionsOfJoiningOptional.ifPresent(c -> dto.setConditionsOfJoining(
-          conditionsOfJoiningMapper.toDto(c)));
-    }
+    dto.setConditionsOfJoining(
+        conditionsOfJoiningMapper.toDto(entity.getConditionsOfJoining()));
     return dto;
   }
 

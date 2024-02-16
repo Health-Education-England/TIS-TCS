@@ -7,17 +7,14 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RotationDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
-import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.model.Rotation;
 import com.transformuk.hee.tis.tcs.service.model.TrainingNumber;
-import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -30,18 +27,14 @@ import org.springframework.util.CollectionUtils;
 public class CurriculumMembershipMapper {
 
   ConditionsOfJoiningMapper conditionsOfJoiningMapper;
-  ConditionsOfJoiningRepository conditionsOfJoiningRepository;
 
   /**
    * Initialise the CurriculumMembership mapper.
    *
    * @param conditionsOfJoiningMapper the Conditions of Joining mapper
-   * @param conditionsOfJoiningRepository the Conditions of Joining repository
    */
-  public CurriculumMembershipMapper(ConditionsOfJoiningMapper conditionsOfJoiningMapper,
-      ConditionsOfJoiningRepository conditionsOfJoiningRepository) {
+  public CurriculumMembershipMapper(ConditionsOfJoiningMapper conditionsOfJoiningMapper) {
     this.conditionsOfJoiningMapper = conditionsOfJoiningMapper;
-    this.conditionsOfJoiningRepository = conditionsOfJoiningRepository;
   }
 
   /**
@@ -167,12 +160,8 @@ public class CurriculumMembershipMapper {
     } else {
       result.setPerson(personToPersonDto(programmeMembership.getPerson()));
     }
-    if (result.getUuid() != null) {
-      Optional<ConditionsOfJoining> conditionsOfJoiningOptional
-          = conditionsOfJoiningRepository.findById(result.getUuid());
-      conditionsOfJoiningOptional.ifPresent(c -> result.setConditionsOfJoining(
-          conditionsOfJoiningMapper.toDto(c)));
-    }
+    result.setConditionsOfJoining(
+        conditionsOfJoiningMapper.toDto(programmeMembership.getConditionsOfJoining()));
 
     result.setTrainingPathway(programmeMembership.getTrainingPathway());
     return result;
