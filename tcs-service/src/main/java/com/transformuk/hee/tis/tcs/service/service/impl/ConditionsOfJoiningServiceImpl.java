@@ -78,7 +78,7 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
       entity = repository.save(mapper.toEntity(dto));
     } catch (NonTransientDataAccessException e) {
       throw new IllegalArgumentException(
-          String.format("Unable to save Conditions of Joining for  %s.", id), e);
+          String.format("Unable to save Conditions of Joining %s.", id), e);
     }
     LOG.info("Saved Conditions of Joining for Programme Membership with UUID {}.",
         programmeMembershipUuid);
