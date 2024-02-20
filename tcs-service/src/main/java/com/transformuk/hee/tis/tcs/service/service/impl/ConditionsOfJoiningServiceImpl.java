@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +60,10 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
           StringUtils.isNumeric(id.toString()) ? curriculumMembershipRepository
               .getOne(Long.parseLong(id.toString())).getProgrammeMembership()
               : programmeMembershipRepository.getOne(UUID.fromString(id.toString()));
+      if (programmeMembership == null) {
+        throw new IllegalArgumentException(String.format("No Programme Membership for %s.", id));
+      }
+      LOG.debug("Found ProgrammeMembership {}", programmeMembership);
     } catch (EntityNotFoundException e) {
       throw new IllegalArgumentException(String.format("Programme Membership %s not found.", id),
           e);
@@ -68,7 +73,13 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
     dto.setProgrammeMembershipUuid(programmeMembershipUuid);
     LOG.info("Saving Conditions of Joining for Programme Membership with UUID {}.",
         programmeMembershipUuid);
-    ConditionsOfJoining entity = repository.save(mapper.toEntity(dto));
+    ConditionsOfJoining entity;
+    try {
+      entity = repository.save(mapper.toEntity(dto));
+    } catch (NonTransientDataAccessException e) {
+      throw new IllegalArgumentException(
+          String.format("Unable to save Conditions of Joining %s.", id), e);
+    }
     LOG.info("Saved Conditions of Joining for Programme Membership with UUID {}.",
         programmeMembershipUuid);
 

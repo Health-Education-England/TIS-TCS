@@ -24,6 +24,7 @@ import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.springframework.dao.DataIntegrityViolationException;
 
 class ConditionsOfJoiningServiceImplTest {
 
@@ -69,6 +70,17 @@ class ConditionsOfJoiningServiceImplTest {
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID, coj));
     verify(repository, never()).save(any());
+  }
+
+  @Test
+  void saveShouldThrowExceptionWhenCojConstraintFails() {
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setUuid(UUID.randomUUID());
+    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(pm);
+    when(repository.save(any())).thenThrow(new DataIntegrityViolationException("expected"));
+
+    assertThrows(IllegalArgumentException.class,
+        () -> conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID, coj));
   }
 
   @Test
