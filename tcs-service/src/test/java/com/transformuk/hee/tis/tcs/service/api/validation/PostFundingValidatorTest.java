@@ -154,9 +154,16 @@ public class PostFundingValidatorTest {
 
   @Test
   public void testValidateSuccessfully() {
+    validDTO.setFundingType(FUNDING_TYPE_LABEL.toUpperCase());
+    when(referenceService.findCurrentFundingTypesByLabelIn(
+        Collections.singleton(FUNDING_TYPE_LABEL.toUpperCase())))
+        .thenReturn(Collections.singletonList(fundingTypeDTO));
     pfDTOs = buildCheckedList(validDTO);
+
     List<PostFundingDTO> result = postFundingValidator.validateFundingType(pfDTOs);
+
     assertThat(result.get(0).getMessageList().isEmpty(), is(true));
+    assertThat(result.get(0).getFundingType(), is(FUNDING_TYPE_LABEL));
   }
 
   @Test
