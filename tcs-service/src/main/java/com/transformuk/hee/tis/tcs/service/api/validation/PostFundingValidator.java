@@ -59,10 +59,13 @@ public class PostFundingValidator {
   private FundingTypeDTO checkFundingTypeExists(PostFundingDTO pfDto,
       List<FundingTypeDTO> fundingTypeDtos) {
     List<FundingTypeDTO> filteredFundingTypeDtos = fundingTypeDtos.stream().filter(
-            fundingTypeDto -> StringUtils.equals(fundingTypeDto.getLabel(), pfDto.getFundingType()))
-        .collect(Collectors.toList());
+        fundingTypeDto -> StringUtils.equalsIgnoreCase(fundingTypeDto.getLabel(),
+            pfDto.getFundingType())).collect(Collectors.toList());
     if (filteredFundingTypeDtos.size() == 1) {
-      return filteredFundingTypeDtos.get(0);
+      FundingTypeDTO matchedFundingTypeDto = filteredFundingTypeDtos.get(0);
+      // When fundingType is verified, use the label from reference object
+      pfDto.setFundingType(matchedFundingTypeDto.getLabel());
+      return matchedFundingTypeDto;
     } else if (filteredFundingTypeDtos.isEmpty()) {
       pfDto.getMessageList().add(FUNDING_TYPE_NOT_FOUND_ERROR);
     } else {
