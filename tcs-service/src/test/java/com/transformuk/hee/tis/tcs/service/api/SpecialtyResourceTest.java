@@ -81,6 +81,7 @@ public class SpecialtyResourceTest {
     specialtyDTO.setSpecialtyCode(SPECIALTY_CODE);
     specialtyDTO.setStatus(Status.CURRENT);
     specialtyDTO.setCollege(SPECIALTY_COLLEGE);
+    specialtyDTO.setBlockIndemnity(true);
 
     anotherSpecialtyDTO = new SpecialtyDTO();
     anotherSpecialtyDTO.setId(ANOTHER_SPECIALTY_ID);
@@ -88,6 +89,7 @@ public class SpecialtyResourceTest {
     anotherSpecialtyDTO.setSpecialtyCode(ANOTHER_SPECIALTY_CODE);
     anotherSpecialtyDTO.setStatus(Status.INACTIVE);
     anotherSpecialtyDTO.setCollege(ANOTHER_SPECIALTY_COLLEGE);
+    anotherSpecialtyDTO.setBlockIndemnity(false);
 
   }
 
@@ -115,6 +117,7 @@ public class SpecialtyResourceTest {
         .andExpect(jsonPath("$.content[0].college").value(SPECIALTY_COLLEGE))
         .andExpect(jsonPath("$.content[0].specialtyCode").value(SPECIALTY_CODE))
         .andExpect(jsonPath("$.content[0].name").value(SPECIALTY_NAME))
+        .andExpect(jsonPath("$.content[0].blockIndemnity").value(true))
     ;
 
     verify(specialtyServiceMock).getPagedSpecialtiesForProgrammeId(programmeId, null, page);
@@ -146,6 +149,7 @@ public class SpecialtyResourceTest {
         .andExpect(jsonPath("$.content[0].college").value(SPECIALTY_COLLEGE))
         .andExpect(jsonPath("$.content[0].specialtyCode").value(SPECIALTY_CODE))
         .andExpect(jsonPath("$.content[0].name").value(SPECIALTY_NAME))
+        .andExpect(jsonPath("$.content[0].blockIndemnity").value(true))
     ;
     verify(specialtyServiceMock).getPagedSpecialtiesForProgrammeId(programmeId, query, page);
   }
@@ -173,6 +177,7 @@ public class SpecialtyResourceTest {
             .value(Matchers.hasItems(SPECIALTY_CODE, ANOTHER_SPECIALTY_CODE)))
         .andExpect(
             jsonPath("$.[*].name").value(Matchers.hasItems(SPECIALTY_NAME, ANOTHER_SPECIALTY_NAME)))
+        .andExpect(jsonPath("$.[*].blockIndemnity").value(Matchers.hasItems(true, false)))
     ;
 
     verify(specialtyServiceMock).getSpecialtiesForProgrammeAndPerson(programmeId, personId);

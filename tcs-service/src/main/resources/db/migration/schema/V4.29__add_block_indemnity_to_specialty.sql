@@ -1,0 +1,2 @@
+ALTER TABLE `Specialty`
+ADD COLUMN `blockIndemnity` BOOLEAN DEFAULT FALSE;

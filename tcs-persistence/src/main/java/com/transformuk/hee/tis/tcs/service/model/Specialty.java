@@ -71,6 +71,9 @@ public class Specialty implements Serializable {
   @OneToMany(mappedBy = "specialty", fetch = FetchType.LAZY)
   private Set<PlacementSpecialty> placementSpecialty;
 
+  @Column(name = "blockIndemnity")
+  private boolean blockIndemnity;
+
   public Specialty status(Status status) {
     this.status = status;
     return this;
@@ -108,6 +111,11 @@ public class Specialty implements Serializable {
 
   public Specialty name(String name) {
     this.name = name;
+    return this;
+  }
+
+  public Specialty blockIndemnity(boolean blockIndemnity) {
+    this.blockIndemnity = blockIndemnity;
     return this;
   }
 

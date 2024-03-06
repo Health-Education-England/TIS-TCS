@@ -116,7 +116,8 @@ public class SpecialtyResourceIntTest {
         .specialtyCode(DEFAULT_NHS_SPECIALTY_CODE)
         .specialtyTypes(newHashSet(DEFAULT_SPECIALTY_TYPE))
         .intrepidId(DEFAULT_INTREPID_ID)
-        .name(DEFAULT_NAME);
+        .name(DEFAULT_NAME)
+        .blockIndemnity(true);
   }
 
   public static SpecialtyGroup createSpecialtyGroupEntity() {
@@ -171,6 +172,7 @@ public class SpecialtyResourceIntTest {
     assertThat(testSpecialty.getCollege()).isEqualTo(DEFAULT_COLLEGE);
     assertThat(testSpecialty.getSpecialtyCode()).isEqualTo(DEFAULT_NHS_SPECIALTY_CODE);
     assertThat(testSpecialty.getSpecialtyTypes()).isEqualTo(newHashSet(DEFAULT_SPECIALTY_TYPE));
+    assertThat(testSpecialty.isBlockIndemnity()).isEqualTo(true);
   }
 
   @Test
@@ -301,7 +303,8 @@ public class SpecialtyResourceIntTest {
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].college").value(hasItem(DEFAULT_COLLEGE)))
         .andExpect(jsonPath("$.[*].specialtyCode").value(hasItem(DEFAULT_NHS_SPECIALTY_CODE)))
-        .andExpect(jsonPath("$.[*].specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()));
+        .andExpect(jsonPath("$.[*].specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()))
+        .andExpect(jsonPath("$.[*].blockIndemnity").value(true));
   }
 
   @Test
@@ -353,7 +356,8 @@ public class SpecialtyResourceIntTest {
         .andExpect(jsonPath("$.college").value(DEFAULT_COLLEGE))
         .andExpect(jsonPath("$.specialtyCode").value(DEFAULT_NHS_SPECIALTY_CODE))
         .andExpect(jsonPath("$.specialtyTypes[0]").value(DEFAULT_SPECIALTY_TYPE.toString()))
-        .andExpect(jsonPath("$.specialtyGroup.id").value(specialtyGroup.getId().intValue()));
+        .andExpect(jsonPath("$.specialtyGroup.id").value(specialtyGroup.getId().intValue()))
+        .andExpect(jsonPath("$.blockIndemnity").value(true));
   }
 
   @Test
@@ -538,7 +542,8 @@ public class SpecialtyResourceIntTest {
         .college(UPDATED_COLLEGE)
         .specialtyCode(UPDATED_NHS_SPECIALTY_CODE)
         .specialtyTypes(newHashSet(UPDATED_SPECIALTY_TYPE))
-        .name(UPDATED_NAME);
+        .name(UPDATED_NAME)
+        .blockIndemnity(false);
     SpecialtyDTO specialtyDTO = linkSpecialtyToSpecialtyGroup(updatedSpecialty,
         specialtyGroupEntity.getId());
 
@@ -555,6 +560,7 @@ public class SpecialtyResourceIntTest {
     assertThat(testSpecialty.getCollege()).isEqualTo(UPDATED_COLLEGE);
     assertThat(testSpecialty.getSpecialtyCode()).isEqualTo(UPDATED_NHS_SPECIALTY_CODE);
     assertThat(testSpecialty.getSpecialtyTypes()).isEqualTo(newHashSet(UPDATED_SPECIALTY_TYPE));
+    assertThat(testSpecialty.isBlockIndemnity()).isEqualTo(false);
 
     // validate if the PostSpecialty still exists and if it's updated
     Optional<PostSpecialty> optionalPostSpecialty =

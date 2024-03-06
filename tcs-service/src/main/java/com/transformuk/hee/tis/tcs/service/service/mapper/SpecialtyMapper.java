@@ -28,6 +28,7 @@ public class SpecialtyMapper {
       result.setSpecialtyTypes(specialty.getSpecialtyTypes());
       result.setStatus(specialty.getStatus());
       result.setSpecialtyGroup(specialtyGroupToSpecialtyGroupDTO(specialty.getSpecialtyGroup()));
+      result.setBlockIndemnity(specialty.isBlockIndemnity());
     }
     return result;
   }
@@ -54,7 +55,7 @@ public class SpecialtyMapper {
       result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
       result.setStatus(specialtyDTO.getStatus());
       result.setSpecialtyGroup(specialtyGroupDTOToSpecialtyGroup(specialtyDTO.getSpecialtyGroup()));
-
+      result.setBlockIndemnity(specialtyDTO.isBlockIndemnity());
     }
     return result;
   }
