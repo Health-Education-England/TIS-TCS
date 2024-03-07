@@ -47,6 +47,8 @@ public class SpecialtyDTO implements Serializable {
       Update.class}, min = 1, max = 100, message = "Name cannot be less than 1 and more than 100 characters")
   private String name;
 
+  private boolean blockIndemnity;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
