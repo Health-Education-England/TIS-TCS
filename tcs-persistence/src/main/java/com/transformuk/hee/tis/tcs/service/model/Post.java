@@ -108,6 +108,11 @@ public class Post implements Serializable {
     return this;
   }
 
+  public Post fundingStatus(final Status fundingStatus) {
+    this.fundingStatus = fundingStatus;
+    return this;
+  }
+
   public Post suffix(final PostSuffix suffix) {
     this.suffix = suffix;
     return this;

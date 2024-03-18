@@ -93,6 +93,7 @@ public class PostMapper {
     result.setIntrepidId(post.getIntrepidId());
     result.setNationalPostNumber(post.getNationalPostNumber());
     result.setStatus(post.getStatus());
+    result.setFundingStatus(post.getFundingStatus());
     result.setSuffix(post.getSuffix());
     result.setOwner(post.getOwner());
     result.setPostFamily(post.getPostFamily());
@@ -235,6 +236,7 @@ public class PostMapper {
     result.setIntrepidId(postDTO.getIntrepidId());
     result.setNationalPostNumber(postDTO.getNationalPostNumber());
     result.setStatus(postDTO.getStatus());
+    result.setFundingStatus(postDTO.getFundingStatus());
     result.setSuffix(postDTO.getSuffix());
     result.setOwner(postDTO.getOwner());
     result.setPostFamily(postDTO.getPostFamily());

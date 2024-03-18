@@ -182,6 +182,9 @@ public class PostDTO implements Serializable {
     if (status != postDTO.status) {
       return false;
     }
+    if (fundingStatus != postDTO.fundingStatus) {
+      return false;
+    }
     if (suffix != postDTO.suffix) {
       return false;
     }
@@ -243,6 +246,7 @@ public class PostDTO implements Serializable {
     result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     result = 31 * result + (nationalPostNumber != null ? nationalPostNumber.hashCode() : 0);
     result = 31 * result + (status != null ? status.hashCode() : 0);
+    result = 31 * result + (fundingStatus != null ? fundingStatus.hashCode() : 0);
     result = 31 * result + (suffix != null ? suffix.hashCode() : 0);
     result = 31 * result + (owner != null ? owner.hashCode() : 0);
     result = 31 * result + (postFamily != null ? postFamily.hashCode() : 0);
