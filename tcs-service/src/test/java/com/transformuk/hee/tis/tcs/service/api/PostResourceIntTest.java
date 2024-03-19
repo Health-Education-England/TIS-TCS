@@ -334,8 +334,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("programmes", "owner", "status", "fundingStatus",
-                "employingBodyId",
+            value(containsInAnyOrder("programmes", "owner", "status", "employingBodyId",
                 "trainingBodyId")));
   }
 
@@ -352,8 +351,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("programmes", "owner", "status", "fundingStatus",
-                "employingBodyId",
+            value(containsInAnyOrder("programmes", "owner", "status", "employingBodyId",
                 "trainingBodyId")));
   }
 
