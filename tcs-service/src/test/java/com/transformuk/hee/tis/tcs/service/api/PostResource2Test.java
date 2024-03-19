@@ -126,6 +126,7 @@ public class PostResource2Test {
 
     postDTO = new PostDTO();
     postDTO.setStatus(Status.CURRENT);
+    postDTO.setFundingStatus(Status.CURRENT);
     postDTO.setOwner("Owner");
     postDTO.setNationalPostNumber("test");
     postDTO.setTrainingBodyId(1L);

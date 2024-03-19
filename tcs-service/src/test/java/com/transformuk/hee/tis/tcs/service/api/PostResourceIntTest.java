@@ -208,6 +208,7 @@ public class PostResourceIntTest {
     return new Post()
         .nationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER)
         .status(DEFAULT_STATUS)
+        .fundingStatus(DEFAULT_STATUS)
         .suffix(DEFAULT_SUFFIX)
         .owner(OWNER)
         .postFamily(DEFAULT_POST_FAMILY)
