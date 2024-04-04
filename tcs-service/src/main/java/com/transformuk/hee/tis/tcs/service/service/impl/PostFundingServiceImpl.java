@@ -34,6 +34,13 @@ public class PostFundingServiceImpl implements PostFundingService {
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
+  /**
+   * Constructor.
+   *
+   * @param postFundingRepository repository
+   * @param postFundingMapper mapper
+   * @param applicationEventPublisher appplication event publisher
+   */
   public PostFundingServiceImpl(PostFundingRepository postFundingRepository,
       PostFundingMapper postFundingMapper, ApplicationEventPublisher applicationEventPublisher) {
     this.postFundingRepository = postFundingRepository;
@@ -123,7 +130,7 @@ public class PostFundingServiceImpl implements PostFundingService {
   }
 
   /**
-   * return the funding Status of the Post based on funding end date.
+   * return the funding Status of the Post.
    *
    * @param postId the id of the associated post
    */

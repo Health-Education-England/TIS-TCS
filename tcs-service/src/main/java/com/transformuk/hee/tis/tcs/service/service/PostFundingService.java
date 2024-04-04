@@ -51,7 +51,7 @@ public interface PostFundingService {
   void delete(Long id);
 
   /**
-   * return the funding Status of the Post based on funding end date
+   * return the funding Status of the Post.
    *
    * @param postId the id of the associated post
    */
