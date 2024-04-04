@@ -6,13 +6,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
-import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
@@ -29,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -37,7 +36,7 @@ public class PostFundingServiceImplTest {
 
   @Mock
   private PostFundingRepository postFundingRepository;
-  @Mock
+  @Spy
   private PostFundingMapper postFundingMapper;
   @Mock
   private ApplicationEventPublisher applicationEventPublisher;
@@ -93,7 +92,6 @@ public class PostFundingServiceImplTest {
 
   @Test
   public void saveShouldPublishPostFundingSavedEvent() {
-    when(postFundingMapper.postFundingDTOToPostFunding(postFundingDTO1)).thenReturn(postFunding1);
     postFundingService.save(postFundingDTO1);
     verify(applicationEventPublisher).publishEvent(savedEventCaptor.capture());
     assertSame(savedEventCaptor.getValue().getPostFundingDTO(), postFundingDTO1);
@@ -104,9 +102,6 @@ public class PostFundingServiceImplTest {
     List<PostFundingDTO> dtos = new ArrayList<>();
     dtos.add(postFundingDTO1);
     dtos.add(postFundingDTO2);
-
-    when(postFundingMapper.postFundingDTOToPostFunding(postFundingDTO1)).thenReturn(postFunding1);
-    when(postFundingMapper.postFundingDTOToPostFunding(postFundingDTO2)).thenReturn(postFunding2);
 
     postFundingService.save(dtos);
     verify(applicationEventPublisher, times(2)).publishEvent(savedEventCaptor.capture());
@@ -120,7 +115,6 @@ public class PostFundingServiceImplTest {
 
   @Test
   public void saveShouldPublishPostFundingCreatedEvent() {
-    when(postFundingMapper.postFundingDTOToPostFunding(postFundingDTO3)).thenReturn(postFunding3);
     postFundingService.save(postFundingDTO3);
     verify(applicationEventPublisher).publishEvent(createdEventCaptor.capture());
     assertSame(createdEventCaptor.getValue().getPostFundingDTO(), postFundingDTO3);
