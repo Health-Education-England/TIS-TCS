@@ -141,10 +141,7 @@ public class PostServiceImpl implements PostService {
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
     handleNewPostEsrNotification(postDTO);
-    if (postDTO.getId() != null) {
-      applicationEventPublisher.publishEvent(new PostSavedEvent(postDTO));
-    }
-
+    applicationEventPublisher.publishEvent(new PostSavedEvent(postMapper.postToPostDTO(post)));
     return postMapper.postToPostDTO(post);
   }
 
@@ -401,7 +398,8 @@ public class PostServiceImpl implements PostService {
 
     postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
-    applicationEventPublisher.publishEvent(new PostSavedEvent(postDTO));
+    applicationEventPublisher.publishEvent(
+        new PostSavedEvent(postMapper.postToPostDTO(currentInDbPost)));
     return postMapper.postToPostDTO(currentInDbPost);
   }
 
