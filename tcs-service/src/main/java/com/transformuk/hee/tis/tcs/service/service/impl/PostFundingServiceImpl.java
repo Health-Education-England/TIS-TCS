@@ -1,13 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostFundingMapper;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,10 +33,13 @@ public class PostFundingServiceImpl implements PostFundingService {
 
   private final PostFundingMapper postFundingMapper;
 
+  private final ApplicationEventPublisher applicationEventPublisher;
+
   public PostFundingServiceImpl(PostFundingRepository postFundingRepository,
-      PostFundingMapper postFundingMapper) {
+      PostFundingMapper postFundingMapper, ApplicationEventPublisher applicationEventPublisher) {
     this.postFundingRepository = postFundingRepository;
     this.postFundingMapper = postFundingMapper;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -43,6 +53,11 @@ public class PostFundingServiceImpl implements PostFundingService {
     log.debug("Request to save PostFunding : {}", postFundingDTO);
     PostFunding postFunding = postFundingMapper.postFundingDTOToPostFunding(postFundingDTO);
     postFunding = postFundingRepository.save(postFunding);
+    if(postFundingDTO.getId() == null) {
+      applicationEventPublisher.publishEvent(new PostFundingCreatedEvent(postFundingDTO));
+    } else {
+      applicationEventPublisher.publishEvent(new PostFundingSavedEvent(postFundingDTO));
+    }
     return postFundingMapper.postFundingToPostFundingDTO(postFunding);
   }
 
@@ -58,6 +73,9 @@ public class PostFundingServiceImpl implements PostFundingService {
     List<PostFunding> postFundings = postFundingMapper
         .postFundingDTOsToPostFundings(postFundingDTO);
     postFundings = postFundingRepository.saveAll(postFundings);
+    postFundingDTO.stream().forEach(dto -> {
+      applicationEventPublisher.publishEvent(new PostFundingSavedEvent(dto));
+    });
     return postFundingMapper.postFundingsToPostFundingDTOs(postFundings);
   }
 
@@ -97,6 +115,22 @@ public class PostFundingServiceImpl implements PostFundingService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete PostFunding : {}", id);
+    Optional<PostFunding> postFundingToDelete = postFundingRepository.findById(id);
     postFundingRepository.deleteById(id);
+    applicationEventPublisher.publishEvent(new PostFundingDeletedEvent(postFundingToDelete.get()));
+  }
+
+  /**
+   * return the funding Status of the Post based on funding end date
+   *
+   * @param postId the id of the associated post
+   */
+  @Override
+  public Status getPostFundingStatusForPost(Long postId) {
+    if (postFundingRepository.countCurrentFundings(postId)
+        > 0) {
+      return Status.CURRENT;
+    }
+    return Status.INACTIVE;
   }
 }

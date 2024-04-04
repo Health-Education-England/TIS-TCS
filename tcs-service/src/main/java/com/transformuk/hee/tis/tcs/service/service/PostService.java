@@ -5,7 +5,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,6 +93,15 @@ public interface PostService {
    * @return the entity saved in DTO form
    */
   PostDTO update(PostDTO postDTO);
+
+  /**
+   * Update post funding status.
+   *
+   * @param postId the id of the post to update
+   * @param fundingStatus the new funding status
+   * @return the modified post
+   */
+  void updateFundingStatus(long postId, Status fundingStatus);
 
   /**
    * Get all the post by dbcs
