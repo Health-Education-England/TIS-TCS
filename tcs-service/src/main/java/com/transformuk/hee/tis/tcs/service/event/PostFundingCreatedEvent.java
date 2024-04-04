@@ -5,18 +5,21 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
 
+/**
+ * Event object for post funding created.
+ */
 public class PostFundingCreatedEvent extends ApplicationEvent {
 
 
-  private PostFundingDTO postFundingDTO;
+  private PostFundingDTO postFundingDto;
 
   public PostFundingCreatedEvent(@NonNull PostFundingDTO source) {
     super(source);
-    this.postFundingDTO = source;
+    this.postFundingDto = source;
   }
 
-  public PostFundingDTO getPostFundingDTO() {
-    return postFundingDTO;
+  public PostFundingDTO getPostFundingDto() {
+    return postFundingDto;
   }
 
   @Override
@@ -28,12 +31,12 @@ public class PostFundingCreatedEvent extends ApplicationEvent {
       return false;
     }
     PostFundingCreatedEvent that = (PostFundingCreatedEvent) o;
-    return Objects.equals(postFundingDTO, that.postFundingDTO);
+    return Objects.equals(postFundingDto, that.postFundingDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(postFundingDTO);
+    return Objects.hash(postFundingDto);
   }
 
 }

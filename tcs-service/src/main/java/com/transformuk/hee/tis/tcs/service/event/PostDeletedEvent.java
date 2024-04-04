@@ -4,6 +4,9 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
 
+/**
+ * Event object for post deleted.
+ */
 public class PostDeletedEvent extends ApplicationEvent {
 
 

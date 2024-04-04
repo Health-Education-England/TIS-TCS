@@ -2,6 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,7 +96,7 @@ public class PostFundingServiceImplTest {
   public void saveShouldPublishPostFundingSavedEvent() {
     postFundingService.save(postFundingDTO1);
     verify(applicationEventPublisher).publishEvent(savedEventCaptor.capture());
-    assertSame(savedEventCaptor.getValue().getPostFundingDTO(), postFundingDTO1);
+    assertSame(savedEventCaptor.getValue().getPostFundingDto(), postFundingDTO1);
   }
 
   @Test
@@ -107,7 +109,7 @@ public class PostFundingServiceImplTest {
     verify(applicationEventPublisher, times(2)).publishEvent(savedEventCaptor.capture());
 
     List<PostFundingSavedEvent> events = savedEventCaptor.getAllValues();
-    List<PostFundingDTO> eventDtos = events.stream().map(PostFundingSavedEvent::getPostFundingDTO)
+    List<PostFundingDTO> eventDtos = events.stream().map(PostFundingSavedEvent::getPostFundingDto)
         .collect(Collectors.toList());
     assertEquals(eventDtos, dtos);
   }
@@ -117,27 +119,34 @@ public class PostFundingServiceImplTest {
   public void saveShouldPublishPostFundingCreatedEvent() {
     postFundingService.save(postFundingDTO3);
     verify(applicationEventPublisher).publishEvent(createdEventCaptor.capture());
-    assertSame(createdEventCaptor.getValue().getPostFundingDTO(), postFundingDTO3);
+    assertSame(createdEventCaptor.getValue().getPostFundingDto(), postFundingDTO3);
   }
   @Test
   public void deleteShouldPublishPostFundingDeletedEvents() {
     when(postFundingRepository.findById(1L)).thenReturn(Optional.of(postFunding1));
     postFundingService.delete(1L);
     verify(applicationEventPublisher).publishEvent(deletedEventCaptor.capture());
-    assertSame(deletedEventCaptor.getValue().getPostFundingDTO(), postFunding1);
+    assertSame(deletedEventCaptor.getValue().getPostFundingDto(), postFunding1);
+  }
+
+  @Test
+  public void deleteShouldNotPublishPostFundingDeletedEventIfNoPostFundingExists() {
+    when(postFundingRepository.findById(1L)).thenReturn(Optional.empty());
+    postFundingService.delete(1L);
+    verify(applicationEventPublisher, never()).publishEvent(any());
   }
 
   @Test
   public void getPostFundingStatusForPostShouldReturnCurrentIfCurrentPostFundingExists() {
     when(postFundingRepository.countCurrentFundings(1L)).thenReturn(1L);
     Status result = postFundingService.getPostFundingStatusForPost(1L);
-    assertEquals(result, Status.CURRENT);
+    assertEquals(Status.CURRENT, result);
   }
 
   @Test
   public void getPostFundingStatusForPostShouldReturnInactiveIfNoCurrentPostFundingExists() {
     when(postFundingRepository.countCurrentFundings(2L)).thenReturn(0L);
     Status result = postFundingService.getPostFundingStatusForPost(2L);
-    assertEquals(result, Status.INACTIVE);
+    assertEquals(Status.INACTIVE, result);
   }
 }

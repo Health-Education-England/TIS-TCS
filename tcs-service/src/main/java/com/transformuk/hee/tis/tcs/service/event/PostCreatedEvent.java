@@ -5,18 +5,20 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
 
+/**
+ * Event object for post created.
+ */
 public class PostCreatedEvent extends ApplicationEvent {
 
-
-  private PostDTO postDTO;
+  private PostDTO postDto;
 
   public PostCreatedEvent(@NonNull PostDTO source) {
     super(source);
-    this.postDTO = source;
+    this.postDto = source;
   }
 
-  public PostDTO getPostDTO() {
-    return postDTO;
+  public PostDTO getPostDto() {
+    return postDto;
   }
 
   @Override
@@ -28,12 +30,12 @@ public class PostCreatedEvent extends ApplicationEvent {
       return false;
     }
     PostCreatedEvent that = (PostCreatedEvent) o;
-    return Objects.equals(postDTO, that.postDTO);
+    return Objects.equals(postDto, that.postDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(postDTO);
+    return Objects.hash(postDto);
   }
 
 }

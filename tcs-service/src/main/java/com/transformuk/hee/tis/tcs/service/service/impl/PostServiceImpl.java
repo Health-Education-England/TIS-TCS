@@ -177,9 +177,9 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.deleteAll(allPostSites);
     postSpecialtyRepository.deleteAll(allPostSpecialties);
     posts = postRepository.saveAll(posts);
-    postDTOs.stream().forEach(postDto -> {
-      applicationEventPublisher.publishEvent(new PostSavedEvent(postDto));
-    });
+    postDTOs.stream().forEach(postDto ->
+        applicationEventPublisher.publishEvent(new PostSavedEvent(postDto))
+    );
     return postMapper.postsToPostDTOs(posts);
   }
 
@@ -406,11 +406,10 @@ public class PostServiceImpl implements PostService {
   }
 
   /**
-   * Update post funding status
+   * Update post funding status.
    *
    * @param postId        the id of the post to update
    * @param fundingStatus the new funding status
-   * @return the modified post
    */
   @Override
   public void updateFundingStatus(long postId, Status fundingStatus) {

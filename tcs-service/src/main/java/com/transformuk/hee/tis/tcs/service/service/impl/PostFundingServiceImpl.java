@@ -52,7 +52,7 @@ public class PostFundingServiceImpl implements PostFundingService {
     log.debug("Request to save PostFunding : {}", postFundingDTO);
     PostFunding postFunding = postFundingMapper.postFundingDTOToPostFunding(postFundingDTO);
     postFunding = postFundingRepository.save(postFunding);
-    if(postFundingDTO.getId() == null) {
+    if (postFundingDTO.getId() == null) {
       applicationEventPublisher.publishEvent(new PostFundingCreatedEvent(postFundingDTO));
     } else {
       applicationEventPublisher.publishEvent(new PostFundingSavedEvent(postFundingDTO));
@@ -72,9 +72,9 @@ public class PostFundingServiceImpl implements PostFundingService {
     List<PostFunding> postFundings = postFundingMapper
         .postFundingDTOsToPostFundings(postFundingDTO);
     postFundings = postFundingRepository.saveAll(postFundings);
-    postFundingDTO.stream().forEach(dto -> {
-      applicationEventPublisher.publishEvent(new PostFundingSavedEvent(dto));
-    });
+    postFundingDTO.stream().forEach(dto ->
+        applicationEventPublisher.publishEvent(new PostFundingSavedEvent(dto))
+    );
     return postFundingMapper.postFundingsToPostFundingDTOs(postFundings);
   }
 
@@ -116,11 +116,14 @@ public class PostFundingServiceImpl implements PostFundingService {
     log.debug("Request to delete PostFunding : {}", id);
     Optional<PostFunding> postFundingToDelete = postFundingRepository.findById(id);
     postFundingRepository.deleteById(id);
-    applicationEventPublisher.publishEvent(new PostFundingDeletedEvent(postFundingToDelete.get()));
+    if (postFundingToDelete.isPresent()) {
+      applicationEventPublisher.publishEvent(
+          new PostFundingDeletedEvent(postFundingToDelete.get()));
+    }
   }
 
   /**
-   * return the funding Status of the Post based on funding end date
+   * return the funding Status of the Post based on funding end date.
    *
    * @param postId the id of the associated post
    */

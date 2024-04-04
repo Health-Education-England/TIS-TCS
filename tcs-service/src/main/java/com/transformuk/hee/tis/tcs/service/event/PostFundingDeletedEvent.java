@@ -5,18 +5,21 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
 
+/**
+ * Event object for post funding deleted.
+ */
 public class PostFundingDeletedEvent extends ApplicationEvent {
 
 
-  private PostFunding postFundingDTO;
+  private PostFunding postFundingDto;
 
   public PostFundingDeletedEvent(@NonNull PostFunding source) {
     super(source);
-    this.postFundingDTO = source;
+    this.postFundingDto = source;
   }
 
-  public PostFunding getPostFundingDTO() {
-    return postFundingDTO;
+  public PostFunding getPostFundingDto() {
+    return postFundingDto;
   }
 
   @Override
@@ -28,12 +31,12 @@ public class PostFundingDeletedEvent extends ApplicationEvent {
       return false;
     }
     PostFundingDeletedEvent that = (PostFundingDeletedEvent) o;
-    return Objects.equals(postFundingDTO, that.postFundingDTO);
+    return Objects.equals(postFundingDto, that.postFundingDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(postFundingDTO);
+    return Objects.hash(postFundingDto);
   }
 
 }

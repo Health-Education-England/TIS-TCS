@@ -207,7 +207,7 @@ public class PostServiceImplTest {
     PostDTO result = testObj.save(postDTOMock1);
     Assert.assertEquals(postMappedDTOMock1, result);
     verify(applicationEventPublisher).publishEvent(postSavedEventArgumentCaptor.capture());
-    Assert.assertEquals(postSavedEventArgumentCaptor.getValue().getPostDTO(), postDTOMock1);
+    Assert.assertEquals(postSavedEventArgumentCaptor.getValue().getPostDto(), postDTOMock1);
   }
 
   @Test
@@ -240,7 +240,7 @@ public class PostServiceImplTest {
     verify(applicationEventPublisher, times(2)).publishEvent(
         postSavedEventArgumentCaptor.capture());
     List<PostSavedEvent> events = postSavedEventArgumentCaptor.getAllValues();
-    List<PostDTO> eventDtos = events.stream().map(PostSavedEvent::getPostDTO)
+    List<PostDTO> eventDtos = events.stream().map(PostSavedEvent::getPostDto)
         .collect(Collectors.toList());
     Assert.assertEquals(eventDtos, postDTOsList);
   }
@@ -302,7 +302,7 @@ public class PostServiceImplTest {
     testObj.updateFundingStatus(1L, Status.CURRENT);
     verify(postRepositoryMock).save(postArgumentCaptor.capture());
     Post result = postArgumentCaptor.getValue();
-    Assert.assertEquals(result.getFundingStatus(), Status.CURRENT);
+    Assert.assertEquals(Status.CURRENT, result.getFundingStatus());
   }
 
   @Test

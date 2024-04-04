@@ -96,9 +96,8 @@ public interface PostService {
   /**
    * Update post funding status.
    *
-   * @param postId the id of the post to update
+   * @param postId        the id of the post to update
    * @param fundingStatus the new funding status
-   * @return the modified post
    */
   void updateFundingStatus(long postId, Status fundingStatus);
 
@@ -193,8 +192,8 @@ public interface PostService {
   /**
    * Create new Post ESR Event and mark as Reconciled or Deleted.
    *
-   * @param postId The id of the Post
-   * @param postEsrEventDto         the post ESR event
+   * @param postId          The id of the Post
+   * @param postEsrEventDto the post ESR event
    * @return Optional post ESR event
    */
   Optional<PostEsrEventDto> markPostAsEsrPositionChanged(

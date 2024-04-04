@@ -9,6 +9,9 @@ import com.transformuk.hee.tis.tcs.service.service.PostService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listener to handle post funding events.
+ */
 @Component
 public class PostFundingEventListener {
 
@@ -28,7 +31,7 @@ public class PostFundingEventListener {
    */
   @EventListener
   public void handlePostFundingSavedEvent(PostFundingSavedEvent event) {
-    long postId = event.getPostFundingDTO().getPostId();
+    long postId = event.getPostFundingDto().getPostId();
     Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
     postService.updateFundingStatus(postId, fundingStatus);
   }
@@ -40,7 +43,7 @@ public class PostFundingEventListener {
    */
   @EventListener
   public void handlePostFundingCreatedEvent(PostFundingCreatedEvent event) {
-    long postId = event.getPostFundingDTO().getPostId();
+    long postId = event.getPostFundingDto().getPostId();
     Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
     postService.updateFundingStatus(postId, fundingStatus);
   }
@@ -52,7 +55,7 @@ public class PostFundingEventListener {
    */
   @EventListener
   public void handlePostFundingDeletedEvent(PostFundingDeletedEvent event) {
-    long postId = event.getPostFundingDTO().getPost().getId();
+    long postId = event.getPostFundingDto().getPost().getId();
     Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
     postService.updateFundingStatus(postId, fundingStatus);
   }
