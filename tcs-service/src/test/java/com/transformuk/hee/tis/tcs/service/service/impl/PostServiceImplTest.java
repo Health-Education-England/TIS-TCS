@@ -309,7 +309,7 @@ public class PostServiceImplTest {
   public void updateFundingStatusShouldNotSetFundingStatusIfNullPost() {
     Post testPost = new Post();
     testPost.setId(1L);
-    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(testPost));
+    when(postRepositoryMock.findById(1L)).thenReturn(Optional.empty());
     testObj.updateFundingStatus(1L, Status.CURRENT);
     verify(postRepositoryMock, never()).save(testPost);
   }
