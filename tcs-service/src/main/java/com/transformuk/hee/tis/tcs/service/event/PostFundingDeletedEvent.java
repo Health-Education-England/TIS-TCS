@@ -11,15 +11,15 @@ import org.springframework.lang.NonNull;
 public class PostFundingDeletedEvent extends ApplicationEvent {
 
 
-  private PostFunding postFundingDto;
+  private PostFunding postFunding;
 
   public PostFundingDeletedEvent(@NonNull PostFunding source) {
     super(source);
-    this.postFundingDto = source;
+    this.postFunding = source;
   }
 
-  public PostFunding getPostFundingDto() {
-    return postFundingDto;
+  public PostFunding getPostFunding() {
+    return postFunding;
   }
 
   @Override
@@ -31,12 +31,12 @@ public class PostFundingDeletedEvent extends ApplicationEvent {
       return false;
     }
     PostFundingDeletedEvent that = (PostFundingDeletedEvent) o;
-    return Objects.equals(postFundingDto, that.postFundingDto);
+    return Objects.equals(postFunding, that.postFunding);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(postFundingDto);
+    return Objects.hash(postFunding);
   }
 
 }

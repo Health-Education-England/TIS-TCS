@@ -126,7 +126,7 @@ public class PostFundingServiceImplTest {
     when(postFundingRepository.findById(1L)).thenReturn(Optional.of(postFunding1));
     postFundingService.delete(1L);
     verify(applicationEventPublisher).publishEvent(deletedEventCaptor.capture());
-    assertSame(deletedEventCaptor.getValue().getPostFundingDto(), postFunding1);
+    assertSame(deletedEventCaptor.getValue().getPostFunding(), postFunding1);
   }
 
   @Test

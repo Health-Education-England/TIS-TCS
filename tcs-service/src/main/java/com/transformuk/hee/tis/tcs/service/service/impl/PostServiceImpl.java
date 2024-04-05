@@ -140,9 +140,10 @@ public class PostServiceImpl implements PostService {
     }
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
+    PostDTO savedPostDto = postMapper.postToPostDTO(post);
     handleNewPostEsrNotification(postDTO);
-    applicationEventPublisher.publishEvent(new PostSavedEvent(postMapper.postToPostDTO(post)));
-    return postMapper.postToPostDTO(post);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
+    return savedPostDto;
   }
 
   /**
@@ -174,10 +175,11 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.deleteAll(allPostSites);
     postSpecialtyRepository.deleteAll(allPostSpecialties);
     posts = postRepository.saveAll(posts);
-    postDTOs.stream().forEach(postDto ->
+    List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
+    savedPostDtos.stream().forEach(postDto ->
         applicationEventPublisher.publishEvent(new PostSavedEvent(postDto))
     );
-    return postMapper.postsToPostDTOs(posts);
+    return savedPostDtos;
   }
 
   /**
@@ -398,9 +400,10 @@ public class PostServiceImpl implements PostService {
 
     postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
+    PostDTO currentInDbPostDto = postMapper.postToPostDTO(currentInDbPost);
     applicationEventPublisher.publishEvent(
-        new PostSavedEvent(postMapper.postToPostDTO(currentInDbPost)));
-    return postMapper.postToPostDTO(currentInDbPost);
+        new PostSavedEvent(currentInDbPostDto));
+    return currentInDbPostDto;
   }
 
   /**

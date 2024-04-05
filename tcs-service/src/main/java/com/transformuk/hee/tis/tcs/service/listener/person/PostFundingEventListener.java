@@ -32,8 +32,7 @@ public class PostFundingEventListener {
   @EventListener
   public void handlePostFundingSavedEvent(PostFundingSavedEvent event) {
     long postId = event.getPostFundingDto().getPostId();
-    Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
-    postService.updateFundingStatus(postId, fundingStatus);
+    updatePostFundingStatus(postId);
   }
 
   /**
@@ -44,8 +43,7 @@ public class PostFundingEventListener {
   @EventListener
   public void handlePostFundingCreatedEvent(PostFundingCreatedEvent event) {
     long postId = event.getPostFundingDto().getPostId();
-    Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
-    postService.updateFundingStatus(postId, fundingStatus);
+    updatePostFundingStatus(postId);
   }
 
   /**
@@ -55,7 +53,11 @@ public class PostFundingEventListener {
    */
   @EventListener
   public void handlePostFundingDeletedEvent(PostFundingDeletedEvent event) {
-    long postId = event.getPostFundingDto().getPost().getId();
+    long postId = event.getPostFunding().getPost().getId();
+    updatePostFundingStatus(postId);
+  }
+
+  private void updatePostFundingStatus(Long postId) {
     Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
     postService.updateFundingStatus(postId, fundingStatus);
   }

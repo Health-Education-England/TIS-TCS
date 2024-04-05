@@ -195,7 +195,7 @@ public class PostServiceImplTest {
     Assert.assertEquals(postMappedDTOMock1, result);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
     verify(postRepositoryMock).save(postMock1);
-    verify(postMapperMock, times(2)).postToPostDTO(postSaveMock1);
+    verify(postMapperMock).postToPostDTO(postSaveMock1);
   }
 
   @Test
@@ -242,7 +242,7 @@ public class PostServiceImplTest {
     List<PostSavedEvent> events = postSavedEventArgumentCaptor.getAllValues();
     List<PostDTO> eventDtos = events.stream().map(PostSavedEvent::getPostDto)
         .collect(Collectors.toList());
-    Assert.assertEquals(eventDtos, postDTOsList);
+    Assert.assertEquals(eventDtos, savedPostDTOs);
   }
 
   @Test
@@ -284,7 +284,7 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).findById(1L);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
     verify(postRepositoryMock).save(payloadPostMock);
-    verify(postMapperMock, times(2)).postToPostDTO(postSaveMock1);
+    verify(postMapperMock).postToPostDTO(postSaveMock1);
     verify(postGradeRepositoryMock).deleteAll(grades);
     verify(postSiteRepositoryMock).deleteAll(sites);
     verify(postSpecialtyRepositoryMock).deleteAll(specialties);

@@ -30,6 +30,10 @@ public class PostEventListener {
   @EventListener
   public void handlePostSavedEvent(PostSavedEvent event) {
     long postId = event.getPostDto().getId();
+    updatePostFundingStatus(postId);
+  }
+
+  private void updatePostFundingStatus(Long postId) {
     Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
     postService.updateFundingStatus(postId, fundingStatus);
   }

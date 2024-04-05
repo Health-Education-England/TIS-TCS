@@ -41,7 +41,6 @@ public class PostEventListenerTest {
   public void shouldHandlePostSavedEvent() {
     when(postFundingService.getPostFundingStatusForPost(any())).thenReturn(Status.CURRENT);
     postEventListener.handlePostSavedEvent(postSavedEvent);
-    verify(postFundingService).getPostFundingStatusForPost(1L);
     verify(postService).updateFundingStatus(1L, Status.CURRENT);
   }
 
