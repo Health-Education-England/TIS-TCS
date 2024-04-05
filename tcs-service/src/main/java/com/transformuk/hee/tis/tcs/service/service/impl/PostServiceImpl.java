@@ -16,6 +16,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
+import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
@@ -61,6 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -83,6 +85,8 @@ import org.springframework.web.client.ResourceAccessException;
 public class PostServiceImpl implements PostService {
 
   private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
+  @Autowired
+  private ApplicationEventPublisher applicationEventPublisher;
   @Autowired
   private PostRepository postRepository;
   @Autowired
@@ -136,8 +140,10 @@ public class PostServiceImpl implements PostService {
     }
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
+    PostDTO savedPostDto = postMapper.postToPostDTO(post);
     handleNewPostEsrNotification(postDTO);
-    return postMapper.postToPostDTO(post);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
+    return savedPostDto;
   }
 
   /**
@@ -169,7 +175,11 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.deleteAll(allPostSites);
     postSpecialtyRepository.deleteAll(allPostSpecialties);
     posts = postRepository.saveAll(posts);
-    return postMapper.postsToPostDTOs(posts);
+    List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
+    savedPostDtos.stream().forEach(postDto ->
+        applicationEventPublisher.publishEvent(new PostSavedEvent(postDto))
+    );
+    return savedPostDtos;
   }
 
   /**
@@ -390,7 +400,25 @@ public class PostServiceImpl implements PostService {
 
     postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
-    return postMapper.postToPostDTO(currentInDbPost);
+    PostDTO currentInDbPostDto = postMapper.postToPostDTO(currentInDbPost);
+    applicationEventPublisher.publishEvent(
+        new PostSavedEvent(currentInDbPostDto));
+    return currentInDbPostDto;
+  }
+
+  /**
+   * Update post funding status.
+   *
+   * @param postId        the id of the post to update
+   * @param fundingStatus the new funding status
+   */
+  @Override
+  public void updateFundingStatus(long postId, Status fundingStatus) {
+    Post currentInDbPost = postRepository.findById(postId).orElse(null);
+    if (currentInDbPost != null) {
+      currentInDbPost.setFundingStatus(fundingStatus);
+      postRepository.save(currentInDbPost);
+    }
   }
 
   /**
@@ -883,5 +911,7 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private class PostViewSearchMapper extends BasePostRowMapper {}
+  private class PostViewSearchMapper extends BasePostRowMapper {
+
+  }
 }
