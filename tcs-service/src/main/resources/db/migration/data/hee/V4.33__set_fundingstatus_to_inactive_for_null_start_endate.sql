@@ -1,0 +1,3 @@
+UPDATE Post p
+INNER JOIN (SELECT distinct(f.postId), f.endDate, f.startDate FROM PostFunding f WHERE startDate IS NULL) latestpf ON p.id = latestpf.postId
+SET p.fundingStatus = 'INACTIVE';

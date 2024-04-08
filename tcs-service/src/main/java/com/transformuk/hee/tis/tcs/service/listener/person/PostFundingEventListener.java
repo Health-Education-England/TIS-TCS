@@ -8,6 +8,8 @@ import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Listener to handle post funding events.
@@ -29,7 +31,7 @@ public class PostFundingEventListener {
    *
    * @param event details of the postFunding saved event
    */
-  @EventListener
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
   public void handlePostFundingSavedEvent(PostFundingSavedEvent event) {
     long postId = event.getPostFundingDto().getPostId();
     updatePostFundingStatus(postId);
@@ -40,7 +42,7 @@ public class PostFundingEventListener {
    *
    * @param event details of the postFunding created event
    */
-  @EventListener
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
   public void handlePostFundingCreatedEvent(PostFundingCreatedEvent event) {
     long postId = event.getPostFundingDto().getPostId();
     updatePostFundingStatus(postId);
@@ -51,7 +53,7 @@ public class PostFundingEventListener {
    *
    * @param event details of the postFunding deleted event
    */
-  @EventListener
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
   public void handlePostFundingDeletedEvent(PostFundingDeletedEvent event) {
     long postId = event.getPostFunding().getPost().getId();
     updatePostFundingStatus(postId);

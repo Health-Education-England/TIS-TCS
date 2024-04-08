@@ -6,6 +6,8 @@ import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Listener to handle post events.
@@ -27,7 +29,7 @@ public class PostEventListener {
    *
    * @param event details of the post saved event
    */
-  @EventListener
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
   public void handlePostSavedEvent(PostSavedEvent event) {
     long postId = event.getPostDto().getId();
     updatePostFundingStatus(postId);
