@@ -6,7 +6,6 @@ import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -53,7 +52,7 @@ public class PostFundingEventListener {
    */
   @EventListener
   public void handlePostFundingDeletedEvent(PostFundingDeletedEvent event) {
-    long postId = event.getPostFunding().getPost().getId();
+    long postId = event.getPostFundingDto().getPostId();
     updatePostFundingStatus(postId);
   }
 

@@ -38,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -77,6 +78,8 @@ public class PostFundingResourceIntTest {
   private EntityManager em;
   @Mock
   private ReferenceServiceImpl referenceServiceMock;
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisher;
   @Autowired
   private PostFundingService postFundingService;
   private PostFundingValidator postFundingValidator;
@@ -111,7 +114,7 @@ public class PostFundingResourceIntTest {
     MockitoAnnotations.initMocks(this);
     postFundingValidator = new PostFundingValidator(referenceServiceMock);
     PostFundingResource postFundingResource = new PostFundingResource(postFundingService,
-        postFundingValidator);
+        postFundingValidator, applicationEventPublisher);
     this.restPostFundingMockMvc = MockMvcBuilders.standaloneSetup(postFundingResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

@@ -2,9 +2,6 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
-import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
-import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
@@ -13,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,20 +28,16 @@ public class PostFundingServiceImpl implements PostFundingService {
 
   private final PostFundingMapper postFundingMapper;
 
-  private final ApplicationEventPublisher applicationEventPublisher;
-
   /**
    * Constructor.
    *
-   * @param postFundingRepository repository
-   * @param postFundingMapper mapper
-   * @param applicationEventPublisher appplication event publisher
+   * @param postFundingRepository     repository
+   * @param postFundingMapper         mapper
    */
   public PostFundingServiceImpl(PostFundingRepository postFundingRepository,
-      PostFundingMapper postFundingMapper, ApplicationEventPublisher applicationEventPublisher) {
+      PostFundingMapper postFundingMapper) {
     this.postFundingRepository = postFundingRepository;
     this.postFundingMapper = postFundingMapper;
-    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -59,11 +51,6 @@ public class PostFundingServiceImpl implements PostFundingService {
     log.debug("Request to save PostFunding : {}", postFundingDTO);
     PostFunding postFunding = postFundingMapper.postFundingDTOToPostFunding(postFundingDTO);
     postFunding = postFundingRepository.save(postFunding);
-    if (postFundingDTO.getId() == null) {
-      applicationEventPublisher.publishEvent(new PostFundingCreatedEvent(postFundingDTO));
-    } else {
-      applicationEventPublisher.publishEvent(new PostFundingSavedEvent(postFundingDTO));
-    }
     return postFundingMapper.postFundingToPostFundingDTO(postFunding);
   }
 
@@ -79,9 +66,6 @@ public class PostFundingServiceImpl implements PostFundingService {
     List<PostFunding> postFundings = postFundingMapper
         .postFundingDTOsToPostFundings(postFundingDTO);
     postFundings = postFundingRepository.saveAll(postFundings);
-    postFundingDTO.stream().forEach(dto ->
-        applicationEventPublisher.publishEvent(new PostFundingSavedEvent(dto))
-    );
     return postFundingMapper.postFundingsToPostFundingDTOs(postFundings);
   }
 
@@ -121,12 +105,7 @@ public class PostFundingServiceImpl implements PostFundingService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete PostFunding : {}", id);
-    Optional<PostFunding> postFundingToDelete = postFundingRepository.findById(id);
     postFundingRepository.deleteById(id);
-    if (postFundingToDelete.isPresent()) {
-      applicationEventPublisher.publishEvent(
-          new PostFundingDeletedEvent(postFundingToDelete.get()));
-    }
   }
 
   /**

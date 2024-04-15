@@ -81,6 +81,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -178,6 +179,8 @@ public class PostResourceIntTest {
   @Autowired
   private ContactDetailsRepository contactDetailsRepository;
   @Autowired
+  private ApplicationEventPublisher applicationEventPublisher;
+  @Autowired
   private PlacementRepository placementRepository;
   private MockMvc restPostMockMvc;
   private Post post;
@@ -266,7 +269,7 @@ public class PostResourceIntTest {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator);
+        placementViewMapper, placementService, placementSummaryDecorator, applicationEventPublisher);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

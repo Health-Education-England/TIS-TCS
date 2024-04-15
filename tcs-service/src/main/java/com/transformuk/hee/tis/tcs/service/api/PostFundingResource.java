@@ -4,6 +4,9 @@ import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import io.github.jhipster.web.util.ResponseUtil;
 import io.jsonwebtoken.lang.Collections;
@@ -17,6 +20,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -43,11 +47,14 @@ public class PostFundingResource {
   private final Logger log = LoggerFactory.getLogger(PostFundingResource.class);
   private final PostFundingService postFundingService;
   private final PostFundingValidator postFundingValidator;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   public PostFundingResource(PostFundingService postFundingService,
-      PostFundingValidator postFundingValidator) {
+      PostFundingValidator postFundingValidator,
+      ApplicationEventPublisher applicationEventPublisher) {
     this.postFundingService = postFundingService;
     this.postFundingValidator = postFundingValidator;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -69,6 +76,7 @@ public class PostFundingResource {
               "A new postFunding cannot already have an ID")).body(null);
     }
     PostFundingDTO result = postFundingService.save(postFundingDTO);
+    applicationEventPublisher.publishEvent(new PostFundingCreatedEvent(result));
     return ResponseEntity.created(new URI("/api/post-fundings/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -95,6 +103,7 @@ public class PostFundingResource {
         postFundingValidator.validateFundingType(Arrays.asList(postFundingDTO)).get(0);
     if (returnedPostFundingDto.getMessageList().isEmpty()) {
       returnedPostFundingDto = postFundingService.save(postFundingDTO);
+      applicationEventPublisher.publishEvent(new PostFundingSavedEvent(returnedPostFundingDto));
     }
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postFundingDTO.getId().toString()))
@@ -141,7 +150,9 @@ public class PostFundingResource {
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deletePostFunding(@PathVariable Long id) {
     log.debug("REST request to delete PostFunding : {}", id);
+    PostFundingDTO postFundingToDelete = postFundingService.findOne(id);
     postFundingService.delete(id);
+    applicationEventPublisher.publishEvent(new PostFundingDeletedEvent(postFundingToDelete));
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
@@ -172,6 +183,8 @@ public class PostFundingResource {
     }
     List<PostFundingDTO> result = postFundingService.save(postFundingDTOS);
     List<Long> ids = result.stream().map(PostFundingDTO::getId).collect(Collectors.toList());
+    result.stream().forEach(postFundingDTO -> applicationEventPublisher.publishEvent(
+        new PostFundingCreatedEvent(postFundingDTO)));
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
@@ -208,6 +221,8 @@ public class PostFundingResource {
 
     List<PostFundingDTO> results = postFundingService.save(postFundingDTOS);
     List<Long> ids = results.stream().map(PostFundingDTO::getId).collect(Collectors.toList());
+    results.stream().forEach(postFundingDTO -> applicationEventPublisher.publishEvent(
+        new PostFundingSavedEvent(postFundingDTO)));
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);

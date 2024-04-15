@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
-import com.transformuk.hee.tis.tcs.service.model.PostFunding;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
@@ -11,15 +11,15 @@ import org.springframework.lang.NonNull;
 public class PostFundingDeletedEvent extends ApplicationEvent {
 
 
-  private PostFunding postFunding;
+  private PostFundingDTO postFundingDto;
 
-  public PostFundingDeletedEvent(@NonNull PostFunding source) {
+  public PostFundingDeletedEvent(@NonNull PostFundingDTO source) {
     super(source);
-    this.postFunding = source;
+    this.postFundingDto = source;
   }
 
-  public PostFunding getPostFunding() {
-    return postFunding;
+  public PostFundingDTO getPostFundingDto() {
+    return postFundingDto;
   }
 
   @Override
@@ -31,12 +31,12 @@ public class PostFundingDeletedEvent extends ApplicationEvent {
       return false;
     }
     PostFundingDeletedEvent that = (PostFundingDeletedEvent) o;
-    return Objects.equals(postFunding, that.postFunding);
+    return Objects.equals(postFundingDto, that.postFundingDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(postFunding);
+    return Objects.hash(postFundingDto);
   }
 
 }

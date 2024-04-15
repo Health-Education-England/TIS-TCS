@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -29,7 +28,6 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
-import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Post;
@@ -57,7 +55,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -68,7 +65,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -176,12 +172,6 @@ public class PostServiceImplTest {
   private PostViewDecorator postViewDecoratorMock;
   @Mock
   private PostFundingValidator postFundingValidatorMock;
-  @Mock
-  private ApplicationEventPublisher applicationEventPublisher;
-
-  @Captor
-  ArgumentCaptor<PostSavedEvent> postSavedEventArgumentCaptor;
-
   @Captor
   ArgumentCaptor<Post> postArgumentCaptor;
 
@@ -199,18 +189,6 @@ public class PostServiceImplTest {
   }
 
   @Test
-  public void saveShouldPublishPostSavedEventForExistingPost() {
-    when(postMapperMock.postDTOToPost(postDTOMock1)).thenReturn(postMock1);
-    when(postRepositoryMock.save(postMock1)).thenReturn(postSaveMock1);
-    when(postDTOMock1.getId()).thenReturn(1L);
-    when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
-    PostDTO result = testObj.save(postDTOMock1);
-    Assert.assertEquals(postMappedDTOMock1, result);
-    verify(applicationEventPublisher).publishEvent(postSavedEventArgumentCaptor.capture());
-    Assert.assertEquals(postSavedEventArgumentCaptor.getValue().getPostDto(), postMappedDTOMock1);
-  }
-
-  @Test
   public void saveShouldSaveListOfPosts() {
     List<PostDTO> postDTOsList = Lists.newArrayList(postDTOMock1, postDTOMock2);
     List<Post> postList = Lists.newArrayList(postMock1, postMock2);
@@ -224,25 +202,6 @@ public class PostServiceImplTest {
     verify(postMapperMock).postDTOsToPosts(postDTOsList);
     verify(postRepositoryMock).saveAll(postList);
     verify(postMapperMock).postsToPostDTOs(savedPosts);
-  }
-
-  @Test
-  public void saveShouldPublishPostSavedEvents() {
-    List<PostDTO> postDTOsList = Lists.newArrayList(postDTOMock1, postDTOMock2);
-    List<Post> postList = Lists.newArrayList(postMock1, postMock2);
-    List<Post> savedPosts = Lists.newArrayList(postSaveMock1, postSaveMock2);
-    List<PostDTO> savedPostDTOs = Lists.newArrayList(postMappedDTOMock1, postMappedDTOMock2);
-    when(postMapperMock.postDTOsToPosts(postDTOsList)).thenReturn(postList);
-    when(postRepositoryMock.saveAll(postList)).thenReturn(savedPosts);
-    when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(savedPostDTOs);
-    List<PostDTO> results = testObj.save(postDTOsList);
-
-    verify(applicationEventPublisher, times(2)).publishEvent(
-        postSavedEventArgumentCaptor.capture());
-    List<PostSavedEvent> events = postSavedEventArgumentCaptor.getAllValues();
-    List<PostDTO> eventDtos = events.stream().map(PostSavedEvent::getPostDto)
-        .collect(Collectors.toList());
-    Assert.assertEquals(eventDtos, savedPostDTOs);
   }
 
   @Test
@@ -312,15 +271,6 @@ public class PostServiceImplTest {
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.empty());
     testObj.updateFundingStatus(1L, Status.CURRENT);
     verify(postRepositoryMock, never()).save(testPost);
-  }
-
-  @Test
-  public void updateFundingStatusShouldNotPublishSavedEvent() {
-    Post testPost = new Post();
-    testPost.setId(1L);
-    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(testPost));
-    testObj.updateFundingStatus(1L, Status.CURRENT);
-    verify(applicationEventPublisher, never()).publishEvent(any());
   }
 
   @Test
