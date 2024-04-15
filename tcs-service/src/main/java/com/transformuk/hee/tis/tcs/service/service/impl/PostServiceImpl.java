@@ -170,8 +170,7 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.deleteAll(allPostSites);
     postSpecialtyRepository.deleteAll(allPostSpecialties);
     posts = postRepository.saveAll(posts);
-    List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
-    return savedPostDtos;
+    return postMapper.postsToPostDTOs(posts);
   }
 
   /**
@@ -392,8 +391,7 @@ public class PostServiceImpl implements PostService {
 
     postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
-    PostDTO currentInDbPostDto = postMapper.postToPostDTO(currentInDbPost);
-    return currentInDbPostDto;
+    return postMapper.postToPostDTO(currentInDbPost);
   }
 
   /**

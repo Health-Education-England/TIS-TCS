@@ -49,6 +49,13 @@ public class PostFundingResource {
   private final PostFundingValidator postFundingValidator;
   private final ApplicationEventPublisher applicationEventPublisher;
 
+  /**
+   * Constructor.
+   *
+   * @param postFundingService        service
+   * @param postFundingValidator      mapper
+   * @param applicationEventPublisher event publisher
+   */
   public PostFundingResource(PostFundingService postFundingService,
       PostFundingValidator postFundingValidator,
       ApplicationEventPublisher applicationEventPublisher) {
