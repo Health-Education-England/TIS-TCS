@@ -299,8 +299,10 @@ public class PostResource2Test {
     restPostMockMvc.perform(put("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value("1"));
+        .andExpect(status().isOk());
+
+    verify(applicationEventPublisher).publishEvent(postSavedEventArgumentCaptor.capture());
+    Assert.assertEquals(postSavedEventArgumentCaptor.getValue().getPostDto(), updatedPost);
   }
 
   @Test
