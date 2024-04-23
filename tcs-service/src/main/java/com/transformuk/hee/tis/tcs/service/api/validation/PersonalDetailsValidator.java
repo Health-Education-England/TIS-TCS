@@ -44,7 +44,7 @@ public class PersonalDetailsValidator {
    */
   public void validate(PersonalDetailsDTO personalDetailsDTO)
       throws MethodArgumentNotValidException {
-    final boolean currentOnly = false;
+    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkGender(personalDetailsDTO, currentOnly));
     fieldErrors.addAll(checkNationality(personalDetailsDTO, currentOnly));

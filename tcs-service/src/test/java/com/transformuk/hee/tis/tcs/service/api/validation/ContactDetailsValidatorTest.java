@@ -61,7 +61,7 @@ class ContactDetailsValidatorTest {
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setTitle("myTitle");
 
-    when(referenceService.isValueExists(TitleDTO.class, "myTitle", false)).thenReturn(false);
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", true)).thenReturn(false);
 
     // When.
     MethodArgumentNotValidException thrown =
@@ -84,7 +84,7 @@ class ContactDetailsValidatorTest {
     ContactDetailsDTO dto = new ContactDetailsDTO();
     dto.setTitle("myTitle");
 
-    when(referenceService.isValueExists(TitleDTO.class, "myTitle", false)).thenReturn(true);
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", true)).thenReturn(true);
 
     // When.
     assertDoesNotThrow(() -> validator.validate(dto));

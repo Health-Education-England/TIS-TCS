@@ -56,7 +56,7 @@ public class ContactDetailsValidator {
    */
   public void validate(ContactDetailsDTO dto)
       throws MethodArgumentNotValidException, NoSuchMethodException {
-    final boolean currentOnly = false;
+    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkTitle(dto, currentOnly));
     fieldErrors.addAll(checkEmail(dto));
