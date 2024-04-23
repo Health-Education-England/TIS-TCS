@@ -44,7 +44,7 @@ public class GdcDetailsValidator {
    */
   public void validate(GdcDetailsDTO gdcDetailsDTO) throws MethodArgumentNotValidException {
 
-    final boolean currentOnly = false;
+    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGdcStatus(gdcDetailsDTO));
     fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));

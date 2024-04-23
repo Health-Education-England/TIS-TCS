@@ -197,7 +197,7 @@ class GdcDetailsValidatorTest {
     // Given.
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
     when(GdcDetailsDTOMock.getGdcStatus()).thenReturn(DEFAULT_GDC_STATUS);
-    when(referenceService.isValueExists(GdcStatusDTO.class, DEFAULT_GDC_STATUS, false))
+    when(referenceService.isValueExists(GdcStatusDTO.class, DEFAULT_GDC_STATUS, true))
         .thenReturn(false);
 
     // When.
@@ -220,7 +220,7 @@ class GdcDetailsValidatorTest {
     // Given.
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(DEFAULT_GDC_NUMBER);
     when(GdcDetailsDTOMock.getGdcStatus()).thenReturn(DEFAULT_GDC_STATUS);
-    when(referenceService.isValueExists(GdcStatusDTO.class, DEFAULT_GDC_STATUS, false))
+    when(referenceService.isValueExists(GdcStatusDTO.class, DEFAULT_GDC_STATUS, true))
         .thenReturn(true);
 
     // When, then.

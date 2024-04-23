@@ -137,7 +137,7 @@ public class GmcDetailsResourceIntTest {
     // Create the GmcDetails
     GmcDetailsDTO gmcDetailsDTO = gmcDetailsMapper.toDto(gmcDetails);
 
-    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), false))
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), true))
         .thenReturn(true);
 
     restGmcDetailsMockMvc.perform(post("/api/gmc-details")
@@ -216,7 +216,7 @@ public class GmcDetailsResourceIntTest {
     anotherGmcDetailsDTO.setGmcStatus(DEFAULT_GMC_STATUS);
 
     Mockito.when(
-        referenceService.isValueExists(GmcStatusDTO.class, anotherGmcDetailsDTO.getGmcStatus(), false))
+        referenceService.isValueExists(GmcStatusDTO.class, anotherGmcDetailsDTO.getGmcStatus(), true))
         .thenReturn(true);
 
     // Create the GmcDetails
@@ -247,7 +247,7 @@ public class GmcDetailsResourceIntTest {
     //Try to update second gmc details with default gmc number
     anotherGmcDetailsDTO.setGmcNumber(DEFAULT_GMC_NUMBER);
 
-    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, UPDATED_GMC_STATUS, false))
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, UPDATED_GMC_STATUS, true))
         .thenReturn(true);
 
     // Create the GmcDetails
@@ -288,7 +288,7 @@ public class GmcDetailsResourceIntTest {
     gmcDetails.setId(1L);
     GmcDetailsDTO gmcDetailsDTO = gmcDetailsMapper.toDto(gmcDetails);
 
-    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), false))
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, gmcDetailsDTO.getGmcStatus(), true))
         .thenReturn(true);
 
     // GMC details is part of person so the call must succeed
@@ -361,7 +361,7 @@ public class GmcDetailsResourceIntTest {
     updatedGmcDetailsDTO.setGmcStartDate(UPDATED_GMC_START_DATE);
     updatedGmcDetailsDTO.setGmcEndDate(UPDATED_GMC_END_DATE);
 
-    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, UPDATED_GMC_STATUS, false))
+    Mockito.when(referenceService.isValueExists(GmcStatusDTO.class, UPDATED_GMC_STATUS, true))
         .thenReturn(true);
 
     restGmcDetailsMockMvc.perform(put("/api/gmc-details")

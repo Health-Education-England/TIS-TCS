@@ -178,7 +178,7 @@ class GmcDetailsValidatorTest {
     // Given.
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
     when(gmcDetailsDtoMock.getGmcStatus()).thenReturn(DEFAULT_GMC_STATUS);
-    when(referenceService.isValueExists(GmcStatusDTO.class, DEFAULT_GMC_STATUS, false))
+    when(referenceService.isValueExists(GmcStatusDTO.class, DEFAULT_GMC_STATUS, true))
         .thenReturn(false);
 
     // When.
@@ -201,7 +201,7 @@ class GmcDetailsValidatorTest {
     // Given.
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(DEFAULT_GMC_NUMBER);
     when(gmcDetailsDtoMock.getGmcStatus()).thenReturn(DEFAULT_GMC_STATUS);
-    when(referenceService.isValueExists(GmcStatusDTO.class, DEFAULT_GMC_STATUS, false))
+    when(referenceService.isValueExists(GmcStatusDTO.class, DEFAULT_GMC_STATUS, true))
         .thenReturn(true);
 
     // When, then.

@@ -42,7 +42,7 @@ public class GmcDetailsValidator {
    */
   public void validate(GmcDetailsDTO gmcDetailsDTO) throws MethodArgumentNotValidException {
 
-    final boolean currentOnly = false;
+    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
 //    fieldErrors.addAll(checkGmcStatus(gmcDetailsDTO));
     fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
