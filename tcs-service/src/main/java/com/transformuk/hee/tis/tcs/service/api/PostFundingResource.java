@@ -50,11 +50,11 @@ public class PostFundingResource {
   private final ApplicationEventPublisher applicationEventPublisher;
 
   /**
-   * Constructor.
+   * Constructs a PostFundingResource with required dependencies.
    *
-   * @param postFundingService        service
-   * @param postFundingValidator      mapper
-   * @param applicationEventPublisher event publisher
+   * @param postFundingService        encapsulates operations including persistence
+   * @param postFundingValidator      validates {@link PostFundingDTO}s, including reference data
+   * @param applicationEventPublisher publishes events for changes to a PostFunding
    */
   public PostFundingResource(PostFundingService postFundingService,
       PostFundingValidator postFundingValidator,
