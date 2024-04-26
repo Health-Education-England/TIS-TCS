@@ -1,7 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,6 +23,9 @@ import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
@@ -30,14 +37,18 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -77,12 +88,21 @@ public class PostFundingResourceIntTest {
   private EntityManager em;
   @Mock
   private ReferenceServiceImpl referenceServiceMock;
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisher;
   @Autowired
   private PostFundingService postFundingService;
   private PostFundingValidator postFundingValidator;
   private MockMvc restPostFundingMockMvc;
   private PostFunding postFunding;
   private PostFunding anotherPostFunding;
+
+  @Captor
+  private ArgumentCaptor<PostFundingSavedEvent> savedEventCaptor;
+  @Captor
+  private ArgumentCaptor<PostFundingCreatedEvent> createdEventCaptor;
+  @Captor
+  private ArgumentCaptor<PostFundingDeletedEvent> deletedEventCaptor;
 
   /**
    * Create an entity for this test.
@@ -111,7 +131,7 @@ public class PostFundingResourceIntTest {
     MockitoAnnotations.initMocks(this);
     postFundingValidator = new PostFundingValidator(referenceServiceMock);
     PostFundingResource postFundingResource = new PostFundingResource(postFundingService,
-        postFundingValidator);
+        postFundingValidator, applicationEventPublisher);
     this.restPostFundingMockMvc = MockMvcBuilders.standaloneSetup(postFundingResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -145,6 +165,10 @@ public class PostFundingResourceIntTest {
     // Validate the PostFunding in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeCreate + 1);
+
+    verify(applicationEventPublisher).publishEvent(createdEventCaptor.capture());
+    assertThat(createdEventCaptor.getValue().getPostFundingDto()).isEqualTo(
+        postFundingMapper.postFundingToPostFundingDTO(postFundingList.get(0)));
   }
 
   @Test
@@ -169,10 +193,19 @@ public class PostFundingResourceIntTest {
 
     // Validate the PostFundings are in the database
     List<PostFunding> postFundings = postFundingRepository.findAll();
+
     assertThat(postFundings).hasSize(databaseSizeBeforeCreate + 2);
     PostFunding anotherPostFunding = postFundings.get(postFundings.size() - 1);
     assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE);
     assertThat(anotherPostFunding.getEndDate()).isEqualTo(END_DATE);
+
+    verify(applicationEventPublisher, times(2)).publishEvent(createdEventCaptor.capture());
+    List<PostFundingCreatedEvent> events = createdEventCaptor.getAllValues();
+    List<PostFundingDTO> eventDtos = events.stream().map(PostFundingCreatedEvent::getPostFundingDto)
+        .collect(Collectors.toList());
+    List<PostFunding> eventPostFundings = postFundingMapper.postFundingDTOsToPostFundings(
+        eventDtos);
+    assertThat(eventPostFundings).isEqualTo(postFundings);
   }
 
   @Test
@@ -210,6 +243,14 @@ public class PostFundingResourceIntTest {
         .findById(anotherUpdatedPostFunding.getId()).orElse(null);
     assertThat(postFunding.getEndDate()).isEqualTo(END_DATE);
     assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE);
+
+    verify(applicationEventPublisher, times(2)).publishEvent(savedEventCaptor.capture());
+    List<PostFundingSavedEvent> events = savedEventCaptor.getAllValues();
+    List<PostFundingDTO> eventDtos = events.stream().map(PostFundingSavedEvent::getPostFundingDto)
+        .collect(Collectors.toList());
+    List<PostFunding> eventPostFundings = postFundingMapper.postFundingDTOsToPostFundings(
+        eventDtos);
+    assertThat(eventPostFundings).isEqualTo(postFundings);
   }
 
   @Test
@@ -226,6 +267,9 @@ public class PostFundingResourceIntTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postFundingDTO)))
         .andExpect(status().isBadRequest());
+
+    verify(applicationEventPublisher, never()).publishEvent(any(PostFundingCreatedEvent.class));
+    verify(applicationEventPublisher, never()).publishEvent(any(PostFundingSavedEvent.class));
 
     // Validate the Alice in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
@@ -302,13 +346,18 @@ public class PostFundingResourceIntTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.messageList").isEmpty());
 
-    // Validate the PostFunding in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
+
+    // Validate the PostFunding in the database
     assertThat(postFundingList).hasSize(databaseSizeBeforeUpdate);
     PostFunding postFundingAfterRequest = postFundingRepository.findById(postFunding.getId())
         .orElse(null);
     assertThat(postFundingAfterRequest).isNotNull();
     assertThat(postFundingAfterRequest.getFundingSubTypeId()).isEqualTo(FUNDING_SUBTYPE_ID);
+
+    verify(applicationEventPublisher).publishEvent(savedEventCaptor.capture());
+    assertThat(savedEventCaptor.getValue().getPostFundingDto()).isEqualTo(
+        postFundingMapper.postFundingToPostFundingDTO(postFundingList.get(0)));
   }
 
   @Test
@@ -351,6 +400,9 @@ public class PostFundingResourceIntTest {
         .orElse(null);
     assertThat(postFundingAfterRequest).isNotNull();
     assertThat(postFundingAfterRequest.getFundingSubTypeId()).isEqualTo(FUNDING_SUBTYPE_ID_1);
+
+    verify(applicationEventPublisher, never()).publishEvent(any(PostFundingCreatedEvent.class));
+    verify(applicationEventPublisher, never()).publishEvent(any(PostFundingSavedEvent.class));
   }
 
   @Test
@@ -370,6 +422,10 @@ public class PostFundingResourceIntTest {
     // Validate the PostFunding in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeUpdate + 1);
+
+    verify(applicationEventPublisher).publishEvent(createdEventCaptor.capture());
+    assertThat(createdEventCaptor.getValue().getPostFundingDto()).isEqualTo(
+        postFundingMapper.postFundingToPostFundingDTO(postFundingList.get(0)));
   }
 
   @Test
@@ -387,5 +443,9 @@ public class PostFundingResourceIntTest {
     // Validate the database is empty
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeDelete - 1);
+
+    verify(applicationEventPublisher).publishEvent(deletedEventCaptor.capture());
+    assertThat(deletedEventCaptor.getValue().getPostFundingDto()).isEqualTo(
+        postFundingMapper.postFundingToPostFundingDTO(postFunding));
   }
 }

@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
@@ -33,7 +32,6 @@ public class PostFundingEventListenerTest {
   PostFundingEventListener postFundingEventListener;
   PostFundingDTO postFundingDTO1, postFundingDTO2;
   Post post1;
-  PostFunding postFunding1;
   PostFundingSavedEvent postFundingSavedEvent;
   PostFundingCreatedEvent postFundingCreatedEvent;
   PostFundingDeletedEvent postFundingDeletedEvent;
@@ -52,13 +50,10 @@ public class PostFundingEventListenerTest {
     post1 = new Post();
     post1.setId(1L);
 
-    postFunding1 = new PostFunding();
-    postFunding1.setId(1L);
-    postFunding1.setPost(post1);
 
     postFundingSavedEvent = new PostFundingSavedEvent(postFundingDTO1);
     postFundingCreatedEvent = new PostFundingCreatedEvent(postFundingDTO2);
-    postFundingDeletedEvent = new PostFundingDeletedEvent(postFunding1);
+    postFundingDeletedEvent = new PostFundingDeletedEvent(postFundingDTO2);
   }
 
   @Test
@@ -79,7 +74,7 @@ public class PostFundingEventListenerTest {
   public void shouldHandlePostFundingDeletedEvent() {
     when(postFundingService.getPostFundingStatusForPost(any())).thenReturn(Status.INACTIVE);
     postFundingEventListener.handlePostFundingDeletedEvent(postFundingDeletedEvent);
-    verify(postService).updateFundingStatus(1L, Status.INACTIVE);
+    verify(postService).updateFundingStatus(2L, Status.INACTIVE);
   }
 
 }

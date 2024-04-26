@@ -53,7 +53,7 @@ public class PostFundingEventListener {
    */
   @EventListener
   public void handlePostFundingDeletedEvent(PostFundingDeletedEvent event) {
-    long postId = event.getPostFunding().getPost().getId();
+    long postId = event.getPostFundingDto().getPostId();
     updatePostFundingStatus(postId);
   }
 
