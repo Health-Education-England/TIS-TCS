@@ -1410,6 +1410,110 @@ public class PostResourceIntTest {
     mvcResult.getResponse().getContentAsString();
   }
 
+  @Test
+  @Transactional
+  public void shouldThrowErrorAndFailToSavePostWhenPostFundingHasEndDateBeforeStartDate()
+      throws Exception {
+    // Valid start and end date for funding
+    PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setStartDate(LocalDate.now().minusDays(10));
+    validFunding.setEndDate(LocalDate.now());
+
+    // Invalid end date for funding
+    PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setStartDate(LocalDate.now());
+    invalidFunding.setEndDate(LocalDate.now().minusDays(10));
+
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    Post post = createEntity();
+    post.setNationalPostNumber("NEW_NPN");
+
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+    Set<PostFundingDTO> fundings = new HashSet<>();
+    fundings.add(validFunding);
+    fundings.add(invalidFunding);
+    postDTO.setFundings(fundings);
+
+    restPostMockMvc.perform(post("/api/posts")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
+        .andExpect(jsonPath("$.fieldErrors[0].message")
+            .value("Post funding end date must not be equal or before start date"));
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
+  public void shouldThrowErrorAndFailToSavePostWhenPostFundingHasNullOrEmptyStartDate()
+      throws Exception {
+    // Valid start and end date for funding
+    PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setStartDate(LocalDate.now().minusDays(10));
+    validFunding.setEndDate(LocalDate.now());
+
+    // Invalid - start date null for funding
+    PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setStartDate(null);
+
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    Post post = createEntity();
+    post.setNationalPostNumber("NEW_NPN");
+
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+    Set<PostFundingDTO> fundings = new HashSet<>();
+    fundings.add(validFunding);
+    fundings.add(invalidFunding);
+    postDTO.setFundings(fundings);
+
+    restPostMockMvc.perform(post("/api/posts")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
+        .andExpect(jsonPath("$.fieldErrors[0].message")
+            .value("Post funding start date cannot be null or empty"));
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
+  public void shouldSavePostWhenPostFundingHasValidStartAndEndDate()
+      throws Exception {
+    // Valid fundings
+    PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setStartDate(LocalDate.now().minusDays(10));
+    validFunding.setEndDate(LocalDate.now());
+
+    PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setStartDate(LocalDate.now());
+
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    Post post = createEntity();
+    post.setNationalPostNumber("NEW_NPN");
+
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+    Set<PostFundingDTO> fundings = new HashSet<>();
+    fundings.add(validFunding);
+    fundings.add(invalidFunding);
+    postDTO.setFundings(fundings);
+
+    restPostMockMvc.perform(post("/api/posts")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isCreated());
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
+  }
+
   private List<String> preparePostRecords() {
     List<String> npns = Arrays.asList("npn-01", "npn-02", "npn-03");
     Post post1 = createEntity();

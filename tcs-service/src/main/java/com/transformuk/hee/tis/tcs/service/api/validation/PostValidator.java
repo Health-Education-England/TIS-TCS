@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
@@ -20,6 +21,7 @@ import com.transformuk.hee.tis.tcs.service.service.impl.NationalPostNumberServic
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
@@ -86,6 +88,7 @@ public class PostValidator {
     fieldErrors.addAll(checkPlacementHistory(postDTO));
     fieldErrors.addAll(checkNationalPostNumber(postDTO));
     fieldErrors.addAll(checkLegacy(postDTO.getId()));
+    fieldErrors.addAll(checkFunding(postDTO));
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO,
@@ -291,4 +294,23 @@ public class PostValidator {
     return fieldErrors;
   }
 
+  private Collection<? extends FieldError> checkFunding(PostDTO postDTO) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    if (postDTO.getFundings() != null && !postDTO.getFundings().isEmpty()) {
+      for (PostFundingDTO postFundingDTO : postDTO.getFundings()) {
+        if (postFundingDTO.getStartDate() == null) {
+          fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
+              "Post funding start date cannot be null or empty"));
+        }
+
+        if (postFundingDTO.getEndDate() != null && (
+            postFundingDTO.getEndDate().isBefore(postFundingDTO.getStartDate()) || postFundingDTO
+                .getEndDate().isEqual(postFundingDTO.getStartDate()))) {
+          fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
+              "Post funding end date must not be equal or before start date"));
+        }
+      }
+    }
+    return fieldErrors;
+  }
 }
