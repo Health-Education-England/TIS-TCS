@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Data;
+import javax.validation.constraints.NotNull;
 
 /**
  * A DTO for the PostFunding entity.
@@ -24,6 +25,7 @@ public class PostFundingDTO implements Serializable {
 
   private String info;
 
+  @NotNull(message = "Post funding start date cannot be null or empty")
   private LocalDate startDate;
 
   private LocalDate endDate;
