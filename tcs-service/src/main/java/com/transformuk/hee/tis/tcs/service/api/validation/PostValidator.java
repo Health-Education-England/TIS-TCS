@@ -294,18 +294,18 @@ public class PostValidator {
     return fieldErrors;
   }
 
-  private Collection<? extends FieldError> checkFunding(PostDTO postDTO) {
+  private Collection<? extends FieldError> checkFunding(PostDTO postDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (postDTO.getFundings() != null && !postDTO.getFundings().isEmpty()) {
-      for (PostFundingDTO postFundingDTO : postDTO.getFundings()) {
-        if (postFundingDTO.getStartDate() == null) {
+    if (postDto.getFundings() != null && !postDto.getFundings().isEmpty()) {
+      for (PostFundingDTO postFundingDto : postDto.getFundings()) {
+        if (postFundingDto.getStartDate() == null) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
               "Post funding start date cannot be null or empty"));
         }
 
-        if (postFundingDTO.getEndDate() != null && (
-            postFundingDTO.getEndDate().isBefore(postFundingDTO.getStartDate()) || postFundingDTO
-                .getEndDate().isEqual(postFundingDTO.getStartDate()))) {
+        if (postFundingDto.getEndDate() != null && (
+            postFundingDto.getEndDate().isBefore(postFundingDto.getStartDate()) || postFundingDto
+                .getEndDate().isEqual(postFundingDto.getStartDate()))) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
               "Post funding end date must not be equal or before start date"));
         }

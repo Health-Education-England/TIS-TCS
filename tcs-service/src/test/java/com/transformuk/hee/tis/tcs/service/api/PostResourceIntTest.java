@@ -278,7 +278,7 @@ public class PostResourceIntTest {
   }
 
   @Before
-  public void initTest() throws Exception {
+  public void initTest() {
     post = createEntity();
     post.setOwner(OWNER);
     em.persist(post);
@@ -1428,10 +1428,10 @@ public class PostResourceIntTest {
     invalidFunding.setEndDate(LocalDate.now().minusDays(10));
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
-    Post post = createEntity();
-    post.setNationalPostNumber("NEW_NPN");
+    Post testPost = createEntity();
+    testPost.setNationalPostNumber("NEW_NPN");
 
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    PostDTO postDTO = postMapper.postToPostDTO(testPost);
     Set<PostFundingDTO> fundings = new HashSet<>();
     fundings.add(validFunding);
     fundings.add(invalidFunding);
@@ -1464,10 +1464,10 @@ public class PostResourceIntTest {
     invalidFunding.setStartDate(null);
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
-    Post post = createEntity();
-    post.setNationalPostNumber("NEW_NPN");
+    Post testPost = createEntity();
+    testPost.setNationalPostNumber("NEW_NPN");
 
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    PostDTO postDTO = postMapper.postToPostDTO(testPost);
     Set<PostFundingDTO> fundings = new HashSet<>();
     fundings.add(validFunding);
     fundings.add(invalidFunding);
@@ -1499,10 +1499,10 @@ public class PostResourceIntTest {
     invalidFunding.setStartDate(LocalDate.now());
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
-    Post post = createEntity();
-    post.setNationalPostNumber("NEW_NPN");
+    Post testPost = createEntity();
+    testPost.setNationalPostNumber("NEW_NPN");
 
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    PostDTO postDTO = postMapper.postToPostDTO(testPost);
     Set<PostFundingDTO> fundings = new HashSet<>();
     fundings.add(validFunding);
     fundings.add(invalidFunding);
