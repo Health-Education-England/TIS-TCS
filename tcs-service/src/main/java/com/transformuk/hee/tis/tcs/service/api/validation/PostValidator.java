@@ -303,7 +303,7 @@ public class PostValidator {
               "Post funding start date cannot be null or empty"));
         }
 
-        if (postFundingDto.getEndDate() != null && (
+        if (postFundingDto.getEndDate() != null && postFundingDto.getStartDate() != null && (
             postFundingDto.getEndDate().isBefore(postFundingDto.getStartDate()) || postFundingDto
                 .getEndDate().isEqual(postFundingDto.getStartDate()))) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
