@@ -1488,8 +1488,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldSavePostWhenPostFundingHasValidStartAndEndDate()
-      throws Exception {
+  public void shouldSavePostWhenPostFundingHasValidStartAndEndDate() throws Exception {
     // Valid fundings
     PostFundingDTO validFunding1 = new PostFundingDTO();
     validFunding1.setStartDate(LocalDate.now().minusDays(10));
