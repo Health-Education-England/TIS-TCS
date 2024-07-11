@@ -295,29 +295,29 @@ public class PostValidator {
     return fieldErrors;
   }
 
-  private Collection<? extends FieldError> checkFunding(PostDTO postDTO) {
+  private Collection<? extends FieldError> checkFunding(PostDTO postDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (postDTO.getFundings() != null && !postDTO.getFundings().isEmpty()) {
-      postDTO.getFundings().forEach(postFundingDTO -> {
-        validateStartDate(postFundingDTO, fieldErrors);
-        validateEndDate(postFundingDTO, fieldErrors);
+    if (postDto.getFundings() != null && !postDto.getFundings().isEmpty()) {
+      postDto.getFundings().forEach(postFundingDto -> {
+        validateStartDate(postFundingDto, fieldErrors);
+        validateEndDate(postFundingDto, fieldErrors);
       });
     }
     return fieldErrors;
   }
 
-  private void validateStartDate(PostFundingDTO postFundingDTO, List<FieldError> fieldErrors) {
-    if (postFundingDTO.getStartDate() == null) {
+  private void validateStartDate(PostFundingDTO postFundingDto, List<FieldError> fieldErrors) {
+    if (postFundingDto.getStartDate() == null) {
       fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
           "Post funding start date cannot be null or empty"));
     }
   }
 
-  private void validateEndDate(PostFundingDTO postFundingDTO, List<FieldError> fieldErrors) {
-    LocalDate startDate = postFundingDTO.getStartDate();
-    LocalDate endDate = postFundingDTO.getEndDate();
-    if (endDate != null && startDate != null &&
-        (endDate.isBefore(startDate) || endDate.isEqual(startDate))) {
+  private void validateEndDate(PostFundingDTO postFundingDto, List<FieldError> fieldErrors) {
+    LocalDate startDate = postFundingDto.getStartDate();
+    LocalDate endDate = postFundingDto.getEndDate();
+    if (endDate != null && startDate != null && (endDate.isBefore(startDate) || endDate
+        .isEqual(startDate))) {
       fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
           "Post funding end date must not be equal or before start date"));
     }
