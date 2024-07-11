@@ -268,8 +268,8 @@ public class PostResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator,
-        placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator, applicationEventPublisher);
+        placementViewRepository, placementViewDecorator, placementViewMapper, placementService,
+        placementSummaryDecorator, applicationEventPublisher);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -1310,19 +1310,19 @@ public class PostResourceIntTest {
     postDTO.setId(post.getId());
 
     Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
-    PostFundingDTO pfDTO_1 = new PostFundingDTO();
-    pfDTO_1.setFundingType("Academic - Trust");
-    pfDTO_1.setFundingBodyId("864");
-    pfDTO_1.setStartDate(LocalDate.of(2019, 4, 4));
-    pfDTO_1.setEndDate(LocalDate.of(2019, 5, 4));
-    postFundingDTOs.add(pfDTO_1);
+    PostFundingDTO pfDto_1 = new PostFundingDTO();
+    pfDto_1.setFundingType("Academic - Trust");
+    pfDto_1.setFundingBodyId("864");
+    pfDto_1.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDto_1.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDto_1);
 
-    PostFundingDTO pfDTO_2 = new PostFundingDTO();
-    pfDTO_2.setFundingType("lalala");
-    pfDTO_2.setFundingBodyId("864");
-    pfDTO_2.setStartDate(LocalDate.of(2019, 4, 4));
-    pfDTO_2.setEndDate(LocalDate.of(2019, 5, 4));
-    postFundingDTOs.add(pfDTO_2);
+    PostFundingDTO pfDto_2 = new PostFundingDTO();
+    pfDto_2.setFundingType("lalala");
+    pfDto_2.setFundingBodyId("864");
+    pfDto_2.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDto_2.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDto_2);
 
     postDTO.setFundings(postFundingDTOs);
 
@@ -1438,8 +1438,8 @@ public class PostResourceIntTest {
     postDTO.setFundings(fundings);
 
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
@@ -1474,8 +1474,8 @@ public class PostResourceIntTest {
     postDTO.setFundings(fundings);
 
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
@@ -1509,8 +1509,8 @@ public class PostResourceIntTest {
     postDTO.setFundings(fundings);
 
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isCreated());
 
     List<Post> postList = postRepository.findAll();
@@ -1543,8 +1543,8 @@ public class PostResourceIntTest {
     postDto.setId(1L);
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDto)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDto)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
