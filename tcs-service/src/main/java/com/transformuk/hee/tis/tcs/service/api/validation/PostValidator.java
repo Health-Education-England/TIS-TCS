@@ -20,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.impl.NationalPostNumberServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -294,23 +295,31 @@ public class PostValidator {
     return fieldErrors;
   }
 
-  private Collection<? extends FieldError> checkFunding(PostDTO postDto) {
+  private Collection<? extends FieldError> checkFunding(PostDTO postDTO) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (postDto.getFundings() != null && !postDto.getFundings().isEmpty()) {
-      for (PostFundingDTO postFundingDto : postDto.getFundings()) {
-        if (postFundingDto.getStartDate() == null) {
-          fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
-              "Post funding start date cannot be null or empty"));
-        }
-
-        if (postFundingDto.getEndDate() != null && postFundingDto.getStartDate() != null && (
-            postFundingDto.getEndDate().isBefore(postFundingDto.getStartDate()) || postFundingDto
-                .getEndDate().isEqual(postFundingDto.getStartDate()))) {
-          fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
-              "Post funding end date must not be equal or before start date"));
-        }
-      }
+    if (postDTO.getFundings() != null && !postDTO.getFundings().isEmpty()) {
+      postDTO.getFundings().forEach(postFundingDTO -> {
+        validateStartDate(postFundingDTO, fieldErrors);
+        validateEndDate(postFundingDTO, fieldErrors);
+      });
     }
     return fieldErrors;
+  }
+
+  private void validateStartDate(PostFundingDTO postFundingDTO, List<FieldError> fieldErrors) {
+    if (postFundingDTO.getStartDate() == null) {
+      fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
+          "Post funding start date cannot be null or empty"));
+    }
+  }
+
+  private void validateEndDate(PostFundingDTO postFundingDTO, List<FieldError> fieldErrors) {
+    LocalDate startDate = postFundingDTO.getStartDate();
+    LocalDate endDate = postFundingDTO.getEndDate();
+    if (endDate != null && startDate != null &&
+        (endDate.isBefore(startDate) || endDate.isEqual(startDate))) {
+      fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
+          "Post funding end date must not be equal or before start date"));
+    }
   }
 }
