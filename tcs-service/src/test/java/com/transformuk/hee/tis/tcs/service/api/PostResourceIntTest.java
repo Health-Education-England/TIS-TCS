@@ -1444,7 +1444,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
         .andExpect(jsonPath("$.fieldErrors[0].message")
-            .value("Post funding end date must not be equal or before start date"));
+            .value("Post funding end date must not be equal to or before start date"));
 
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeCreate);
