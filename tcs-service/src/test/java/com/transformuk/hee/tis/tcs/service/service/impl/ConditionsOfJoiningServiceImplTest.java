@@ -19,6 +19,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipReposit
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,8 +55,8 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenCurriculumMembershipIdNotFound() {
-    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenThrow(
-        new EntityNotFoundException("Expected"));
+    when(curriculumMembershipRepository.findById(CURRICULUM_MEMBERSHIP_ID))
+        .thenReturn(Optional.empty());
 
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save(CURRICULUM_MEMBERSHIP_ID, coj));
@@ -64,8 +65,8 @@ class ConditionsOfJoiningServiceImplTest {
 
   @Test
   void saveShouldThrowExceptionWhenProgrammeMembershipIdNotFound() {
-    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenThrow(
-        new EntityNotFoundException("Expected"));
+    when(programmeMembershipRepository.findByUuid(PROGRAMME_MEMBERSHIP_UUID))
+        .thenReturn(Optional.empty());
 
     assertThrows(IllegalArgumentException.class,
         () -> conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID, coj));
@@ -76,7 +77,8 @@ class ConditionsOfJoiningServiceImplTest {
   void saveShouldThrowExceptionWhenCojConstraintFails() {
     ProgrammeMembership pm = new ProgrammeMembership();
     pm.setUuid(UUID.randomUUID());
-    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(pm);
+    when(programmeMembershipRepository.findByUuid(PROGRAMME_MEMBERSHIP_UUID))
+        .thenReturn(Optional.of(pm));
     when(repository.save(any())).thenThrow(new DataIntegrityViolationException("expected"));
 
     assertThrows(IllegalArgumentException.class,
@@ -97,8 +99,8 @@ class ConditionsOfJoiningServiceImplTest {
     CurriculumMembership curriculumMembership = new CurriculumMembership();
     curriculumMembership.setProgrammeMembership(programmeMembership);
 
-    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
-        curriculumMembership);
+    when(curriculumMembershipRepository.findById(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
+        Optional.of(curriculumMembership));
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
 
     ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(CURRICULUM_MEMBERSHIP_ID,
@@ -117,8 +119,8 @@ class ConditionsOfJoiningServiceImplTest {
     ProgrammeMembership programmeMembership = new ProgrammeMembership();
     programmeMembership.setUuid(PROGRAMME_MEMBERSHIP_UUID);
 
-    when(programmeMembershipRepository.getOne(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(
-        programmeMembership);
+    when(programmeMembershipRepository.findByUuid(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(
+        Optional.of(programmeMembership));
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
 
     ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID,
@@ -141,8 +143,8 @@ class ConditionsOfJoiningServiceImplTest {
     CurriculumMembership curriculumMembership = new CurriculumMembership();
     curriculumMembership.setProgrammeMembership(programmeMembership);
 
-    when(curriculumMembershipRepository.getOne(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
-        curriculumMembership);
+    when(curriculumMembershipRepository.findById(CURRICULUM_MEMBERSHIP_ID)).thenReturn(
+        Optional.of(curriculumMembership));
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
 
     ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(CURRICULUM_MEMBERSHIP_ID,
