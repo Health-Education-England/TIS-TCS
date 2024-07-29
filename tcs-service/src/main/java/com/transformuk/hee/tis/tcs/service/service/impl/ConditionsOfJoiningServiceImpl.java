@@ -56,28 +56,24 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
   public ConditionsOfJoiningDto save(Object id, ConditionsOfJoiningDto dto) {
     Optional<ProgrammeMembership> programmeMembershipOptional = Optional.empty();
     LOG.info("Request received to save Conditions of Joining for id {}.", id);
-    try {
-      // Deprecated structure and will be removed. JIRA - TIS21-2446: ProgrammeMembership refactor
-      if (StringUtils.isNumeric(id.toString())) {
-        Optional<CurriculumMembership> curriculumMembershipOptional
-            = curriculumMembershipRepository.findById(Long.parseLong(id.toString()));
-        if (curriculumMembershipOptional.isPresent()) {
-          programmeMembershipOptional = Optional.of(
-              curriculumMembershipOptional.get().getProgrammeMembership());
-        }
-      } else {
-        programmeMembershipOptional = programmeMembershipRepository.findByUuid(
-            UUID.fromString(id.toString()));
-      }
 
-      if (!programmeMembershipOptional.isPresent()) {
-        throw new IllegalArgumentException(String.format("No Programme Membership for %s.", id));
+    // Deprecated structure and will be removed. JIRA - TIS21-2446: ProgrammeMembership refactor
+    if (StringUtils.isNumeric(id.toString())) {
+      Optional<CurriculumMembership> curriculumMembershipOptional
+          = curriculumMembershipRepository.findById(Long.parseLong(id.toString()));
+      if (curriculumMembershipOptional.isPresent()) {
+        programmeMembershipOptional = Optional.of(
+            curriculumMembershipOptional.get().getProgrammeMembership());
       }
-      LOG.debug("Found ProgrammeMembership {}", programmeMembershipOptional.get());
-    } catch (EntityNotFoundException e) {
-      throw new IllegalArgumentException(String.format("Programme Membership %s not found.", id),
-          e);
+    } else {
+      programmeMembershipOptional = programmeMembershipRepository.findByUuid(
+          UUID.fromString(id.toString()));
     }
+
+    if (!programmeMembershipOptional.isPresent()) {
+      throw new IllegalArgumentException(String.format("No Programme Membership for %s.", id));
+    }
+    LOG.debug("Found ProgrammeMembership {}", programmeMembershipOptional.get());
 
     UUID programmeMembershipUuid = programmeMembershipOptional.get().getUuid();
     dto.setProgrammeMembershipUuid(programmeMembershipUuid);
