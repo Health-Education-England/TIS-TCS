@@ -36,6 +36,8 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -130,8 +132,7 @@ class PostValidatorTest {
 
   @Test
   void shouldFailValidationWhenSitesAreInvalid() {
-    PostSiteDTO site = new PostSiteDTO();
-    site.setSiteId(999L);
+    PostSiteDTO site = new PostSiteDTO(null, 999L, PostSiteType.PRIMARY);
     dto.setSites(Set.of(site));
 
     when(referenceService.siteIdExists(List.of(999L))).thenReturn(Map.of(999L, false));
@@ -145,8 +146,7 @@ class PostValidatorTest {
 
   @Test
   void shouldFailValidationWhenGradesAreInvalid() {
-    PostGradeDTO grade = new PostGradeDTO();
-    grade.setGradeId(999L);
+    PostGradeDTO grade = new PostGradeDTO(null, 999L, PostGradeType.APPROVED);
     dto.setGrades(Set.of(grade));
 
     when(referenceService.gradeIdsExists(List.of(999L))).thenReturn(Map.of(999L, false));
@@ -160,9 +160,10 @@ class PostValidatorTest {
 
   @Test
   void shouldFailValidationWhenSpecialtiesAreInvalid() {
-    PostSpecialtyDTO specialty = new PostSpecialtyDTO();
     SpecialtyDTO specialtyDto = new SpecialtyDTO();
     specialtyDto.setId(999L);
+    PostSpecialtyDTO specialty = new PostSpecialtyDTO(null, specialtyDto,
+        PostSpecialtyType.PRIMARY);
     specialty.setSpecialty(specialtyDto);
     specialty.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
     dto.setSpecialties(Set.of(specialty));

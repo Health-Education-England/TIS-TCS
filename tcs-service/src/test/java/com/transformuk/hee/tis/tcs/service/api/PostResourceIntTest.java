@@ -1310,19 +1310,19 @@ public class PostResourceIntTest {
     postDTO.setId(post.getId());
 
     Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
-    PostFundingDTO pfDto_1 = new PostFundingDTO();
-    pfDto_1.setFundingType("Academic - Trust");
-    pfDto_1.setFundingBodyId("864");
-    pfDto_1.setStartDate(LocalDate.of(2019, 4, 4));
-    pfDto_1.setEndDate(LocalDate.of(2019, 5, 4));
-    postFundingDTOs.add(pfDto_1);
+    PostFundingDTO pfDto1 = new PostFundingDTO();
+    pfDto1.setFundingType("Academic - Trust");
+    pfDto1.setFundingBodyId("864");
+    pfDto1.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDto1.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDto1);
 
-    PostFundingDTO pfDto_2 = new PostFundingDTO();
-    pfDto_2.setFundingType("lalala");
-    pfDto_2.setFundingBodyId("864");
-    pfDto_2.setStartDate(LocalDate.of(2019, 4, 4));
-    pfDto_2.setEndDate(LocalDate.of(2019, 5, 4));
-    postFundingDTOs.add(pfDto_2);
+    PostFundingDTO pfDto2 = new PostFundingDTO();
+    pfDto2.setFundingType("lalala");
+    pfDto2.setFundingBodyId("864");
+    pfDto2.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDto2.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDto2);
 
     postDTO.setFundings(postFundingDTOs);
 
