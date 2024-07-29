@@ -2,12 +2,14 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.service.model.ConditionsOfJoining;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ConditionsOfJoiningRepository;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
 import org.apache.commons.lang3.StringUtils;
@@ -52,24 +54,32 @@ public class ConditionsOfJoiningServiceImpl implements ConditionsOfJoiningServic
 
   @Override
   public ConditionsOfJoiningDto save(Object id, ConditionsOfJoiningDto dto) {
-    ProgrammeMembership programmeMembership;
+    Optional<ProgrammeMembership> programmeMembershipOptional = Optional.empty();
     LOG.info("Request received to save Conditions of Joining for id {}.", id);
     try {
       // Deprecated structure and will be removed. JIRA - TIS21-2446: ProgrammeMembership refactor
-      programmeMembership =
-          StringUtils.isNumeric(id.toString()) ? curriculumMembershipRepository
-              .getOne(Long.parseLong(id.toString())).getProgrammeMembership()
-              : programmeMembershipRepository.getOne(UUID.fromString(id.toString()));
-      if (programmeMembership == null) {
+      if (StringUtils.isNumeric(id.toString())) {
+        Optional<CurriculumMembership> curriculumMembershipOptional
+            = curriculumMembershipRepository.findById(Long.parseLong(id.toString()));
+        if (curriculumMembershipOptional.isPresent()) {
+          programmeMembershipOptional = Optional.of(
+              curriculumMembershipOptional.get().getProgrammeMembership());
+        }
+      } else {
+        programmeMembershipOptional = programmeMembershipRepository.findByUuid(
+            UUID.fromString(id.toString()));
+      }
+
+      if (!programmeMembershipOptional.isPresent()) {
         throw new IllegalArgumentException(String.format("No Programme Membership for %s.", id));
       }
-      LOG.debug("Found ProgrammeMembership {}", programmeMembership);
+      LOG.debug("Found ProgrammeMembership {}", programmeMembershipOptional.get());
     } catch (EntityNotFoundException e) {
       throw new IllegalArgumentException(String.format("Programme Membership %s not found.", id),
           e);
     }
 
-    UUID programmeMembershipUuid = programmeMembership.getUuid();
+    UUID programmeMembershipUuid = programmeMembershipOptional.get().getUuid();
     dto.setProgrammeMembershipUuid(programmeMembershipUuid);
     LOG.info("Saving Conditions of Joining for Programme Membership with UUID {}.",
         programmeMembershipUuid);
