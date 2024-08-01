@@ -268,8 +268,8 @@ public class PostResourceIntTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator,
-        placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator, applicationEventPublisher);
+        placementViewRepository, placementViewDecorator, placementViewMapper, placementService,
+        placementSummaryDecorator, applicationEventPublisher);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -278,7 +278,7 @@ public class PostResourceIntTest {
   }
 
   @Before
-  public void initTest() throws Exception {
+  public void initTest() {
     post = createEntity();
     post.setOwner(OWNER);
     em.persist(post);
@@ -1310,19 +1310,19 @@ public class PostResourceIntTest {
     postDTO.setId(post.getId());
 
     Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
-    PostFundingDTO pfDTO_1 = new PostFundingDTO();
-    pfDTO_1.setFundingType("Academic - Trust");
-    pfDTO_1.setFundingBodyId("864");
-    pfDTO_1.setStartDate(LocalDate.of(2019, 4, 4));
-    pfDTO_1.setEndDate(LocalDate.of(2019, 5, 4));
-    postFundingDTOs.add(pfDTO_1);
+    PostFundingDTO pfDto1 = new PostFundingDTO();
+    pfDto1.setFundingType("Academic - Trust");
+    pfDto1.setFundingBodyId("864");
+    pfDto1.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDto1.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDto1);
 
-    PostFundingDTO pfDTO_2 = new PostFundingDTO();
-    pfDTO_2.setFundingType("lalala");
-    pfDTO_2.setFundingBodyId("864");
-    pfDTO_2.setStartDate(LocalDate.of(2019, 4, 4));
-    pfDTO_2.setEndDate(LocalDate.of(2019, 5, 4));
-    postFundingDTOs.add(pfDTO_2);
+    PostFundingDTO pfDto2 = new PostFundingDTO();
+    pfDto2.setFundingType("lalala");
+    pfDto2.setFundingBodyId("864");
+    pfDto2.setStartDate(LocalDate.of(2019, 4, 4));
+    pfDto2.setEndDate(LocalDate.of(2019, 5, 4));
+    postFundingDTOs.add(pfDto2);
 
     postDTO.setFundings(postFundingDTOs);
 
@@ -1411,6 +1411,147 @@ public class PostResourceIntTest {
         .andReturn();
 
     mvcResult.getResponse().getContentAsString();
+  }
+
+  @Test
+  @Transactional
+  public void shouldThrowErrorAndFailToSavePostWhenPostFundingHasEndDateBeforeStartDate()
+      throws Exception {
+    // Valid start and end date for funding
+    PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setStartDate(LocalDate.now().minusDays(10));
+    validFunding.setEndDate(LocalDate.now());
+
+    // Invalid end date for funding
+    PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setStartDate(LocalDate.now());
+    invalidFunding.setEndDate(LocalDate.now().minusDays(10));
+
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    Post testPost = createEntity();
+    testPost.setNationalPostNumber("NEW_NPN");
+
+    PostDTO postDTO = postMapper.postToPostDTO(testPost);
+    Set<PostFundingDTO> fundings = new HashSet<>();
+    fundings.add(validFunding);
+    fundings.add(invalidFunding);
+    postDTO.setFundings(fundings);
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
+        .andExpect(jsonPath("$.fieldErrors[0].message")
+            .value("Post funding end date must not be equal to or before start date"));
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
+  public void shouldThrowErrorAndFailToSavePostWhenPostFundingHasNullOrEmptyStartDate()
+      throws Exception {
+    // Valid start and end date for funding
+    PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setStartDate(LocalDate.now().minusDays(10));
+    validFunding.setEndDate(LocalDate.now());
+
+    // Invalid - start date null for funding
+    PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setEndDate(LocalDate.now());
+
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    Post testPost = createEntity();
+    testPost.setNationalPostNumber("NEW_NPN");
+
+    PostDTO postDTO = postMapper.postToPostDTO(testPost);
+    Set<PostFundingDTO> fundings = new HashSet<>();
+    fundings.add(validFunding);
+    fundings.add(invalidFunding);
+    postDTO.setFundings(fundings);
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
+        .andExpect(jsonPath("$.fieldErrors[0].message")
+            .value("Post funding start date cannot be null or empty"));
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
+  public void shouldSavePostWhenPostFundingHasValidStartAndEndDate() throws Exception {
+    // Valid fundings
+    PostFundingDTO validFunding1 = new PostFundingDTO();
+    validFunding1.setStartDate(LocalDate.now().minusDays(10));
+    validFunding1.setEndDate(LocalDate.now());
+
+    PostFundingDTO validFunding2 = new PostFundingDTO();
+    validFunding2.setStartDate(LocalDate.now());
+
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    Post testPost = createEntity();
+    testPost.setNationalPostNumber("NEW_NPN");
+
+    PostDTO postDTO = postMapper.postToPostDTO(testPost);
+    Set<PostFundingDTO> fundings = new HashSet<>();
+    fundings.add(validFunding1);
+    fundings.add(validFunding2);
+    postDTO.setFundings(fundings);
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().isCreated());
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
+  }
+
+  @Test
+  @Transactional
+  public void shouldThrowErrorAndFailTo_UpdatePostWhenPostFundingHasNullOrEmptyStartDate()
+      throws Exception {
+    // Valid start and end date for funding
+    PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setStartDate(LocalDate.now().minusDays(10));
+    validFunding.setEndDate(LocalDate.now());
+
+    // Invalid - start date null for funding
+    PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setEndDate(LocalDate.now());
+
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    Post testPost = createEntity();
+    testPost.setNationalPostNumber("NEW_NPN");
+
+    PostDTO postDto = postMapper.postToPostDTO(testPost);
+    Set<PostFundingDTO> fundings = new HashSet<>();
+    fundings.add(validFunding);
+    fundings.add(invalidFunding);
+    postDto.setFundings(fundings);
+    // For update post must have an id
+    postDto.setId(1L);
+
+    restPostMockMvc.perform(put("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("error.validation"))
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("fundings"))
+        .andExpect(jsonPath("$.fieldErrors[0].message")
+            .value("Post funding start date cannot be null or empty"));
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
   }
 
   private List<String> preparePostRecords() {
