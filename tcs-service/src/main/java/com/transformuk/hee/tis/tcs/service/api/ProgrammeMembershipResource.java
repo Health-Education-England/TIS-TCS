@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO.ProgrammeMembershipSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -158,6 +159,34 @@ public class ProgrammeMembershipResource {
     }
 
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
+  }
+
+
+  /**
+   * GET /programme-memberships/:uuid : get the "uuid" programmeMembership.
+   *
+   * @param uuid the id of the programmeMembershipDTO to retrieve
+   * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO, or
+   *         with status 404 (Not Found)
+   */
+  @GetMapping("/programme-memberships/{uuid}")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<ProgrammeMembershipSummaryDTO> getProgrammeMembershipbyUuid(@PathVariable String uuid) {
+    log.debug("REST request to get ProgrammeMembership : {}", uuid);
+    ProgrammeMembershipDTO programmeMembershipDto;
+
+    try {
+      programmeMembershipDto = programmeMembershipService.findOne(UUID.fromString(uuid));
+    } catch (IllegalArgumentException e) {
+      programmeMembershipDto = programmeMembershipService.findOne(Long.parseLong(uuid));
+    }
+
+    ProgrammeMembershipSummaryDTO summaryDto = new ProgrammeMembershipSummaryDTO();
+    summaryDto.setProgrammeName(programmeMembershipDto.getProgrammeName());
+    summaryDto.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
+    summaryDto.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
+
+    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(summaryDto));
   }
 
   /**
