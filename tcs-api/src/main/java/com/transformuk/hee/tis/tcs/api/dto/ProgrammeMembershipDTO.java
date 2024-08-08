@@ -81,6 +81,15 @@ public class ProgrammeMembershipDTO implements Serializable {
     messageList.add(message);
   }
 
+
+  @Data
+  public static class ProgrammeMembershipSummaryDTO implements Serializable {
+
+    private String programmeName;
+    private LocalDate programmeStartDate;
+    private LocalDate programmeEndDate;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

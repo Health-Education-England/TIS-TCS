@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.41.1</version>
+  <version>6.42.0</version>
 
   <dependencies>
     <dependency>
@@ -324,6 +324,16 @@
       <groupId>io.sentry</groupId>
       <artifactId>sentry-logback</artifactId>
       <version>${sentryVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.transformuk.hee</groupId>
+      <artifactId>tis-security-jwt</artifactId>
+      <version>5.1.4</version>
+      <scope>compile</scope>
     </dependency>
 
   </dependencies>
