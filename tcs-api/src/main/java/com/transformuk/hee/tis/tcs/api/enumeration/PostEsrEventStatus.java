@@ -6,5 +6,6 @@ package com.transformuk.hee.tis.tcs.api.enumeration;
 public enum PostEsrEventStatus {
 
   RECONCILED,
-  DELETED
+  DELETED,
+  RECONCILED_EXP
 }

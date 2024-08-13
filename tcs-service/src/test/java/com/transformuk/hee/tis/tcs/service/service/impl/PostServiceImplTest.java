@@ -21,11 +21,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
@@ -49,6 +45,9 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -174,6 +173,10 @@ public class PostServiceImplTest {
   private PostFundingValidator postFundingValidatorMock;
   @Captor
   ArgumentCaptor<Post> postArgumentCaptor;
+  @Captor
+  ArgumentCaptor<Set<PostEsrEvent>> postEsrEventSetArgCaptor;
+  @Captor
+  ArgumentCaptor<PostEsrEvent> postEsrEventArgCaptor;
 
   @Test
   public void saveShouldSavePost() {
@@ -724,19 +727,179 @@ public class PostServiceImplTest {
   @Test
   public void markPostAsEsrPositionChangedShouldSaveUpdatedPostEsrEvent() {
     //given
-    Long postId = 1L;
-    Post post = new Post();
-    post.setId(postId);
-    PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
-    PostEsrEvent postEsrEvent = new PostEsrEvent();
+    Long postId1 = 1L;
+    Long postId2 = 2L;
+    Long positionNumber = 12345678L;
+    LocalDateTime currentReconciledTime = LocalDateTime.of(2024, Month.AUGUST, 8, 8, 0);
 
-    when(postEsrEventDtoMapperMock.postEsrEventDtoToPostEsrEvent(any())).thenReturn(postEsrEvent);
-    when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.of(post));
+    Post post1 = new Post();
+    post1.setId(postId1);
+    Post post2 = new Post();
+    post2.setId(postId2);
+
+    PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
+    postEsrEventDto.setPostId(postId1);
+    postEsrEventDto.setEventDateTime(currentReconciledTime);
+    postEsrEventDto.setPositionNumber(positionNumber);
+
+    PostEsrEvent mappedPostEsrEvent = new PostEsrEvent();
+    mappedPostEsrEvent.setPost(post1);
+    mappedPostEsrEvent.setStatus(PostEsrEventStatus.RECONCILED);
+    mappedPostEsrEvent.setPositionNumber(positionNumber);
+    mappedPostEsrEvent.setEventDateTime(currentReconciledTime);
+
+    PostEsrEvent postEsrEvent1 = new PostEsrEvent();
+    postEsrEvent1.setPost(post1);
+    postEsrEvent1.setStatus(PostEsrEventStatus.RECONCILED);
+    postEsrEvent1.setPositionNumber(positionNumber);
+    postEsrEvent1.setEventDateTime(LocalDateTime.of(2024, Month.AUGUST, 7, 8, 0));
+    PostEsrEvent postEsrEvent2 = new PostEsrEvent();
+    postEsrEvent2.setPost(post2);
+    postEsrEvent2.setStatus(PostEsrEventStatus.RECONCILED);
+    postEsrEvent2.setPositionNumber(positionNumber);
+    postEsrEvent2.setEventDateTime(LocalDateTime.of(2024, Month.AUGUST, 6, 8, 0));
+
+    when(postEsrEventDtoMapperMock.postEsrEventDtoToPostEsrEvent(any())).thenReturn(mappedPostEsrEvent);
+    when(postRepositoryMock.findPostWithTrustsById(postId1)).thenReturn(Optional.of(post1));
+    when(postEsrEventRepositoryMock.findPostEsrEventsByPositionNumber(positionNumber))
+        .thenReturn(Set.of(postEsrEvent1, postEsrEvent2));
 
     //when
-    testObj.markPostAsEsrPositionChanged(postId, postEsrEventDto);
+    testObj.markPostAsEsrPositionChanged(postId1, postEsrEventDto);
 
     //then
-    verify(postEsrEventRepositoryMock).save(postEsrEvent);
+    verify(postEsrEventRepositoryMock).save(postEsrEventArgCaptor.capture());
+    PostEsrEvent postEsrEvent = postEsrEventArgCaptor.getValue();
+    Assert.assertEquals(PostEsrEventStatus.RECONCILED, postEsrEvent.getStatus());
+  }
+
+  @Test
+  public void markPostAsEsrPositionChangedShouldSaveUpdatedPostEsrEventIfCurrentEventExpired() {
+    //given
+    Long postId1 = 1L;
+    Long postId2 = 2L;
+    Long positionNumber = 12345678L;
+    LocalDateTime currentReconciledTime = LocalDateTime.of(2024, Month.AUGUST, 8, 8, 0);
+
+    PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
+    postEsrEventDto.setPostId(postId1);
+    postEsrEventDto.setEventDateTime(currentReconciledTime);
+    postEsrEventDto.setPositionNumber(positionNumber);
+
+    Post post1 = new Post();
+    post1.setId(postId1);
+    Post post2 = new Post();
+    post2.setId(postId2);
+
+    PostEsrEvent mappedPostEsrEvent = new PostEsrEvent();
+    mappedPostEsrEvent.setPost(post1);
+    mappedPostEsrEvent.setStatus(PostEsrEventStatus.RECONCILED);
+    mappedPostEsrEvent.setPositionNumber(positionNumber);
+    mappedPostEsrEvent.setEventDateTime(currentReconciledTime);
+
+    PostEsrEvent postEsrEvent1 = new PostEsrEvent();
+    postEsrEvent1.setPost(post1);
+    postEsrEvent1.setStatus(PostEsrEventStatus.RECONCILED);
+    postEsrEvent1.setPositionNumber(positionNumber);
+    postEsrEvent1.setEventDateTime(LocalDateTime.of(2024, Month.AUGUST, 7, 8, 0));
+    PostEsrEvent postEsrEvent2 = new PostEsrEvent();
+    postEsrEvent2.setPost(post2);
+    postEsrEvent2.setStatus(PostEsrEventStatus.DELETED);
+    postEsrEvent2.setPositionNumber(positionNumber);
+    postEsrEvent2.setEventDateTime(LocalDateTime.of(2024, Month.SEPTEMBER, 6, 8, 0));
+
+    when(postEsrEventDtoMapperMock.postEsrEventDtoToPostEsrEvent(any())).thenReturn(mappedPostEsrEvent);
+    when(postRepositoryMock.findPostWithTrustsById(postId1)).thenReturn(Optional.of(post1));
+    when(postEsrEventRepositoryMock.findPostEsrEventsByPositionNumber(positionNumber))
+        .thenReturn(Set.of(postEsrEvent1, postEsrEvent2));
+
+    //when
+    testObj.markPostAsEsrPositionChanged(postId1, postEsrEventDto);
+
+    //then
+    verify(postEsrEventRepositoryMock).save(postEsrEventArgCaptor.capture());
+    PostEsrEvent postEsrEvent = postEsrEventArgCaptor.getValue();
+    Assert.assertEquals(PostEsrEventStatus.RECONCILED_EXP, postEsrEvent.getStatus());
+  }
+
+  @Test
+  public void handlePosReconciliationExpiryShouldSaveExpiredStatusWhenExpiryFound() {
+    //given
+    Long postId1 = 1L;
+    Long postId2 = 2L;
+    Long positionNumber = 12345678L;
+    LocalDateTime currentReconciledTime = LocalDateTime.of(2024, Month.AUGUST, 8, 8, 0);
+
+    PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
+    postEsrEventDto.setPostId(postId1);
+    postEsrEventDto.setEventDateTime(currentReconciledTime);
+    postEsrEventDto.setPositionNumber(positionNumber);
+
+    Post post1 = new Post();
+    post1.setId(postId1);
+    Post post2 = new Post();
+    post2.setId(postId2);
+
+    PostEsrEvent postEsrEvent1 = new PostEsrEvent();
+    postEsrEvent1.setPost(post1);
+    postEsrEvent1.setStatus(PostEsrEventStatus.RECONCILED);
+    postEsrEvent1.setPositionNumber(positionNumber);
+    postEsrEvent1.setEventDateTime(LocalDateTime.of(2024, Month.AUGUST, 7, 8, 0));
+    PostEsrEvent postEsrEvent2 = new PostEsrEvent();
+    postEsrEvent2.setPost(post2);
+    postEsrEvent2.setStatus(PostEsrEventStatus.RECONCILED);
+    postEsrEvent2.setPositionNumber(positionNumber);
+    postEsrEvent2.setEventDateTime(LocalDateTime.of(2024, Month.AUGUST, 6, 8, 0));
+
+    when(postEsrEventRepositoryMock.findPostEsrEventsByPositionNumber(positionNumber))
+        .thenReturn(Set.of(postEsrEvent1, postEsrEvent2));
+
+    boolean isCurrentEventExpired = testObj.handPositionReconciliationExpiry(postEsrEventDto);
+
+    Assert.assertEquals(false, isCurrentEventExpired);
+    verify(postEsrEventRepositoryMock).saveAll(postEsrEventSetArgCaptor.capture());
+    Set<PostEsrEvent> expiredPostEsrEvents = postEsrEventSetArgCaptor.getValue();
+    Assert.assertEquals(1, expiredPostEsrEvents.size());
+    PostEsrEvent expiredPostEsrEvent = expiredPostEsrEvents.iterator().next();
+    Assert.assertEquals(PostEsrEventStatus.RECONCILED_EXP, expiredPostEsrEvent.getStatus());
+    Assert.assertEquals(postId2, expiredPostEsrEvent.getPost().getId());
+  }
+
+  @Test
+  public void handlePosReconciliationExpiryShouldNotSaveWhenNoExpiryFound() {
+    //given
+    Long postId1 = 1L;
+    Long postId2 = 2L;
+    Long positionNumber = 12345678L;
+    LocalDateTime currentReconciledTime = LocalDateTime.of(2024, Month.AUGUST, 8, 8, 0);
+
+    PostEsrEventDto postEsrEventDto = new PostEsrEventDto();
+    postEsrEventDto.setPostId(postId1);
+    postEsrEventDto.setEventDateTime(currentReconciledTime);
+    postEsrEventDto.setPositionNumber(positionNumber);
+
+    Post post1 = new Post();
+    post1.setId(postId1);
+    Post post2 = new Post();
+    post2.setId(postId2);
+
+    PostEsrEvent postEsrEvent1 = new PostEsrEvent();
+    postEsrEvent1.setPost(post1);
+    postEsrEvent1.setStatus(PostEsrEventStatus.RECONCILED);
+    postEsrEvent1.setPositionNumber(positionNumber);
+    postEsrEvent1.setEventDateTime(LocalDateTime.of(2024, Month.AUGUST, 7, 8, 0));
+    PostEsrEvent postEsrEvent2 = new PostEsrEvent();
+    postEsrEvent2.setPost(post2);
+    postEsrEvent2.setStatus(PostEsrEventStatus.DELETED);
+    postEsrEvent2.setPositionNumber(positionNumber);
+    postEsrEvent2.setEventDateTime(LocalDateTime.of(2024, Month.SEPTEMBER, 6, 8, 0));
+
+    when(postEsrEventRepositoryMock.findPostEsrEventsByPositionNumber(positionNumber))
+        .thenReturn(Set.of(postEsrEvent1, postEsrEvent2));
+
+    boolean isCurrentEventExpired = testObj.handPositionReconciliationExpiry(postEsrEventDto);
+
+    Assert.assertEquals(true, isCurrentEventExpired);
+    verify(postEsrEventRepositoryMock, never()).saveAll(any());
   }
 }

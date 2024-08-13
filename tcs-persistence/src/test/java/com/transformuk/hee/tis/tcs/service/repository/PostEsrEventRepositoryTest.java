@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.tcs.service.TestConfigNonES;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import java.util.List;
 import java.util.Set;
+
+import lombok.var;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,4 +57,32 @@ public class PostEsrEventRepositoryTest {
     Assert.assertEquals(0, result.size());
   }
 
+  @Sql(scripts = "/scripts/insertPostEsrEvent.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+  @Sql(scripts = "/scripts/deletePostEsrEvent.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+  @Test
+  public void findPostEsrEventByPositionNumberShouldReturnEmptyListWhenNoMatchingPositionNumberFound(){
+    long nonExistingPostNumber = 9999L;
+
+    Set<PostEsrEvent> result = postEsrEventRepository
+        .findPostEsrEventsByPositionNumber(nonExistingPostNumber);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(0, result.size());
+  }
+
+  @Sql(scripts = "/scripts/insertPostEsrEvent.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+  @Sql(scripts = "/scripts/deletePostEsrEvent.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+  @Test
+  public void findPostEsrEventByPositionNumberShouldReturnEvents(){
+    long positionNumber = 2654522l;
+
+    Set<PostEsrEvent> result = postEsrEventRepository
+        .findPostEsrEventsByPositionNumber(positionNumber);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(2, result.size());
+    var iter = result.iterator();
+    Assert.assertTrue(iter.next().getPositionNumber().equals(positionNumber));
+    Assert.assertTrue(iter.next().getPositionNumber().equals(positionNumber));
+  }
 }

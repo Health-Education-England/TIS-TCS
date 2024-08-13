@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
@@ -44,6 +45,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -668,9 +670,46 @@ public class PostServiceImpl implements PostService {
         .postEsrEventDtoToPostEsrEvent(postEsrExportedDto);
     newPostEsrEvent.setPost(post);
 
+    boolean isCurrentEventExpired = handPositionReconciliationExpiry(postEsrExportedDto);
+    if (isCurrentEventExpired && newPostEsrEvent.getStatus() == PostEsrEventStatus.RECONCILED) {
+      newPostEsrEvent.setStatus(PostEsrEventStatus.RECONCILED_EXP);
+    }
+
     PostEsrEvent newPost = postEsrEventRepository.save(newPostEsrEvent);
+
     return Optional.ofNullable(
         postEsrEventDtoMapper.postEsrEventToPostEsrEventDto(newPost));
+  }
+
+  /**
+   * Check if there are any expired reconciliation events and set them to RECONCILED_EXP.
+   * @param postEsrExportedDto the current reconciliation event
+   */
+  protected boolean handPositionReconciliationExpiry(PostEsrEventDto postEsrExportedDto) {
+    Long positionNumber = postEsrExportedDto.getPositionNumber();
+    Long currentPostId = postEsrExportedDto.getPostId();
+    LocalDateTime currentReconciledTime = postEsrExportedDto.getEventDateTime();
+    boolean isCurrentEventExpired = false;
+    Set<PostEsrEvent> postEsrEvents = postEsrEventRepository.findPostEsrEventsByPositionNumber(
+        positionNumber);
+
+    Set<PostEsrEvent> expiredPostEsrEvents = postEsrEvents.stream().filter(
+        postEsrEvent -> postEsrEvent.getStatus() == PostEsrEventStatus.RECONCILED
+            && postEsrEvent.getPost().getId() != currentPostId
+            && postEsrEvent.getEventDateTime().isBefore(currentReconciledTime)).collect(Collectors.toSet());
+
+    expiredPostEsrEvents.forEach(postEsrEvent -> postEsrEvent.setStatus(PostEsrEventStatus.RECONCILED_EXP));
+
+    if (!expiredPostEsrEvents.isEmpty()) {
+      postEsrEventRepository.saveAll(expiredPostEsrEvents);
+    }
+
+    long countOfEventsAfterCurrent = postEsrEvents.stream().filter(
+        postEsrEvent -> postEsrEvent.getEventDateTime().isAfter(currentReconciledTime)).count();
+    if (countOfEventsAfterCurrent > 0 ) {
+      isCurrentEventExpired = true;
+    }
+    return isCurrentEventExpired;
   }
 
   protected String createWhereClause(final String searchString,
