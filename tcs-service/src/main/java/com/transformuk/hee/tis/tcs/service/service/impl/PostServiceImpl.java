@@ -683,6 +683,7 @@ public class PostServiceImpl implements PostService {
 
   /**
    * Check if there are any expired reconciliation events and set them to RECONCILED_EXP.
+   *
    * @param postEsrExportedDto the current reconciliation event
    */
   protected boolean handPositionReconciliationExpiry(PostEsrEventDto postEsrExportedDto) {
@@ -695,10 +696,12 @@ public class PostServiceImpl implements PostService {
 
     Set<PostEsrEvent> expiredPostEsrEvents = postEsrEvents.stream().filter(
         postEsrEvent -> postEsrEvent.getStatus() == PostEsrEventStatus.RECONCILED
-            && postEsrEvent.getPost().getId() != currentPostId
-            && postEsrEvent.getEventDateTime().isBefore(currentReconciledTime)).collect(Collectors.toSet());
+            && !postEsrEvent.getPost().getId().equals(currentPostId)
+            && postEsrEvent.getEventDateTime().isBefore(currentReconciledTime))
+        .collect(Collectors.toSet());
 
-    expiredPostEsrEvents.forEach(postEsrEvent -> postEsrEvent.setStatus(PostEsrEventStatus.RECONCILED_EXP));
+    expiredPostEsrEvents.forEach(
+        postEsrEvent -> postEsrEvent.setStatus(PostEsrEventStatus.RECONCILED_EXP));
 
     if (!expiredPostEsrEvents.isEmpty()) {
       postEsrEventRepository.saveAll(expiredPostEsrEvents);
@@ -706,7 +709,7 @@ public class PostServiceImpl implements PostService {
 
     long countOfEventsAfterCurrent = postEsrEvents.stream().filter(
         postEsrEvent -> postEsrEvent.getEventDateTime().isAfter(currentReconciledTime)).count();
-    if (countOfEventsAfterCurrent > 0 ) {
+    if (countOfEventsAfterCurrent > 0) {
       isCurrentEventExpired = true;
     }
     return isCurrentEventExpired;
