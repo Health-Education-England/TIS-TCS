@@ -45,10 +45,9 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,7 +95,7 @@ class PostValidatorTest {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(start);
     funding.setEndDate(end);
-    dto.setFundings(Set.of(funding));
+    dto.setFundings(Collections.singleton(funding));
     MethodArgumentNotValidException exception =
         assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
     List<FieldError> errors = exception.getBindingResult().getFieldErrors();
@@ -119,7 +118,7 @@ class PostValidatorTest {
   void shouldFailValidationWhenProgrammesAreInvalid() {
     ProgrammeDTO programme = new ProgrammeDTO();
     programme.setId(999L);
-    dto.setProgrammes(Set.of(programme));
+    dto.setProgrammes(Collections.singleton(programme));
 
     when(programmeRepository.existsById(999L)).thenReturn(false);
 
@@ -133,9 +132,10 @@ class PostValidatorTest {
   @Test
   void shouldFailValidationWhenSitesAreInvalid() {
     PostSiteDTO site = new PostSiteDTO(null, 999L, PostSiteType.PRIMARY);
-    dto.setSites(Set.of(site));
+    dto.setSites(Collections.singleton(site));
 
-    when(referenceService.siteIdExists(List.of(999L))).thenReturn(Map.of(999L, false));
+    when(referenceService.siteIdExists(Collections.singletonList(999L))).thenReturn(
+        Collections.singletonMap(999L, false));
 
     MethodArgumentNotValidException exception =
         assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
@@ -147,9 +147,10 @@ class PostValidatorTest {
   @Test
   void shouldFailValidationWhenGradesAreInvalid() {
     PostGradeDTO grade = new PostGradeDTO(null, 999L, PostGradeType.APPROVED);
-    dto.setGrades(Set.of(grade));
+    dto.setGrades(Collections.singleton(grade));
 
-    when(referenceService.gradeIdsExists(List.of(999L))).thenReturn(Map.of(999L, false));
+    when(referenceService.gradeIdsExists(Collections.singletonList(999L))).thenReturn(
+        Collections.singletonMap(999L, false));
 
     MethodArgumentNotValidException exception =
         assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
@@ -166,7 +167,7 @@ class PostValidatorTest {
         PostSpecialtyType.PRIMARY);
     specialty.setSpecialty(specialtyDto);
     specialty.setPostSpecialtyType(PostSpecialtyType.PRIMARY);
-    dto.setSpecialties(Set.of(specialty));
+    dto.setSpecialties(Collections.singleton(specialty));
 
     when(specialtyRepository.existsById(999L)).thenReturn(false);
 
@@ -181,7 +182,7 @@ class PostValidatorTest {
   void shouldFailValidationWhenPlacementHistoryIsInvalid() {
     PlacementDTO placement = new PlacementDTO();
     placement.setId(999L);
-    dto.setPlacementHistory(Set.of(placement));
+    dto.setPlacementHistory(Collections.singleton(placement));
 
     when(placementRepository.existsById(999L)).thenReturn(false);
 
@@ -214,7 +215,8 @@ class PostValidatorTest {
     dto.setId(null);
     dto.setBypassNPNGeneration(true);
 
-    when(postRepository.findByNationalPostNumber("npn")).thenReturn(List.of(new Post()));
+    when(postRepository.findByNationalPostNumber("npn")).thenReturn(
+        Collections.singletonList(new Post()));
 
     MethodArgumentNotValidException exception =
         assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
