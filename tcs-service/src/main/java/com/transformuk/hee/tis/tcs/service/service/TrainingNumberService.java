@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,4 +49,11 @@ public interface TrainingNumberService {
    * @param id the id of the entity
    */
   void delete(Long id);
+
+  /**
+   * Populate the trainingNumbers for the given programme memberships.
+   *
+   * @param programmeMemberships The programme memberships to generate the training numbers for.
+   */
+  void populateTrainingNumbers(List<ProgrammeMembership> programmeMemberships);
 }

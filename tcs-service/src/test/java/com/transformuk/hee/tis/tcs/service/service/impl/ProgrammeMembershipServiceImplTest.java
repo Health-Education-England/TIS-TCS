@@ -2,8 +2,10 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -30,6 +32,7 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ConditionsOfJoiningMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
@@ -45,7 +48,6 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.SpecialtyMapperImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainingNumberMapperImpl;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -76,7 +78,6 @@ public class ProgrammeMembershipServiceImplTest {
   private static final long PROGRAMME_ID = 2L;
   private static final ProgrammeMembershipType PROGRAMME_MEMBERSHIP_TYPE = ProgrammeMembershipType.SUBSTANTIVE;
   private static final UUID PROGRAMME_MEMBERSHIP_ID_1 = UUID.randomUUID();
-  private static final UUID PROGRAMME_MEMBERSHIP_ID_2 = UUID.randomUUID();
   private static final Long CURRICULUM_MEMBERSHIP_ID_1 = 7777L;
   private static final Long CURRICULUM_MEMBERSHIP_ID_2 = 8888L;
   private static final LocalDate PROGRAMME_START_DATE = LocalDate.of(2020, 1, 1);
@@ -112,6 +113,8 @@ public class ProgrammeMembershipServiceImplTest {
   private PersonRepository personRepositoryMock;
   @Mock
   private ProgrammeMembershipValidator programmeMembershipValidatorMock;
+  @Mock
+  private TrainingNumberService trainingNumberService;
 
   @Before
   public void setup() {
@@ -133,7 +136,8 @@ public class ProgrammeMembershipServiceImplTest {
     testObj = new ProgrammeMembershipServiceImpl(programmeMembershipRepositoryMock,
         curriculumMembershipRepositoryMock, programmeMembershipMapper, curriculumMembershipMapper,
         curriculumRepositoryMock, curriculumMapper, applicationEventPublisherMock,
-        personRepositoryMock, programmeMembershipValidatorMock, programmeMembershipDtoMapper);
+        personRepositoryMock, programmeMembershipValidatorMock, programmeMembershipDtoMapper,
+        trainingNumberService);
 
     initialiseData();
   }
@@ -248,8 +252,6 @@ public class ProgrammeMembershipServiceImplTest {
     //given
     List<CurriculumMembership> curriculumMemberships = Lists
         .newArrayList(curriculumMembership1, curriculumMembership2);
-    List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
-    Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
     Page<CurriculumMembership> curriculumMembershipPage = new PageImpl<>(curriculumMemberships);
     when(curriculumMembershipRepositoryMock.findAll(any(Pageable.class)))
         .thenReturn(curriculumMembershipPage);
@@ -317,13 +319,8 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(0, result.size());
   }
 
-  @Test()
+  @Test
   public void findProgrammeMembershipsForTraineeShouldReturnPopulatedDTOList() {
-    List<CurriculumMembership> curriculumMemberships = Lists
-        .newArrayList(curriculumMembership1, curriculumMembership2);
-    List<Curriculum> foundCurricula = Lists.newArrayList(curriculum1, curriculum2);
-    Set<Long> curriculumIds = Sets.newLinkedHashSet(5L, 6L);
-
     when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
         .thenReturn(Collections.singletonList(programmeMembership1));
 
@@ -339,6 +336,27 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(PROGRAMME_NUMBER1, programmeMembershipCurriculaDTO.getProgrammeNumber());
   }
 
+  @Test
+  public void findProgrammeMembershipsForTraineeShouldPopulateTrainingNumbers() {
+    when(programmeMembershipRepositoryMock.findByTraineeId(TRAINEE_ID))
+        .thenReturn(Collections.singletonList(programmeMembership1));
+
+    doAnswer(inv -> {
+      List<ProgrammeMembership> pms = inv.getArgument(0);
+      pms.get(0).setTrainingNumber(trainingNumber);
+      return null;
+    }).when(trainingNumberService).populateTrainingNumbers(anyList());
+
+    List<ProgrammeMembershipCurriculaDTO> result = testObj
+        .findProgrammeMembershipsForTrainee(TRAINEE_ID);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(2, result.size());
+    Assert.assertEquals(trainingNumberDto, result.get(0).getTrainingNumber());
+    Assert.assertEquals(trainingNumberDto, result.get(1).getTrainingNumber());
+
+    verify(trainingNumberService, atMostOnce()).populateTrainingNumbers(anyList());
+  }
 
   @Test
   public void findProgrammeMembershipsForTraineeRolledUpShouldThrowExceptionWithWhenTraineeIdIsNull() {
@@ -495,7 +513,7 @@ public class ProgrammeMembershipServiceImplTest {
     long cesrCount = result.stream().filter(pm -> pm.getTrainingPathway().equals("CESR")).count();
     Assert.assertEquals(2L, cesrCount);
 
-    long nullCount = result.stream().filter(pm -> pm.getTrainingPathway().equals(null)).count();
+    long nullCount = result.stream().filter(pm -> pm.getTrainingPathway() == null).count();
     Assert.assertEquals(0L, nullCount);
   }
 
@@ -538,9 +556,6 @@ public class ProgrammeMembershipServiceImplTest {
   @Test
   public void shouldSaveProgrammeMembershipDtoToRepository() {
     //given
-    List<CurriculumMembership> curriculumMembershipList
-        = new ArrayList<>(programmeMembership1.getCurriculumMemberships());
-
     when(programmeMembershipRepositoryMock.save(any()))
         .thenReturn(programmeMembership1);
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
@@ -623,7 +638,7 @@ public class ProgrammeMembershipServiceImplTest {
         .thenReturn(Optional.of(programmeMembership1));
 
     doAnswer(i -> {
-      ProgrammeMembershipDTO arg = (ProgrammeMembershipDTO)i.getArguments()[0];
+      ProgrammeMembershipDTO arg = (ProgrammeMembershipDTO) i.getArguments()[0];
       arg.addMessage("default error");
       return null;
     }).when(programmeMembershipValidatorMock).validateForBulk(any(ProgrammeMembershipDTO.class));

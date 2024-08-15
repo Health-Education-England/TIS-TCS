@@ -20,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
+import com.transformuk.hee.tis.tcs.service.service.TrainingNumberService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipDtoMapper;
@@ -63,6 +64,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   private final PersonRepository personRepository;
   private final ProgrammeMembershipValidator programmeMembershipValidator;
   private final ProgrammeMembershipDtoMapper programmeMembershipDtoMapper;
+  private final TrainingNumberService trainingNumberService;
 
   /**
    * Initialise the ProgrammeMembershipService.
@@ -87,7 +89,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       ApplicationEventPublisher applicationEventPublisher,
       PersonRepository personRepository,
       ProgrammeMembershipValidator programmeMembershipValidator,
-      ProgrammeMembershipDtoMapper programmeMembershipDtoMapper) {
+      ProgrammeMembershipDtoMapper programmeMembershipDtoMapper,
+      TrainingNumberService trainingNumberService) {
     this.programmeMembershipRepository = programmeMembershipRepository;
     this.curriculumMembershipRepository = curriculumMembershipRepository;
     this.programmeMembershipMapper = programmeMembershipMapper;
@@ -98,6 +101,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     this.personRepository = personRepository;
     this.programmeMembershipValidator = programmeMembershipValidator;
     this.programmeMembershipDtoMapper = programmeMembershipDtoMapper;
+    this.trainingNumberService = trainingNumberService;
   }
 
   /**
@@ -343,6 +347,7 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
         .findByTraineeId(traineeId);
 
     if (CollectionUtils.isNotEmpty(foundProgrammeMemberships)) {
+      trainingNumberService.populateTrainingNumbers(foundProgrammeMemberships);
       List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper
           .allEntityToDto(foundProgrammeMemberships);
       return attachCurricula(programmeMembershipDtos);
