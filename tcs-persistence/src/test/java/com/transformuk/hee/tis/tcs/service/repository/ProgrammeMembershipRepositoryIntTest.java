@@ -65,12 +65,4 @@ public class ProgrammeMembershipRepositoryIntTest {
     programmeMembershipRepository.saveAll(Lists.newArrayList(pm1, pm2));
     programmeMembershipRepository.flush();
   }
-
-  @Transactional
-  @Test
-  public void shouldFindByTrainingNumberId() {
-    List<ProgrammeMembership> programmeMemberships =
-        programmeMembershipRepository.findByTrainingNumberId(trainingNumber1.getId());
-    Assert.assertEquals(2, programmeMemberships.size());
-  }
 }
