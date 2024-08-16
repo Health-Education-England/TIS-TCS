@@ -4,7 +4,7 @@ select distinct
   pm.programmeId,
   prg.programmeName,
   prg.programmeNumber,
-  tn.trainingNumber,
+  NULL as trainingNumber,
   pm.programmeMembershipStatus
 from
   (
@@ -17,5 +17,4 @@ from
   from
     CurriculumMembership cmem JOIN ProgrammeMembership pmem ON cmem.programmeMembershipUuid = pmem.uuid WHERECLAUSE
   ) as pm
-left join Programme prg on (prg.id = pm.programmeId)
-left join TrainingNumber tn on (tn.id = pm.trainingNumberId);
+left join Programme prg on (prg.id = pm.programmeId);

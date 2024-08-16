@@ -19,7 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PreRemove;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
@@ -66,8 +66,7 @@ public class ProgrammeMembership implements Serializable {
   @JoinColumn(name = "rotationId")
   private Rotation rotation;
 
-  @ManyToOne
-  @JoinColumn(name = "trainingNumberId")
+  @Transient
   private TrainingNumber trainingNumber;
 
   @OneToOne
