@@ -358,9 +358,7 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
    * @return true if training number generated cannot continue, else false.
    */
   private boolean isExcluded(ProgrammeMembership programmeMembership) {
-    boolean personExcluded = isExcluded(programmeMembership.getPerson());
-
-    if (personExcluded) {
+    if (isExcluded(programmeMembership.getPerson())) {
       return true;
     }
 
@@ -380,7 +378,7 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
     String lowerProgrammeName = programmeName.toLowerCase();
     if (lowerProgrammeName.contains("foundation")) {
       log.info("Skipping training number population as programme name '{}' is excluded.",
-          programme.getProgrammeName());
+          programmeName);
       return true;
     }
 
@@ -412,17 +410,19 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
 
     GmcDetails gmcDetails = person.getGmcDetails();
 
-    if (gmcDetails == null || gmcDetails.getGmcNumber() == null || !gmcDetails.getGmcNumber()
+    if (gmcDetails != null && gmcDetails.getGmcNumber() != null && gmcDetails.getGmcNumber()
         .matches("\\d{7}")) {
-      GdcDetails gdcDetails = person.getGdcDetails();
-
-      if (gdcDetails == null || gdcDetails.getGdcNumber() == null || !gdcDetails.getGdcNumber()
-          .matches("\\d{5}.*")) {
-        log.info("Skipping training number population as reference number not valid.");
-        return true;
-      }
+      return false;
     }
 
-    return false;
+    GdcDetails gdcDetails = person.getGdcDetails();
+
+    if (gdcDetails != null && gdcDetails.getGdcNumber() != null && gdcDetails.getGdcNumber()
+        .matches("\\d{5}.*")) {
+      return false;
+    }
+
+    log.info("Skipping training number population as reference number not valid.");
+    return true;
   }
 }
