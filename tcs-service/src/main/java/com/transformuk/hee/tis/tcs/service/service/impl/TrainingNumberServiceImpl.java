@@ -139,7 +139,14 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
 
   @Override
   public void populateTrainingNumbers(List<ProgrammeMembership> programmeMemberships) {
-    programmeMemberships.forEach(this::populateTrainingNumber);
+    programmeMemberships.forEach(pm -> {
+      try {
+        populateTrainingNumber(pm);
+      } catch (RuntimeException e) {
+        // Failure to populate the training number should never block the programme being returned.
+        log.error("Caught and ignoring training number generation runtime error:", e);
+      }
+    });
   }
 
   /**

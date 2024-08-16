@@ -7,7 +7,7 @@ import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -333,7 +333,8 @@ class TrainingNumberServiceImplTest {
   @ParameterizedTest
   @NullAndEmptySource
   @ValueSource(strings = {" ", "Unknown Organization"})
-  void shouldThrowExceptionPopulatingTrainingNumberWhenParentOrganizationNull(String ownerName) {
+  void shouldNotThrowExceptionPopulatingTrainingNumberWhenParentOrganizationNull(String ownerName,
+      CapturedOutput output) {
     ProgrammeMembership pm = new ProgrammeMembership();
     Person person = createPerson(GMC_NUMBER, null);
     pm.setPerson(person);
@@ -352,11 +353,10 @@ class TrainingNumberServiceImplTest {
     pm.setCurriculumMemberships(Collections.singleton(cm));
 
     List<ProgrammeMembership> pms = Collections.singletonList(pm);
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-        () -> service.populateTrainingNumbers(pms));
+    assertDoesNotThrow(() -> service.populateTrainingNumbers(pms));
 
-    assertThat("Unexpected message.", exception.getMessage(),
-        is("Unable to calculate the parent organization."));
+    assertThat("Unexpected message.", output.getOut(),
+        containsString("Unable to calculate the parent organization."));
   }
 
   @Test
