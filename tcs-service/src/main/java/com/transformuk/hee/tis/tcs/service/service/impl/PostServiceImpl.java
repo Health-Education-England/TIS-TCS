@@ -17,25 +17,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
-import com.transformuk.hee.tis.tcs.service.model.PostFunding;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
-import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -115,6 +98,8 @@ public class PostServiceImpl implements PostService {
   private PostEsrEventRepository postEsrEventRepository;
   @Autowired
   private PostEsrEventDtoMapper postEsrEventDtoMapper;
+  @Autowired
+  private PostEsrLatestEventViewRepository postEsrLatestEventViewRepository;
 
   /**
    * Save a post.
@@ -599,7 +584,17 @@ public class PostServiceImpl implements PostService {
   public PostDTO findOne(Long id) {
     log.debug("Request to get Post : {}", id);
     Post post = postRepository.findPostByIdWithJoinFetch(id).orElse(null);
-    return postMapper.postToPostDTO(post);
+    PostDTO postDto = postMapper.postToPostDTO(post);
+
+    if (postDto != null) {
+      Set<PostEsrLatestEventView> postEsrLatestEventViews =
+          postEsrLatestEventViewRepository.findPostEsrLatestEventByPostId(id);
+      Set<PostEsrEventDto> postEsrEventDtos =
+          postEsrEventDtoMapper.postEsrLatestEventViewsToPostEsrEventDtos(postEsrLatestEventViews);
+
+      postDto.setPostEsrEvents(postEsrEventDtos);
+    }
+    return postDto;
   }
 
   /**

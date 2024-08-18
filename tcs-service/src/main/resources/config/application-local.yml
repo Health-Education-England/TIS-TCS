@@ -7,6 +7,7 @@ spring:
     username: ${DBUSER:root}
     password: ${DBPASSWORD:}
   flyway:
+    ignore-missing-migrations: true
     password: ${DBPASSWORD:}
     schemas: ${DBNAME:tcs}
   elasticsearch:
@@ -21,6 +22,8 @@ spring:
 
 logging:
     file: ${LOG_DIR:${HOME}}/tcs.log
+#    level:
+#      com.transformuk.hee.tis.tcs: DEBUG
 
 application:
 

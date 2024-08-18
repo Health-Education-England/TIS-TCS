@@ -29,23 +29,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
-import com.transformuk.hee.tis.tcs.service.model.PostFunding;
-import com.transformuk.hee.tis.tcs.service.model.PostGrade;
-import com.transformuk.hee.tis.tcs.service.model.PostSite;
-import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
-import com.transformuk.hee.tis.tcs.service.model.PostTrust;
-import com.transformuk.hee.tis.tcs.service.model.Programme;
-import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
-import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
+import com.transformuk.hee.tis.tcs.service.model.*;
+import com.transformuk.hee.tis.tcs.service.repository.*;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
@@ -133,6 +118,8 @@ public class PostServiceImplTest {
   @Mock
   private PostEsrEventRepository postEsrEventRepositoryMock;
   @Mock
+  private PostEsrLatestEventViewRepository postEsrLatestEventViewRepositoryMock;
+  @Mock
   private PostGradeRepository postGradeRepositoryMock;
   @Mock
   private PostSiteRepository postSiteRepositoryMock;
@@ -152,6 +139,10 @@ public class PostServiceImplTest {
   private PostViewDTO postViewDTOMock1;
   @Mock
   private Post postMock1, postMock2, postSaveMock1, postSaveMock2;
+  @Mock
+  private PostEsrLatestEventView postEsrLatestEventView;
+  @Mock
+  private PostEsrEventDto postEsrEventDtoMock;
   @Mock
   private Pageable pageableMock;
   @Captor
@@ -293,15 +284,31 @@ public class PostServiceImplTest {
   }
 
   @Test
+  public void findOneShouldReturnNullWhenIdNotFound() {
+    when(postRepositoryMock.findPostByIdWithJoinFetch(1L)).thenReturn(Optional.empty());
+    when(postMapperMock.postToPostDTO(null)).thenReturn(null);
+
+    PostDTO result = testObj.findOne(1L);
+    Assert.assertNull(result);
+  }
+
+  @Test
   public void findOneShouldRetrieveOneInstanceById() {
     when(postRepositoryMock.findPostByIdWithJoinFetch(1L)).thenReturn(Optional.of(postMock1));
     when(postMapperMock.postToPostDTO(postMock1)).thenReturn(postDTOMock1);
 
+    Set<PostEsrLatestEventView> postEsrLatestEventViews = Sets.newHashSet(postEsrLatestEventView);
+    Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet(postEsrEventDtoMock);
+    when(postEsrLatestEventViewRepositoryMock.findPostEsrLatestEventByPostId(1L))
+        .thenReturn(Sets.newHashSet(postEsrLatestEventViews));
+    when(postEsrEventDtoMapperMock.postEsrLatestEventViewsToPostEsrEventDtos(postEsrLatestEventViews))
+        .thenReturn(postEsrEventDtos);
+
     PostDTO result = testObj.findOne(1L);
     Assert.assertEquals(postDTOMock1, result);
-
     verify(postRepositoryMock).findPostByIdWithJoinFetch(1L);
     verify(postMapperMock).postToPostDTO(postMock1);
+    verify(postDTOMock1).setPostEsrEvents(postEsrEventDtos);
   }
 
   @Test

@@ -27,7 +27,7 @@ public class PostMapperTest {
   }
 
   @Test
-  public void postToPostDTOtest() {
+  public void postToPostDtoTest() {
     //given
     String dateStamp = "2020-01-01T01:01:01.100";
     PostEsrEvent postEsrEvent = new PostEsrEvent();
@@ -52,13 +52,7 @@ public class PostMapperTest {
     PostDTO postDTO = postMapper.postToPostDTO(post);
 
     //then
-    assertThat(postDTO.getPostEsrEvents()).hasSize(1);
-    PostEsrEventDto postEsrEventDto = postDTO.getPostEsrEvents().iterator().next();
-    assertThat(postEsrEventDto.getEventDateTime()).hasToString(dateStamp);
-    assertThat(postEsrEventDto.getFilename()).isEqualTo("test.dat");
-    assertThat(postEsrEventDto.getPositionNumber()).isEqualTo(1L);
-    assertThat(postEsrEventDto.getStatus()).isEqualTo(PostEsrEventStatus.DELETED);
-    assertThat(postEsrEventDto.getPositionId()).isEqualTo(2L);
+    assertThat(postDTO.getPostEsrEvents()).isNull();
 
     assertThat(postDTO.getFundings()).hasSize(1);
     PostFundingDTO postFundingDto = postDTO.getFundings().iterator().next();
