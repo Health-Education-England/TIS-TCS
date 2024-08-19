@@ -2,12 +2,19 @@ package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import lombok.Data;
-import org.hibernate.annotations.Immutable;
-
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Immutable;
 
+/**
+ * Entity of the view v_PostEsrLatestEvent.
+ */
 @Entity
 @Immutable
 @Table(name = "v_PostEsrLatestEvent")

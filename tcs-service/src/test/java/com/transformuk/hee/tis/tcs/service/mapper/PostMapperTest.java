@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
-import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.service.model.Post;

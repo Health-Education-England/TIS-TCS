@@ -1,9 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.TestConfigNonES;
-import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
-import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +26,6 @@ public class PostEsrLatestEventViewRepositoryTest {
   @Test
   public void findPostEsrEventByPostIdInShouldReturnEventsForAllProvidedPosts(){
     long postId = 1111111L;
-
-    List<PostEsrLatestEventView> aaa = repository.findAll();
 
     Set<PostEsrLatestEventView> result = repository.findPostEsrLatestEventByPostId(postId);
 

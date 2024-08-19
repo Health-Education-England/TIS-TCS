@@ -13,7 +13,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
-public class PostEsrEventDtoMapperTest {
+class PostEsrEventDtoMapperTest {
 
   private PostEsrEventDtoMapper mapper;
   private PostEsrLatestEventView postEsrLatestEventView;

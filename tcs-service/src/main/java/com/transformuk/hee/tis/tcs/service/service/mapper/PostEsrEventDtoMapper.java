@@ -2,9 +2,8 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
-import java.util.Set;
-
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
+import java.util.Set;
 import org.mapstruct.Mapper;
 
 /**
