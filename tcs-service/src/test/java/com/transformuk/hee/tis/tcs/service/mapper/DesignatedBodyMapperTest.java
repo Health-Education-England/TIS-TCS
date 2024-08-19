@@ -18,9 +18,9 @@ public class DesignatedBodyMapperTest {
 
     //Then
     assertThat(res).hasSize(4);
-    assertThat(res).contains("Health Education England Kent, Surrey and Sussex",
-        "London LETBs", "Health Education England East Midlands",
-        "Health Education England West Midlands");
+    assertThat(res).contains("Kent, Surrey and Sussex",
+        "London LETBs", "East Midlands",
+        "West Midlands");
   }
 
   @Test
@@ -48,27 +48,27 @@ public class DesignatedBodyMapperTest {
     //then
     assertThat(ownerSet)
         .hasSize(15)
-        .contains("Health Education England Kent, Surrey and Sussex",
+        .contains("Kent, Surrey and Sussex",
             "London LETBs",
-            "Health Education England North West London",
-            "Health Education England North Central and East London",
-            "Health Education England South London",
-            "Health Education England East Midlands",
-            "Health Education England East of England",
-            "Health Education England North East",
-            "Health Education England Thames Valley",
-            "Health Education England Yorkshire and the Humber",
-            "Health Education England West Midlands",
-            "Health Education England South West",
-            "Health Education England Wessex",
-            "Health Education England North West",
+            "North West London",
+            "North Central and East London",
+            "South London",
+            "East Midlands",
+            "East of England",
+            "North East",
+            "Thames Valley",
+            "Yorkshire and the Humber",
+            "West Midlands",
+            "South West",
+            "Wessex",
+            "North West",
             "Northern Ireland Medical and Dental Training Agency");
   }
 
   @Test
   public void shouldgetDbcByOwner() {
     //Given
-    String owner = "Health Education England West Midlands";
+    String owner = "West Midlands";
 
     //When
     String res = DesignatedBodyMapper.getDbcByOwner(owner);

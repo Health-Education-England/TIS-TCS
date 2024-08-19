@@ -88,7 +88,7 @@ public class RevalidationServiceImplTest {
   private static final ProgrammeMembershipType PROGRAMME_MEMBERSHIP_TYPE_VISITOR =
       ProgrammeMembershipType.VISITOR;
   private static final String PROGRAMME_NAME = "Corona Medicine";
-  private static final String PROGRAMME_OWNER = "Health Education England Yorkshire and the Humber";
+  private static final String PROGRAMME_OWNER = "Yorkshire and the Humber";
   private static final String CURRENT_GRADE = "GP Specialty Training";
   private static final String CONNECTION_STATUS_CONNECTED = "Yes";
   private static final String CONNECTION_STATUS_DISCONNECTED = "No";

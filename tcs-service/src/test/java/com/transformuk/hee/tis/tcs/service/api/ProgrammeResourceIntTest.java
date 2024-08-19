@@ -59,8 +59,8 @@ public class ProgrammeResourceIntTest {
   private static final String DEFAULT_INTREPID_ID = "1234";
   private static final String UPDATED_INTREPID_ID = "4567";
 
-  private static final String DEFAULT_OWNER = "Health Education England Kent, Surrey and Sussex";
-  private static final String UPDATED_OWNER = "Health Education England North West London";
+  private static final String DEFAULT_OWNER = "Kent, Surrey and Sussex";
+  private static final String UPDATED_OWNER = "North West London";
 
   private static final String DEFAULT_PROGRAMME_NAME = "AAAAAAAAAA";
   private static final String UPDATED_PROGRAMME_NAME = "BBBBBBBBBB";
@@ -580,7 +580,7 @@ public class ProgrammeResourceIntTest {
     //given
     // Initialize the database
     Programme otherDeaneryProgramme = createEntity();
-    otherDeaneryProgramme.setOwner("Health Education England West Midlands");
+    otherDeaneryProgramme.setOwner("West Midlands");
     programmeRepository.saveAndFlush(otherDeaneryProgramme);
 
     //when & then
@@ -591,7 +591,7 @@ public class ProgrammeResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(otherDeaneryProgramme.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
         .andExpect(jsonPath("$.[*].intrepidId").value(hasItem(DEFAULT_INTREPID_ID)))
-        .andExpect(jsonPath("$.[*].owner").value(hasItem("Health Education England West Midlands")))
+        .andExpect(jsonPath("$.[*].owner").value(hasItem("West Midlands")))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
         .andExpect(jsonPath("$.[*].programmeNumber").value(hasItem(DEFAULT_PROGRAMME_NUMBER)));
   }
@@ -603,7 +603,7 @@ public class ProgrammeResourceIntTest {
     // Initialize the database
     programmeRepository.saveAndFlush(programme);
     Programme otherDeaneryProgramme = createEntity();
-    otherDeaneryProgramme.setOwner("Health Education England West Midlands");
+    otherDeaneryProgramme.setOwner("West Midlands");
     programmeRepository.saveAndFlush(otherDeaneryProgramme);
     Programme otherNameProgramme = createEntity();
     otherNameProgramme.setProgrammeName("other name");
