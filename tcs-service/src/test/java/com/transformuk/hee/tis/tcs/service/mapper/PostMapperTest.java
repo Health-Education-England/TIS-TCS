@@ -51,7 +51,7 @@ public class PostMapperTest {
     PostDTO postDTO = postMapper.postToPostDTO(post);
 
     //then
-    assertThat(postDTO.getPostEsrEvents()).isNull();
+    assertThat(postDTO.getCurrentReconciledEvents()).isNull();
 
     assertThat(postDTO.getFundings()).hasSize(1);
     PostFundingDTO postFundingDto = postDTO.getFundings().iterator().next();

@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
@@ -606,12 +607,13 @@ public class PostServiceImpl implements PostService {
     PostDTO postDto = postMapper.postToPostDTO(post);
 
     if (postDto != null) {
-      Set<PostEsrLatestEventView> postEsrLatestEventViews =
-          postEsrLatestEventViewRepository.findPostEsrLatestEventByPostId(id);
-      Set<PostEsrEventDto> postEsrEventDtos =
-          postEsrEventDtoMapper.postEsrLatestEventViewsToPostEsrEventDtos(postEsrLatestEventViews);
+      Set<PostEsrLatestEventView> currentReconciledEvents =
+          postEsrLatestEventViewRepository.findPostEsrLatestEventByPostIdAndStatus(
+              id, PostEsrEventStatus.RECONCILED);
+      Set<PostEsrEventDto> currentReconciledEventDtos =
+          postEsrEventDtoMapper.postEsrLatestEventViewsToPostEsrEventDtos(currentReconciledEvents);
 
-      postDto.setPostEsrEvents(postEsrEventDtos);
+      postDto.setCurrentReconciledEvents(currentReconciledEventDtos);
     }
     return postDto;
   }

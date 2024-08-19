@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,6 @@ import org.springframework.stereotype.Repository;
 public interface PostEsrLatestEventViewRepository
     extends JpaRepository<PostEsrLatestEventView, Long> {
 
-  Set<PostEsrLatestEventView> findPostEsrLatestEventByPostId(Long postId);
+  Set<PostEsrLatestEventView> findPostEsrLatestEventByPostIdAndStatus(
+      Long postId, PostEsrEventStatus status);
 }

@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.service.TestConfigNonES;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
 import org.junit.Assert;
@@ -25,7 +26,8 @@ public class PostEsrLatestEventViewRepositoryTest {
   public void findPostEsrEventByPostIdInShouldReturnEventsForAllProvidedPosts(){
     long postId = 1111111L;
 
-    Set<PostEsrLatestEventView> result = repository.findPostEsrLatestEventByPostId(postId);
+    Set<PostEsrLatestEventView> result = repository.findPostEsrLatestEventByPostIdAndStatus(
+        postId, PostEsrEventStatus.RECONCILED);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(1, result.size());
@@ -37,7 +39,8 @@ public class PostEsrLatestEventViewRepositoryTest {
   public void findPostEsrEventByPostIdInShouldReturnEmptyListWhenNoMatchingPostIdFound(){
     long nonExistingPostId = 9999L;
 
-    Set<PostEsrLatestEventView> result = repository.findPostEsrLatestEventByPostId(nonExistingPostId);
+    Set<PostEsrLatestEventView> result = repository.findPostEsrLatestEventByPostIdAndStatus(
+        nonExistingPostId, PostEsrEventStatus.RECONCILED);
 
     Assert.assertNotNull(result);
     Assert.assertEquals(0, result.size());

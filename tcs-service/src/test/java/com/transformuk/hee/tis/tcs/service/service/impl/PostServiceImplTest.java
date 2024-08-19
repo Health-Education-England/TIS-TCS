@@ -21,11 +21,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
-import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.api.enumeration.*;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
@@ -299,8 +295,8 @@ public class PostServiceImplTest {
 
     Set<PostEsrLatestEventView> postEsrLatestEventViews = Sets.newHashSet(postEsrLatestEventView);
     Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet(postEsrEventDtoMock);
-    when(postEsrLatestEventViewRepositoryMock.findPostEsrLatestEventByPostId(1L))
-        .thenReturn(Sets.newHashSet(postEsrLatestEventViews));
+    when(postEsrLatestEventViewRepositoryMock.findPostEsrLatestEventByPostIdAndStatus(
+        1L, PostEsrEventStatus.RECONCILED)).thenReturn(Sets.newHashSet(postEsrLatestEventViews));
     when(postEsrEventDtoMapperMock.postEsrLatestEventViewsToPostEsrEventDtos(postEsrLatestEventViews))
         .thenReturn(postEsrEventDtos);
 
@@ -308,7 +304,7 @@ public class PostServiceImplTest {
     Assert.assertEquals(postDTOMock1, result);
     verify(postRepositoryMock).findPostByIdWithJoinFetch(1L);
     verify(postMapperMock).postToPostDTO(postMock1);
-    verify(postDTOMock1).setPostEsrEvents(postEsrEventDtos);
+    verify(postDTOMock1).setCurrentReconciledEvents(postEsrEventDtos);
   }
 
   @Test
