@@ -171,8 +171,8 @@ public class ProgrammeMembershipResource {
    */
   @GetMapping("/programme-memberships/uuid/{uuid}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ProgrammeMembershipSummaryDTO> getProgrammeMembershipbyUuid(@PathVariable String uuid) {
-    log.debug("REST request to get ProgrammeMembership : {}", uuid);
+  public ResponseEntity<ProgrammeMembershipSummaryDTO> getProgrammeMembershipbyUuid(
+      @PathVariable String uuid) {
     ProgrammeMembershipDTO programmeMembershipDto;
 
     try {
