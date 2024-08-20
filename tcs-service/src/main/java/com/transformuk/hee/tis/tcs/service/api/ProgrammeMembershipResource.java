@@ -169,7 +169,7 @@ public class ProgrammeMembershipResource {
    * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO, or
    *         with status 404 (Not Found)
    */
-  @GetMapping("/programme-memberships/{uuid}")
+  @GetMapping("/programme-memberships/uuid/{uuid}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipSummaryDTO> getProgrammeMembershipbyUuid(@PathVariable String uuid) {
     log.debug("REST request to get ProgrammeMembership : {}", uuid);
