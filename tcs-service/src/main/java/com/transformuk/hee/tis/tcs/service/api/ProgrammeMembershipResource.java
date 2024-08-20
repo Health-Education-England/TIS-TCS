@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
-import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO.ProgrammeMembershipSummaryDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO.ProgrammeMembershipSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -149,7 +149,6 @@ public class ProgrammeMembershipResource {
   @GetMapping("/programme-memberships/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable String id) {
-    log.debug("REST request to get ProgrammeMembership : {}", id);
     ProgrammeMembershipDTO programmeMembershipDto;
 
     try {
@@ -171,7 +170,7 @@ public class ProgrammeMembershipResource {
    */
   @GetMapping("/programme-memberships/uuid/{uuid}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ProgrammeMembershipSummaryDTO> getProgrammeMembershipbyUuid(
+  public ResponseEntity<ProgrammeMembershipSummaryDto> getProgrammeMembershipbyUuid(
       @PathVariable String uuid) {
     ProgrammeMembershipDTO programmeMembershipDto;
 
@@ -180,13 +179,15 @@ public class ProgrammeMembershipResource {
     } catch (IllegalArgumentException e) {
       programmeMembershipDto = programmeMembershipService.findOne(Long.parseLong(uuid));
     }
+    ProgrammeMembershipSummaryDto summaryDto = new ProgrammeMembershipSummaryDto();
+    if (programmeMembershipDto != null) {
+      summaryDto.setProgrammeName(programmeMembershipDto.getProgrammeName());
+      summaryDto.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
+      summaryDto.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
 
-    ProgrammeMembershipSummaryDTO summaryDto = new ProgrammeMembershipSummaryDTO();
-    summaryDto.setProgrammeName(programmeMembershipDto.getProgrammeName());
-    summaryDto.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
-    summaryDto.setProgrammeEndDate(programmeMembershipDto.getProgrammeEndDate());
-
-    return ResponseUtil.wrapOrNotFound(Optional.ofNullable(summaryDto));
+      return ResponseUtil.wrapOrNotFound(Optional.ofNullable(summaryDto));
+    }
+    return ResponseEntity.notFound().build();
   }
 
   /**
@@ -358,7 +359,6 @@ public class ProgrammeMembershipResource {
     if (StringUtils.isEmpty(ids)) {
       return new ResponseEntity<>(resp, HttpStatus.OK);
     }
-    log.debug("REST request to get ProgrammeMemberships with Curricula for ID: {}", ids);
 
     Set<Long> idSet = Arrays.stream(ids.split(",")).map(Long::valueOf)
         .collect(Collectors.toSet());

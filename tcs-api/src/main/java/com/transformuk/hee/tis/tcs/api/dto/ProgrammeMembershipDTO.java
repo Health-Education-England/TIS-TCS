@@ -81,9 +81,11 @@ public class ProgrammeMembershipDTO implements Serializable {
     messageList.add(message);
   }
 
-
+  /**
+   * A DTO for the ProgrammeMembershipSummary entity.
+   */
   @Data
-  public static class ProgrammeMembershipSummaryDTO implements Serializable {
+  public static class ProgrammeMembershipSummaryDto implements Serializable {
 
     private String programmeName;
     private LocalDate programmeStartDate;

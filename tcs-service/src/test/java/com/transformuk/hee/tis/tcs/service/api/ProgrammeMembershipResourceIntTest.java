@@ -303,15 +303,26 @@ class ProgrammeMembershipResourceIntTest {
     programmeMembership.setProgramme(programme);
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
-    UUID programmeMembershipUuid = programmeMembership.getUuid(); // Assume UUID is used in the entity
+    UUID programmeMembershipUuid = programmeMembership.getUuid();
 
     // Perform the API request and validate the response
-    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/uuid/{uuid}", programmeMembershipUuid))
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/uuid/{uuid}",
+            programmeMembershipUuid))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.programmeName").value(programme.getProgrammeName()))
-        .andExpect(jsonPath("$.programmeStartDate").value(DEFAULT_PROGRAMME_START_DATE.toString()))
-        .andExpect(jsonPath("$.programmeEndDate").value(DEFAULT_PROGRAMME_END_DATE.toString()));
+        .andExpect(jsonPath("$.programmeStartDate").value(
+            DEFAULT_PROGRAMME_START_DATE.toString()))
+        .andExpect(jsonPath("$.programmeEndDate").value(
+            DEFAULT_PROGRAMME_END_DATE.toString()));
+  }
+
+  @Test
+  @Transactional
+  void shouldReturnNotFoundForInvalidUuid() throws Exception {
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/uuid/{uuid}",
+            UUID.randomUUID().toString()))
+        .andExpect(status().isNotFound());
   }
 
   @Test
