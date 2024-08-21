@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
 import java.util.Set;
 import org.mapstruct.Mapper;
 
@@ -19,4 +20,7 @@ public interface PostEsrEventDtoMapper {
 
   Set<PostEsrEventDto> postEsrEventSetToPostEsrEventDtoSet(
       Set<PostEsrEvent> postEsrEventSet);
+
+  Set<PostEsrEventDto> postEsrLatestEventViewsToPostEsrEventDtos(
+      Set<PostEsrLatestEventView> postEsrLatestEventViewSet);
 }

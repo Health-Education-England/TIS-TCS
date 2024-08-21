@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
@@ -21,6 +22,7 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
 import com.transformuk.hee.tis.tcs.service.model.PostSite;
@@ -30,6 +32,7 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostEsrLatestEventViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
@@ -115,6 +118,8 @@ public class PostServiceImpl implements PostService {
   private PostEsrEventRepository postEsrEventRepository;
   @Autowired
   private PostEsrEventDtoMapper postEsrEventDtoMapper;
+  @Autowired
+  private PostEsrLatestEventViewRepository postEsrLatestEventViewRepository;
 
   /**
    * Save a post.
@@ -599,7 +604,18 @@ public class PostServiceImpl implements PostService {
   public PostDTO findOne(Long id) {
     log.debug("Request to get Post : {}", id);
     Post post = postRepository.findPostByIdWithJoinFetch(id).orElse(null);
-    return postMapper.postToPostDTO(post);
+    PostDTO postDto = postMapper.postToPostDTO(post);
+
+    if (postDto != null) {
+      Set<PostEsrLatestEventView> currentReconciledEvents =
+          postEsrLatestEventViewRepository.findPostEsrLatestEventByPostIdAndStatus(
+              id, PostEsrEventStatus.RECONCILED);
+      Set<PostEsrEventDto> currentReconciledEventDtos =
+          postEsrEventDtoMapper.postEsrLatestEventViewsToPostEsrEventDtos(currentReconciledEvents);
+
+      postDto.setCurrentReconciledEvents(currentReconciledEventDtos);
+    }
+    return postDto;
   }
 
   /**
