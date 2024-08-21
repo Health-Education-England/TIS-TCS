@@ -1,5 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -21,12 +27,34 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.*;
+import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
+import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.*;
-import com.transformuk.hee.tis.tcs.service.repository.*;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Post;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
+import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
+import com.transformuk.hee.tis.tcs.service.model.PostFunding;
+import com.transformuk.hee.tis.tcs.service.model.PostGrade;
+import com.transformuk.hee.tis.tcs.service.model.PostSite;
+import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
+import com.transformuk.hee.tis.tcs.service.model.PostTrust;
+import com.transformuk.hee.tis.tcs.service.model.Programme;
+import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostEsrLatestEventViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostGradeRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
@@ -37,15 +65,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,7 +81,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PostServiceImplTest {
 
   private static final Long SITE_ID = 12345L;
@@ -106,6 +133,8 @@ public class PostServiceImplTest {
       " ORDERBYCLAUSE\n" +
       " LIMITCLAUSE\n" +
       ";";
+  @Captor
+  ArgumentCaptor<Post> postArgumentCaptor;
   @Spy
   @InjectMocks
   private PostServiceImpl testObj;
@@ -159,24 +188,22 @@ public class PostServiceImplTest {
   private PostViewDecorator postViewDecoratorMock;
   @Mock
   private PostFundingValidator postFundingValidatorMock;
-  @Captor
-  ArgumentCaptor<Post> postArgumentCaptor;
 
   @Test
-  public void saveShouldSavePost() {
+  void saveShouldSavePost() {
     when(postMapperMock.postDTOToPost(postDTOMock1)).thenReturn(postMock1);
     when(postRepositoryMock.save(postMock1)).thenReturn(postSaveMock1);
     when(postDTOMock1.getId()).thenReturn(1L);
     when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
     PostDTO result = testObj.save(postDTOMock1);
-    Assert.assertEquals(postMappedDTOMock1, result);
+    assertEquals(postMappedDTOMock1, result);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
     verify(postRepositoryMock).save(postMock1);
     verify(postMapperMock).postToPostDTO(postSaveMock1);
   }
 
   @Test
-  public void saveShouldSaveListOfPosts() {
+  void saveShouldSaveListOfPosts() {
     List<PostDTO> postDTOsList = Lists.newArrayList(postDTOMock1, postDTOMock2);
     List<Post> postList = Lists.newArrayList(postMock1, postMock2);
     List<Post> savedPosts = Lists.newArrayList(postSaveMock1, postSaveMock2);
@@ -185,14 +212,14 @@ public class PostServiceImplTest {
     when(postRepositoryMock.saveAll(postList)).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(savedPostDTOs);
     List<PostDTO> results = testObj.save(postDTOsList);
-    Assert.assertSame(savedPostDTOs, results);
+    assertSame(savedPostDTOs, results);
     verify(postMapperMock).postDTOsToPosts(postDTOsList);
     verify(postRepositoryMock).saveAll(postList);
     verify(postMapperMock).postsToPostDTOs(savedPosts);
   }
 
   @Test
-  public void updateShouldSavePostAndRefreshLinkedEntities() {
+  void updateShouldSavePostAndRefreshLinkedEntities() {
     Post postInDBMock = mock(Post.class);
     Post payloadPostMock = mock(Post.class);
     Set<PostGrade> grades = Sets.newHashSet();
@@ -226,7 +253,7 @@ public class PostServiceImplTest {
 
     PostDTO result = testObj.update(postDTOMock1);
 
-    Assert.assertEquals(postMappedDTOMock1, result);
+    assertEquals(postMappedDTOMock1, result);
     verify(postRepositoryMock).findById(1L);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
     verify(postRepositoryMock).save(payloadPostMock);
@@ -236,23 +263,22 @@ public class PostServiceImplTest {
     verify(postSpecialtyRepositoryMock).deleteAll(specialties);
 
     Set<PostFunding> capturedPostFundings = postFundingCaptor.getValue();
-    Assert.assertTrue(capturedPostFundings.size() < fundingsInDatabase.size());
-
+    assertTrue(capturedPostFundings.size() < fundingsInDatabase.size());
   }
 
   @Test
-  public void updateFundingStatusShouldSetFundingStatus() {
+  void updateFundingStatusShouldSetFundingStatus() {
     Post testPost = new Post();
     testPost.setId(1L);
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(testPost));
     testObj.updateFundingStatus(1L, Status.CURRENT);
     verify(postRepositoryMock).save(postArgumentCaptor.capture());
     Post result = postArgumentCaptor.getValue();
-    Assert.assertEquals(Status.CURRENT, result.getFundingStatus());
+    assertEquals(Status.CURRENT, result.getFundingStatus());
   }
 
   @Test
-  public void updateFundingStatusShouldNotSetFundingStatusIfNullPost() {
+  void updateFundingStatusShouldNotSetFundingStatusIfNullPost() {
     Post testPost = new Post();
     testPost.setId(1L);
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.empty());
@@ -261,7 +287,7 @@ public class PostServiceImplTest {
   }
 
   @Test
-  public void findAllShouldRetrieveAllInstances() {
+  void findAllShouldRetrieveAllInstances() {
     String query = "PostQuery";
     List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
@@ -273,23 +299,23 @@ public class PostServiceImplTest {
 
     Page<PostViewDTO> result = testObj.findAll(pageableMock);
 
-    Assert.assertEquals(1, result.getContent().size());
+    assertEquals(1, result.getContent().size());
     verify(sqlQuerySupplierMock).getQuery(SqlQuerySupplier.POST_VIEW);
     verify(namedParameterJdbcTemplateMock)
         .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class));
   }
 
   @Test
-  public void findOneShouldReturnNullWhenIdNotFound() {
+  void findOneShouldReturnNullWhenIdNotFound() {
     when(postRepositoryMock.findPostByIdWithJoinFetch(1L)).thenReturn(Optional.empty());
     when(postMapperMock.postToPostDTO(null)).thenReturn(null);
 
     PostDTO result = testObj.findOne(1L);
-    Assert.assertNull(result);
+    assertNull(result);
   }
 
   @Test
-  public void findOneShouldRetrieveOneInstanceById() {
+  void findOneShouldRetrieveOneInstanceById() {
     when(postRepositoryMock.findPostByIdWithJoinFetch(1L)).thenReturn(Optional.of(postMock1));
     when(postMapperMock.postToPostDTO(postMock1)).thenReturn(postDTOMock1);
 
@@ -297,24 +323,25 @@ public class PostServiceImplTest {
     Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet(postEsrEventDtoMock);
     when(postEsrLatestEventViewRepositoryMock.findPostEsrLatestEventByPostIdAndStatus(
         1L, PostEsrEventStatus.RECONCILED)).thenReturn(Sets.newHashSet(postEsrLatestEventViews));
-    when(postEsrEventDtoMapperMock.postEsrLatestEventViewsToPostEsrEventDtos(postEsrLatestEventViews))
+    when(postEsrEventDtoMapperMock.postEsrLatestEventViewsToPostEsrEventDtos(
+        postEsrLatestEventViews))
         .thenReturn(postEsrEventDtos);
 
     PostDTO result = testObj.findOne(1L);
-    Assert.assertEquals(postDTOMock1, result);
+    assertEquals(postDTOMock1, result);
     verify(postRepositoryMock).findPostByIdWithJoinFetch(1L);
     verify(postMapperMock).postToPostDTO(postMock1);
     verify(postDTOMock1).setCurrentReconciledEvents(postEsrEventDtos);
   }
 
   @Test
-  public void deleteShouldDeleteOneInstanceById() {
+  void deleteShouldDeleteOneInstanceById() {
     testObj.delete(1L);
     verify(postRepositoryMock).deleteById(1L);
   }
 
   @Test
-  public void patchOldNewPostsShouldApplyProvidedPosts() {
+  void patchOldNewPostsShouldApplyProvidedPosts() {
     List<Long> postIds = Lists.newArrayList(1L, 2L, 3L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1", "intrepid2", "intrepid3");
     PostDTO currentPostDTO = new PostDTO();
@@ -348,14 +375,14 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
     verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
     verify(postMapperMock).postsToPostDTOs(savedPosts);
-    Assert.assertSame(transformedPosts, result);
-    Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(oldPostDTO, result.get(0).getOldPost());
-    Assert.assertEquals(newPostDTO, result.get(0).getNewPost());
+    assertSame(transformedPosts, result);
+    assertEquals(expectedDTO, result.get(0));
+    assertEquals(oldPostDTO, result.get(0).getOldPost());
+    assertEquals(newPostDTO, result.get(0).getNewPost());
   }
 
   @Test
-  public void patchPostSites() {
+  void patchPostSites() {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
     PostSiteDTO postSiteDTO = new PostSiteDTO();
@@ -381,13 +408,13 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
     verify(postSiteRepositoryMock).saveAll(any());
     verify(postMapperMock).postsToPostDTOs(savedPosts);
-    Assert.assertSame(transformedPosts, result);
-    Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(expectedSites, result.get(0).getSites());
+    assertSame(transformedPosts, result);
+    assertEquals(expectedDTO, result.get(0));
+    assertEquals(expectedSites, result.get(0).getSites());
   }
 
   @Test
-  public void pathPostGrades() {
+  void pathPostGrades() {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
     PostGradeDTO postGradeDTO = new PostGradeDTO();
@@ -414,13 +441,13 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).findPostByIntrepidIdIn(Sets.newHashSet(intrepidIds));
     verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
     verify(postMapperMock).postsToPostDTOs(savedPosts);
-    Assert.assertSame(transformedPosts, result);
-    Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(expectedGrades, result.get(0).getGrades());
+    assertSame(transformedPosts, result);
+    assertEquals(expectedDTO, result.get(0));
+    assertEquals(expectedGrades, result.get(0).getGrades());
   }
 
   @Test
-  public void pathPostProgrammes() {
+  void pathPostProgrammes() {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
     ProgrammeDTO programmeDTO = new ProgrammeDTO();
@@ -453,13 +480,13 @@ public class PostServiceImplTest {
     verify(programmeRepositoryMock).findAllById(programmeIds);
     verify(postRepositoryMock).saveAll(Lists.newArrayList(currentPost));
     verify(postMapperMock).postsToPostDTOs(savedPosts);
-    Assert.assertSame(transformedPosts, result);
-    Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(programmeDTO, result.get(0).getProgrammes().iterator().next());
+    assertSame(transformedPosts, result);
+    assertEquals(expectedDTO, result.get(0));
+    assertEquals(programmeDTO, result.get(0).getProgrammes().iterator().next());
   }
 
   @Test
-  public void patchPostSpecialties() {
+  void patchPostSpecialties() {
     List<Long> postIds = Lists.newArrayList(1L);
     List<String> intrepidIds = Lists.newArrayList("intrepid1");
     PostSpecialtyDTO newPostSpecialtyDTO = new PostSpecialtyDTO();
@@ -501,34 +528,34 @@ public class PostServiceImplTest {
         break;
       }
     }
-    Assert.assertEquals(PostSpecialtyType.OTHER, postSpecialtyValue.getPostSpecialtyType());
-    Assert.assertEquals(postInRepository.getId(), postSpecialtyValue.getPostId());
-    Assert.assertEquals(newPostSpecialtyDTO.getSpecialty().getId(),
+    assertEquals(PostSpecialtyType.OTHER, postSpecialtyValue.getPostSpecialtyType());
+    assertEquals(postInRepository.getId(), postSpecialtyValue.getPostId());
+    assertEquals(newPostSpecialtyDTO.getSpecialty().getId(),
         postSpecialtyValue.getSpecialty().getId());
-    Assert.assertSame(transformedPosts, result);
-    Assert.assertEquals(expectedDTO, result.get(0));
-    Assert.assertEquals(expectedSpecialties, result.get(0).getSpecialties());
+    assertSame(transformedPosts, result);
+    assertEquals(expectedDTO, result.get(0));
+    assertEquals(expectedSpecialties, result.get(0).getSpecialties());
   }
 
   @Test
-  public void patchPostFundingsShouldReturnNullWhenPostDTOIsNull() {
+  void patchPostFundingsShouldReturnNullWhenPostDTOIsNull() {
     PostDTO postDTO = null;
     List<PostFundingDTO> retList = testObj.patchPostFundings(postDTO);
-    Assert.assertNull(retList);
+    assertNull(retList);
   }
 
   @Test
-  public void patchPostFundingsShouldReturnNullWhenPostIsNotFound() {
+  void patchPostFundingsShouldReturnNullWhenPostIsNotFound() {
     PostDTO postDTO = new PostDTO();
     Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
     postDTO.id(1L).setFundings(postFundingDTOs);
     doReturn(null).when(testObj).findOne(any());
     List<PostFundingDTO> retList = testObj.patchPostFundings(postDTO);
-    Assert.assertNull(retList);
+    assertNull(retList);
   }
 
   @Test
-  public void patchPostFundingShouldSucceed() {
+  void patchPostFundingShouldSucceed() {
     PostDTO postDTO = new PostDTO();
     Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
     postDTO.id(1L).setFundings(postFundingDTOs);
@@ -538,11 +565,11 @@ public class PostServiceImplTest {
     when(postFundingValidatorMock.validateFundingType(checkList)).thenReturn(checkList);
     doReturn(postDTOInDBMock).when(testObj).update(any());
     List<PostFundingDTO> retList = testObj.patchPostFundings(postDTO);
-    Assert.assertEquals(checkList, retList);
+    assertEquals(checkList, retList);
   }
 
   @Test
-  public void canLoggedInUserViewOrAmendShouldDoNothingWhenUserIsNotTrustAdmin() {
+  void canLoggedInUserViewOrAmendShouldDoNothingWhenUserIsNotTrustAdmin() {
     Long postId = 1L;
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
     testObj.canLoggedInUserViewOrAmend(postId);
@@ -551,7 +578,7 @@ public class PostServiceImplTest {
   }
 
   @Test
-  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostCannotBeFound() {
+  void canLoggedInUserViewOrAmendShouldDoNothingWhenPostCannotBeFound() {
     Long postId = 1L;
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(true);
     when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.empty());
@@ -561,7 +588,7 @@ public class PostServiceImplTest {
   }
 
   @Test
-  public void canLoggedInUserViewOrAmendShouldDoNothingWhenPostIsPartOfUsersTrusts() {
+  void canLoggedInUserViewOrAmendShouldDoNothingWhenPostIsPartOfUsersTrusts() {
     PostTrust associatedTrust1 = new PostTrust();
     associatedTrust1.setTrustId(1L);
     PostTrust associatedTrust2 = new PostTrust();
@@ -578,8 +605,8 @@ public class PostServiceImplTest {
     verify(postRepositoryMock).findPostWithTrustsById(postId);
   }
 
-  @Test(expected = AccessUnauthorisedException.class)
-  public void canLoggedInUserViewOrAmendShouldThrowExceptionWhenPostIsNotPartOfUsersTrusts() {
+  @Test
+  void canLoggedInUserViewOrAmendShouldThrowExceptionWhenPostIsNotPartOfUsersTrusts() {
     PostTrust associatedTrust1 = new PostTrust();
     associatedTrust1.setTrustId(1L);
     PostTrust associatedTrust2 = new PostTrust();
@@ -591,17 +618,15 @@ public class PostServiceImplTest {
     when(permissionServiceMock.isUserTrustAdmin()).thenReturn(true);
     when(permissionServiceMock.getUsersTrustIds()).thenReturn(Sets.newHashSet(99999L));
     when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.of(foundPost));
-    try {
-      testObj.canLoggedInUserViewOrAmend(postId);
-    } catch (Exception e) {
-      verify(permissionServiceMock).getUsersTrustIds();
-      verify(postRepositoryMock).findPostWithTrustsById(postId);
-      throw e;
-    }
+
+    AccessUnauthorisedException exception = assertThrows(AccessUnauthorisedException.class, () ->
+        testObj.canLoggedInUserViewOrAmend(postId));
+    verify(permissionServiceMock).getUsersTrustIds();
+    verify(postRepositoryMock).findPostWithTrustsById(postId);
   }
 
   @Test
-  public void fundingTypeShouldExistInWhereClauseWhenFilteredByIt() {
+  void fundingTypeShouldExistInWhereClauseWhenFilteredByIt() {
     final String SEARCH_STRING = StringUtils.EMPTY;
     final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
     List<Object> columnFilterValues = new ArrayList<>();
@@ -613,11 +638,11 @@ public class PostServiceImplTest {
     List<PostViewDTO> resultsFromQuery = new ArrayList<>();
     resultsFromQuery.add(new PostViewDTO());
     String whereClause = testObj.createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
-    Assert.assertTrue(whereClause.contains("fundingTypeList"));
+    assertTrue(whereClause.contains("fundingTypeList"));
   }
 
   @Test
-  public void advancedSearchShouldSearchWithDescOrderByCurrentTraineeSurname() {
+  void advancedSearchShouldSearchWithDescOrderByCurrentTraineeSurname() {
     final int PAGE = 1;
     final int SIZE = 100;
     final Sort surnameSortOrder = Sort.by(Sort.Direction.DESC, "currentTraineeSurname");
@@ -637,18 +662,18 @@ public class PostServiceImplTest {
     testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
     int indexOfGroupBy = capturedQueryString.indexOf("group by");
-    Assert.assertTrue(indexOfGroupBy >= 0);
+    assertTrue(indexOfGroupBy >= 0);
     int indexOfOrderBy = capturedQueryString.indexOf("ORDER BY surnames DESC");
-    Assert.assertTrue(indexOfOrderBy >= 0);
+    assertTrue(indexOfOrderBy >= 0);
     //ordering
-    Assert.assertTrue(indexOfGroupBy < indexOfOrderBy);
+    assertTrue(indexOfGroupBy < indexOfOrderBy);
     //multiples
-    Assert.assertFalse(
+    assertFalse(
         capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
   }
 
   @Test
-  public void advancedSearchShouldSearchWithAscendingOrderByCurrentTraineeSurname() {
+  void advancedSearchShouldSearchWithAscendingOrderByCurrentTraineeSurname() {
     final int PAGE = 1;
     final int SIZE = 100;
     final Sort surnameSortOrder = Sort.by(Sort.Direction.ASC, "currentTraineeSurname");
@@ -668,29 +693,26 @@ public class PostServiceImplTest {
     testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
     String capturedQueryString = queryCaptor.getValue();
     int indexOfGroupBy = capturedQueryString.indexOf("group by");
-    Assert.assertTrue(indexOfGroupBy >= 0);
+    assertTrue(indexOfGroupBy >= 0);
     int indexOfOrderBy = capturedQueryString.indexOf("ORDER BY surnames ASC");
-    Assert.assertTrue(indexOfOrderBy >= 0);
+    assertTrue(indexOfOrderBy >= 0);
     //ordering
-    Assert.assertTrue(indexOfGroupBy < indexOfOrderBy);
+    assertTrue(indexOfGroupBy < indexOfOrderBy);
     //multiples
-    Assert.assertFalse(
+    assertFalse(
         capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
   }
 
-  @Test(expected = NullPointerException.class)
-  public void findPostsForProgrammeIdAndNpnShouldThrowExceptionWhenProgrammeIdIsNull() {
-    try {
-      testObj.findPostsForProgrammeIdAndNpn(null, "DUMMY TEXT");
-    } catch (Exception e) {
-      verifyZeroInteractions(postRepositoryMock);
-      verifyZeroInteractions(postMapperMock);
-      throw e;
-    }
+  @Test
+  void findPostsForProgrammeIdAndNpnShouldThrowExceptionWhenProgrammeIdIsNull() {
+    NullPointerException exception = assertThrows(NullPointerException.class, () ->
+        testObj.findPostsForProgrammeIdAndNpn(null, "DUMMY TEXT"));
+    verifyZeroInteractions(postRepositoryMock);
+    verifyZeroInteractions(postMapperMock);
   }
 
   @Test
-  public void findPostsForProgrammeIdAndNpnShouldDoSearchAndConvertResultToDto() {
+  void findPostsForProgrammeIdAndNpnShouldDoSearchAndConvertResultToDto() {
     long programmeId = 1L;
     String npn = "DUMMY TEXT";
 
@@ -705,11 +727,11 @@ public class PostServiceImplTest {
 
     verify(postRepositoryMock).findPostsForProgrammeIdAndNpnLike(programmeId, npn, Status.CURRENT);
     verify(postMapperMock).postsToPostDTOs(postsFromDb);
-    Assert.assertSame(convertedPosts, result);
+    assertSame(convertedPosts, result);
   }
 
   @Test
-  public void markPostAsEsrPositionChangedShouldReturnEmptyIfPostIdNotFound() {
+  void markPostAsEsrPositionChangedShouldReturnEmptyIfPostIdNotFound() {
     //given
     Long postId = 1L;
     when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.empty());
@@ -721,11 +743,11 @@ public class PostServiceImplTest {
 
     //then
     boolean postEsrEventIsPresent = postEsrEvent.isPresent();
-    Assert.assertFalse("Unexpected PostEsrEvent returned", postEsrEventIsPresent);
+    assertFalse(postEsrEventIsPresent);
   }
 
   @Test
-  public void markPostAsEsrPositionChangedShouldSaveUpdatedPostEsrEvent() {
+  void markPostAsEsrPositionChangedShouldSaveUpdatedPostEsrEvent() {
     //given
     Long postId = 1L;
     Post post = new Post();
