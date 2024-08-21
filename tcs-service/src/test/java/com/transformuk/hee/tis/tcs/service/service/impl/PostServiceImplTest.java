@@ -82,7 +82,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
-public class PostServiceImplTest {
+class PostServiceImplTest {
 
   private static final Long SITE_ID = 12345L;
   String query = "select distinct id,\n" +
@@ -619,8 +619,8 @@ public class PostServiceImplTest {
     when(permissionServiceMock.getUsersTrustIds()).thenReturn(Sets.newHashSet(99999L));
     when(postRepositoryMock.findPostWithTrustsById(postId)).thenReturn(Optional.of(foundPost));
 
-    AccessUnauthorisedException exception = assertThrows(AccessUnauthorisedException.class, () ->
-        testObj.canLoggedInUserViewOrAmend(postId));
+    assertThrows(AccessUnauthorisedException.class,
+        () -> testObj.canLoggedInUserViewOrAmend(postId));
     verify(permissionServiceMock).getUsersTrustIds();
     verify(postRepositoryMock).findPostWithTrustsById(postId);
   }
@@ -705,7 +705,7 @@ public class PostServiceImplTest {
 
   @Test
   void findPostsForProgrammeIdAndNpnShouldThrowExceptionWhenProgrammeIdIsNull() {
-    NullPointerException exception = assertThrows(NullPointerException.class, () ->
+    assertThrows(NullPointerException.class, () ->
         testObj.findPostsForProgrammeIdAndNpn(null, "DUMMY TEXT"));
     verifyZeroInteractions(postRepositoryMock);
     verifyZeroInteractions(postMapperMock);
