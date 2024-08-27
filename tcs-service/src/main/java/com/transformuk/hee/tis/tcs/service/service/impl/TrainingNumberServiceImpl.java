@@ -290,7 +290,8 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
    */
   private String getReferenceNumber(Person person) {
     GmcDetails gmcDetails = person.getGmcDetails();
-    String gmcNumber = gmcDetails == null ? "" : gmcDetails.getGmcNumber();
+    String gmcNumber = gmcDetails == null || gmcDetails.getGmcNumber() == null
+        ? "" : gmcDetails.getGmcNumber();
 
     GdcDetails gdcDetails = person.getGdcDetails();
     String gdcNumber = gdcDetails == null ? null : gdcDetails.getGdcNumber();

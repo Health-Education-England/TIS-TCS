@@ -944,6 +944,35 @@ class TrainingNumberServiceImplTest {
     assertThat("Unexpected suffix.", trainingNumberParts[3], is("C"));
   }
 
+  @ParameterizedTest
+  @NullAndEmptySource
+  void shouldPopulateTrainingNumberWhenGmcNumberInvalid(String gmcNumber) {
+    ProgrammeMembership pm = new ProgrammeMembership();
+    Person person = createPerson(gmcNumber, GDC_NUMBER);
+    pm.setPerson(person);
+
+    Programme programme = new Programme();
+    programme.setOwner(OWNER_NAME);
+    programme.setProgrammeName(PROGRAMME_NAME);
+    programme.setProgrammeNumber(PROGRAMME_NUMBER);
+
+    pm.setProgramme(programme);
+    pm.setTrainingPathway(TRAINING_PATHWAY);
+    pm.setProgrammeStartDate(NOW);
+
+    CurriculumMembership cm1 = createCurriculumMembership(CURRICULUM_NAME, PAST, FUTURE,
+        MEDICAL_CURRICULUM, "123");
+    CurriculumMembership cm2 = createCurriculumMembership(CURRICULUM_NAME, PAST, FUTURE,
+        MEDICAL_CURRICULUM, "ACA");
+    pm.setCurriculumMemberships(new HashSet<>(Arrays.asList(cm1, cm2)));
+
+    service.populateTrainingNumbers(Collections.singletonList(pm));
+
+    TrainingNumber trainingNumber = pm.getTrainingNumber();
+    String[] trainingNumberParts = trainingNumber.getTrainingNumber().split("/");
+    assertThat("Unexpected suffix.", trainingNumberParts[3], is("C"));
+  }
+
   @Test
   void shouldFilterCurriculaWhenPopulatingTrainingNumberWithSuffixAndCurriculaEnding() {
     ProgrammeMembership pm = new ProgrammeMembership();
@@ -1077,17 +1106,13 @@ class TrainingNumberServiceImplTest {
   private Person createPerson(String gmcNumber, String gdcNumber) {
     Person person = new Person();
 
-    if (gmcNumber != null) {
-      GmcDetails gmcDetails = new GmcDetails();
-      gmcDetails.setGmcNumber(gmcNumber);
-      person.setGmcDetails(gmcDetails);
-    }
+    GmcDetails gmcDetails = new GmcDetails();
+    gmcDetails.setGmcNumber(gmcNumber);
+    person.setGmcDetails(gmcDetails);
 
-    if (gdcNumber != null) {
-      GdcDetails gdcDetails = new GdcDetails();
-      gdcDetails.setGdcNumber(gdcNumber);
-      person.setGdcDetails(gdcDetails);
-    }
+    GdcDetails gdcDetails = new GdcDetails();
+    gdcDetails.setGdcNumber(gdcNumber);
+    person.setGdcDetails(gdcDetails);
 
     return person;
   }
