@@ -191,40 +191,40 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
         case "Defence Postgraduate Medical Deanery":
           parentOrganization = "TSD";
           break;
-        case "Health Education England East Midlands":
+        case "East Midlands":
           parentOrganization = "EMD";
           break;
-        case "Health Education England East of England":
+        case "East of England":
           parentOrganization = "EAN";
           break;
-        case "Health Education England Kent, Surrey and Sussex":
+        case "Kent, Surrey and Sussex":
           parentOrganization = "KSS";
           break;
-        case "Health Education England North Central and East London":
-        case "Health Education England South London":
-        case "Health Education England North West London":
+        case "North Central and East London":
+        case "South London":
+        case "North West London":
         case "London LETBs":
           parentOrganization = "LDN";
           break;
-        case "Health Education England North East":
+        case "North East":
           parentOrganization = "NTH";
           break;
-        case "Health Education England North West":
+        case "North West":
           parentOrganization = "NWE";
           break;
-        case "Health Education England South West":
+        case "South West":
           parentOrganization = "SWN";
           break;
-        case "Health Education England Thames Valley":
+        case "Thames Valley":
           parentOrganization = "OXF";
           break;
-        case "Health Education England Wessex":
+        case "Wessex":
           parentOrganization = "WES";
           break;
-        case "Health Education England West Midlands":
+        case "West Midlands":
           parentOrganization = "WMD";
           break;
-        case "Health Education England Yorkshire and the Humber":
+        case "Yorkshire and the Humber":
           parentOrganization = "YHD";
           break;
         default:

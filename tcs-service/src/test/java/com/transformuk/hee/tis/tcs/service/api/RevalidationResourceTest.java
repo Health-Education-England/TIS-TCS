@@ -51,7 +51,7 @@ public class RevalidationResourceTest {
   private static final String PROGRAMME_MEMBERSHIP_TYPE = "Substantive";
   private static final String PROGRAMME_NAME = "Clinical Radiology";
   private static final String CURRENT_GRADE = "Foundation Year 2";
-  private static final String PROGRAMME_OWNER = "Health Education England Yorkshire and the Humber";
+  private static final String PROGRAMME_OWNER = "Yorkshire and the Humber";
   private static final String CONNECTION_STATUS = "Yes";
   private static final LocalDate PM_START_DATE = LocalDate.now();
   private static final LocalDate PM_END_DATE = LocalDate.now().plusDays(10);

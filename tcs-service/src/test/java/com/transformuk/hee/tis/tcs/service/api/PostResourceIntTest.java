@@ -131,11 +131,11 @@ public class PostResourceIntTest {
   private static final Long NEW_SITE_ID = 22223L;
   private static final String TEST_POST_NUMBER = "TESTPOST";
   private static final String DEFAULT_POST_NUMBER = "DEFAULTPOST";
-  private static final String OWNER = "Health Education England Kent, Surrey and Sussex";
-  private static final String OWNER_NORTH_EAST = "Health Education England North East";
+  private static final String OWNER = "Kent, Surrey and Sussex";
+  private static final String OWNER_NORTH_EAST = "North East";
   private static final String FUNDING_TYPE_TRUST = "TRUST";
   private static final String FUNDING_TYPE_TARIFF = "TARIFF";
-  private static final String UPDATED_OWNER = "Health Education England North West London";
+  private static final String UPDATED_OWNER = "North West London";
   public static final String DEFAULT_TRAINEE_EMAIL = "EMAIL@email.com";
   public static final String DEFAULT_TRAINEE_SURNAME = "PERSON_SURNAME";
   public static final String DEFAULT_TRAINEE_FORENAMES = "PERSON_FORENAMES";

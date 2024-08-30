@@ -469,21 +469,21 @@ class TrainingNumberServiceImplTest {
 
   @ParameterizedTest
   @CsvSource(delimiter = '|', value = {
-      "Defence Postgraduate Medical Deanery                   | TSD",
-      "Health Education England East Midlands                 | EMD",
-      "Health Education England East of England               | EAN",
-      "Health Education England Kent, Surrey and Sussex       | KSS",
-      "Health Education England North Central and East London | LDN",
-      "Health Education England North East                    | NTH",
-      "Health Education England North West                    | NWE",
-      "Health Education England North West London             | LDN",
-      "Health Education England South London                  | LDN",
-      "Health Education England South West                    | SWN",
-      "Health Education England Thames Valley                 | OXF",
-      "Health Education England Wessex                        | WES",
-      "Health Education England West Midlands                 | WMD",
-      "Health Education England Yorkshire and the Humber      | YHD",
-      "London LETBs                                           | LDN"
+      "Defence Postgraduate Medical Deanery | TSD",
+      "East Midlands                        | EMD",
+      "East of England                      | EAN",
+      "Kent, Surrey and Sussex              | KSS",
+      "North Central and East London        | LDN",
+      "North East                           | NTH",
+      "North West                           | NWE",
+      "North West London                    | LDN",
+      "South London                         | LDN",
+      "South West                           | SWN",
+      "Thames Valley                        | OXF",
+      "Wessex                               | WES",
+      "West Midlands                        | WMD",
+      "Yorkshire and the Humber             | YHD",
+      "London LETBs                         | LDN"
   })
   void shouldPopulateTrainingNumberWithParentOrganizationWhenMappedByOwner(String ownerName,
       String ownerCode) {
