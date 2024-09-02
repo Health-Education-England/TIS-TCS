@@ -21,22 +21,22 @@ public class DesignatedBodyMapper {
   private static final Map<String, List<String>> heeDbToOwnerMap = ImmutableMap.<String, List<String>>builder()
       //London LETBs match any of the london DBC's
       .put("1-1RUZV1D",
-          Lists.newArrayList("Health Education England Kent, Surrey and Sussex", "London LETBs"))
+          Lists.newArrayList("Kent, Surrey and Sussex", "London LETBs"))
       .put("1-1RUZV6H",
-          Lists.newArrayList("Health Education England North West London", "London LETBs"))
+          Lists.newArrayList("North West London", "London LETBs"))
       .put("1-1RUZV4H", Lists
-          .newArrayList("Health Education England North Central and East London", "London LETBs"))
-      .put("1-1RSSQ5L", Lists.newArrayList("Health Education England South London", "London LETBs"))
+          .newArrayList("North Central and East London", "London LETBs"))
+      .put("1-1RSSQ5L", Lists.newArrayList("South London", "London LETBs"))
 
-      .put("1-1RSSPZ7", Lists.newArrayList("Health Education England East Midlands"))
-      .put("1-1RSSQ05", Lists.newArrayList("Health Education England East of England"))
-      .put("1-1RSSQ1B", Lists.newArrayList("Health Education England North East"))
-      .put("1-1RSSQ6R", Lists.newArrayList("Health Education England Thames Valley"))
-      .put("1-1RSG4X0", Lists.newArrayList("Health Education England Yorkshire and the Humber"))
-      .put("1-1RUZUYF", Lists.newArrayList("Health Education England West Midlands"))
-      .put("1-1RUZUVB", Lists.newArrayList("Health Education England South West"))
-      .put("1-1RUZUSF", Lists.newArrayList("Health Education England Wessex"))
-      .put("1-1RSSQ2H", Lists.newArrayList("Health Education England North West"))
+      .put("1-1RSSPZ7", Lists.newArrayList("East Midlands"))
+      .put("1-1RSSQ05", Lists.newArrayList("East of England"))
+      .put("1-1RSSQ1B", Lists.newArrayList("North East"))
+      .put("1-1RSSQ6R", Lists.newArrayList("Thames Valley"))
+      .put("1-1RSG4X0", Lists.newArrayList("Yorkshire and the Humber"))
+      .put("1-1RUZUYF", Lists.newArrayList("West Midlands"))
+      .put("1-1RUZUVB", Lists.newArrayList("South West"))
+      .put("1-1RUZUSF", Lists.newArrayList("Wessex"))
+      .put("1-1RSSQ2H", Lists.newArrayList("North West"))
       .put("1-25U-830", Lists.newArrayList("Northern Ireland Medical and Dental Training Agency"))
       .build();
 
