@@ -8,12 +8,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -417,6 +420,61 @@ class TrainingNumberServiceImplTest {
     TrainingNumber trainingNumber = pm.getTrainingNumber();
     assertThat("Unexpected training number.", trainingNumber.getTrainingNumber(),
         is("LDN/ABC.XYZ.123/1234567/D"));
+  }
+
+  @Test
+  void shouldUseTsdPrefixWhenMilitaryProgrammeMembershipType() {
+    ProgrammeMembership pm = new ProgrammeMembership();
+    Person person = createPerson(GMC_NUMBER, null);
+    pm.setPerson(person);
+
+    Programme programme = new Programme();
+    programme.setOwner(OWNER_NAME);
+    programme.setProgrammeName(PROGRAMME_NAME);
+    programme.setProgrammeNumber(PROGRAMME_NUMBER);
+
+    pm.setProgramme(programme);
+    pm.setTrainingPathway(TRAINING_PATHWAY);
+    pm.setProgrammeStartDate(FUTURE);
+    pm.setProgrammeMembershipType(ProgrammeMembershipType.MILITARY);
+
+    CurriculumMembership cm1 = createCurriculumMembership(CURRICULUM_NAME, NOW, FUTURE.plusDays(1),
+        MEDICAL_CURRICULUM, "ABC");
+    pm.setCurriculumMemberships(new HashSet<>(Collections.singletonList(cm1)));
+
+    service.populateTrainingNumbers(Collections.singletonList(pm));
+
+    TrainingNumber trainingNumber = pm.getTrainingNumber();
+    assertThat("Unexpected training number.",
+        trainingNumber.getTrainingNumber().startsWith("TSD"), is(true));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = ProgrammeMembershipType.class, names = "MILITARY", mode = EXCLUDE)
+  void shouldNotForceTsdPrefixWhenNotMilitaryProgrammeMembershipType(ProgrammeMembershipType type) {
+    ProgrammeMembership pm = new ProgrammeMembership();
+    Person person = createPerson(GMC_NUMBER, null);
+    pm.setPerson(person);
+
+    Programme programme = new Programme();
+    programme.setOwner(OWNER_NAME);
+    programme.setProgrammeName(PROGRAMME_NAME);
+    programme.setProgrammeNumber(PROGRAMME_NUMBER);
+
+    pm.setProgramme(programme);
+    pm.setTrainingPathway(TRAINING_PATHWAY);
+    pm.setProgrammeStartDate(FUTURE);
+    pm.setProgrammeMembershipType(type);
+
+    CurriculumMembership cm1 = createCurriculumMembership(CURRICULUM_NAME, NOW, FUTURE.plusDays(1),
+        MEDICAL_CURRICULUM, "ABC");
+    pm.setCurriculumMemberships(new HashSet<>(Collections.singletonList(cm1)));
+
+    service.populateTrainingNumbers(Collections.singletonList(pm));
+
+    TrainingNumber trainingNumber = pm.getTrainingNumber();
+    assertThat("Unexpected training number.",
+        trainingNumber.getTrainingNumber().startsWith("TSD"), is(false));
   }
 
   @Test

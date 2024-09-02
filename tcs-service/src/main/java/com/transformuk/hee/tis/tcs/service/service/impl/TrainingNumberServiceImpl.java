@@ -4,6 +4,7 @@ import static com.transformuk.hee.tis.tcs.api.enumeration.CurriculumSubType.SUB_
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.service.event.TrainingNumberSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -230,6 +231,11 @@ public class TrainingNumberServiceImpl implements TrainingNumberService {
         default:
           break;
       }
+    }
+
+    //override for military trainees
+    if (programmeMembership.getProgrammeMembershipType() == ProgrammeMembershipType.MILITARY) {
+      parentOrganization = "TSD";
     }
 
     if (parentOrganization == null) {
