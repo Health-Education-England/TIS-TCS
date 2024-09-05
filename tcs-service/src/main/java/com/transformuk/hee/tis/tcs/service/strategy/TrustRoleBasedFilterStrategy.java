@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.strategy;
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.security.util.TisSecurityHelper;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,7 +26,7 @@ public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
   private static final String COLUMN_FILTER = "trusts.trustId";
 
   @Override
-  public Optional<Tuple<String, BoolQueryBuilder>> getFilter() {
+  public Optional<Tuple<String, BoolQueryBuilder>> getFilter(List<ColumnFilter> columnFilters) {
     UserProfile currentUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<Trust> assignedTrusts = currentUserProfile.getAssignedTrusts();
     if (CollectionUtils.isNotEmpty(assignedTrusts)) {

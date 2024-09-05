@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.strategy;
 
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import java.util.List;
 import java.util.Optional;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -11,5 +13,5 @@ public interface RoleBasedFilterStrategy {
    *
    * @return The column filter that is to be applied and the name of the group of filters
    */
-  Optional<Tuple<String, BoolQueryBuilder>> getFilter();
+  Optional<Tuple<String, BoolQueryBuilder>> getFilter(List<ColumnFilter> columnFilters);
 }
