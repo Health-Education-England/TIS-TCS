@@ -135,6 +135,27 @@ class ConditionsOfJoiningServiceImplTest {
   }
 
   @Test
+  void saveShouldSaveTheConditionsOfJoiningGg10() {
+    ProgrammeMembership programmeMembership = new ProgrammeMembership();
+    programmeMembership.setUuid(PROGRAMME_MEMBERSHIP_UUID);
+
+    when(programmeMembershipRepository.findByUuid(PROGRAMME_MEMBERSHIP_UUID)).thenReturn(
+        Optional.of(programmeMembership));
+    when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
+
+    coj.setVersion(GoldGuideVersion.GG10);
+    ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID,
+        coj);
+
+    assertThat("Unexpected programme membership uuid.", savedCoj.getProgrammeMembershipUuid(),
+        is(PROGRAMME_MEMBERSHIP_UUID));
+    assertThat("Unexpected programme membership signed at.", savedCoj.getSignedAt(),
+        is(SIGNED_AT));
+    assertThat("Unexpected programme membership version.", savedCoj.getVersion(),
+        is(GoldGuideVersion.GG10));
+  }
+
+  @Test
   void saveShouldReplaceAnyProvidedProgrammeMembershipUuid() {
     coj.setProgrammeMembershipUuid(UUID.randomUUID());
 
