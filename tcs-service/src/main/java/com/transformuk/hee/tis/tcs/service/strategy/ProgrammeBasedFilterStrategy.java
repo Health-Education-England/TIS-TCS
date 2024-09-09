@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
@@ -26,22 +25,17 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
 
   @Override
   public Optional<Tuple<String, BoolQueryBuilder>> getFilter(List<ColumnFilter> columnFilters) {
-    MatchQueryBuilder statusMatchQueryBuilder = null;
-    if (columnFilters != null) {
-      Set<ColumnFilter> statusFilters = columnFilters.stream().filter(
-              columnFilter -> StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus"))
-          .collect(
-              Collectors.toSet());
-      if (statusFilters.size() > 0) {
-        ProgrammeMembershipStatus status = ProgrammeMembershipStatus
-            .valueOf(statusFilters.iterator().next().getValues().get(0).toString());
-        statusMatchQueryBuilder = getProgrammeMembershipStatusQueryBuilder(status);
-      }
-    }
-
     UserProfile currentUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<Programme> assignedProgrammes = currentUserProfile.getAssignedProgrammes();
+
     if (CollectionUtils.isNotEmpty(assignedProgrammes)) {
+
+      MatchQueryBuilder statusMatchQueryBuilder = columnFilters.stream().filter(
+              columnFilter -> StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus"))
+          .findFirst().map(columnFilter -> getProgrammeMembershipStatusQueryBuilder(
+              ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString())))
+          .orElse(null);
+
       BoolQueryBuilder programmeRoleFilter = new BoolQueryBuilder();
       for (Programme programme : assignedProgrammes) {
         if (statusMatchQueryBuilder == null) {
@@ -54,7 +48,6 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
               new NestedQueryBuilder("programmeMemberships",
                   new BoolQueryBuilder().should(
                           new MatchQueryBuilder("programmeMemberships.programmeId", programme.getId()))
-                      .minimumShouldMatch(1)
                       .should(statusMatchQueryBuilder).minimumShouldMatch(2),
                   ScoreMode.None));
         }
@@ -66,17 +59,7 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
 
   public MatchQueryBuilder getProgrammeMembershipStatusQueryBuilder(
       ProgrammeMembershipStatus status) {
-    MatchQueryBuilder statusQueryBuilder = null;
-    if (status.equals(ProgrammeMembershipStatus.CURRENT)) {
-      statusQueryBuilder = QueryBuilders
-          .matchQuery("programmeMemberships.programmeMembershipStatus", "CURRENT");
-    } else if (status.equals(ProgrammeMembershipStatus.PAST)) {
-      statusQueryBuilder = QueryBuilders
-          .matchQuery("programmeMemberships.programmeMembershipStatus", "PAST");
-    } else if (status.equals(ProgrammeMembershipStatus.FUTURE)) {
-      statusQueryBuilder = QueryBuilders
-          .matchQuery("programmeMemberships.programmeMembershipStatus", "FUTURE");
-    }
-    return statusQueryBuilder;
+    return ProgrammeMembershipStatus.UNASSIGNED.equals(status) ? null :
+        QueryBuilders.matchQuery("programmeMemberships.programmeMembershipStatus", status);
   }
 }
