@@ -161,23 +161,24 @@ public class ProgrammeMembershipResource {
   }
 
 
+
   /**
-   * GET /programme-memberships/:uuid : get the "uuid" programmeMembership.
+   * GET /programme-memberships/:id :/summary get the "id" programmeMembership.
    *
-   * @param uuid the id of the programmeMembershipDTO to retrieve
+   * @param id the id of the programmeMembershipDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO, or
    *         with status 404 (Not Found)
    */
-  @GetMapping("/programme-memberships/uuid/{uuid}")
+  @GetMapping("/programme-memberships/{id}/summary")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
-  public ResponseEntity<ProgrammeMembershipSummaryDto> getProgrammeMembershipbyUuid(
-      @PathVariable String uuid) {
+  public ResponseEntity<ProgrammeMembershipSummaryDto> getProgrammeMembershipSummary(
+      @PathVariable String id) {
     ProgrammeMembershipDTO programmeMembershipDto;
 
     try {
-      programmeMembershipDto = programmeMembershipService.findOne(UUID.fromString(uuid));
+      programmeMembershipDto = programmeMembershipService.findOne(UUID.fromString(id));
     } catch (IllegalArgumentException e) {
-      programmeMembershipDto = programmeMembershipService.findOne(Long.parseLong(uuid));
+      programmeMembershipDto = programmeMembershipService.findOne(Long.parseLong(id));
     }
     ProgrammeMembershipSummaryDto summaryDto = new ProgrammeMembershipSummaryDto();
     if (programmeMembershipDto != null) {

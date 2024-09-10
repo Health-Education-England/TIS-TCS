@@ -293,7 +293,7 @@ class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  void shouldGetProgrammeMembershipByUuid() throws Exception {
+  void shouldGetProgrammeMembershipSummary() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
     curriculumRepository.saveAndFlush(curriculum);
@@ -306,7 +306,7 @@ class ProgrammeMembershipResourceIntTest {
     UUID programmeMembershipUuid = programmeMembership.getUuid();
 
     // Perform the API request and validate the response
-    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/uuid/{uuid}",
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/{id}/summary",
             programmeMembershipUuid))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -319,8 +319,8 @@ class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  void shouldReturnNotFoundForInvalidUuid() throws Exception {
-    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/uuid/{uuid}",
+  void shouldReturnNotFoundForRequestingSummeryWhenProvidingAnInvalidUuid() throws Exception {
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/{id}/summary",
             UUID.randomUUID().toString()))
         .andExpect(status().isNotFound());
   }
