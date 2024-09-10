@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -114,8 +116,10 @@ class ConditionsOfJoiningServiceImplTest {
         is(GoldGuideVersion.GG9));
   }
 
-  @Test
-  void saveShouldSaveTheConditionsOfJoiningAgainstTheProgrammeMembershipFromPmId() {
+  @ParameterizedTest
+  @EnumSource(GoldGuideVersion.class)
+  void saveShouldSaveTheConditionsOfJoiningAgainstTheProgrammeMembershipFromPmId(
+      GoldGuideVersion goldGuideVersion) {
     ProgrammeMembership programmeMembership = new ProgrammeMembership();
     programmeMembership.setUuid(PROGRAMME_MEMBERSHIP_UUID);
 
@@ -123,6 +127,7 @@ class ConditionsOfJoiningServiceImplTest {
         Optional.of(programmeMembership));
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
 
+    coj.setVersion(goldGuideVersion);
     ConditionsOfJoiningDto savedCoj = conditionsOfJoiningService.save(PROGRAMME_MEMBERSHIP_UUID,
         coj);
 
@@ -131,7 +136,7 @@ class ConditionsOfJoiningServiceImplTest {
     assertThat("Unexpected programme membership signed at.", savedCoj.getSignedAt(),
         is(SIGNED_AT));
     assertThat("Unexpected programme membership version.", savedCoj.getVersion(),
-        is(GoldGuideVersion.GG9));
+        is(goldGuideVersion));
   }
 
   @Test
