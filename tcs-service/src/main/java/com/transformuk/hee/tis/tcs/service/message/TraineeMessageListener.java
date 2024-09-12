@@ -54,6 +54,11 @@ public class TraineeMessageListener {
     }
   }
 
+  /**
+   * A listener for GMC details being provided by a trainee.
+   *
+   * @param event The event containing trainee provided GMC details.
+   */
   @RabbitListener(queues = "${app.rabbit.trainee.queue.gmc-details.provided}", ackMode = "AUTO")
   public void receiveGmcDetailsProvidedMessage(GmcDetailsProvidedEvent event) {
     Set<ConstraintViolation<GmcDetailsProvidedEvent>> violations = validator.validate(event,

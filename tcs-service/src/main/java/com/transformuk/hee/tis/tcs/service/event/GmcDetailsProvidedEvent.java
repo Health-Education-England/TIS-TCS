@@ -5,6 +5,9 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.TraineeUpdate;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+/**
+ * An event triggered when a trainee provides GMC details.
+ */
 public class GmcDetailsProvidedEvent {
 
   @NotNull(groups = TraineeUpdate.class)
