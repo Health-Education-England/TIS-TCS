@@ -136,10 +136,6 @@ public class PersonElasticSearchService {
               continue;
             }
             if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
-              shouldBetweenSameColumnFilter.should(new NestedQueryBuilder("programmeMemberships",
-                  new MatchQueryBuilder("programmeMemberships.programmeMembershipStatus",
-                      value.toString()),
-                  ScoreMode.None));
               continue;
             }
             //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
