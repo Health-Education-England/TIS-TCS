@@ -36,6 +36,8 @@ public class PostFundingDTO implements Serializable {
 
   private List<String> messageList = new ArrayList<>();
 
+  private UUID fundingReasonId;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -53,13 +55,14 @@ public class PostFundingDTO implements Serializable {
         Objects.equals(startDate, that.startDate) &&
         Objects.equals(endDate, that.endDate) &&
         Objects.equals(fundingBodyId, that.fundingBodyId) &&
-        Objects.equals(messageList, that.messageList);
+        Objects.equals(messageList, that.messageList) &&
+        Objects.equals(fundingReasonId, that.fundingReasonId);
   }
 
   @Override
   public int hashCode() {
     return Objects
         .hash(id, intrepidId, fundingType, fundingSubTypeId, info, startDate, endDate,
-            fundingBodyId, messageList);
+            fundingBodyId, messageList, fundingReasonId);
   }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `PostFunding` ADD COLUMN `fundingReasonId` varchar(36);
