@@ -118,7 +118,8 @@ public class PersonElasticSearchService {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
 
           for (Object value : columnFilter.getValues()) {
-            if (appliedFilters.contains(columnFilter.getName()) // skip if we've already applied this type of filter via role based filters
+            // skip if we've already applied this type of filter via role based filters
+            if (appliedFilters.contains(columnFilter.getName())
                 || StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
               continue;
             }
