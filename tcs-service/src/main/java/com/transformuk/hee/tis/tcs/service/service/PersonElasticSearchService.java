@@ -118,8 +118,9 @@ public class PersonElasticSearchService {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
 
           for (Object value : columnFilter.getValues()) {
-            if (appliedFilters.contains(columnFilter
-                .getName())) { // skip if we've already applied this type of filter via role based filters
+            // skip if we've already applied this type of filter via role based filters
+            if (appliedFilters.contains(columnFilter.getName())
+                || StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
               continue;
             }
             if (StringUtils.equals(columnFilter.getName(), "programmeName")) {
@@ -133,13 +134,6 @@ public class PersonElasticSearchService {
                   ScoreMode.None);
               shouldBetweenSameColumnFilter.should(nested);
               shouldBetweenSameColumnFilter.minimumShouldMatch(1);
-              continue;
-            }
-            if (StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus")) {
-              shouldBetweenSameColumnFilter.should(new NestedQueryBuilder("programmeMemberships",
-                  new MatchQueryBuilder("programmeMemberships.programmeMembershipStatus",
-                      value.toString()),
-                  ScoreMode.None));
               continue;
             }
             //because the role column is a comma separated list of roles, we need to do a wildcard 'like' search
