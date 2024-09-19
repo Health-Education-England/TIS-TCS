@@ -71,6 +71,8 @@ public class PostFundingResourceIntTest {
   private static final String FUNDING_TYPE = "Trust Funded";
   private static final UUID FUNDING_SUBTYPE_ID = UUID.randomUUID();
   private static final UUID FUNDING_SUBTYPE_ID_1 = UUID.randomUUID();
+  private static final UUID FUNDING_REASON_ID_1 = UUID.randomUUID();
+  private static final UUID FUNDING_REASON_ID_2 = UUID.randomUUID();
   private static final LocalDate END_DATE = LocalDate.of(2033, 7, 6);
   @Autowired
   private PostFundingRepository postFundingRepository;
@@ -315,6 +317,7 @@ public class PostFundingResourceIntTest {
   public void updatePostFunding() throws Exception {
     // Initialize the database
     postFunding.setFundingSubTypeId(FUNDING_SUBTYPE_ID_1);
+    postFunding.setFundingReasonId(FUNDING_REASON_ID_1);
     postFunding = postFundingRepository.saveAndFlush(postFunding);
     int databaseSizeBeforeUpdate = postFundingRepository.findAll().size();
 
@@ -354,6 +357,7 @@ public class PostFundingResourceIntTest {
         .orElse(null);
     assertThat(postFundingAfterRequest).isNotNull();
     assertThat(postFundingAfterRequest.getFundingSubTypeId()).isEqualTo(FUNDING_SUBTYPE_ID);
+    assertThat(postFundingAfterRequest.getFundingReasonId()).isEqualTo(FUNDING_REASON_ID_1);
 
     verify(applicationEventPublisher).publishEvent(savedEventCaptor.capture());
     assertThat(savedEventCaptor.getValue().getPostFundingDto()).isEqualTo(
@@ -365,6 +369,7 @@ public class PostFundingResourceIntTest {
   public void shouldNotUpdatePostFundingWhenValidationFails() throws Exception {
     // Initialize the database
     postFunding.setFundingSubTypeId(FUNDING_SUBTYPE_ID_1);
+    postFunding.setFundingReasonId(FUNDING_REASON_ID_1);
     postFunding = postFundingRepository.saveAndFlush(postFunding);
     int databaseSizeBeforeUpdate = postFundingRepository.findAll().size();
 
@@ -375,6 +380,7 @@ public class PostFundingResourceIntTest {
         .postFundingToPostFundingDTO(updatedPostFunding);
     postFundingDto.setFundingType(FUNDING_TYPE);
     postFundingDto.setFundingSubTypeId(FUNDING_SUBTYPE_ID);
+    postFundingDto.setFundingReasonId(FUNDING_REASON_ID_2);
 
     FundingTypeDTO fundingTypeDto = new FundingTypeDTO();
     fundingTypeDto.setId(FUNDING_TYPE_ID);
@@ -400,6 +406,7 @@ public class PostFundingResourceIntTest {
         .orElse(null);
     assertThat(postFundingAfterRequest).isNotNull();
     assertThat(postFundingAfterRequest.getFundingSubTypeId()).isEqualTo(FUNDING_SUBTYPE_ID_1);
+    assertThat(postFundingAfterRequest.getFundingReasonId()).isEqualTo(FUNDING_REASON_ID_1);
 
     verify(applicationEventPublisher, never()).publishEvent(any(PostFundingCreatedEvent.class));
     verify(applicationEventPublisher, never()).publishEvent(any(PostFundingSavedEvent.class));
