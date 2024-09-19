@@ -5,10 +5,12 @@ import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
@@ -51,7 +53,14 @@ public class GmcDetailsValidator {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO,
           "GmcDetailsDTO");
       fieldErrors.forEach(bindingResult::addError);
-      throw new MethodArgumentNotValidException(null, bindingResult);
+
+      try {
+        Method method = this.getClass().getDeclaredMethod("validate", GmcDetailsDTO.class);
+        throw new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult);
+      } catch (NoSuchMethodException e) {
+        // This should only happen if the method name is changed without updating the code.
+        throw new RuntimeException(e);
+      }
     }
   }
 

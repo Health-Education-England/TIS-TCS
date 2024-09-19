@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -50,6 +51,26 @@ class GmcDetailsValidatorTest {
 
   @Mock
   private GmcDetails gmcDetailsMock1, gmcDetailsMock2;
+
+
+  @Test
+  void validateShouldIncludeParameterInThrownException() {
+    // Given.
+    when(gmcDetailsDtoMock_whitespace.getGmcNumber()).thenReturn(WHITESPACE_GMC_NUMBER);
+
+    // When.
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(gmcDetailsDtoMock_whitespace));
+
+    // Then.
+    MethodParameter parameter = thrown.getParameter();
+    String executableName = parameter.getExecutable().getName();
+
+    assertThat("Unexpected method name.", executableName, is("validate"));
+    assertThat("Unexpected parameter type.", parameter.getParameter().getType(),
+        is(GmcDetailsDTO.class));
+  }
 
   @Test
   void validateShouldThrowExceptionWhenGmcNumberContainsWhitespace() {
