@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO.ProgrammeMembershipSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -88,7 +89,7 @@ public class ProgrammeMembershipResource {
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
     return ResponseEntity.created(
-        new URI("/api/programme-memberships/" + result.getCurriculumMemberships().get(0).getId()))
+            new URI("/api/programme-memberships/" + result.getCurriculumMemberships().get(0).getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME,
             result.getCurriculumMemberships().get(0).getId().toString()))
         .body(result);
@@ -148,7 +149,6 @@ public class ProgrammeMembershipResource {
   @GetMapping("/programme-memberships/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable String id) {
-    log.debug("REST request to get ProgrammeMembership : {}", id);
     ProgrammeMembershipDTO programmeMembershipDto;
 
     try {
@@ -159,6 +159,52 @@ public class ProgrammeMembershipResource {
 
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
   }
+
+  /**
+   * GET /programme-memberships/{ids}/summary-list : get the list of programmeMembership summaries.
+   *
+   * @param ids a comma-separated list of programmeMembershipDTO ids to retrieve
+   * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO list,
+   *         or with status 404 (Not Found)
+   */
+  @GetMapping("/programme-memberships/{ids}/summary-list")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipSummaryDto>> getProgrammeMembershipSummaryList(
+      @PathVariable String ids) {
+
+    String[] idArray = ids.split(",");
+    List<ProgrammeMembershipSummaryDto> summaryList = new ArrayList<>();
+
+    for (String id : idArray) {
+      ProgrammeMembershipDTO programmeMembershipDto = null;
+
+      try {
+        programmeMembershipDto = programmeMembershipService.findOne(UUID.fromString(id));
+      } catch (IllegalArgumentException e) {
+        try {
+          programmeMembershipDto = programmeMembershipService.findOne(Long.parseLong(id));
+        } catch (NumberFormatException ex) {
+          continue;
+        }
+      }
+
+      if (programmeMembershipDto != null) {
+        ProgrammeMembershipSummaryDto summaryDto = new ProgrammeMembershipSummaryDto();
+        summaryDto.setProgrammeMembershipId(id);
+        summaryDto.setProgrammeMembershipName(programmeMembershipDto.getProgrammeName());
+        summaryDto.setProgrammeStartDate(programmeMembershipDto.getProgrammeStartDate());
+
+        summaryList.add(summaryDto);
+      }
+    }
+
+    if (!summaryList.isEmpty()) {
+      return ResponseEntity.ok(summaryList);
+    } else {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
 
   /**
    * POST /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
@@ -329,7 +375,6 @@ public class ProgrammeMembershipResource {
     if (StringUtils.isEmpty(ids)) {
       return new ResponseEntity<>(resp, HttpStatus.OK);
     }
-    log.debug("REST request to get ProgrammeMemberships with Curricula for ID: {}", ids);
 
     Set<Long> idSet = Arrays.stream(ids.split(",")).map(Long::valueOf)
         .collect(Collectors.toSet());
