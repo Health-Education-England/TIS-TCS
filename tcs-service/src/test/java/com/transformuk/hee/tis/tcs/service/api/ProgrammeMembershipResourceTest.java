@@ -1,11 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,10 +21,12 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +54,16 @@ public class ProgrammeMembershipResourceTest {
   private static final String REASON_2 = "reason 2";
   private static final long CURRICULUM_ID1 = 1L;
   private static final long CURRICULUM_ID2 = 2L;
-
+  private static final UUID PROGRAMME_UUID1 =
+      UUID.fromString("337cd2fa-4620-4fbe-a323-b1ce00fb2194");
+  private static final String PROGRAMME_NAME1 = "programme1";
+  private static final LocalDate PROGRAMME_START_DATE1 =
+      LocalDate.of(2020, 1, 1);
+  private static final UUID PROGRAMME_UUID2 =
+      UUID.fromString("8c64e5f0-b45e-4105-b473-2b9bfc58b9fd");
+  private static final String PROGRAMME_NAME2 = "programme2";
+  private static final LocalDate PROGRAMME_START_DATE2 =
+      LocalDate.of(2020, 1, 1);
   @MockBean
   private ProgrammeMembershipService programmeMembershipServiceMock;
   @MockBean
@@ -85,6 +99,74 @@ public class ProgrammeMembershipResourceTest {
         .andExpect(jsonPath("$.*.id").value(hasItem(PROGRAMME_MEMBERSHIP_ID.intValue())))
         .andExpect(status().isOk());
     verify(programmeMembershipServiceMock).findProgrammeMembershipsForTrainee(TRAINEE_ID_LONG);
+  }
+
+  @Test
+  public void shouldGetProgrammeMembershipSummaryList() throws Exception {
+    ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO =
+        new ProgrammeMembershipCurriculaDTO();
+    programmeMembershipCurriculaDTO.setProgrammeNumber(PROGRAMME_NUMBER);
+    programmeMembershipCurriculaDTO.setProgrammeName(PROGRAMME_NAME);
+    programmeMembershipCurriculaDTO.setProgrammeId(1L);
+    programmeMembershipCurriculaDTO.setId(PROGRAMME_MEMBERSHIP_ID);
+
+    ProgrammeMembershipDTO dto1 = new ProgrammeMembershipDTO();
+    dto1.setUuid(PROGRAMME_UUID1);
+    dto1.setProgrammeName(PROGRAMME_NAME1);
+    dto1.setProgrammeStartDate(PROGRAMME_START_DATE1);
+
+    ProgrammeMembershipDTO dto2 = new ProgrammeMembershipDTO();
+    dto2.setUuid(PROGRAMME_UUID2);
+    dto2.setProgrammeName(PROGRAMME_NAME2);
+    dto2.setProgrammeStartDate(PROGRAMME_START_DATE2);
+
+    List<ProgrammeMembershipDTO> programmeMembershipDtos = Arrays.asList(dto1, dto2);
+
+    List<UUID> uuidList = Arrays.asList(PROGRAMME_UUID1, PROGRAMME_UUID2);
+
+    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidList))
+        .thenReturn(programmeMembershipDtos);
+
+    mockMvc.perform(
+            get("/api/programme-memberships/summary-list")
+                .param("ids", uuidList.stream().map(UUID::toString)
+                    .collect(Collectors.joining(",")))
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].programmeMembershipId").value(containsInAnyOrder(
+            PROGRAMME_UUID1.toString(), PROGRAMME_UUID2.toString())))
+        .andExpect(jsonPath("$.[*].programmeMembershipName")
+            .value(containsInAnyOrder(PROGRAMME_NAME1, PROGRAMME_NAME2)))
+        .andExpect(jsonPath("$", hasSize(2)));
+  }
+
+  @Test
+  public void shouldReturnNotFoundWhenSummaryListIsEmpty() throws Exception {
+    List<UUID> uuidList = Arrays.asList(PROGRAMME_UUID1,PROGRAMME_UUID2);
+
+    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidList))
+        .thenReturn(Collections.emptyList());
+
+    mockMvc.perform(
+            get("/api/programme-memberships/summary-list")
+                .param("ids", uuidList.stream().map(UUID::toString)
+                    .collect(Collectors.joining(",")))
+        )
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void shouldReturnBadRequestWhenIdsIsEmpty() throws Exception {
+    mockMvc.perform(
+            get("/api/programme-memberships/summary-list")
+                .param("ids", "")
+        )
+
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
   }
 
   @Test
