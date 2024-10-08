@@ -210,6 +210,14 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     return programmeMembershipMapper.toDto(programmeMembership);
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public List<ProgrammeMembershipDTO> findProgrammeMembershipsByUuid(List<UUID> ids) {
+    return programmeMembershipMapper.allEntityToDto(
+        programmeMembershipRepository.findProgrammeMembershipsByUuidIn(ids)
+    );
+  }
+
   /**
    * Delete the curriculumMembership by id. NOTE: this is the curriculumMembership, not the
    * containing programmeMembership

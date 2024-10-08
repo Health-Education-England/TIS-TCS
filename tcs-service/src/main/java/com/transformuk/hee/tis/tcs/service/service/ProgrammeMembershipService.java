@@ -77,10 +77,18 @@ public interface ProgrammeMembershipService {
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId);
 
   /**
-   * Get a list of programme memberships with curricula
+   * Get a list of programmeMembershipsDto for a trainee
    *
-   * @param ids set of all the programme memberships
-   * @return a list of programme memberships with curricula for all the ids
+   * @param ids a list of ProgrammeMemberships for linked programmes for the trainee
+   * @return a list of programme memberships for linked programmes for the trainee
+   */
+  List<ProgrammeMembershipDTO> findProgrammeMembershipsByUuid(List<UUID> ids);
+
+  /**
+   * Get a list of programme memberships with curricula.
+   *
+   * @param ids set of all the programme memberships.
+   * @return a list of programme memberships with curricula for all the ids.
    */
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipDetailsByIds(
       Set<Long> ids);

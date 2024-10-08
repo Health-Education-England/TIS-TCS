@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -15,6 +16,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +25,9 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -41,6 +46,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -59,6 +65,21 @@ public class ProgrammeMembershipResource {
       ProgrammeMembershipValidator programmeMembershipValidator) {
     this.programmeMembershipService = programmeMembershipService;
     this.programmeMembershipValidator = programmeMembershipValidator;
+  }
+
+  /**
+   * This mapper is used to convert the detailed programme membership data into a summary form
+   * by extracting specific fields such as the programme name and start date.
+   */
+  @Mapper
+  public interface ProgrammeMembershipMapper {
+    ProgrammeMembershipMapper INSTANCE = Mappers.getMapper(ProgrammeMembershipMapper.class);
+
+    @Mapping(source = "id", target = "programmeMembershipId")
+    @Mapping(source = "programmeMembershipDto.programmeName", target = "programmeMembershipName")
+    @Mapping(source = "programmeMembershipDto.programmeStartDate", target = "programmeStartDate")
+    ProgrammeMembershipSummaryDTO toSummaryDTO(
+        String id, ProgrammeMembershipDTO programmeMembershipDto);
   }
 
   /**
@@ -88,7 +109,8 @@ public class ProgrammeMembershipResource {
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
     return ResponseEntity.created(
-        new URI("/api/programme-memberships/" + result.getCurriculumMemberships().get(0).getId()))
+            new URI("/api/programme-memberships/"
+                + result.getCurriculumMemberships().get(0).getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME,
             result.getCurriculumMemberships().get(0).getId().toString()))
         .body(result);
@@ -148,7 +170,6 @@ public class ProgrammeMembershipResource {
   @GetMapping("/programme-memberships/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<ProgrammeMembershipDTO> getProgrammeMembership(@PathVariable String id) {
-    log.debug("REST request to get ProgrammeMembership : {}", id);
     ProgrammeMembershipDTO programmeMembershipDto;
 
     try {
@@ -158,6 +179,38 @@ public class ProgrammeMembershipResource {
     }
 
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
+  }
+
+  /**
+   * GET /programme-memberships/summary-list : get the list of programmeMembership summaries.
+   *
+   * @param ids a comma-separated list of programmeMembershipDTO ids to retrieve
+   * @return the ResponseEntity with status 200 (OK) and the programmeMembershipDTO list,
+   *         or with status 400 (Bad Request) if the ids are invalid
+   *         or with status 404 (Not Found) if no programme memberships are found
+   */
+  @GetMapping("/programme-memberships/summary-list")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
+      @RequestParam List<String> ids) {
+
+    if (ids == null || ids.isEmpty()) {
+      return ResponseEntity.badRequest().body(Collections.emptyList());
+    }
+    List<UUID> uuidList = ids.stream()
+        .map(UUID::fromString)
+        .collect(Collectors.toList());
+    List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipService
+        .findProgrammeMembershipsByUuid(uuidList);
+
+    List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipDtos.stream()
+        .map(dto -> ProgrammeMembershipMapper.INSTANCE.toSummaryDTO(dto.getUuid().toString(), dto))
+        .collect(Collectors.toList());
+
+    if (summaryList.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+    }
+    return ResponseEntity.ok(summaryList);
   }
 
   /**
@@ -329,7 +382,6 @@ public class ProgrammeMembershipResource {
     if (StringUtils.isEmpty(ids)) {
       return new ResponseEntity<>(resp, HttpStatus.OK);
     }
-    log.debug("REST request to get ProgrammeMemberships with Curricula for ID: {}", ids);
 
     Set<Long> idSet = Arrays.stream(ids.split(",")).map(Long::valueOf)
         .collect(Collectors.toSet());

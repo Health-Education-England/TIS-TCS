@@ -215,6 +215,36 @@ public class ProgrammeMembershipServiceImplTest {
     }
   }
 
+  @Test
+  public void findProgrammeMembershipsByUuidShouldReturnPopulatedDTOList() {
+
+    List<UUID> ids = Collections.singletonList(PROGRAMME_MEMBERSHIP_ID_1);
+
+    programmeMembership1.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
+    programmeMembership1.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
+    programmeMembership1.setProgramme(programme);
+    programmeMembership1.setProgrammeStartDate(PROGRAMME_START_DATE);
+    programmeMembership1.setProgrammeEndDate(PROGRAMME_END_DATE);
+    programmeMembership1.setPerson(person);
+
+    curriculumMembership1.setId(CURRICULUM_MEMBERSHIP_ID_1);
+    curriculumMembership1.setCurriculumId(CURRICULUM_1_ID);
+    curriculumMembership1.setProgrammeMembership(programmeMembership1);
+
+    programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1));
+
+    ProgrammeMembershipDTO expectedDto = programmeMembershipMapper.toDto(programmeMembership1);
+
+    when(programmeMembershipRepositoryMock.findProgrammeMembershipsByUuidIn(ids))
+        .thenReturn(Collections.singletonList(programmeMembership1));
+
+    List<ProgrammeMembershipDTO> result = testObj.findProgrammeMembershipsByUuid(ids);
+
+    Assert.assertNotNull("The result should not be null", result);
+    Assert.assertEquals("The result size should be 1", 1, result.size());
+    Assert.assertEquals("The first element should match the expected DTO", expectedDto, result.get(0));
+  }
+
   @Test()
   public void findProgrammeMembershipsForTraineeAndProgrammeShouldReturnEmptyListWhenNoResultsFound() {
     List<CurriculumMembership> emptyCurriculumMembershipList = Lists.emptyList();
