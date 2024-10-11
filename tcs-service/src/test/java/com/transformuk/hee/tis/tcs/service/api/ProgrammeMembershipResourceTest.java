@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipSummaryDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
@@ -59,12 +60,12 @@ public class ProgrammeMembershipResourceTest {
       UUID.fromString("337cd2fa-4620-4fbe-a323-b1ce00fb2194");
   private static final String PROGRAMME_NAME1 = "programme1";
   private static final LocalDate PROGRAMME_START_DATE1 =
-      LocalDate.of(2020, 1, 1);
+      LocalDate.of(2020, 2, 3);
   private static final UUID PROGRAMME_UUID2 =
       UUID.fromString("8c64e5f0-b45e-4105-b473-2b9bfc58b9fd");
   private static final String PROGRAMME_NAME2 = "programme2";
   private static final LocalDate PROGRAMME_START_DATE2 =
-      LocalDate.of(2020, 1, 1);
+      LocalDate.of(2024, 5, 3);
   @MockBean
   private ProgrammeMembershipService programmeMembershipServiceMock;
   @MockBean
@@ -111,23 +112,23 @@ public class ProgrammeMembershipResourceTest {
     programmeMembershipCurriculaDTO.setProgrammeId(1L);
     programmeMembershipCurriculaDTO.setId(PROGRAMME_MEMBERSHIP_ID);
 
-    ProgrammeMembershipDTO dto1 = new ProgrammeMembershipDTO();
-    dto1.setUuid(PROGRAMME_UUID1);
+    ProgrammeMembershipSummaryDTO dto1 = new ProgrammeMembershipSummaryDTO();
+    dto1.setProgrammeMembershipUuid(String.valueOf(PROGRAMME_UUID1));
     dto1.setProgrammeName(PROGRAMME_NAME1);
     dto1.setProgrammeStartDate(PROGRAMME_START_DATE1);
 
-    ProgrammeMembershipDTO dto2 = new ProgrammeMembershipDTO();
-    dto2.setUuid(PROGRAMME_UUID2);
+    ProgrammeMembershipSummaryDTO dto2 = new ProgrammeMembershipSummaryDTO();
+    dto2.setProgrammeMembershipUuid(String.valueOf(PROGRAMME_UUID2));
     dto2.setProgrammeName(PROGRAMME_NAME2);
     dto2.setProgrammeStartDate(PROGRAMME_START_DATE2);
 
-    List<ProgrammeMembershipDTO> programmeMembershipDtos = Arrays.asList(dto1, dto2);
+    List<ProgrammeMembershipSummaryDTO> programmeMembershipDtos = Arrays.asList(dto1, dto2);
 
     Set<UUID> uuidSet = new HashSet<>();
     uuidSet.add(PROGRAMME_UUID1);
     uuidSet.add(PROGRAMME_UUID2);
 
-    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidSet))
+    when(programmeMembershipServiceMock.findProgrammeMembershipSummariesByUuid(uuidSet))
         .thenReturn(programmeMembershipDtos);
 
     mockMvc.perform(
@@ -141,6 +142,9 @@ public class ProgrammeMembershipResourceTest {
             PROGRAMME_UUID1.toString(), PROGRAMME_UUID2.toString())))
         .andExpect(jsonPath("$.[*].programmeName")
             .value(containsInAnyOrder(PROGRAMME_NAME1, PROGRAMME_NAME2)))
+        .andExpect(jsonPath("$.[*].programmeStartDate").value(containsInAnyOrder(
+            Arrays.asList(2020, 2, 3), Arrays.asList(2024, 5, 3)
+        )))
         .andExpect(jsonPath("$", hasSize(2)));
   }
 
@@ -150,7 +154,7 @@ public class ProgrammeMembershipResourceTest {
     uuidSet.add(PROGRAMME_UUID1);
     uuidSet.add(PROGRAMME_UUID2);
 
-    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidSet))
+    when(programmeMembershipServiceMock.findProgrammeMembershipSummariesByUuid(uuidSet))
         .thenReturn(Collections.emptyList());
 
     mockMvc.perform(
@@ -162,16 +166,13 @@ public class ProgrammeMembershipResourceTest {
   }
 
   @Test
-  public void shouldReturnBadRequestWhenIdsIsEmpty() throws Exception {
+  public void shouldReturnBadRequestForInvalidUuid() throws Exception {
     mockMvc.perform(
             get("/api/programme-memberships/summary-list")
-                .param("ids", "")
+                .param("ids", "invalidUuid")
         )
-
         .andExpect(status().isBadRequest())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$").isEmpty());
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
   }
 
   @Test

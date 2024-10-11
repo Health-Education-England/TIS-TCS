@@ -10,7 +10,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
-import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipSummaryDtoMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -177,19 +176,22 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
       @RequestParam List<String> ids) {
-    Set<UUID> uuids = ids.stream()
-        .map(UUID::fromString)
-        .collect(Collectors.toSet());
-    List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipService
-        .findProgrammeMembershipsByUuid(uuids);
-    List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipDtos.stream()
-        .map(dto -> ProgrammeMembershipSummaryDtoMapper.INSTANCE.toSummaryDTO(dto.getUuid().toString(), dto))
-        .collect(Collectors.toList());
 
-    if (summaryList.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+    try {
+      Set<UUID> uuids = ids.stream()
+          .map(UUID::fromString)
+          .collect(Collectors.toSet());
+
+      List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipService
+          .findProgrammeMembershipSummariesByUuid(uuids);
+
+      if (summaryList.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+      }
+      return ResponseEntity.ok(summaryList);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
     }
-    return ResponseEntity.ok(summaryList);
   }
 
   /**
