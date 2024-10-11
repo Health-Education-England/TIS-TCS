@@ -183,7 +183,8 @@ public class ProgrammeMembershipResource {
     List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipService
         .findProgrammeMembershipsByUuid(uuids);
     List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipDtos.stream()
-        .map(dto -> ProgrammeMembershipSummaryDtoMapper.INSTANCE.toSummaryDTO(dto.getUuid().toString(), dto))
+        .map(dto -> ProgrammeMembershipSummaryDtoMapper
+            .INSTANCE.toSummaryDTO(dto.getUuid().toString(), dto))
         .collect(Collectors.toList());
 
     if (summaryList.isEmpty()) {
