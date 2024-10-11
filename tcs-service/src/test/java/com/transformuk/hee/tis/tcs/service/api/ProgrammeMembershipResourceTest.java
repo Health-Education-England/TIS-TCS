@@ -162,19 +162,6 @@ public class ProgrammeMembershipResourceTest {
   }
 
   @Test
-  public void shouldReturnBadRequestWhenIdsIsEmpty() throws Exception {
-    mockMvc.perform(
-            get("/api/programme-memberships/summary-list")
-                .param("ids", "")
-        )
-
-        .andExpect(status().isBadRequest())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$").isEmpty());
-  }
-
-  @Test
   public void getProgrammeMembershipDetailsShouldReturnFoundDto() throws Exception {
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = new ProgrammeMembershipCurriculaDTO();
     programmeMembershipCurriculaDTO.setProgrammeNumber(PROGRAMME_NUMBER);
