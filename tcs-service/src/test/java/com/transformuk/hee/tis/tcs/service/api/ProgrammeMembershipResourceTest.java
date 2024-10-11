@@ -134,9 +134,9 @@ public class ProgrammeMembershipResourceTest {
         )
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(jsonPath("$.[*].programmeMembershipId").value(containsInAnyOrder(
+        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(containsInAnyOrder(
             PROGRAMME_UUID1.toString(), PROGRAMME_UUID2.toString())))
-        .andExpect(jsonPath("$.[*].programmeMembershipName")
+        .andExpect(jsonPath("$.[*].programmeName")
             .value(containsInAnyOrder(PROGRAMME_NAME1, PROGRAMME_NAME2)))
         .andExpect(jsonPath("$", hasSize(2)));
   }
