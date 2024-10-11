@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 public class ProgrammeMembershipSummaryDTO implements Serializable {
-  private String programmeMembershipId;
-  private String programmeMembershipName;
+  private String programmeMembershipUuid;
+  private String programmeName;
   private LocalDate programmeStartDate;
 }
