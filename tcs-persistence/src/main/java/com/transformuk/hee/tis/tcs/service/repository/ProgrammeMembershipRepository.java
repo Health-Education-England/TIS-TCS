@@ -43,15 +43,6 @@ public interface ProgrammeMembershipRepository extends JpaRepository<ProgrammeMe
       + "WHERE pm.programme.id = :programmeId")
   List<ProgrammeMembership> findByProgrammeId(@Param("programmeId") Long programmeId);
 
-  /**
-   * Get a list of programme memberships.
-   *
-   * @param uuids List of all the programme memberships.
-   * @return a list of programme memberships for all the uuid.
-   */
-  List<ProgrammeMembership> findProgrammeMembershipsByUuidIn(
-      List<UUID> uuids);
-
   List<ProgrammeMembership> findByUuidIn(Set<UUID> ids);
 
   Optional<ProgrammeMembership> findByUuid(UUID id);

@@ -23,6 +23,7 @@ import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -122,14 +123,16 @@ public class ProgrammeMembershipResourceTest {
 
     List<ProgrammeMembershipDTO> programmeMembershipDtos = Arrays.asList(dto1, dto2);
 
-    List<UUID> uuidList = Arrays.asList(PROGRAMME_UUID1, PROGRAMME_UUID2);
+    Set<UUID> uuidSet = new HashSet<>();
+    uuidSet.add(PROGRAMME_UUID1);
+    uuidSet.add(PROGRAMME_UUID2);
 
-    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidList))
+    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidSet))
         .thenReturn(programmeMembershipDtos);
 
     mockMvc.perform(
             get("/api/programme-memberships/summary-list")
-                .param("ids", uuidList.stream().map(UUID::toString)
+                .param("ids", uuidSet.stream().map(UUID::toString)
                     .collect(Collectors.joining(",")))
         )
         .andExpect(status().isOk())
@@ -143,14 +146,16 @@ public class ProgrammeMembershipResourceTest {
 
   @Test
   public void shouldReturnNotFoundWhenSummaryListIsEmpty() throws Exception {
-    List<UUID> uuidList = Arrays.asList(PROGRAMME_UUID1,PROGRAMME_UUID2);
+    Set<UUID> uuidSet = new HashSet<>();
+    uuidSet.add(PROGRAMME_UUID1);
+    uuidSet.add(PROGRAMME_UUID2);
 
-    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidList))
+    when(programmeMembershipServiceMock.findProgrammeMembershipsByUuid(uuidSet))
         .thenReturn(Collections.emptyList());
 
     mockMvc.perform(
             get("/api/programme-memberships/summary-list")
-                .param("ids", uuidList.stream().map(UUID::toString)
+                .param("ids", uuidSet.stream().map(UUID::toString)
                     .collect(Collectors.joining(",")))
         )
         .andExpect(status().isNotFound());

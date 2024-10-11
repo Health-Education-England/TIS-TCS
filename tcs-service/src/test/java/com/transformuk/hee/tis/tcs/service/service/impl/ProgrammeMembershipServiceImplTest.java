@@ -218,7 +218,8 @@ public class ProgrammeMembershipServiceImplTest {
   @Test
   public void findProgrammeMembershipsByUuidShouldReturnPopulatedDTOList() {
 
-    List<UUID> ids = Collections.singletonList(PROGRAMME_MEMBERSHIP_ID_1);
+    Set<UUID> uuidSet = new HashSet<>();
+    uuidSet.add(PROGRAMME_MEMBERSHIP_ID_1);
 
     programmeMembership1.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
     programmeMembership1.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
@@ -235,10 +236,10 @@ public class ProgrammeMembershipServiceImplTest {
 
     ProgrammeMembershipDTO expectedDto = programmeMembershipMapper.toDto(programmeMembership1);
 
-    when(programmeMembershipRepositoryMock.findProgrammeMembershipsByUuidIn(ids))
+    when(programmeMembershipRepositoryMock.findByUuidIn(uuidSet))
         .thenReturn(Collections.singletonList(programmeMembership1));
 
-    List<ProgrammeMembershipDTO> result = testObj.findProgrammeMembershipsByUuid(ids);
+    List<ProgrammeMembershipDTO> result = testObj.findProgrammeMembershipsByUuid(uuidSet);
 
     Assert.assertNotNull("The result should not be null", result);
     Assert.assertEquals("The result size should be 1", 1, result.size());

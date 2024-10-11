@@ -211,16 +211,16 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
-   * Get multiple programmeMemberships by uuid.
+   * Get programmeMemberships for a set of UUIDs.
    *
-   * @param ids the list of uuids for the entity
-   * @return the entity
+   * @param uuids the list of uuids for the programme memberships.
+   * @return the list of programme membership DTOs
    */
   @Transactional(readOnly = true)
   @Override
-  public List<ProgrammeMembershipDTO> findProgrammeMembershipsByUuid(List<UUID> ids) {
+  public List<ProgrammeMembershipDTO> findProgrammeMembershipsByUuid(Set<UUID> uuids) {
     return programmeMembershipMapper.allEntityToDto(
-        programmeMembershipRepository.findProgrammeMembershipsByUuidIn(ids)
+        programmeMembershipRepository.findByUuidIn(uuids)
     );
   }
 

@@ -177,11 +177,11 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
       @RequestParam List<String> ids) {
-    List<UUID> uuidList = ids.stream()
+    Set<UUID> uuids = ids.stream()
         .map(UUID::fromString)
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
     List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipService
-        .findProgrammeMembershipsByUuid(uuidList);
+        .findProgrammeMembershipsByUuid(uuids);
     List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipDtos.stream()
         .map(dto -> ProgrammeMembershipSummaryDtoMapper.INSTANCE.toSummaryDTO(dto.getUuid().toString(), dto))
         .collect(Collectors.toList());
