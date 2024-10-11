@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipSummaryDTO;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -77,12 +78,12 @@ public interface ProgrammeMembershipService {
   List<ProgrammeMembershipCurriculaDTO> findProgrammeMembershipsForTrainee(Long traineeId);
 
   /**
-   * Get a list of programmeMembershipsDto for a set of UUIDs.
+   * Get a list of ProgrammeMembershipSummaryDTO for a set of UUIDs.
    *
    * @param uuids a list of programme membership UUIDs.
-   * @return a list of programme memberships.
+   * @return a list of programme memberships Summary's.
    */
-  List<ProgrammeMembershipDTO> findProgrammeMembershipsByUuid(Set<UUID> uuids);
+  List<ProgrammeMembershipSummaryDTO> findProgrammeMembershipSummariesByUuid(Set<UUID> uuids);
 
   /**
    * Get a list of programme memberships with curricula.

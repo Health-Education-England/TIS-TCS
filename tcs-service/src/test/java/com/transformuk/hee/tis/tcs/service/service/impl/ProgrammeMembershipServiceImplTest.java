@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -16,6 +17,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainingNumberDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -87,6 +89,8 @@ public class ProgrammeMembershipServiceImplTest {
   private final CurriculumMembership curriculumMembership1 = new CurriculumMembership();
   private final CurriculumMembership curriculumMembership2 = new CurriculumMembership();
   private final ProgrammeMembership programmeMembership1 = new ProgrammeMembership();
+  private final ProgrammeMembershipSummaryDTO programmeMembershipSummary = new ProgrammeMembershipSummaryDTO();
+
   private final Curriculum curriculum1 = new Curriculum();
   private final Curriculum curriculum2 = new Curriculum();
   private final CurriculumDTO curriculumDto1 = new CurriculumDTO();
@@ -232,18 +236,28 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumMembership1.setCurriculumId(CURRICULUM_1_ID);
     curriculumMembership1.setProgrammeMembership(programmeMembership1);
 
-    programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1));
+    programmeMembershipSummary.setProgrammeMembershipUuid(String.valueOf(PROGRAMME_MEMBERSHIP_ID_1));
+    programmeMembershipSummary.setProgrammeStartDate(PROGRAMME_START_DATE);
+    programmeMembershipSummary.setProgrammeName(PROGRAMME_NAME);
 
-    ProgrammeMembershipDTO expectedDto = programmeMembershipMapper.toDto(programmeMembership1);
+    programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1));
 
     when(programmeMembershipRepositoryMock.findByUuidIn(uuidSet))
         .thenReturn(Collections.singletonList(programmeMembership1));
 
-    List<ProgrammeMembershipDTO> result = testObj.findProgrammeMembershipsByUuid(uuidSet);
+    List<ProgrammeMembershipSummaryDTO> result = testObj.findProgrammeMembershipSummariesByUuid(uuidSet);
 
     Assert.assertNotNull("The result should not be null", result);
     Assert.assertEquals("The result size should be 1", 1, result.size());
-    Assert.assertEquals("The first element should match the expected DTO", expectedDto, result.get(0));
+
+    ProgrammeMembershipSummaryDTO returnedSummary = result.get(0);
+
+    assertEquals(programmeMembershipSummary.getProgrammeMembershipUuid(),
+        returnedSummary.getProgrammeMembershipUuid(), "Programme membership UUID should match");
+    assertEquals(programmeMembershipSummary.getProgrammeStartDate(),
+        returnedSummary.getProgrammeStartDate(), "Programme start date should match");
+    assertEquals(programmeMembershipSummary.getProgrammeName(),
+        returnedSummary.getProgrammeName(), "Programme name should match");
   }
 
   @Test()

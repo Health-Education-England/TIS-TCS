@@ -104,7 +104,7 @@ class ProgrammeMembershipResourceIntTest {
   private static final LocalDate DEFAULT_CURRICULUM_COMPLETION_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_CURRICULUM_COMPLETION_DATE = LocalDate
       .now(ZoneId.systemDefault());
-
+  private static final String DEFAULT_PROGRAMME_NAME = "DEFAULT PROGRAMME NAME";
   private static final LocalDate DEFAULT_PROGRAMME_END_DATE = LocalDate.ofEpochDay(0L);
   private static final LocalDate UPDATED_PROGRAMME_END_DATE = LocalDate.now(ZoneId.systemDefault());
 
@@ -289,6 +289,47 @@ class ProgrammeMembershipResourceIntTest {
           .andExpect(jsonPath("$.[*].curriculumMemberships[*].amendedDate").isNotEmpty())
           .andExpect(jsonPath("$.[*].curriculumMemberships", hasSize(1)));
     }
+  }
+
+  @Test
+  @Transactional
+  void shouldGetProgrammeMembershipSummaryListByUuid2() throws Exception {
+
+    programmeMembershipRepository.deleteAll();
+    Person personSaved = personRepository.saveAndFlush(person);
+
+    programmeMembership.setPerson(personSaved);
+    LocalDate today = LocalDate.now();
+    programmeMembership.setProgrammeStartDate(DEFAULT_PROGRAMME_START_DATE);
+    programmeMembership.setProgrammeEndDate(DEFAULT_PROGRAMME_END_DATE);
+
+    programme.setProgrammeName(DEFAULT_PROGRAMME_NAME);
+    programmeRepository.saveAndFlush(programme);
+    programmeMembership.setProgramme(programme);
+
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumStartDate(today.minusDays(1));
+    curriculumMembership.setCurriculumEndDate(today.plusDays(1));
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    UUID savedProgrammeMembershipUuid = programmeMembership.getUuid();
+
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
+            .param("ids", savedProgrammeMembershipUuid.toString()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(hasItem(savedProgrammeMembershipUuid.toString())))
+        .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
+        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)));
+
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
+            .param("ids", UUID.randomUUID().toString()))
+        .andExpect(status().isNotFound());
+
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
+            .param("ids", "invalid-uuid"))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
