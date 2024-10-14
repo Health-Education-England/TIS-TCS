@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
@@ -25,6 +26,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMembershipSummaryDtoMapper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -214,14 +216,18 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
    * Get programmeMemberships for a set of UUIDs.
    *
    * @param uuids the list of uuids for the programme memberships.
-   * @return the list of programme membership DTOs
+   * @return the list of programme membership summary DTOs
    */
   @Transactional(readOnly = true)
   @Override
-  public List<ProgrammeMembershipDTO> findProgrammeMembershipsByUuid(Set<UUID> uuids) {
-    return programmeMembershipMapper.allEntityToDto(
-        programmeMembershipRepository.findByUuidIn(uuids)
-    );
+  public List<ProgrammeMembershipSummaryDTO> findProgrammeMembershipSummariesByUuid(Set<UUID> uuids) {
+    List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper.allEntityToDto(
+        programmeMembershipRepository.findByUuidIn(uuids));
+
+    return programmeMembershipDtos.stream()
+        .map(dto -> ProgrammeMembershipSummaryDtoMapper.INSTANCE
+            .toSummaryDTO(dto.getUuid().toString(), dto))
+        .collect(Collectors.toList());
   }
 
   /**
