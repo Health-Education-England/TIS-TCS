@@ -220,7 +220,8 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
    */
   @Transactional(readOnly = true)
   @Override
-  public List<ProgrammeMembershipSummaryDTO> findProgrammeMembershipSummariesByUuid(Set<UUID> uuids) {
+  public List<ProgrammeMembershipSummaryDTO> findProgrammeMembershipSummariesByUuid(
+      Set<UUID> uuids) {
     List<ProgrammeMembershipDTO> programmeMembershipDtos = programmeMembershipMapper.allEntityToDto(
         programmeMembershipRepository.findByUuidIn(uuids));
 

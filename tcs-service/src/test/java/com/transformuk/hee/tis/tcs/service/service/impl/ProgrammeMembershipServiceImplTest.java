@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -241,8 +242,6 @@ public class ProgrammeMembershipServiceImplTest {
 
     programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1));
 
-    ProgrammeMembershipDTO expectedDto = programmeMembershipMapper.toDto(programmeMembership1);
-
     when(programmeMembershipRepositoryMock.findByUuidIn(uuidSet))
         .thenReturn(Collections.singletonList(programmeMembership1));
 
@@ -253,12 +252,12 @@ public class ProgrammeMembershipServiceImplTest {
 
     ProgrammeMembershipSummaryDTO returnedSummary = result.get(0);
 
-    Assert.assertEquals("Programme membership UUID should match",
-        programmeMembershipSummary.getProgrammeMembershipUuid(), returnedSummary.getProgrammeMembershipUuid());
-    Assert.assertEquals("Programme start date should match",
-        programmeMembershipSummary.getProgrammeStartDate(), returnedSummary.getProgrammeStartDate());
-    Assert.assertEquals("Programme name should match",
-        programmeMembershipSummary.getProgrammeName(), returnedSummary.getProgrammeName());
+    assertEquals(programmeMembershipSummary.getProgrammeMembershipUuid(),
+        returnedSummary.getProgrammeMembershipUuid(), "Programme membership UUID should match");
+    assertEquals(programmeMembershipSummary.getProgrammeStartDate(),
+        returnedSummary.getProgrammeStartDate(), "Programme start date should match");
+    assertEquals(programmeMembershipSummary.getProgrammeName(),
+        returnedSummary.getProgrammeName(), "Programme name should match");
   }
 
   @Test()
