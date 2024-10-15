@@ -237,7 +237,7 @@ public class ProgrammeMembershipServiceImplTest {
     curriculumMembership1.setProgrammeMembership(programmeMembership1);
 
     programmeMembershipSummary.setProgrammeMembershipUuid(String.valueOf(PROGRAMME_MEMBERSHIP_ID_1));
-    programmeMembershipSummary.setProgrammeStartDate(PROGRAMME_START_DATE);
+    programmeMembershipSummary.setProgrammeStartDate(PROGRAMME_START_DATE.toString());
     programmeMembershipSummary.setProgrammeName(PROGRAMME_NAME);
 
     programmeMembership1.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership1));

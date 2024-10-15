@@ -11,5 +11,5 @@ import lombok.Data;
 public class ProgrammeMembershipSummaryDTO implements Serializable {
   private String programmeMembershipUuid;
   private String programmeName;
-  private LocalDate programmeStartDate;
+  private String programmeStartDate;
 }

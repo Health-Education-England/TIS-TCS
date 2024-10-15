@@ -65,7 +65,7 @@ public class ProgrammeMembershipResourceTest {
       UUID.fromString("8c64e5f0-b45e-4105-b473-2b9bfc58b9fd");
   private static final String PROGRAMME_NAME2 = "programme2";
   private static final LocalDate PROGRAMME_START_DATE2 =
-      LocalDate.of(2020, 1, 1);
+      LocalDate.of(2022, 2, 2);
   @MockBean
   private ProgrammeMembershipService programmeMembershipServiceMock;
   @MockBean
@@ -115,12 +115,12 @@ public class ProgrammeMembershipResourceTest {
     ProgrammeMembershipSummaryDTO dto1 = new ProgrammeMembershipSummaryDTO();
     dto1.setProgrammeMembershipUuid(String.valueOf(PROGRAMME_UUID1));
     dto1.setProgrammeName(PROGRAMME_NAME1);
-    dto1.setProgrammeStartDate(PROGRAMME_START_DATE1);
+    dto1.setProgrammeStartDate(PROGRAMME_START_DATE1.toString());
 
     ProgrammeMembershipSummaryDTO dto2 = new ProgrammeMembershipSummaryDTO();
     dto2.setProgrammeMembershipUuid(String.valueOf(PROGRAMME_UUID2));
     dto2.setProgrammeName(PROGRAMME_NAME2);
-    dto2.setProgrammeStartDate(PROGRAMME_START_DATE2);
+    dto2.setProgrammeStartDate(PROGRAMME_START_DATE2.toString());
 
     List<ProgrammeMembershipSummaryDTO> programmeMembershipDtos = Arrays.asList(dto1, dto2);
 
@@ -142,6 +142,9 @@ public class ProgrammeMembershipResourceTest {
             PROGRAMME_UUID1.toString(), PROGRAMME_UUID2.toString())))
         .andExpect(jsonPath("$.[*].programmeName")
             .value(containsInAnyOrder(PROGRAMME_NAME1, PROGRAMME_NAME2)))
+        .andExpect(jsonPath("$.[*].programmeStartDate")
+            .value(containsInAnyOrder(
+                PROGRAMME_START_DATE1.toString(), PROGRAMME_START_DATE2.toString())))
         .andExpect(jsonPath("$", hasSize(2)));
   }
 
