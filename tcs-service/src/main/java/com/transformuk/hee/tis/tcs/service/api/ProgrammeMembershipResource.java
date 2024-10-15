@@ -176,17 +176,22 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
       @RequestParam List<String> ids) {
-    Set<UUID> uuids = ids.stream()
-        .map(UUID::fromString)
-        .collect(Collectors.toSet());
 
-    List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipService
+    try {
+      Set<UUID> uuids = ids.stream()
+          .map(UUID::fromString)
+          .collect(Collectors.toSet());
+
+      List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipService
           .findProgrammeMembershipSummariesByUuid(uuids);
 
-    if (summaryList.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
-    }
-    return ResponseEntity.ok(summaryList);
+      if (summaryList.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+      }
+      return ResponseEntity.ok(summaryList);
+    } catch (IllegalArgumentException e){
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
+      }
   }
 
   /**

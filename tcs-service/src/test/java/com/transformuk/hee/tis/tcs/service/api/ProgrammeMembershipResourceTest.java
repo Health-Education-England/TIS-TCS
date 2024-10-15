@@ -163,6 +163,19 @@ public class ProgrammeMembershipResourceTest {
   }
 
   @Test
+  public void shouldReturnBadRequestForInvalidUuid() throws Exception {
+    // Use an invalid UUID string
+    String invalidUuid = "invalid-uuid";
+
+    mockMvc.perform(
+            get("/api/programme-memberships/summary-list")
+                .param("ids", "invalidUuid")
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
+  }
+
+  @Test
   public void getProgrammeMembershipDetailsShouldReturnFoundDto() throws Exception {
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = new ProgrammeMembershipCurriculaDTO();
     programmeMembershipCurriculaDTO.setProgrammeNumber(PROGRAMME_NUMBER);
