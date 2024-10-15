@@ -189,9 +189,9 @@ public class ProgrammeMembershipResource {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
       }
       return ResponseEntity.ok(summaryList);
-    } catch (IllegalArgumentException e){
+    } catch (IllegalArgumentException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
-      }
+    }
   }
 
   /**

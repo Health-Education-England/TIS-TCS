@@ -164,9 +164,6 @@ public class ProgrammeMembershipResourceTest {
 
   @Test
   public void shouldReturnBadRequestForInvalidUuid() throws Exception {
-    // Use an invalid UUID string
-    String invalidUuid = "invalid-uuid";
-
     mockMvc.perform(
             get("/api/programme-memberships/summary-list")
                 .param("ids", "invalidUuid")
