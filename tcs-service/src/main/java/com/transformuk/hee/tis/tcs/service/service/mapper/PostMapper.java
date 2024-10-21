@@ -171,6 +171,7 @@ public class PostMapper {
       result.setIntrepidId(postFunding.getIntrepidId());
       result.setFundingBodyId(postFunding.getFundingBodyId());
       result.setFundingSubTypeId(postFunding.getFundingSubTypeId());
+      result.setFundingReasonId(postFunding.getFundingReasonId());
     }
     return result;
   }
@@ -332,6 +333,7 @@ public class PostMapper {
       result.setIntrepidId(postFundingDTO.getIntrepidId());
       result.setFundingBodyId(postFundingDTO.getFundingBodyId());
       result.setFundingSubTypeId(postFundingDTO.getFundingSubTypeId());
+      result.setFundingReasonId(postFundingDTO.getFundingReasonId());
     }
     return result;
   }
