@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
@@ -15,6 +16,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,6 +43,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -88,7 +91,8 @@ public class ProgrammeMembershipResource {
     }
     ProgrammeMembershipDTO result = programmeMembershipService.save(programmeMembershipDTO);
     return ResponseEntity.created(
-        new URI("/api/programme-memberships/" + result.getCurriculumMemberships().get(0).getId()))
+            new URI("/api/programme-memberships/"
+                + result.getCurriculumMemberships().get(0).getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME,
             result.getCurriculumMemberships().get(0).getId().toString()))
         .body(result);
@@ -158,6 +162,36 @@ public class ProgrammeMembershipResource {
     }
 
     return ResponseUtil.wrapOrNotFound(Optional.ofNullable(programmeMembershipDto));
+  }
+
+  /**
+   * GET /programme-memberships/summary-list : get the list of programmeMembership summaries.
+   *
+   * @param ids a comma-separated list of programmeMembershipDTO ids to retrieve
+   * @return the ResponseEntity with status 200 (OK) and the programmeMembershipDTO list,
+   *         or with status 400 (Bad Request) if the ids are invalid
+   *         or with status 404 (Not Found) if no programme memberships are found
+   */
+  @GetMapping("/programme-memberships/summary-list")
+  @PreAuthorize("hasPermission('tis:people::person:', 'View')")
+  public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
+      @RequestParam List<String> ids) {
+
+    try {
+      Set<UUID> uuids = ids.stream()
+          .map(UUID::fromString)
+          .collect(Collectors.toSet());
+
+      List<ProgrammeMembershipSummaryDTO> summaryList = programmeMembershipService
+          .findProgrammeMembershipSummariesByUuid(uuids);
+
+      if (summaryList.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+      }
+      return ResponseEntity.ok(summaryList);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
+    }
   }
 
   /**
@@ -329,7 +363,6 @@ public class ProgrammeMembershipResource {
     if (StringUtils.isEmpty(ids)) {
       return new ResponseEntity<>(resp, HttpStatus.OK);
     }
-    log.debug("REST request to get ProgrammeMemberships with Curricula for ID: {}", ids);
 
     Set<Long> idSet = Arrays.stream(ids.split(",")).map(Long::valueOf)
         .collect(Collectors.toSet());
