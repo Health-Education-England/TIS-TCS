@@ -176,7 +176,7 @@ public class ProgrammeMembershipResource {
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
   public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
       @RequestParam List<String> ids) {
-    List<ProgrammeMembershipSummaryDTO> summaryList = Collections.emptyList();;
+    List<ProgrammeMembershipSummaryDTO> summaryList = Collections.emptyList();
     if (!ids.isEmpty()) {
       try {
         Set<UUID> uuids = ids.stream()
