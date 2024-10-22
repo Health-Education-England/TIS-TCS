@@ -330,6 +330,13 @@ class ProgrammeMembershipResourceIntTest {
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
             .param("ids", "invalid-uuid"))
         .andExpect(status().isBadRequest());
+
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
+            .param("ids", ""))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
   }
 
   @Test
