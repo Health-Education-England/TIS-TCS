@@ -177,7 +177,7 @@ public class ProgrammeMembershipResource {
   public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
       @RequestParam List<String> ids) {
     List<ProgrammeMembershipSummaryDTO> summaryList = Collections.emptyList();;
-    if(!ids.isEmpty()) {
+    if (!ids.isEmpty()) {
       try {
         Set<UUID> uuids = ids.stream()
             .map(UUID::fromString)
