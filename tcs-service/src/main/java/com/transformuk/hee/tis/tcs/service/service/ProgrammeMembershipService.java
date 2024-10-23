@@ -23,6 +23,14 @@ public interface ProgrammeMembershipService {
   ProgrammeMembershipDTO save(ProgrammeMembershipDTO programmeMembershipDTO);
 
   /**
+   * check if a uuid string is valid
+   *
+   * @param uuid to be verified
+   * @return the true if uuid is valid
+   */
+  boolean isValidUUID(String uuid);
+
+  /**
    * Save a list of programmeMembership.
    *
    * @param programmeMembershipDTO the list of entities to save

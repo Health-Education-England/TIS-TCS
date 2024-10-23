@@ -180,6 +180,7 @@ public class ProgrammeMembershipResource {
     if (!ids.isEmpty()) {
       try {
         Set<UUID> uuids = ids.stream()
+            .filter(id -> programmeMembershipService.isValidUUID(id))
             .map(UUID::fromString)
             .collect(Collectors.toSet());
         summaryList = programmeMembershipService

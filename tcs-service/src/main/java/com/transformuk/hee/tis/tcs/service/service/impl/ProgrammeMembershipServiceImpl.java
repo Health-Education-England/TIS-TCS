@@ -133,6 +133,21 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
   }
 
   /**
+   * check if a uuid string is valid
+   *
+   * @param uuid to be verified
+   * @return the true if uuid is valid
+   */
+  public boolean isValidUUID(String uuid) {
+    try {
+      UUID.fromString(uuid);
+      return true;
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  /**
    * Save a list of programmeMembership.
    *
    * @param programmeMembershipDto the list of entities to save
