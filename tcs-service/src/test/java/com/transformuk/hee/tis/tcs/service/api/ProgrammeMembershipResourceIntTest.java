@@ -314,15 +314,15 @@ class ProgrammeMembershipResourceIntTest {
     curriculumMembership.setCurriculumEndDate(today.plusDays(1));
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
-    String ProgrammeMembershipUuid = String.valueOf(programmeMembership.getUuid()) + ",77777";
-    String FilterdUuidList = String.valueOf(programmeMembership.getUuid());
+    String programmeMembershipUuid = programmeMembership.getUuid().toString() + ",77777";
+    String filterdUuidList = String.valueOf(programmeMembership.getUuid());
 
 
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
-            .param("ids", ProgrammeMembershipUuid.toString()))
+            .param("ids", programmeMembershipUuid.toString()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(hasItem(FilterdUuidList.toString())))
+        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(hasItem(filterdUuidList.toString())))
         .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
         .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(not(hasItem("77777"))));
