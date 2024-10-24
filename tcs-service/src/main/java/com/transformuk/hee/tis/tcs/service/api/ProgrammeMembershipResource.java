@@ -177,17 +177,21 @@ public class ProgrammeMembershipResource {
   public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
       @RequestParam List<String> ids) {
     List<ProgrammeMembershipSummaryDTO> summaryList = Collections.emptyList();
-    if (!ids.isEmpty()) {
+
+    Set<String> filteredUuids = ids.stream()
+        .filter(id -> {
+          try {
+            UUID.fromString(id);
+            return true;
+          } catch (IllegalArgumentException e) {
+            return false;
+          }
+        })
+        .collect(Collectors.toSet());
+
+    if (!filteredUuids.isEmpty()) {
       try {
-        Set<UUID> uuids = ids.stream()
-            .filter(id -> {
-              try {
-                UUID.fromString(id);
-                return true;
-              } catch (IllegalArgumentException e) {
-                return false;
-              }
-            })
+        Set<UUID> uuids = filteredUuids.stream()
             .map(UUID::fromString)
             .collect(Collectors.toSet());
         summaryList = programmeMembershipService

@@ -322,11 +322,21 @@ class ProgrammeMembershipResourceIntTest {
             .param("ids", programmeMembershipUuid.toString()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(hasItem(filterdUuidList.toString())))
-        .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
+        .andExpect(jsonPath("$.[*].programmeMembershipUuid")
+            .value(hasItem(filterdUuidList.toString())))
+        .andExpect(jsonPath("$.[*].programmeStartDate")
+            .value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
         .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
         .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(not(hasItem("77777"))));
 
+    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
+            .param("ids", "333333333333"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].programmeMembershipUuid")
+            .value(not(hasItem("333333333333"))))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
 
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
             .param("ids", UUID.randomUUID().toString()))
