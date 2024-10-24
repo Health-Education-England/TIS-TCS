@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -293,7 +294,7 @@ class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
-  void shouldGetProgrammeMembershipSummaryListByUuid2() throws Exception {
+  void shouldGetProgrammeMembershipSummaryListByUuid() throws Exception {
 
     programmeMembershipRepository.deleteAll();
     Person personSaved = personRepository.saveAndFlush(person);
@@ -313,23 +314,23 @@ class ProgrammeMembershipResourceIntTest {
     curriculumMembership.setCurriculumEndDate(today.plusDays(1));
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 
-    UUID savedProgrammeMembershipUuid = programmeMembership.getUuid();
+    String programmeMembershipUuid = programmeMembership.getUuid().toString() + ",77777";
+    String filterdUuidList = String.valueOf(programmeMembership.getUuid());
+
 
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
-            .param("ids", savedProgrammeMembershipUuid.toString()))
+            .param("ids", programmeMembershipUuid.toString()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(hasItem(savedProgrammeMembershipUuid.toString())))
+        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(hasItem(filterdUuidList.toString())))
         .andExpect(jsonPath("$.[*].programmeStartDate").value(hasItem(DEFAULT_PROGRAMME_START_DATE.toString())))
-        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)));
+        .andExpect(jsonPath("$.[*].programmeName").value(hasItem(DEFAULT_PROGRAMME_NAME)))
+        .andExpect(jsonPath("$.[*].programmeMembershipUuid").value(not(hasItem("77777"))));
+
 
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
             .param("ids", UUID.randomUUID().toString()))
         .andExpect(status().isNotFound());
-
-    restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
-            .param("ids", "invalid-uuid"))
-        .andExpect(status().isBadRequest());
 
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
             .param("ids", ""))
