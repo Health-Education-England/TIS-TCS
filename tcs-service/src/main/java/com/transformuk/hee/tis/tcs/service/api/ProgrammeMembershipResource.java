@@ -177,7 +177,6 @@ public class ProgrammeMembershipResource {
   public ResponseEntity<List<ProgrammeMembershipSummaryDTO>> getProgrammeMembershipSummaryList(
       @RequestParam List<String> ids) {
     List<ProgrammeMembershipSummaryDTO> summaryList = Collections.emptyList();
-
     Set<String> filteredUuids = ids.stream()
         .filter(id -> {
           try {
@@ -188,7 +187,6 @@ public class ProgrammeMembershipResource {
           }
         })
         .collect(Collectors.toSet());
-
     if (!filteredUuids.isEmpty()) {
       try {
         Set<UUID> uuids = filteredUuids.stream()
@@ -196,9 +194,6 @@ public class ProgrammeMembershipResource {
             .collect(Collectors.toSet());
         summaryList = programmeMembershipService
             .findProgrammeMembershipSummariesByUuid(uuids);
-        if (summaryList.isEmpty()) {
-          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
-        }
         return ResponseEntity.ok(summaryList);
       } catch (IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
