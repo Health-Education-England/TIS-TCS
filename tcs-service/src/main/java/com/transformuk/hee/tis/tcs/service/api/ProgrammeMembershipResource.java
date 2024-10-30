@@ -194,9 +194,6 @@ public class ProgrammeMembershipResource {
             .collect(Collectors.toSet());
         summaryList = programmeMembershipService
             .findProgrammeMembershipSummariesByUuid(uuids);
-        if (summaryList.isEmpty()) {
-          return ResponseEntity.ok(summaryList);
-        }
         return ResponseEntity.ok(summaryList);
       } catch (IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
