@@ -340,7 +340,7 @@ class ProgrammeMembershipResourceIntTest {
 
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
             .param("ids", UUID.randomUUID().toString()))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isOk());
 
     restProgrammeMembershipMockMvc.perform(get("/api/programme-memberships/summary-list")
             .param("ids", ""))

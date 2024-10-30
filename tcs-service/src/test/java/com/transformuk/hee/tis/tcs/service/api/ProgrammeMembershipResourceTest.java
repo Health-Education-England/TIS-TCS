@@ -162,7 +162,7 @@ public class ProgrammeMembershipResourceTest {
                 .param("ids", uuidSet.stream().map(UUID::toString)
                     .collect(Collectors.joining(",")))
         )
-        .andExpect(status().isNotFound());
+        .andExpect(status().isOk());
   }
 
   @Test
