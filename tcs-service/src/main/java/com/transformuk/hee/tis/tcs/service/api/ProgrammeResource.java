@@ -15,17 +15,17 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import io.github.jhipster.web.util.ResponseUtil;
-import io.jsonwebtoken.lang.Collections;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class ProgrammeResource {
    *
    * @param programmeDTO the programmeDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new programmeDTO, or
-   * with status 400 (Bad Request) if the programme has already an ID
+   *     with status 400 (Bad Request) if the programme has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programmes")
@@ -103,8 +103,8 @@ public class ProgrammeResource {
    *
    * @param programmeDTO the programmeDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated programmeDTO, or with
-   * status 400 (Bad Request) if the programmeDTO is not valid, or with status 500 (Internal Server
-   * Error) if the programmeDTO couldnt be updated
+   *     status 400 (Bad Request) if the programmeDTO is not valid, or with status 500 (Internal
+   *     Server Error) if the programmeDTO couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/programmes")
@@ -164,19 +164,16 @@ public class ProgrammeResource {
    *
    * @param ids the ids to search by
    * @return the ResponseEntity with status 200 (OK)  and the list of programmes in body, or empty
-   * list
+   *     list
    */
   @GetMapping("/programmes/in/{ids}")
   @PreAuthorize("hasAuthority('programme:view')")
   public ResponseEntity<List<ProgrammeDTO>> getProgrammesIn(
       @PathVariable("ids") final Set<Long> ids) {
     log.debug("REST request to find several Programmes by Ids: {}", ids);
-    if (!ids.isEmpty()) {
-      List<ProgrammeDTO> programmesDtos = programmeService.findByIdIn(ids);
-      return new ResponseEntity<>(programmesDtos, HttpStatus.FOUND);
-    } else {
-      return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-    }
+    List<ProgrammeDTO> programmesDtos =
+        ids.isEmpty() ? Collections.emptyList() : programmeService.findByIdIn(ids);
+    return new ResponseEntity<>(programmesDtos, HttpStatus.OK);
   }
 
   /**
@@ -201,7 +198,7 @@ public class ProgrammeResource {
    *
    * @param id the id of the programmeDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status
-   * 404 (Not Found)
+   *     404 (Not Found)
    */
   @GetMapping("/programmes/{id}")
   @PreAuthorize("hasAuthority('programme:view')")
@@ -231,7 +228,7 @@ public class ProgrammeResource {
    * GET  /trainee/programmes : get a list of trainee programmes that they have been enrolled to.
    *
    * @return the ResponseEntity with status 200 (OK) and with body the programmeDTO, or with status
-   * 404 (Not Found)
+   *     404 (Not Found)
    */
   @GetMapping("/trainee/{traineeId}/programmes")
   @PreAuthorize("hasAuthority('programme:view')")
@@ -246,7 +243,7 @@ public class ProgrammeResource {
    *
    * @param programmeDTOS List of the programmeDTOS to create
    * @return the ResponseEntity with status 200 (Created) and with body the new programmeDTOS, or
-   * with status 400 (Bad Request) if the Programme has already an ID
+   *     with status 400 (Bad Request) if the Programme has already an ID
    */
   @PostMapping("/bulk-programmes")
   @PreAuthorize("hasAuthority('programme:bulk:add:modify')")
@@ -254,12 +251,12 @@ public class ProgrammeResource {
       @RequestBody List<ProgrammeDTO> programmeDTOS) {
     log.debug("REST request to bulk create {} Programmes.", programmeDTOS.size());
     try {
-      if (!Collections.isEmpty(programmeDTOS)) {
+      if (CollectionUtils.isNotEmpty(programmeDTOS)) {
         List<Long> entityIds = programmeDTOS.stream()
             .map(ProgrammeDTO::getId)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-        if (!Collections.isEmpty(entityIds)) {
+        if (CollectionUtils.isNotEmpty(entityIds)) {
           return ResponseEntity.badRequest().headers(HeaderUtil
               .createFailureAlert(StringUtils.join(entityIds, ","), "ids.exist",
                   "A new Programme cannot already have an ID")).body(null);
@@ -279,8 +276,8 @@ public class ProgrammeResource {
    *
    * @param programmeDTOS List of the programmeDTOS to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated programmeDTOS, or
-   * with status 400 (Bad Request) if the programmeDTOS is not valid, or with status 500 (Internal
-   * Server Error) if the programmeDTOS couldnt be updated
+   *     with status 400 (Bad Request) if the programmeDTOS is not valid, or with status 500
+   *     (Internal Server Error) if the programmeDTOS couldnt be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/bulk-programmes")
@@ -289,14 +286,14 @@ public class ProgrammeResource {
       @Valid @RequestBody List<ProgrammeDTO> programmeDTOS) throws URISyntaxException {
     log.debug("REST request to bulk update Programme : {}", programmeDTOS);
     try {
-      if (Collections.isEmpty(programmeDTOS)) {
+      if (CollectionUtils.isEmpty(programmeDTOS)) {
         return ResponseEntity.badRequest()
             .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "request.body.empty",
                 "The request body for this end point cannot be empty")).body(null);
-      } else if (!Collections.isEmpty(programmeDTOS)) {
+      } else if (CollectionUtils.isNotEmpty(programmeDTOS)) {
         List<ProgrammeDTO> entitiesWithNoId = programmeDTOS.stream().filter(p -> p.getId() == null)
             .collect(Collectors.toList());
-        if (!Collections.isEmpty(entitiesWithNoId)) {
+        if (CollectionUtils.isNotEmpty(entitiesWithNoId)) {
           return ResponseEntity.badRequest()
               .headers(HeaderUtil.createFailureAlert(StringUtils.join(entitiesWithNoId, ","),
                   "bulk.update.failed.noId",
