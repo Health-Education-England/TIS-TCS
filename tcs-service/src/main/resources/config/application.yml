@@ -195,6 +195,9 @@ jhipster:
 # ===================================================================
 
 application:
+  aws:
+    sqs:
+      syncRequestQueueUrl: ${AWS_SQS_SYNC_QUEUE_URL}
 
 azure:
   accountName: ${CLOUD_BLOB_ACCOUNT_NAME}

@@ -324,6 +324,12 @@
       <artifactId>sentry-logback</artifactId>
       <version>${sentryVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>amazon-sqs-java-messaging-lib</artifactId>
+      <version>1.0.8</version>
+      <type>jar</type>
+    </dependency>
 
   </dependencies>
   <packaging>war</packaging>

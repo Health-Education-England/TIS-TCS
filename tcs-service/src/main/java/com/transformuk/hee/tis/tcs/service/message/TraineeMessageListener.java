@@ -7,8 +7,11 @@ import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
 import com.transformuk.hee.tis.tcs.service.event.GmcDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.SqsFifoMessagingService;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
@@ -17,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -26,21 +30,26 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class TraineeMessageListener {
 
-
+  private static final String GMC_TABLE = "GmcDetails";
   private static final Logger LOG = LoggerFactory.getLogger(TraineeMessageListener.class);
 
   private final ConditionsOfJoiningService conditionsOfJoiningService;
   private final GmcDetailsService gmcDetailsService;
   private final GmcDetailsValidator gmcDetailsValidator;
   private final Validator validator;
+  private final SqsFifoMessagingService sqsFifoMessagingService;
+  private final String syncRequestQueueUrl;
 
   TraineeMessageListener(ConditionsOfJoiningService conditionsOfJoiningService,
       GmcDetailsService gmcDetailsService, GmcDetailsValidator gmcDetailsValidator,
-      Validator validator) {
+      Validator validator, SqsFifoMessagingService sqsFifoMessagingService,
+      @Value("${application.aws.sqs.syncRequestQueueUrl}") String syncRequestQueueUrl) {
     this.conditionsOfJoiningService = conditionsOfJoiningService;
     this.gmcDetailsService = gmcDetailsService;
     this.gmcDetailsValidator = gmcDetailsValidator;
     this.validator = validator;
+    this.sqsFifoMessagingService = sqsFifoMessagingService;
+    this.syncRequestQueueUrl = syncRequestQueueUrl;
   }
 
   @RabbitListener(queues = "${app.rabbit.trainee.queue.coj.signed}", ackMode = "AUTO")
@@ -87,6 +96,13 @@ public class TraineeMessageListener {
     try {
       gmcDetailsValidator.validate(gmcDetails);
     } catch (MethodArgumentNotValidException e) {
+      Map<String, String> messageMap = new HashMap<>();
+      messageMap.put("id", personId.toString());
+      messageMap.put("table", GMC_TABLE);
+      messageMap.put("tisTrigger", "Update rejected");
+      messageMap.put("tisTriggerDetail", e.getMessage());
+      sqsFifoMessagingService.sendMessageToFifoQueue(syncRequestQueueUrl, messageMap,
+          GMC_TABLE, personId.toString());
       throw new AmqpRejectAndDontRequeueException("Invalid GMC details.", e);
     }
 
