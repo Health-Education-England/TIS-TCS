@@ -45,7 +45,6 @@ public class SqsFifoMessagingServiceImpl implements SqsFifoMessagingService {
     String deduplicationId = getUniqueDeduplicationId(table, id);
     String messageGroupId = getMessageGroupId(table, id);
 
-    //ObjectMapper objectMapper = new ObjectMapper();
     String jsonToSend;
     try {
       jsonToSend = objectMapper.writeValueAsString(toSend);
