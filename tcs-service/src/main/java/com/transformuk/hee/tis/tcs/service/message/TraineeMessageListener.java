@@ -43,7 +43,7 @@ public class TraineeMessageListener {
   TraineeMessageListener(ConditionsOfJoiningService conditionsOfJoiningService,
       GmcDetailsService gmcDetailsService, GmcDetailsValidator gmcDetailsValidator,
       Validator validator, SqsFifoMessagingService sqsFifoMessagingService,
-      @Value("${application.aws.sqs.syncRequestQueueUrl}") String syncRequestQueueUrl) {
+      @Value("${app.aws.sqs.syncRequestQueueUrl}") String syncRequestQueueUrl) {
     this.conditionsOfJoiningService = conditionsOfJoiningService;
     this.gmcDetailsService = gmcDetailsService;
     this.gmcDetailsValidator = gmcDetailsValidator;

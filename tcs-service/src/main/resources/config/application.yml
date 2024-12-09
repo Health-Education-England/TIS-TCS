@@ -195,9 +195,6 @@ jhipster:
 # ===================================================================
 
 application:
-  aws:
-    sqs:
-      syncRequestQueueUrl: ${AWS_SQS_SYNC_QUEUE_URL}
 
 azure:
   accountName: ${CLOUD_BLOB_ACCOUNT_NAME}
@@ -242,6 +239,9 @@ app:
       queue:
         coj.signed: ${TRAINEE_RABBIT_COJ_SIGNED_QUEUE}
         gmc-details.provided: ${TRAINEE_RABBIT_GMC_DETAILS_PROVIDED_QUEUE}
+  aws:
+    sqs:
+      syncRequestQueueUrl: ${AWS_SQS_SYNC_QUEUE_URL}
 
 sentry:
   dsn: ${SENTRY_DSN:}

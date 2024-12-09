@@ -134,3 +134,6 @@ app:
       queue:
         coj.signed: ${TRAINEE_RABBIT_COJ_SIGNED_QUEUE:trainee.queue.coj.signed.tcs}
         gmc-details.provided: ${TRAINEE_RABBIT_GMC_DETAILS_PROVIDED_QUEUE:trainee.queue.gmcdetails.provided.tcs}
+  aws:
+    sqs:
+      syncRequestQueueUrl: ${AWS_SQS_SYNC_QUEUE_URL:sync.request.queue}
