@@ -7,23 +7,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transformuk.hee.tis.tcs.service.service.SqsFifoMessagingService;
 import java.time.Instant;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
  * A service for sending messages to a SQS FIFO queue with appropriate message group ids.
  */
 @Service
-@Slf4j
 public class SqsFifoMessagingServiceImpl implements SqsFifoMessagingService {
 
-  private final AmazonSQS sqs;
+  private static final Logger LOG = LoggerFactory.getLogger(SqsFifoMessagingServiceImpl.class);
 
-  private static final String MESSAGE_GROUP_ID_FORMAT = "%s_%s_%s";
+  private final AmazonSQS sqs;
+  private final ObjectMapper objectMapper;
+
+  protected static final String MESSAGE_GROUP_ID_FORMAT = "%s_%s_%s";
   protected static final String DEFAULT_SCHEMA = "tcs";
 
-  public SqsFifoMessagingServiceImpl(AmazonSQS sqs) {
+  public SqsFifoMessagingServiceImpl(AmazonSQS sqs, ObjectMapper mapper) {
     this.sqs = sqs;
+    this.objectMapper = mapper;
   }
 
   /**
@@ -41,17 +45,17 @@ public class SqsFifoMessagingServiceImpl implements SqsFifoMessagingService {
     String deduplicationId = getUniqueDeduplicationId(table, id);
     String messageGroupId = getMessageGroupId(table, id);
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    //ObjectMapper objectMapper = new ObjectMapper();
     String jsonToSend;
     try {
       jsonToSend = objectMapper.writeValueAsString(toSend);
     } catch (JsonProcessingException jpe) {
-      log.warn("FIFO queue {} message not sent, content could not be processed: {}",
+      LOG.warn("FIFO queue {} message not sent, content could not be processed: {}",
           queueUrl, toSend);
       return;
     }
 
-    log.debug("Sending to FIFO queue {} (messageGroupId {} : deduplicationId {}): {}",
+    LOG.debug("Sending to FIFO queue {} (messageGroupId {} : deduplicationId {}): {}",
         queueUrl, messageGroupId, deduplicationId, jsonToSend);
 
     SendMessageRequest sendMessageRequest = new SendMessageRequest();

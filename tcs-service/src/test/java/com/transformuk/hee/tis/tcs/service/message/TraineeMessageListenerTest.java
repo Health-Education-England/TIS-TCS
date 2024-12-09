@@ -1,10 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
+import static com.transformuk.hee.tis.tcs.service.message.TraineeMessageListener.GMC_TABLE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -20,8 +22,10 @@ import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
 import com.transformuk.hee.tis.tcs.service.event.GmcDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.SqsFifoMessagingService;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -38,11 +42,13 @@ class TraineeMessageListenerTest {
   private static final Long CURRICULUM_MEMBERSHIP_ID = 40L;
   private static final UUID PROGRAMME_MEMBERSHIP_ID = UUID.randomUUID();
   private static final Instant SIGNED_AT = Instant.now();
+  private static final String REQUEST_QUEUE_URL = "queue.url";
 
   private TraineeMessageListener listener;
   private ConditionsOfJoiningService cojService;
   private GmcDetailsService gmcDetailsService;
   private GmcDetailsValidator gmcDetailsValidator;
+  private SqsFifoMessagingService sqsFifoMessagingService;
   private ConditionsOfJoiningDto dto;
 
   @BeforeEach
@@ -50,9 +56,10 @@ class TraineeMessageListenerTest {
     cojService = mock(ConditionsOfJoiningService.class);
     gmcDetailsService = mock(GmcDetailsService.class);
     gmcDetailsValidator = mock(GmcDetailsValidator.class);
+    sqsFifoMessagingService = mock(SqsFifoMessagingService.class);
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     listener = new TraineeMessageListener(cojService, gmcDetailsService, gmcDetailsValidator,
-        validator);
+        validator, sqsFifoMessagingService, REQUEST_QUEUE_URL);
     dto = new ConditionsOfJoiningDto();
     dto.setSignedAt(SIGNED_AT);
     dto.setVersion(GoldGuideVersion.GG9);
@@ -151,13 +158,27 @@ class TraineeMessageListenerTest {
 
     GmcDetailsProvidedEvent event = new GmcDetailsProvidedEvent(40L, gmcDetails);
 
-    doThrow(MethodArgumentNotValidException.class).when(gmcDetailsValidator).validate(any());
+    String errorDetails = "Duplicate GMC number";
+    MethodArgumentNotValidException methodArgumentNotValidException = mock(MethodArgumentNotValidException.class);
+    when(methodArgumentNotValidException.getMessage()).thenReturn(errorDetails);
+    doThrow(methodArgumentNotValidException).when(gmcDetailsValidator).validate(any());
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveGmcDetailsProvidedMessage(event));
 
     verify(gmcDetailsService).findOne(any());
     verifyNoMoreInteractions(gmcDetailsService);
+
+    ArgumentCaptor<Map<String, String>> queryCaptor = ArgumentCaptor.forClass(Map.class);
+    verify(sqsFifoMessagingService).sendMessageToFifoQueue(eq(REQUEST_QUEUE_URL),
+        queryCaptor.capture(), eq(GMC_TABLE), eq("40"));
+    Map<String, String> requestMap = queryCaptor.getValue();
+    assertThat("Unexpected request id.", requestMap.get("id"), is("40"));
+    assertThat("Unexpected request table.", requestMap.get("table"), is(GMC_TABLE));
+    assertThat("Unexpected request trigger.", requestMap.get("tisTrigger"),
+        is("Update rejected"));
+    assertThat("Unexpected request trigger detail.", requestMap.get("tisTriggerDetail"),
+        is(errorDetails));
   }
 
   @Test
@@ -181,6 +202,8 @@ class TraineeMessageListenerTest {
     assertThat("Unexpected GMC start date.", savedDto.getGmcStartDate(), nullValue());
     assertThat("Unexpected GMC end date.", savedDto.getGmcEndDate(), nullValue());
     assertThat("Unexpected amended date.", savedDto.getAmendedDate(), nullValue());
+
+    verifyNoInteractions(sqsFifoMessagingService);
   }
 
   @Test
@@ -209,5 +232,7 @@ class TraineeMessageListenerTest {
     assertThat("Unexpected GMC start date.", savedDto.getGmcStartDate(), nullValue());
     assertThat("Unexpected GMC end date.", savedDto.getGmcEndDate(), nullValue());
     assertThat("Unexpected amended date.", savedDto.getAmendedDate(), is(now));
+
+    verifyNoInteractions(sqsFifoMessagingService);
   }
 }

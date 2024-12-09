@@ -30,7 +30,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class TraineeMessageListener {
 
-  private static final String GMC_TABLE = "GmcDetails";
+  protected static final String GMC_TABLE = "GmcDetails";
   private static final Logger LOG = LoggerFactory.getLogger(TraineeMessageListener.class);
 
   private final ConditionsOfJoiningService conditionsOfJoiningService;
