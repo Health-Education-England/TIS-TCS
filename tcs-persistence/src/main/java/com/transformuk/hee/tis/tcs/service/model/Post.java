@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSuffix;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
@@ -87,6 +88,7 @@ public class Post implements Serializable {
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Set<PostFunding> fundings = new HashSet<>();
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+  @JsonBackReference
   private Set<Placement> placementHistory = new HashSet<>();
   @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
   private Set<PostTrust> associatedTrusts;
