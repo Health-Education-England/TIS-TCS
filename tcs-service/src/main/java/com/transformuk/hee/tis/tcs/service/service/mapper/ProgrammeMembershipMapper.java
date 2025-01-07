@@ -261,4 +261,16 @@ public class ProgrammeMembershipMapper {
     }
     return result;
   }
+
+  public ProgrammeMembership fromUuid(UUID uuid) {
+    if ( uuid == null ) {
+      return null;
+    }
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+
+    pm.setUuid( uuid );
+
+    return pm;
+  }
 }

@@ -27,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 public class CurriculumMembershipMapper {
 
   ConditionsOfJoiningMapper conditionsOfJoiningMapper;
+  ProgrammeMembershipMapper pmMapper;
 
   /**
    * Initialise the CurriculumMembership mapper.
@@ -187,6 +188,7 @@ public class CurriculumMembershipMapper {
     result.setCurriculumCompletionDate(curriculumMembership.getCurriculumCompletionDate());
     result.setCurriculumId(curriculumMembership.getCurriculumId());
     result.setAmendedDate(curriculumMembership.getAmendedDate());
+    result.setProgrammeMembershipUuid(curriculumMembership.getProgrammeMembership().getUuid());
     return result;
   }
 
@@ -273,5 +275,22 @@ public class CurriculumMembershipMapper {
       result.setStatus(rotation.getStatus());
     }
     return result;
+  }
+
+  public CurriculumMembership toEntity(CurriculumMembershipDTO cmDto) {
+    if ( cmDto == null ) {
+      return null;
+    }
+    CurriculumMembership cm = new CurriculumMembership();
+    cm.setId(cmDto.getId());
+    cm.setIntrepidId(cmDto.getIntrepidId());
+    cm.setCurriculumStartDate(cmDto.getCurriculumStartDate());
+    cm.setCurriculumEndDate(cmDto.getCurriculumEndDate());
+    cm.setPeriodOfGrace(cmDto.getPeriodOfGrace());
+    cm.setCurriculumCompletionDate(cmDto.getCurriculumCompletionDate());
+    cm.setCurriculumId(cmDto.getCurriculumId());
+    cm.setAmendedDate(cmDto.getAmendedDate());
+    cm.setProgrammeMembership(pmMapper.fromUuid(cmDto.getProgrammeMembershipUuid()));
+    return cm;
   }
 }

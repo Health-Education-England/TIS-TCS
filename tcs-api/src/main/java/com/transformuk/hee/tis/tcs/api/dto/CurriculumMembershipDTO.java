@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -18,6 +19,8 @@ public class CurriculumMembershipDTO implements Serializable {
   private Long id;
 
   private String intrepidId;
+
+  private UUID programmeMembershipUuid;
 
   @NotNull(message = "CurriculumStartDate is required", groups = {Update.class, Create.class})
   private LocalDate curriculumStartDate;

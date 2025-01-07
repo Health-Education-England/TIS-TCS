@@ -6,6 +6,7 @@ import com.transformuk.hee.tis.client.impl.AbstractClientService;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.FundingComponentsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.FundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
@@ -80,6 +81,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_CONTACT_DETAILS = "/api/contact-details/";
   private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
   private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
+  private static final String API_CURRICULUM_MEMBERSHIP = "/api/curriculum-membership/";
   private static final String API_TRAINEE_PLACEMENTS = "/api/people/%d/placements/new";
   private static final String API_SPECIALTIES = "/api/specialties/";
   private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS =
@@ -485,6 +487,16 @@ public class TcsServiceImpl extends AbstractClientService {
     return tcsRestTemplate
         .exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS + uuid, HttpMethod.GET, null,
             new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
+            })
+        .getBody();
+  }
+
+  public CurriculumMembershipDTO createCurriculumMembership(CurriculumMembershipDTO cmDto) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(cmDto, headers);
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS, HttpMethod.POST, httpEntity,
+            new ParameterizedTypeReference<CurriculumMembershipDTO>() {
             })
         .getBody();
   }
