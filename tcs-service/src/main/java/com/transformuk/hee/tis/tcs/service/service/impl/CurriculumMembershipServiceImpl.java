@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service Implementation for managing CurriculumMembership.
+ */
 @Service
 public class CurriculumMembershipServiceImpl implements CurriculumMembershipService {
 
