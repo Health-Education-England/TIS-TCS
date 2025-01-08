@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipReposi
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
+import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,10 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
   public CurriculumMembershipDTO save(CurriculumMembershipDTO cmDto) {
     log.debug("Request to save CurriculumMembership : {}", cmDto);
     CurriculumMembership cm = cmMapper.toEntity(cmDto);
+    // As we have done the validation before save, so it's very unlikely that pm is not found.
     ProgrammeMembership pm =
-        pmRepository.findByUuid(cmDto.getProgrammeMembershipUuid()).orElseThrow();
+        pmRepository.findByUuid(cmDto.getProgrammeMembershipUuid())
+            .orElseThrow(() -> new NoSuchElementException("No value present"));
     cm.setProgrammeMembership(pm);
     CurriculumMembership returnedCm = cmRepository.save(cm);
     return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
