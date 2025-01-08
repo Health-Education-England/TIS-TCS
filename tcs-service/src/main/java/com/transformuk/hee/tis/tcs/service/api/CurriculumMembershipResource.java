@@ -37,7 +37,7 @@ public class CurriculumMembershipResource {
   }
 
   /**
-   * POST /curriculum-membership : Add a new curriculumMembership.
+   * POST /curriculum-memberships : Add a new curriculumMembership.
    *
    * @param cmDto the curriculumMembershipDto to add
    * @return the ResponseEntity with status 201 (Created) and with body the new
@@ -45,7 +45,7 @@ public class CurriculumMembershipResource {
    *         if the curriculumMembershipDto has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
-  @PostMapping("/curriculum-membership")
+  @PostMapping("/curriculum-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<CurriculumMembershipDTO> createCurriculumMembership(
       @RequestBody @Validated(Create.class) CurriculumMembershipDTO cmDto)
@@ -59,7 +59,7 @@ public class CurriculumMembershipResource {
     cmValidator.validate(cmDto);
     CurriculumMembershipDTO result = cmService.save(cmDto);
     return ResponseEntity.created(
-            new URI("/api/curriculum-membership/" + result.getId()))
+            new URI("/api/curriculum-memberships/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
   }

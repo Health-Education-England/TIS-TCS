@@ -116,7 +116,7 @@ class CurriculumMembershipResourceTest {
     cmDto.setCurriculumEndDate(END_DATE_2);
     cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
 
-    restCmMockMvc.perform(post("/api/curriculum-membership")
+    restCmMockMvc.perform(post("/api/curriculum-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
         .andDo(print())
@@ -139,7 +139,7 @@ class CurriculumMembershipResourceTest {
     cmDto.setCurriculumEndDate(END_DATE_2);
     cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
 
-    restCmMockMvc.perform(post("/api/curriculum-membership")
+    restCmMockMvc.perform(post("/api/curriculum-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
         .andDo(print())
@@ -166,7 +166,7 @@ class CurriculumMembershipResourceTest {
     cmDto.setCurriculumEndDate(END_DATE_2);
     cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
 
-    restCmMockMvc.perform(post("/api/curriculum-membership")
+    restCmMockMvc.perform(post("/api/curriculum-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
         .andDo(print())

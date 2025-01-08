@@ -362,7 +362,7 @@ public class TcsServiceImplTest {
   public void createCurriculumMembershipShouldReturnSavedDto() {
     CurriculumMembershipDTO dto = new CurriculumMembershipDTO();
 
-    String url = "http://localhost:9999/tcs/api/curriculum-membership";
+    String url = "http://localhost:9999/tcs/api/curriculum-memberships";
 
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(dto, headers);
