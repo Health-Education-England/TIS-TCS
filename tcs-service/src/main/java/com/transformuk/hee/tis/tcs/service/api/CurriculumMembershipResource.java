@@ -41,8 +41,8 @@ public class CurriculumMembershipResource {
    *
    * @param cmDto the curriculumMembershipDto to add
    * @return the ResponseEntity with status 201 (Created) and with body the new
-   * CurriculumMembershipDTO, or with status 400 (Bad Request) if the curriculumMembershipDto has
-   * already an ID
+   *         CurriculumMembershipDTO, or with status 400 (Bad Request) if the curriculumMembershipDto has
+   *         already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/curriculum-membership")

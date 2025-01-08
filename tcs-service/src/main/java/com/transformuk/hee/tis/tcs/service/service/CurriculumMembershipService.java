@@ -9,6 +9,7 @@ public interface CurriculumMembershipService {
 
   /**
    * Save a curriculumMembership.
+   *
    * @param cmDto the dto to save
    * @return the persisted object
    */

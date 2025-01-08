@@ -23,7 +23,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * Holds more complex custom validation for a {@link CurriculumMembership} that cannot be easily
- * done via annotations
+ * done via annotations.
  */
 @Component
 public class CurriculumMembershipValidator {
@@ -67,7 +67,7 @@ public class CurriculumMembershipValidator {
    * Validate a CurriculumMembershipDTO.
    *
    * @param cmDto the curriculumMembership Dto to validate
-   * @throws MethodArgumentNotValidException
+   * @throws MethodArgumentNotValidException when validation fails
    */
   public void validate(CurriculumMembershipDTO cmDto)
       throws MethodArgumentNotValidException, NoSuchMethodException {

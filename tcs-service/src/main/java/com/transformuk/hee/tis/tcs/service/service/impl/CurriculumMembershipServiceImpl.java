@@ -22,6 +22,13 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
   private final ProgrammeMembershipRepository pmRepository;
   private final CurriculumMembershipMapper cmMapper;
 
+  /**
+   * Initialise the CurriculumMembershipServiceImpl.
+   *
+   * @param cmRepository Curriculum Membership repository
+   * @param cmMapper Curriculum Membership mapper
+   * @param pmRepository Programme Membership repository
+   */
   public CurriculumMembershipServiceImpl(CurriculumMembershipRepository cmRepository,
       CurriculumMembershipMapper cmMapper, ProgrammeMembershipRepository pmRepository) {
     this.cmRepository = cmRepository;

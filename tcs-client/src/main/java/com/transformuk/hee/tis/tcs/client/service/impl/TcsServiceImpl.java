@@ -491,6 +491,12 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Create a Curriculum Membership under a Programme Membership.
+   *
+   * @param cmDto the Curriculum Membership dto to create
+   * @return the created Curriculum Membership dto
+   */
   public CurriculumMembershipDTO createCurriculumMembership(CurriculumMembershipDTO cmDto) {
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(cmDto, headers);
