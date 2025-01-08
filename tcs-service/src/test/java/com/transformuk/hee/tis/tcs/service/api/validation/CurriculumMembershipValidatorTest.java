@@ -187,7 +187,7 @@ class CurriculumMembershipValidatorTest {
     BindingResult result = thrown.getBindingResult();
 
     FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
-        FIELD_CURRICULUM_ID, NO_MATCHING_CURRICULUM);
+        FIELD_CURRICULUM_ID, String.format(NO_MATCHING_CURRICULUM, CURRICULUM_ID));
     assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
     assertThat("Expected field error not found.", result.getFieldErrors(), hasItems(fieldError));
   }

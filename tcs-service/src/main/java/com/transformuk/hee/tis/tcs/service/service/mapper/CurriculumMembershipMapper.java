@@ -187,7 +187,9 @@ public class CurriculumMembershipMapper {
     result.setCurriculumCompletionDate(curriculumMembership.getCurriculumCompletionDate());
     result.setCurriculumId(curriculumMembership.getCurriculumId());
     result.setAmendedDate(curriculumMembership.getAmendedDate());
-    result.setProgrammeMembershipUuid(curriculumMembership.getProgrammeMembership().getUuid());
+    if (curriculumMembership.getProgrammeMembership() != null) {
+      result.setProgrammeMembershipUuid(curriculumMembership.getProgrammeMembership().getUuid());
+    }
     return result;
   }
 
