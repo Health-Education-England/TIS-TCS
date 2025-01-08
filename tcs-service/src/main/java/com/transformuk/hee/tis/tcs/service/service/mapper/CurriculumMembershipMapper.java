@@ -27,7 +27,6 @@ import org.springframework.util.CollectionUtils;
 public class CurriculumMembershipMapper {
 
   ConditionsOfJoiningMapper conditionsOfJoiningMapper;
-  ProgrammeMembershipMapper pmMapper;
 
   /**
    * Initialise the CurriculumMembership mapper.
@@ -290,7 +289,6 @@ public class CurriculumMembershipMapper {
     cm.setCurriculumCompletionDate(cmDto.getCurriculumCompletionDate());
     cm.setCurriculumId(cmDto.getCurriculumId());
     cm.setAmendedDate(cmDto.getAmendedDate());
-    cm.setProgrammeMembership(pmMapper.fromUuid(cmDto.getProgrammeMembershipUuid()));
     return cm;
   }
 }

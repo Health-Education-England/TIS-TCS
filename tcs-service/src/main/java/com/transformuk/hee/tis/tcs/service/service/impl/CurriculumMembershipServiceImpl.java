@@ -2,7 +2,9 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
+import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
+import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import org.slf4j.Logger;
@@ -16,17 +18,29 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
   private final Logger log = LoggerFactory.getLogger(CurriculumMembershipServiceImpl.class);
 
   private final CurriculumMembershipRepository cmRepository;
+  private final ProgrammeMembershipRepository pmRepository;
   private final CurriculumMembershipMapper cmMapper;
 
   public CurriculumMembershipServiceImpl(CurriculumMembershipRepository cmRepository,
-      CurriculumMembershipMapper cmMapper) {
+      CurriculumMembershipMapper cmMapper, ProgrammeMembershipRepository pmRepository) {
     this.cmRepository = cmRepository;
     this.cmMapper = cmMapper;
+    this.pmRepository = pmRepository;
   }
+
+  /**
+   * Save a curriculumMembership.
+   *
+   * @param cmDto the dto to save
+   * @return the persisted object
+   */
   @Transactional
   public CurriculumMembershipDTO save(CurriculumMembershipDTO cmDto) {
     log.debug("Request to save CurriculumMembership : {}", cmDto);
     CurriculumMembership cm = cmMapper.toEntity(cmDto);
+    ProgrammeMembership pm =
+        pmRepository.findByUuid(cmDto.getProgrammeMembershipUuid()).orElseThrow();
+    cm.setProgrammeMembership(pm);
     CurriculumMembership returnedCm = cmRepository.save(cm);
     return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
   }

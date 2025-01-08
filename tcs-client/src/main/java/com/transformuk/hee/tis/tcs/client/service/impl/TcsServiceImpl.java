@@ -81,7 +81,7 @@ public class TcsServiceImpl extends AbstractClientService {
   private static final String API_CONTACT_DETAILS = "/api/contact-details/";
   private static final String API_RIGHT_TO_WORKS = "/api/right-to-works/";
   private static final String API_PROGRAMME_MEMBERSHIPS = "/api/programme-memberships/";
-  private static final String API_CURRICULUM_MEMBERSHIP = "/api/curriculum-membership/";
+  private static final String API_CURRICULUM_MEMBERSHIP = "/api/curriculum-membership";
   private static final String API_TRAINEE_PLACEMENTS = "/api/people/%d/placements/new";
   private static final String API_SPECIALTIES = "/api/specialties/";
   private static final String API_CURRENT_SPECIALTIES_COLUMN_FILTERS =
@@ -495,7 +495,7 @@ public class TcsServiceImpl extends AbstractClientService {
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(cmDto, headers);
     return tcsRestTemplate
-        .exchange(serviceUrl + API_PROGRAMME_MEMBERSHIPS, HttpMethod.POST, httpEntity,
+        .exchange(serviceUrl + API_CURRICULUM_MEMBERSHIP, HttpMethod.POST, httpEntity,
             new ParameterizedTypeReference<CurriculumMembershipDTO>() {
             })
         .getBody();
