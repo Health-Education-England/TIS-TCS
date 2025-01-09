@@ -8,15 +8,14 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
-import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import java.lang.reflect.Method;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -51,16 +50,10 @@ public class CurriculumMembershipValidator {
   protected static final String NO_MATCHING_CURRICULUM =
       "Could not find current curriculum for id \"%s\" under the programme.";
 
-  protected static final String NO_PROGRAMME_INFO =
-      "Could not retrieve the programme info.";
-
   private final ProgrammeMembershipRepository pmRepository;
-  private final ProgrammeRepository programmeRepository;
 
-  public CurriculumMembershipValidator(ProgrammeMembershipRepository pmRepository,
-      ProgrammeRepository programmeRepository) {
+  public CurriculumMembershipValidator(ProgrammeMembershipRepository pmRepository) {
     this.pmRepository = pmRepository;
-    this.programmeRepository = programmeRepository;
   }
 
   /**
@@ -69,6 +62,7 @@ public class CurriculumMembershipValidator {
    * @param cmDto the curriculumMembership Dto to validate
    * @throws MethodArgumentNotValidException when validation fails
    */
+  @Transactional(readOnly = true)
   public void validate(CurriculumMembershipDTO cmDto)
       throws MethodArgumentNotValidException, NoSuchMethodException {
     List<FieldError> fieldErrors = new ArrayList<>();
@@ -99,7 +93,7 @@ public class CurriculumMembershipValidator {
         ProgrammeMembership pm = optionalPm.get();
         fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
         fieldErrors.addAll(
-            checkCurriculumIdWithProgramme(pm.getProgramme().getId(), cmDto.getCurriculumId()));
+            checkCurriculumIdWithProgramme(pm.getProgramme(), cmDto.getCurriculumId()));
       } else {
         fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
             NO_PROGRAMME_MEMBERSHIP_FOR_ID));
@@ -108,23 +102,15 @@ public class CurriculumMembershipValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkCurriculumIdWithProgramme(Long programmeId, Long curriculumId) {
+  private List<FieldError> checkCurriculumIdWithProgramme(Programme programme, Long curriculumId) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    Optional<Programme> optionalProgramme = programmeRepository.findProgrammeByIdEagerFetch(
-        programmeId);
-    if (optionalProgramme.isPresent()) {
-      Programme programme = optionalProgramme.get();
-      Optional<ProgrammeCurriculum> optionalPc = programme.getCurricula().stream().filter(pc -> {
-        Curriculum curriculum = pc.getCurriculum();
-        return curriculum.getId().equals(curriculumId) && curriculum.getStatus() == Status.CURRENT;
-      }).findAny();
-      if (!optionalPc.isPresent()) {
-        fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
-            String.format(NO_MATCHING_CURRICULUM, curriculumId)));
-      }
-    } else {
-      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
-          NO_PROGRAMME_INFO));
+    Optional<ProgrammeCurriculum> optionalPc = programme.getCurricula().stream().filter(pc -> {
+      Curriculum curriculum = pc.getCurriculum();
+      return curriculum.getId().equals(curriculumId) && curriculum.getStatus() == Status.CURRENT;
+    }).findAny();
+    if (!optionalPc.isPresent()) {
+      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
+          String.format(NO_MATCHING_CURRICULUM, curriculumId)));
     }
     return fieldErrors;
   }
@@ -132,16 +118,12 @@ public class CurriculumMembershipValidator {
   private List<FieldError> checkCmDatesWithPm(ProgrammeMembership pm,
       CurriculumMembershipDTO cmDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    LocalDate cmStartDate = cmDto.getCurriculumStartDate();
-    LocalDate cmEndDate = cmDto.getCurriculumEndDate();
-    LocalDate pmStartDate = pm.getProgrammeStartDate();
-    LocalDate pmEndDate = pm.getProgrammeEndDate();
 
-    if (cmStartDate.isBefore(pmStartDate)) {
+    if (cmDto.getCurriculumStartDate().isBefore(pm.getProgrammeStartDate())) {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CM_START_DATE,
           CM_START_DATE_BEFORE_PM_START_DATE));
     }
-    if (cmEndDate.isAfter(pmEndDate)) {
+    if (cmDto.getCurriculumEndDate().isAfter(pm.getProgrammeEndDate())) {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CM_END_DATE,
           CM_END_DATE_AFTER_PM_END_DATE));
     }
@@ -151,9 +133,7 @@ public class CurriculumMembershipValidator {
   private List<FieldError> checkCmDates(CurriculumMembershipDTO cmDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
 
-    LocalDate cmStartDate = cmDto.getCurriculumStartDate();
-    LocalDate cmEndDate = cmDto.getCurriculumEndDate();
-    if (cmStartDate.isAfter(cmEndDate)) {
+    if (cmDto.getCurriculumStartDate().isAfter(cmDto.getCurriculumEndDate())) {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CM_START_DATE,
           CM_START_DATE_AFTER_END_DATE));
     }
