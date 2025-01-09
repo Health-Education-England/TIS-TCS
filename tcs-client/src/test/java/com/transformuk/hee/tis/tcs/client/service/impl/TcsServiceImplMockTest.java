@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
@@ -151,13 +152,28 @@ public class TcsServiceImplMockTest {
   }
 
   @Test
+  public void createCurriculumMembershipShouldReturnResponseBody() {
+    // Given.
+    CurriculumMembershipDTO dto = new CurriculumMembershipDTO();
+    dto.setId(1L);
+    ResponseEntity<CurriculumMembershipDTO> response = ResponseEntity.ok(dto);
+
+    when(restTemplateMock.exchange(anyString(), same(HttpMethod.POST), any(HttpEntity.class), any(
+        ParameterizedTypeReference.class))).thenReturn(response);
+
+    // When.
+    CurriculumMembershipDTO returnedDto = testObj.createCurriculumMembership(dto);
+    // Then.
+    assertThat("Unexpected dto.", returnedDto, is(dto));
+  }
+
+  @Test
   public void createTrainerApprovalShouldReturnResponseBody() {
     // Given.
     TrainerApprovalDTO dto = new TrainerApprovalDTO();
     dto.setId(1L);
     ResponseEntity<TrainerApprovalDTO> response = ResponseEntity.ok(dto);
 
-    final String API_TRAINER_APPROVAL = "/api/trainer-approvals";
     when(restTemplateMock.exchange(anyString(), same(HttpMethod.POST), any(HttpEntity.class), any(
         ParameterizedTypeReference.class))).thenReturn(response);
 

@@ -15,6 +15,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
@@ -354,6 +355,27 @@ public class TcsServiceImplTest {
     assertThat("Unexpected result", result, is(dto));
     verify(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,
         new ParameterizedTypeReference<ProgrammeMembershipDTO>() {
+        });
+  }
+
+  @Test
+  public void createCurriculumMembershipShouldReturnSavedDto() {
+    CurriculumMembershipDTO dto = new CurriculumMembershipDTO();
+
+    String url = "http://localhost:9999/tcs/api/curriculum-memberships";
+
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(dto, headers);
+    ResponseEntity responseEntity = new ResponseEntity(dto, HttpStatus.CREATED);
+    doReturn(responseEntity).when(restTemplate).exchange(url, HttpMethod.POST, httpEntity,
+        new ParameterizedTypeReference<CurriculumMembershipDTO>() {
+        });
+
+    CurriculumMembershipDTO result = testObj.createCurriculumMembership(dto);
+
+    assertThat("Unexpected result", result, is(dto));
+    verify(restTemplate).exchange(url, HttpMethod.POST, httpEntity,
+        new ParameterizedTypeReference<CurriculumMembershipDTO>() {
         });
   }
 }

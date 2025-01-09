@@ -123,6 +123,28 @@ public class CurriculumMembershipMapper {
   }
 
   /**
+   * Convert a CurriculumMembershipDTO to a CurriculumMembership entity.
+   *
+   * @param cmDto the CurriculumMembershipDTO to convert
+   * @return the converted CurriculumMembership entity
+   */
+  public CurriculumMembership toEntity(CurriculumMembershipDTO cmDto) {
+    if (cmDto == null) {
+      return null;
+    }
+    CurriculumMembership cm = new CurriculumMembership();
+    cm.setId(cmDto.getId());
+    cm.setIntrepidId(cmDto.getIntrepidId());
+    cm.setCurriculumStartDate(cmDto.getCurriculumStartDate());
+    cm.setCurriculumEndDate(cmDto.getCurriculumEndDate());
+    cm.setPeriodOfGrace(cmDto.getPeriodOfGrace());
+    cm.setCurriculumCompletionDate(cmDto.getCurriculumCompletionDate());
+    cm.setCurriculumId(cmDto.getCurriculumId());
+    cm.setAmendedDate(cmDto.getAmendedDate());
+    return cm;
+  }
+
+  /**
    * Convert a CurriculumMembership to a ProgrammeMembershipDTO, without its curriculumMemberships.
    *
    * @param curriculumMembership the CurriculumMembership object to convert
@@ -187,6 +209,9 @@ public class CurriculumMembershipMapper {
     result.setCurriculumCompletionDate(curriculumMembership.getCurriculumCompletionDate());
     result.setCurriculumId(curriculumMembership.getCurriculumId());
     result.setAmendedDate(curriculumMembership.getAmendedDate());
+    if (curriculumMembership.getProgrammeMembership() != null) {
+      result.setProgrammeMembershipUuid(curriculumMembership.getProgrammeMembership().getUuid());
+    }
     return result;
   }
 
