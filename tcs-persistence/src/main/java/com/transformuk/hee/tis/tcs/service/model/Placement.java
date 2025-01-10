@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -68,6 +69,7 @@ public class Placement implements Serializable {
   private String intrepidId;
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "postId")
+  @JsonManagedReference
   private Post post;
   //Please use site id, site codes from intrepid are NOT unique
   @Column(name = "siteCode")
