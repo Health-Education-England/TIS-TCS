@@ -698,6 +698,12 @@ public class TcsServiceImpl extends AbstractClientService {
     return responseEntity.getBody();
   }
 
+  public GmcDetailsDTO getGmcDetailsById(Long id) {
+    log.debug("calling getGmcDetailsById with {}", id);
+    String url = serviceUrl + API_GMC_DETAILS + id.toString();
+    return tcsRestTemplate.getForEntity(url, GmcDetailsDTO.class).getBody();
+  }
+
   public List<PostDTO> findPostsByNationalPostNumbersIn(List<String> npns) {
     String url = serviceUrl + API_POSTS_IN + getIdsAsUrlEncodedCSVs(npns);
     ResponseEntity<List<PostDTO>> responseEntity = tcsRestTemplate.
