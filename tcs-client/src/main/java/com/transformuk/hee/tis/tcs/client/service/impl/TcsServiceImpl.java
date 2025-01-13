@@ -690,6 +690,12 @@ public class TcsServiceImpl extends AbstractClientService {
     return responseEntity.getBody();
   }
 
+  /**
+   * Retrieve the list of GMC details having GMC numbers in the provided list.
+   *
+   * @param gmcIds The GMC numbers to search for.
+   * @return The list of matching GMC details.
+   */
   public List<GmcDetailsDTO> findGmcDetailsIn(List<String> gmcIds) {
     String url = serviceUrl + API_GMC_DETAILS_IN + getIdsAsUrlEncodedCSVs(gmcIds);
     ResponseEntity<List<GmcDetailsDTO>> responseEntity = tcsRestTemplate.
@@ -698,6 +704,12 @@ public class TcsServiceImpl extends AbstractClientService {
     return responseEntity.getBody();
   }
 
+  /**
+   * Retrieve the 'id' GMC details.
+   *
+   * @param id The ID of the GMC details to retrieve. (This is the ID of the person with these GMC details.)
+   * @return The GMC details, or null if not found.
+   */
   public GmcDetailsDTO getGmcDetailsById(Long id) {
     log.debug("calling getGmcDetailsById with {}", id);
     String url = serviceUrl + API_GMC_DETAILS + id.toString();
