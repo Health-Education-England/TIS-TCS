@@ -7,12 +7,14 @@ import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,10 +52,17 @@ public class CurriculumMembershipValidator {
   protected static final String NO_MATCHING_CURRICULUM =
       "Could not find current curriculum for id \"%s\" under the programme.";
 
-  private final ProgrammeMembershipRepository pmRepository;
+  protected static final String EXISTING_CM_FOUND =
+      "Curriculum membership with the same curriculumId, programme membership uuid, "
+          + "start date and end date already exists for id \"%s\".";
 
-  public CurriculumMembershipValidator(ProgrammeMembershipRepository pmRepository) {
+  private final ProgrammeMembershipRepository pmRepository;
+  private final CurriculumMembershipRepository cmRepository;
+
+  public CurriculumMembershipValidator(ProgrammeMembershipRepository pmRepository,
+      CurriculumMembershipRepository cmRepository) {
     this.pmRepository = pmRepository;
+    this.cmRepository = cmRepository;
   }
 
   /**
@@ -67,8 +76,12 @@ public class CurriculumMembershipValidator {
       throws MethodArgumentNotValidException, NoSuchMethodException {
     List<FieldError> fieldErrors = new ArrayList<>();
 
-    fieldErrors.addAll(checkCmDates(cmDto));
-    fieldErrors.addAll(checkCmWithPm(cmDto));
+    fieldErrors.addAll(checkDuplicate(cmDto));
+    // if there are no duplicate found
+    if (fieldErrors.isEmpty()) {
+      fieldErrors.addAll(checkCmDates(cmDto));
+      fieldErrors.addAll(checkCmWithPm(cmDto));
+    }
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
@@ -80,24 +93,40 @@ public class CurriculumMembershipValidator {
     }
   }
 
-  private List<FieldError> checkCmWithPm(CurriculumMembershipDTO cmDto) {
+  // Checks for existing CMs that are duplicates of the assessment in the DTO.
+  private List<FieldError> checkDuplicate(CurriculumMembershipDTO cmDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-
     UUID pmUuid = cmDto.getProgrammeMembershipUuid();
     if (pmUuid == null) {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
           NULL_PROGRAMME_MEMBERSHIP_ID));
     } else {
-      Optional<ProgrammeMembership> optionalPm = pmRepository.findByUuid(pmUuid);
-      if (optionalPm.isPresent()) {
-        ProgrammeMembership pm = optionalPm.get();
-        fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
-        fieldErrors.addAll(
-            checkCurriculumIdWithProgramme(pm.getProgramme(), cmDto.getCurriculumId()));
-      } else {
-        fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
-            NO_PROGRAMME_MEMBERSHIP_FOR_ID));
+      List<CurriculumMembership> cmList =
+          cmRepository.findByCurriculumIdAndPmUuidAndDates(cmDto.getCurriculumId(),
+              pmUuid.toString(),
+              cmDto.getCurriculumStartDate(), cmDto.getCurriculumEndDate());
+      if (!cmList.isEmpty()) {
+        fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
+            String.format(EXISTING_CM_FOUND,
+                cmList.stream().map(cm -> String.valueOf(cm.getId())).collect(
+                    Collectors.joining(", ")))));
       }
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkCmWithPm(CurriculumMembershipDTO cmDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    Optional<ProgrammeMembership> optionalPm = pmRepository.findByUuid(
+        cmDto.getProgrammeMembershipUuid());
+    if (optionalPm.isPresent()) {
+      ProgrammeMembership pm = optionalPm.get();
+      fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
+      fieldErrors.addAll(
+          checkCurriculumIdWithProgramme(pm.getProgramme(), cmDto.getCurriculumId()));
+    } else {
+      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
+          NO_PROGRAMME_MEMBERSHIP_FOR_ID));
     }
     return fieldErrors;
   }
