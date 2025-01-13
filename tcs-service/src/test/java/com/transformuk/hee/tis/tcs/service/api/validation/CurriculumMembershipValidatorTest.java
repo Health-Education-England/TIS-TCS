@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.CM_END_DATE_AFTER_PM_END_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.CM_START_DATE_AFTER_END_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.CM_START_DATE_BEFORE_PM_START_DATE;
+import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.EXISTING_CM_FOUND;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CM_END_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CM_START_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CURRICULUM_ID;
@@ -21,9 +22,11 @@ import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
+import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipRepository;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -41,6 +44,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 class CurriculumMembershipValidatorTest {
 
   private static final long CURRICULUM_ID = 1L;
+  private static final long CM_ID = 111L;
   private static final long PROGRAMME_ID = 1L;
   private static final UUID PM_UUID = UUID.randomUUID();
   private static final LocalDate START_DATE_1 = LocalDate.of(2020, 1, 1);
@@ -50,10 +54,12 @@ class CurriculumMembershipValidatorTest {
   private CurriculumMembershipValidator cmValidator;
   @Mock
   private ProgrammeMembershipRepository pmRepository;
+  @Mock
+  private CurriculumMembershipRepository cmRepository;
 
   @BeforeEach
   void setUp() {
-    cmValidator = new CurriculumMembershipValidator(pmRepository);
+    cmValidator = new CurriculumMembershipValidator(pmRepository, cmRepository);
   }
 
   CurriculumMembershipDTO createDto(Long curriculumId, UUID pmUuid, LocalDate cmStartDate,
@@ -67,7 +73,7 @@ class CurriculumMembershipValidatorTest {
   }
 
   @Test
-  void shouldThrowExceptionsWhenPmUuidNullAndCmDatesNotValid() {
+  void shouldThrowExceptionsWhenPmUuidNull() {
     // Given.
     CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, null, END_DATE_1, START_DATE_1);
 
@@ -81,13 +87,70 @@ class CurriculumMembershipValidatorTest {
         is(CurriculumMembershipDTO.class.getSimpleName()));
     assertThat("Unexpected target object.", result.getTarget(), is(dto));
 
-    FieldError fieldError1 = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
+    FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
         FIELD_PM_UUID, NULL_PROGRAMME_MEMBERSHIP_ID);
-    FieldError fieldError2 = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
-        FIELD_CM_START_DATE, CM_START_DATE_AFTER_END_DATE);
-    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(2));
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
     assertThat("Expected field error not found.", result.getFieldErrors(),
-        hasItems(fieldError1, fieldError2));
+        hasItems(fieldError));
+  }
+
+  @Test
+  void shouldThrowExceptionsWhenDuplicateFound() {
+    // Given.
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, START_DATE_1, END_DATE_1);
+
+    CurriculumMembership duplicateCm = new CurriculumMembership();
+    duplicateCm.setId(CM_ID);
+    when(cmRepository.findByCurriculumIdAndPmUuidAndDates(CURRICULUM_ID, PM_UUID.toString(),
+        START_DATE_1, END_DATE_1)).thenReturn(Lists.newArrayList(duplicateCm));
+
+    // When.
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class, () -> cmValidator.validate(dto));
+
+    // Then.
+    BindingResult result = thrown.getBindingResult();
+    FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
+        FIELD_CURRICULUM_ID, String.format(EXISTING_CM_FOUND, "111"));
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError));
+  }
+
+  @Test
+  void shouldThrowExceptionsWhenCmDatesNotValid() {
+    // Given.
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, END_DATE_2, START_DATE_2);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setProgrammeStartDate(START_DATE_1);
+    pm.setProgrammeEndDate(END_DATE_1);
+
+    Programme programme = new Programme();
+    programme.setId(PROGRAMME_ID);
+
+    Curriculum curriculum1 = new Curriculum();
+    curriculum1.setId(1L);
+    curriculum1.setStatus(Status.CURRENT);
+    ProgrammeCurriculum pc1 = new ProgrammeCurriculum();
+    pc1.setCurriculum(curriculum1);
+
+    programme.getCurricula().addAll(Lists.newArrayList(pc1));
+    pm.setProgramme(programme);
+
+    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
+
+    // When.
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class, () -> cmValidator.validate(dto));
+
+    // Then.
+    BindingResult result = thrown.getBindingResult();
+    FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
+        FIELD_CM_START_DATE, CM_START_DATE_AFTER_END_DATE);
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError));
   }
 
   @Test

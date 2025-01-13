@@ -1,8 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -59,4 +61,17 @@ public interface CurriculumMembershipRepository extends JpaRepository<Curriculum
       + "WHERE pm.personId = :traineeId "
       + "ORDER BY cm.curriculumEndDate DESC LIMIT 1", nativeQuery = true)
   CurriculumMembership findLatestCurriculumByTraineeId(@Param("traineeId") Long traineeId);
+
+  @Query(value = "SELECT * "
+      + "FROM CurriculumMembership "
+      + "WHERE curriculumId = :curriculumId "
+      + "AND programmeMembershipUuid = :programmeMembershipUuid "
+      + "AND curriculumStartDate = :curriculumStartDate "
+      + "AND curriculumEndDate = :curriculumEndDate"
+      , nativeQuery = true
+  )
+  List<CurriculumMembership> findByCurriculumIdAndPmUuidAndDates(
+      Long curriculumId, @Param("programmeMembershipUuid") String programmeMembershipUuid,
+      LocalDate curriculumStartDate, LocalDate curriculumEndDate
+  );
 }

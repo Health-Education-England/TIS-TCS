@@ -86,4 +86,13 @@ public class CurriculumMembershipRepositoryIntTest {
     CurriculumMembership result = testObj.findLatestCurriculumByTraineeId(1L);
     Assert.assertEquals(2L, result.getId().longValue());
   }
+
+  @Transactional
+  @Test
+  public void shouldFindCmByCurriculumIdAndPmUuidAndDates() {
+    List<CurriculumMembership> cmList = testObj.findByCurriculumIdAndPmUuidAndDates(2L,
+        "004c4a2a-80fd-4312-83b4-5e8666db5166",
+        LocalDate.of(2023, 8, 1), LocalDate.of(2027, 9, 4));
+    Assert.assertEquals(1, cmList.size());
+  }
 }
