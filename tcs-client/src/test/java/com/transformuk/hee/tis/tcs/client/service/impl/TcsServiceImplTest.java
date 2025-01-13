@@ -16,6 +16,7 @@ import com.google.common.collect.Maps;
 import com.transformuk.hee.tis.tcs.api.dto.AbsenceDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
+import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
@@ -377,5 +378,28 @@ public class TcsServiceImplTest {
     verify(restTemplate).exchange(url, HttpMethod.POST, httpEntity,
         new ParameterizedTypeReference<CurriculumMembershipDTO>() {
         });
+  }
+
+  @Test
+  public void getGmcDetailsByIdShouldFindGmcDto() {
+    GmcDetailsDTO gmc = new GmcDetailsDTO();
+    gmc.setId(20L);
+
+    String url = "http://localhost:9999/tcs/api/gmc-details/20";
+
+    ResponseEntity responseEntity = new ResponseEntity(gmc, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).getForEntity(url, GmcDetailsDTO.class);
+
+    GmcDetailsDTO result = testObj.getGmcDetailsById(20L);
+    assertThat("Unexpected result", result, is(gmc));
+    verify(restTemplate).getForEntity(url, GmcDetailsDTO.class);
+  }
+
+  @Test
+  public void getGmcDetailsByIdShouldThrowErrorWhenNotFound() {
+    exceptionRule.expect(HttpClientErrorException.class);
+    exceptionRule.expectMessage("404 Not Found");
+    // RestTemplate hasn't been set up to find any GMC, so should throw exception
+    testObj.getGmcDetailsById(20L);
   }
 }
