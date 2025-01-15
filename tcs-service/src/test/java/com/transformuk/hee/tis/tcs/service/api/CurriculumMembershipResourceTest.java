@@ -4,6 +4,7 @@ import static com.transformuk.hee.tis.tcs.service.api.CurriculumResourceIntTest.
 import static com.transformuk.hee.tis.tcs.service.api.ProgrammeMembershipResourceIntTest.createPersonEntity;
 import static com.transformuk.hee.tis.tcs.service.api.ProgrammeMembershipResourceIntTest.createProgrammeMembershipEntity;
 import static com.transformuk.hee.tis.tcs.service.api.ProgrammeResourceIntTest.createEntity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -15,6 +16,7 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
@@ -121,6 +123,47 @@ class CurriculumMembershipResourceTest {
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
         .andDo(print())
         .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").isNotEmpty())
+        .andExpect(jsonPath("$.curriculumStartDate").value(START_DATE_2.toString()))
+        .andExpect(jsonPath("$.curriculumEndDate").value(END_DATE_2.toString()))
+        .andExpect(
+            jsonPath("$.programmeMembershipUuid").value(programmeMembership.getUuid().toString()))
+        .andExpect(jsonPath("$.curriculumId").value(curriculumId));
+  }
+
+  @Test
+  @Transactional
+  void shouldUpdateCurriculumMembership() throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculum.setStatus(Status.CURRENT);
+    cmRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setProgrammeStartDate(START_DATE_1);
+    programmeMembership.setProgrammeEndDate(END_DATE_1);
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    CurriculumMembership curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setCurriculumId(curriculum.getId());
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumStartDate(START_DATE_1);
+    curriculumMembership.setCurriculumEndDate(END_DATE_1);
+    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    Long curriculumId = programme.getCurricula().iterator().next().getCurriculum().getId();
+    cmDto.setId(curriculumMembership.getId());
+    cmDto.setCurriculumId(curriculumId);
+    cmDto.setCurriculumStartDate(START_DATE_2);
+    cmDto.setCurriculumEndDate(END_DATE_2);
+    cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
+
+    restCmMockMvc.perform(patch("/api/curriculum-membership")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(cmDto)))
+        .andDo(print())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.curriculumStartDate").value(START_DATE_2.toString()))
         .andExpect(jsonPath("$.curriculumEndDate").value(END_DATE_2.toString()))

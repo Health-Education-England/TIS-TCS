@@ -14,4 +14,6 @@ public interface CurriculumMembershipService {
    * @return the persisted object
    */
   CurriculumMembershipDTO save(CurriculumMembershipDTO cmDto);
+  CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto);
+  CurriculumMembershipDTO findOne(Long id);
 }
