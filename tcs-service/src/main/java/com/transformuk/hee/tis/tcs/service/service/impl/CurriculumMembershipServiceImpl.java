@@ -39,6 +39,15 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
     this.pmRepository = pmRepository;
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public CurriculumMembershipDTO findOne(Long id) {
+    log.debug("Request to get CurriculumMembership : {}", id);
+    CurriculumMembership curriculumMembership = cmRepository.findById(id)
+        .orElse(null);
+    return cmMapper.curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
+  }
+
   /**
    * Save a curriculumMembership.
    *
@@ -53,6 +62,33 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
     ProgrammeMembership pm =
         pmRepository.findByUuid(cmDto.getProgrammeMembershipUuid())
             .orElseThrow(() -> new NoSuchElementException("No value present"));
+    cm.setProgrammeMembership(pm);
+    CurriculumMembership returnedCm = cmRepository.save(cm);
+    return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
+  }
+
+  /**
+   * Patch a curriculumMembership.
+   *
+   * @param cmDto the dto to patch
+   * @return the persisted object
+   */
+  @Transactional
+  public CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto) {
+    log.debug("Request to patch CurriculumMembership : {}", cmDto);
+    CurriculumMembershipDTO curriculumMembershipDtoFromDb = findOne(cmDto.getId());
+    if (curriculumMembershipDtoFromDb == null) {
+      cmDto.addMessage("Curriculum membership id not found.");
+      return cmDto;
+    }
+    CurriculumMembership cm = cmMapper.toEntity(cmDto);
+    ProgrammeMembership pm = pmRepository.findByUuid(cmDto.getProgrammeMembershipUuid())
+        .orElse(null);
+    if (pm == null) {
+      cmDto.addMessage("Programme membership id not found.");
+      return cmDto;
+    }
+
     cm.setProgrammeMembership(pm);
     CurriculumMembership returnedCm = cmRepository.save(cm);
     return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);

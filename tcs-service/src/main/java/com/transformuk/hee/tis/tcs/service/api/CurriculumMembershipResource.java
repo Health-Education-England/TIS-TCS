@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,5 +63,23 @@ public class CurriculumMembershipResource {
             new URI("/api/curriculum-memberships/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
+  }
+
+  /**
+   * PATCH /curriculum-membership : patch a curriculum membership via bulk upload.
+   *
+   * @param curriculumMembershipDTO the dto to patch
+   * @return the ResponseEntity with status 200 (OK) and with body the patched dto
+   */
+  @PatchMapping("/curriculum-membership")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<CurriculumMembershipDTO> patchCurriculumMembership(
+      @RequestBody CurriculumMembershipDTO curriculumMembershipDTO) {
+    log.debug("REST request to patch curriculum membership via bulk upload : {}",
+        curriculumMembershipDTO);
+
+    CurriculumMembershipDTO result = cmService.patch(curriculumMembershipDTO);
+    return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
+        curriculumMembershipDTO.getId().toString())).body(result);
   }
 }

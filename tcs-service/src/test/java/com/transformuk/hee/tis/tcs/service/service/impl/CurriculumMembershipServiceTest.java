@@ -107,4 +107,41 @@ class CurriculumMembershipServiceTest {
     assertThrows(NoSuchElementException.class,
         () -> cmService.save(dto));
   }
+
+  @Test
+  void shouldPatchCmDto() {
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, START_DATE, END_DATE);
+    dto.setId(CURRICULUM_ID);
+
+    CurriculumMembership cm = new CurriculumMembership();
+    cm.setId(CURRICULUM_ID);
+    cm.setCurriculumStartDate(START_DATE);
+    cm.setCurriculumEndDate(END_DATE);
+    cm.setCurriculumId(CURRICULUM_ID);
+    when(cmMapper.toEntity(dto)).thenReturn(cm);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setUuid(PM_UUID);
+    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
+
+    CurriculumMembership returnedCm = new CurriculumMembership();
+    returnedCm.setId(CURRICULUM_ID);
+    returnedCm.setCurriculumStartDate(START_DATE);
+    returnedCm.setCurriculumEndDate(END_DATE);
+    returnedCm.setCurriculumId(CURRICULUM_ID);
+    returnedCm.setId(CM_ID);
+    returnedCm.setProgrammeMembership(pm);
+
+    CurriculumMembershipDTO returnedCmDto = createDto(CURRICULUM_ID, PM_UUID, START_DATE, END_DATE);
+    returnedCmDto.setId(CM_ID);
+
+    when(cmRepository.findById(dto.getId())).thenReturn(Optional.of(returnedCm));
+
+    when(cmRepository.save(any(CurriculumMembership.class))).thenReturn(returnedCm);
+    when(cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm)).thenReturn(
+        returnedCmDto);
+
+    CurriculumMembershipDTO result = cmService.patch(dto);
+    assertEquals(returnedCmDto, result);
+  }
 }
