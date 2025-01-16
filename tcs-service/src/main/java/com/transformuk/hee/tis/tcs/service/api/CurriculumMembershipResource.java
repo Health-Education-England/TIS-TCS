@@ -68,18 +68,18 @@ public class CurriculumMembershipResource {
   /**
    * PATCH /curriculum-membership : patch a curriculum membership via bulk upload.
    *
-   * @param curriculumMembershipDTO the dto to patch
+   * @param curriculumMembershipDto the dto to patch
    * @return the ResponseEntity with status 200 (OK) and with body the patched dto
    */
   @PatchMapping("/curriculum-membership")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<CurriculumMembershipDTO> patchCurriculumMembership(
-      @RequestBody CurriculumMembershipDTO curriculumMembershipDTO) {
+      @RequestBody CurriculumMembershipDTO curriculumMembershipDto) {
     log.debug("REST request to patch curriculum membership via bulk upload : {}",
-        curriculumMembershipDTO);
+        curriculumMembershipDto);
 
-    CurriculumMembershipDTO result = cmService.patch(curriculumMembershipDTO);
+    CurriculumMembershipDTO result = cmService.patch(curriculumMembershipDto);
     return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
-        curriculumMembershipDTO.getId().toString())).body(result);
+        curriculumMembershipDto.getId().toString())).body(result);
   }
 }
