@@ -381,7 +381,6 @@ public class TcsServiceImplTest {
   }
 
   @Test
-<<<<<<< HEAD
   public void getGmcDetailsByIdShouldFindGmcDto() {
     GmcDetailsDTO gmc = new GmcDetailsDTO();
     gmc.setId(20L);
@@ -402,7 +401,8 @@ public class TcsServiceImplTest {
     exceptionRule.expectMessage("404 Not Found");
     // RestTemplate hasn't been set up to find any GMC, so should throw exception
     testObj.getGmcDetailsById(20L);
-=======
+  }
+
   public void updateCurriculumMembershipShouldReturnSavedDto() {
     CurriculumMembershipDTO dto = new CurriculumMembershipDTO();
 
@@ -421,6 +421,5 @@ public class TcsServiceImplTest {
     verify(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,
         new ParameterizedTypeReference<CurriculumMembershipDTO>() {
         });
->>>>>>> feat: update curriculum membership api
   }
 }
