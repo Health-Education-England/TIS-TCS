@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
@@ -143,5 +145,33 @@ class CurriculumMembershipServiceTest {
 
     CurriculumMembershipDTO result = cmService.patch(dto);
     assertEquals(returnedCmDto, result);
+  }
+
+  @Test
+  void shouldReturnMessageWhenCurriculumMembershipNotFound() {
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(CM_ID);
+    when(cmService.findOne(CM_ID)).thenReturn(null);
+
+   CurriculumMembershipDTO result = cmService.patch(cmDto);
+
+    assertEquals("Curriculum membership id not found.", result.getMessageList().get(0));
+    verify(cmRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldReturnMessageWhenProgrammeMembershipNotFound() {
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(CM_ID);
+    cmDto.setProgrammeMembershipUuid(PM_UUID);
+
+    CurriculumMembershipDTO fromDb = new CurriculumMembershipDTO();
+    when(cmService.findOne(CM_ID)).thenReturn(fromDb);
+    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.empty());
+
+    CurriculumMembershipDTO result = cmService.patch(cmDto);
+
+    assertEquals("Programme membership id not found.", result.getMessageList().get(0));
+    verify(cmRepository, never()).save(any());
   }
 }

@@ -403,10 +403,11 @@ public class TcsServiceImplTest {
     testObj.getGmcDetailsById(20L);
   }
 
+  @Test
   public void updateCurriculumMembershipShouldReturnSavedDto() {
     CurriculumMembershipDTO dto = new CurriculumMembershipDTO();
 
-    String url = "http://localhost:9999/tcs/api/curriculum-memberships";
+    String url = "http://localhost:9999/tcs/api/curriculum-membership";
 
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(dto, headers);
