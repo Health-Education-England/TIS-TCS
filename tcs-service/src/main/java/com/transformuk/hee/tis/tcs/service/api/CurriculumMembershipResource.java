@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
@@ -42,8 +43,8 @@ public class CurriculumMembershipResource {
    *
    * @param cmDto the curriculumMembershipDto to add
    * @return the ResponseEntity with status 201 (Created) and with body the new
-   *         CurriculumMembershipDTO, or with status 400 (Bad Request)
-   *         if the curriculumMembershipDto has already an ID
+   *     CurriculumMembershipDTO, or with status 400 (Bad Request) if the
+   *     curriculumMembershipDto already has an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/curriculum-memberships")
@@ -71,15 +72,23 @@ public class CurriculumMembershipResource {
    * @param curriculumMembershipDto the dto to patch
    * @return the ResponseEntity with status 200 (OK) and with body the patched dto
    */
-  @PatchMapping("/curriculum-membership")
+  @PatchMapping("/curriculum-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<CurriculumMembershipDTO> patchCurriculumMembership(
-      @RequestBody CurriculumMembershipDTO curriculumMembershipDto) {
-    log.debug("REST request to patch curriculum membership via bulk upload : {}",
-        curriculumMembershipDto);
+      @RequestBody @Validated(Update.class) CurriculumMembershipDTO curriculumMembershipDto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
+    log.debug("REST request to patch CurriculumMembership : {}", curriculumMembershipDto);
 
+    if (curriculumMembershipDto.getId() == null) {
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "id_missing",
+              "The ID is required for patching an existing curriculumMembership.")).body(null);
+    }
+    cmValidator.validate(curriculumMembershipDto);
     CurriculumMembershipDTO result = cmService.patch(curriculumMembershipDto);
-    return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
-        curriculumMembershipDto.getId().toString())).body(result);
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
+            curriculumMembershipDto.getId().toString()))
+        .body(result);
   }
 }

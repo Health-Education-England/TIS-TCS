@@ -120,7 +120,6 @@ class CurriculumMembershipServiceTest {
     cm.setCurriculumStartDate(START_DATE);
     cm.setCurriculumEndDate(END_DATE);
     cm.setCurriculumId(CURRICULUM_ID);
-    when(cmMapper.toEntity(dto)).thenReturn(cm);
 
     ProgrammeMembership pm = new ProgrammeMembership();
     pm.setUuid(PM_UUID);
@@ -151,7 +150,7 @@ class CurriculumMembershipServiceTest {
   void shouldReturnMessageWhenCurriculumMembershipNotFound() {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setId(CM_ID);
-    when(cmService.findOne(CM_ID)).thenReturn(null);
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.empty());
 
    CurriculumMembershipDTO result = cmService.patch(cmDto);
 
@@ -165,13 +164,83 @@ class CurriculumMembershipServiceTest {
     cmDto.setId(CM_ID);
     cmDto.setProgrammeMembershipUuid(PM_UUID);
 
-    CurriculumMembershipDTO fromDb = new CurriculumMembershipDTO();
-    when(cmService.findOne(CM_ID)).thenReturn(fromDb);
+    CurriculumMembership returnedCm = new CurriculumMembership();
+    returnedCm.setId(CURRICULUM_ID);
+    returnedCm.setCurriculumStartDate(START_DATE);
+    returnedCm.setCurriculumEndDate(END_DATE);
+    returnedCm.setCurriculumId(CURRICULUM_ID);
+    returnedCm.setId(CM_ID);
+
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(returnedCm));
     when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.empty());
 
     CurriculumMembershipDTO result = cmService.patch(cmDto);
 
     assertEquals("Programme membership id not found.", result.getMessageList().get(0));
     verify(cmRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldKeepDatabaseCurriculumMembershipStartAndEndDateWhenTheyAreEmptyInTemplate() {
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(CM_ID);
+    cmDto.setCurriculumStartDate(null);
+    cmDto.setCurriculumEndDate(null);
+    cmDto.setProgrammeMembershipUuid(PM_UUID);
+
+    CurriculumMembership returnedCm = new CurriculumMembership();
+    returnedCm.setId(CURRICULUM_ID);
+    returnedCm.setCurriculumStartDate(START_DATE);
+    returnedCm.setCurriculumEndDate(END_DATE);
+    returnedCm.setCurriculumId(CURRICULUM_ID);
+    returnedCm.setId(CM_ID);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setUuid(PM_UUID);
+
+    when(cmRepository.save(any(CurriculumMembership.class))).thenReturn(returnedCm);
+    CurriculumMembershipDTO returnedCmDto = createDto(CURRICULUM_ID, PM_UUID, START_DATE, END_DATE);
+    returnedCmDto.setId(CM_ID);
+    when(cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm)).thenReturn(
+        returnedCmDto);
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(returnedCm));
+    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
+
+    CurriculumMembershipDTO result = cmService.patch(cmDto);
+
+    assertEquals(returnedCm.getCurriculumEndDate(), result.getCurriculumEndDate());
+    assertEquals(returnedCm.getCurriculumStartDate(), result.getCurriculumStartDate());
+  }
+
+  @Test
+  void shouldKeepDatabaseCurriculumMembershipStartWhenTheyAreEmptyInTemplate() {
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(CM_ID);
+    cmDto.setCurriculumStartDate(null);
+    cmDto.setCurriculumEndDate(END_DATE);
+    cmDto.setProgrammeMembershipUuid(PM_UUID);
+
+    CurriculumMembership returnedCm = new CurriculumMembership();
+    returnedCm.setId(CURRICULUM_ID);
+    returnedCm.setCurriculumStartDate(START_DATE);
+    returnedCm.setCurriculumEndDate(END_DATE);
+    returnedCm.setCurriculumId(CURRICULUM_ID);
+    returnedCm.setId(CM_ID);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setUuid(PM_UUID);
+
+    when(cmRepository.save(any(CurriculumMembership.class))).thenReturn(returnedCm);
+    CurriculumMembershipDTO returnedCmDto = createDto(CURRICULUM_ID, PM_UUID, START_DATE, END_DATE);
+    returnedCmDto.setId(CM_ID);
+    when(cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm)).thenReturn(
+        returnedCmDto);
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(returnedCm));
+    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
+
+    CurriculumMembershipDTO result = cmService.patch(cmDto);
+
+    assertEquals(returnedCm.getCurriculumEndDate(), result.getCurriculumEndDate());
+    assertEquals(returnedCm.getCurriculumStartDate(), result.getCurriculumStartDate());
   }
 }

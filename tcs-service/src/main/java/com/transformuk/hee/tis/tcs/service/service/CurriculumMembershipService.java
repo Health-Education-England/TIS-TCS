@@ -17,5 +17,4 @@ public interface CurriculumMembershipService {
 
   CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto);
 
-  CurriculumMembershipDTO findOne(Long id);
 }

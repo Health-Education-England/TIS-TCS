@@ -29,7 +29,7 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
    * Initialise the CurriculumMembershipServiceImpl.
    *
    * @param cmRepository Curriculum Membership repository
-   * @param cmMapper Curriculum Membership mapper
+   * @param cmMapper     Curriculum Membership mapper
    * @param pmRepository Programme Membership repository
    */
   public CurriculumMembershipServiceImpl(CurriculumMembershipRepository cmRepository,
@@ -37,15 +37,6 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
     this.cmRepository = cmRepository;
     this.cmMapper = cmMapper;
     this.pmRepository = pmRepository;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public CurriculumMembershipDTO findOne(Long id) {
-    log.debug("Request to get CurriculumMembership : {}", id);
-    CurriculumMembership curriculumMembership = cmRepository.findById(id)
-        .orElse(null);
-    return cmMapper.curriculumMembershipToCurriculumMembershipDto(curriculumMembership);
   }
 
   /**
@@ -76,21 +67,28 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
   @Transactional
   public CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto) {
     log.debug("Request to patch CurriculumMembership : {}", cmDto);
-    CurriculumMembershipDTO curriculumMembershipDtoFromDb = findOne(cmDto.getId());
-    if (curriculumMembershipDtoFromDb == null) {
+    CurriculumMembership curriculumMembershipDb = cmRepository.findById(cmDto.getId())
+        .orElse(null);
+    if (curriculumMembershipDb == null) {
       cmDto.addMessage("Curriculum membership id not found.");
       return cmDto;
     }
-    CurriculumMembership cm = cmMapper.toEntity(cmDto);
     ProgrammeMembership pm = pmRepository.findByUuid(cmDto.getProgrammeMembershipUuid())
         .orElse(null);
     if (pm == null) {
       cmDto.addMessage("Programme membership id not found.");
       return cmDto;
     }
+    if (cmDto.getCurriculumStartDate() != null) {
+      curriculumMembershipDb.setCurriculumStartDate(cmDto.getCurriculumStartDate());
+    }
 
-    cm.setProgrammeMembership(pm);
-    CurriculumMembership returnedCm = cmRepository.save(cm);
+    if (cmDto.getCurriculumEndDate() != null) {
+      curriculumMembershipDb.setCurriculumEndDate(cmDto.getCurriculumEndDate());
+    }
+
+    curriculumMembershipDb.setProgrammeMembership(pm);
+    CurriculumMembership returnedCm = cmRepository.save(curriculumMembershipDb);
     return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
   }
 }

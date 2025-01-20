@@ -404,10 +404,10 @@ public class TcsServiceImplTest {
   }
 
   @Test
-  public void updateCurriculumMembershipShouldReturnSavedDto() {
+  public void patchCurriculumMembershipShouldReturnSavedDto() {
     CurriculumMembershipDTO dto = new CurriculumMembershipDTO();
 
-    String url = "http://localhost:9999/tcs/api/curriculum-membership";
+    String url = "http://localhost:9999/tcs/api/curriculum-memberships";
 
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(dto, headers);
@@ -416,7 +416,7 @@ public class TcsServiceImplTest {
         new ParameterizedTypeReference<CurriculumMembershipDTO>() {
         });
 
-    CurriculumMembershipDTO result = testObj.updateCurriculumMembership(dto);
+    CurriculumMembershipDTO result = testObj.patchCurriculumMembership(dto);
 
     assertThat("Unexpected result", result, is(dto));
     verify(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,

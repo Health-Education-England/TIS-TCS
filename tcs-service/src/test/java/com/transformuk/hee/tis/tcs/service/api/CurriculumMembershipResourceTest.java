@@ -133,7 +133,7 @@ class CurriculumMembershipResourceTest {
 
   @Test
   @Transactional
-  void shouldUpdateCurriculumMembership() throws Exception {
+  void shouldPatchCurriculumMembership() throws Exception {
     personRepository.saveAndFlush(person);
     curriculum.setStatus(Status.CURRENT);
     cmRepository.saveAndFlush(curriculum);
@@ -159,7 +159,7 @@ class CurriculumMembershipResourceTest {
     cmDto.setCurriculumEndDate(END_DATE_2);
     cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
 
-    restCmMockMvc.perform(patch("/api/curriculum-membership")
+    restCmMockMvc.perform(patch("/api/curriculum-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
         .andDo(print())
