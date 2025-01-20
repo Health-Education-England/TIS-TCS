@@ -278,4 +278,57 @@ class CurriculumMembershipValidatorTest {
     // When.
     assertDoesNotThrow(() -> cmValidator.validate(dto));
   }
+
+  @Test
+  void shouldNotHaveAnyErrorIfCmStartAndEndDateIsNull() {
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, null, null);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setProgrammeStartDate(START_DATE_1);
+    pm.setProgrammeEndDate(END_DATE_1);
+
+    Programme programme = new Programme();
+    programme.setId(PROGRAMME_ID);
+
+    Curriculum curriculum1 = new Curriculum();
+    curriculum1.setId(1L);
+    curriculum1.setStatus(Status.CURRENT);
+    ProgrammeCurriculum pc1 = new ProgrammeCurriculum();
+    pc1.setCurriculum(curriculum1);
+
+    programme.getCurricula().addAll(Lists.newArrayList(pc1));
+    pm.setProgramme(programme);
+
+    cmValidator.validateForBulkUploadPatch(dto);
+    assertThat("should contain 0 error", dto.getMessageList().size(), is(0));
+  }
+
+  @Test
+  void shouldThrowExceptionsWhenCmDatesNotValid_ForBulk() {
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, END_DATE_2, START_DATE_2);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setProgrammeStartDate(START_DATE_1);
+    pm.setProgrammeEndDate(END_DATE_1);
+
+    Programme programme = new Programme();
+    programme.setId(PROGRAMME_ID);
+
+    Curriculum curriculum1 = new Curriculum();
+    curriculum1.setId(1L);
+    curriculum1.setStatus(Status.CURRENT);
+    ProgrammeCurriculum pc1 = new ProgrammeCurriculum();
+    pc1.setCurriculum(curriculum1);
+
+    programme.getCurricula().addAll(Lists.newArrayList(pc1));
+    pm.setProgramme(programme);
+
+    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
+
+    cmValidator.validateForBulkUploadPatch(dto);
+
+    assertThat("Unexpected error count.", dto.getMessageList().size(), is(1));
+    assertThat("Validation error", dto.getMessageList().get(0),
+        is("Curriculum membership start date must not be later than end date."));
+  }
 }

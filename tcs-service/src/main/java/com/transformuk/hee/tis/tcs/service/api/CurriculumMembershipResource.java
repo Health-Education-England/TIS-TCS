@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
-import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
@@ -75,8 +74,7 @@ public class CurriculumMembershipResource {
   @PatchMapping("/curriculum-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<CurriculumMembershipDTO> patchCurriculumMembership(
-      @RequestBody @Validated(Update.class) CurriculumMembershipDTO curriculumMembershipDto)
-      throws MethodArgumentNotValidException, NoSuchMethodException {
+      @RequestBody CurriculumMembershipDTO curriculumMembershipDto) {
     log.debug("REST request to patch CurriculumMembership : {}", curriculumMembershipDto);
 
     if (curriculumMembershipDto.getId() == null) {
@@ -84,7 +82,7 @@ public class CurriculumMembershipResource {
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "id_missing",
               "The ID is required for patching an existing curriculumMembership.")).body(null);
     }
-    cmValidator.validate(curriculumMembershipDto);
+    cmValidator.validateForBulkUploadPatch(curriculumMembershipDto);
     CurriculumMembershipDTO result = cmService.patch(curriculumMembershipDto);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,

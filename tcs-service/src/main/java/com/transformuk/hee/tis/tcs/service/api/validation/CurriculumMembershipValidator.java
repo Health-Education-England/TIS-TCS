@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class CurriculumMembershipValidator {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(CurriculumMembershipValidator.class);
   protected static final String CURRICULUM_MEMBERSHIP_DTO_NAME = "CurriculumMembershipDTO";
   protected static final String FIELD_CURRICULUM_ID = "Curriculum Id";
   protected static final String FIELD_PM_UUID = "ProgrammeMembership Uuid";
@@ -90,6 +93,27 @@ public class CurriculumMembershipValidator {
       Method method = this.getClass().getMethod("validate", CurriculumMembershipDTO.class);
       MethodParameter methodParameter = new MethodParameter(method, 0);
       throw new MethodArgumentNotValidException(methodParameter, bindingResult);
+    }
+  }
+
+  /**
+   * Validate a CurriculumMembershipDTO.
+   * for bulk update
+   *
+   * @param cmDto the curriculumMembership Dto to validate
+   */
+  @Transactional(readOnly = true)
+  public void validateForBulkUploadPatch(CurriculumMembershipDTO cmDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    if (cmDto.getCurriculumEndDate() != null && cmDto.getCurriculumStartDate() != null) {
+      fieldErrors.addAll(checkCmWithPm(cmDto));
+      fieldErrors.addAll(checkCmDates(cmDto));
+    }
+
+    for (FieldError fieldError : fieldErrors) {
+      String errorMessage = fieldError.getDefaultMessage();
+      cmDto.addMessage(errorMessage);
+      LOGGER.debug("Validation error: {}", errorMessage);
     }
   }
 
