@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +29,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class CurriculumMembershipValidator {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CurriculumMembershipValidator.class);
   protected static final String CURRICULUM_MEMBERSHIP_DTO_NAME = "CurriculumMembershipDTO";
   protected static final String FIELD_CURRICULUM_ID = "Curriculum Id";
+  protected static final String FIELD_CURRICULUM_MEMBERSHIP_ID = "Curriculum membership Id";
   protected static final String FIELD_PM_UUID = "ProgrammeMembership Uuid";
   protected static final String FIELD_CM_START_DATE = "Curriculum Start Date";
   protected static final String FIELD_CM_END_DATE = "Curriculum End Date";
@@ -54,6 +52,9 @@ public class CurriculumMembershipValidator {
 
   protected static final String NO_MATCHING_CURRICULUM =
       "Could not find current curriculum for id \"%s\" under the programme.";
+
+  protected static final String NO_MATCHING_CURRICULUM_MEMBERSHIP =
+      "Could not find current curriculum membership for id \"%s\" under the programme membership.";
 
   protected static final String EXISTING_CM_FOUND =
       "Curriculum membership with the same curriculumId, programme membership uuid, "
@@ -103,17 +104,22 @@ public class CurriculumMembershipValidator {
    * @param cmDto the curriculumMembership Dto to validate
    */
   @Transactional(readOnly = true)
-  public void validateForBulkUploadPatch(CurriculumMembershipDTO cmDto) {
+  public void validateForBulkUploadPatch(CurriculumMembershipDTO cmDto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     List<FieldError> fieldErrors = new ArrayList<>();
     if (cmDto.getCurriculumEndDate() != null && cmDto.getCurriculumStartDate() != null) {
-      fieldErrors.addAll(checkCmWithPm(cmDto));
+      fieldErrors.addAll(checkCmWithPmForBulk(cmDto));
       fieldErrors.addAll(checkCmDates(cmDto));
     }
 
-    for (FieldError fieldError : fieldErrors) {
-      String errorMessage = fieldError.getDefaultMessage();
-      cmDto.addMessage(errorMessage);
-      LOGGER.debug("Validation error: {}", errorMessage);
+    if (!fieldErrors.isEmpty()) {
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
+          cmDto, CURRICULUM_MEMBERSHIP_DTO_NAME);
+      fieldErrors.forEach(bindingResult::addError);
+      Method method = this.getClass()
+          .getMethod("validateForBulkUploadPatch", CurriculumMembershipDTO.class);
+      MethodParameter methodParameter = new MethodParameter(method, 0);
+      throw new MethodArgumentNotValidException(methodParameter, bindingResult);
     }
   }
 
@@ -155,6 +161,22 @@ public class CurriculumMembershipValidator {
     return fieldErrors;
   }
 
+  private List<FieldError> checkCmWithPmForBulk(CurriculumMembershipDTO cmDto) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    Optional<ProgrammeMembership> optionalPm = pmRepository.findByUuid(
+        cmDto.getProgrammeMembershipUuid());
+    if (optionalPm.isPresent()) {
+      ProgrammeMembership pm = optionalPm.get();
+      fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
+      fieldErrors.addAll(
+          checkCurriculumMembershipBelongsToCorrectPm(pm, cmDto.getId()));
+    } else {
+      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
+          NO_PROGRAMME_MEMBERSHIP_FOR_ID));
+    }
+    return fieldErrors;
+  }
+
   private List<FieldError> checkCurriculumIdWithProgramme(Programme programme, Long curriculumId) {
     List<FieldError> fieldErrors = new ArrayList<>();
     Optional<ProgrammeCurriculum> optionalPc = programme.getCurricula().stream().filter(pc -> {
@@ -164,6 +186,18 @@ public class CurriculumMembershipValidator {
     if (!optionalPc.isPresent()) {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
           String.format(NO_MATCHING_CURRICULUM, curriculumId)));
+    }
+    return fieldErrors;
+  }
+
+  private List<FieldError> checkCurriculumMembershipBelongsToCorrectPm(ProgrammeMembership pm,
+      Long cmId) {
+    List<FieldError> fieldErrors = new ArrayList<>();
+    Optional<CurriculumMembership> correctCm = pm.getCurriculumMemberships().stream()
+        .filter(cms -> cms.getId().equals(cmId)).findFirst();
+    if (!correctCm.isPresent()) {
+      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_MEMBERSHIP_ID,
+          String.format(NO_MATCHING_CURRICULUM_MEMBERSHIP, cmId)));
     }
     return fieldErrors;
   }

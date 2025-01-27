@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
+import com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * Service Implementation for managing CurriculumMembership.
@@ -24,6 +26,7 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
   private final CurriculumMembershipRepository cmRepository;
   private final ProgrammeMembershipRepository pmRepository;
   private final CurriculumMembershipMapper cmMapper;
+  private final CurriculumMembershipValidator cmValidator;
 
   /**
    * Initialise the CurriculumMembershipServiceImpl.
@@ -33,10 +36,12 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
    * @param pmRepository Programme Membership repository
    */
   public CurriculumMembershipServiceImpl(CurriculumMembershipRepository cmRepository,
-      CurriculumMembershipMapper cmMapper, ProgrammeMembershipRepository pmRepository) {
+      CurriculumMembershipMapper cmMapper, ProgrammeMembershipRepository pmRepository,
+      CurriculumMembershipValidator cmValidator) {
     this.cmRepository = cmRepository;
     this.cmMapper = cmMapper;
     this.pmRepository = pmRepository;
+    this.cmValidator = cmValidator;
   }
 
   /**
@@ -65,7 +70,8 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
    * @return the persisted object
    */
   @Transactional
-  public CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto) {
+  public CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("Request to patch CurriculumMembership : {}", cmDto);
     CurriculumMembership curriculumMembershipDb = cmRepository.findById(cmDto.getId())
         .orElse(null);
@@ -73,22 +79,18 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
       cmDto.addMessage("Curriculum membership id not found.");
       return cmDto;
     }
-    ProgrammeMembership pm = pmRepository.findByUuid(cmDto.getProgrammeMembershipUuid())
-        .orElse(null);
-    if (pm == null) {
-      cmDto.addMessage("Programme membership id not found.");
-      return cmDto;
+    if (cmDto.getCurriculumStartDate() == null) {
+      cmDto.setCurriculumStartDate(curriculumMembershipDb.getCurriculumStartDate());
     }
-    if (cmDto.getCurriculumStartDate() != null) {
-      curriculumMembershipDb.setCurriculumStartDate(cmDto.getCurriculumStartDate());
+    if (cmDto.getCurriculumEndDate() == null) {
+      cmDto.setCurriculumEndDate(curriculumMembershipDb.getCurriculumEndDate());
     }
+    cmValidator.validateForBulkUploadPatch(cmDto);
 
-    if (cmDto.getCurriculumEndDate() != null) {
-      curriculumMembershipDb.setCurriculumEndDate(cmDto.getCurriculumEndDate());
-    }
-
-    curriculumMembershipDb.setProgrammeMembership(pm);
+    curriculumMembershipDb.setCurriculumStartDate(cmDto.getCurriculumStartDate());
+    curriculumMembershipDb.curriculumEndDate(cmDto.getCurriculumEndDate());
     CurriculumMembership returnedCm = cmRepository.save(curriculumMembershipDb);
+
     return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
   }
 }

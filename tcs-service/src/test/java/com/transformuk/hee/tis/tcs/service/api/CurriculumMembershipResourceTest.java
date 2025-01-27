@@ -142,13 +142,15 @@ class CurriculumMembershipResourceTest {
     programmeMembership.setProgramme(programme);
     programmeMembership.setProgrammeStartDate(START_DATE_1);
     programmeMembership.setProgrammeEndDate(END_DATE_1);
-    programmeMembershipRepository.saveAndFlush(programmeMembership);
 
     CurriculumMembership curriculumMembership = new CurriculumMembership();
     curriculumMembership.setCurriculumId(curriculum.getId());
     curriculumMembership.setProgrammeMembership(programmeMembership);
     curriculumMembership.setCurriculumStartDate(START_DATE_1);
     curriculumMembership.setCurriculumEndDate(END_DATE_1);
+    programmeMembership.setCurriculumMemberships(Collections.singleton(curriculumMembership));
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
     curriculumMembershipRepository.saveAndFlush(curriculumMembership);
 
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();

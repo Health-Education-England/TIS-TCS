@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
+import com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeMembership;
 import com.transformuk.hee.tis.tcs.service.repository.CurriculumMembershipRepository;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ExtendWith(MockitoExtension.class)
 class CurriculumMembershipServiceTest {
@@ -38,12 +40,15 @@ class CurriculumMembershipServiceTest {
   private ProgrammeMembershipRepository pmRepository;
   @Mock
   private CurriculumMembershipMapper cmMapper;
+  @Mock
+  private CurriculumMembershipValidator cmValidator;
 
   private CurriculumMembershipService cmService;
 
   @BeforeEach
   void setUp() {
-    cmService = new CurriculumMembershipServiceImpl(cmRepository, cmMapper, pmRepository);
+    cmService = new CurriculumMembershipServiceImpl(cmRepository, cmMapper, pmRepository,
+        cmValidator);
   }
 
   CurriculumMembershipDTO createDto(Long curriculumId, UUID pmUuid, LocalDate cmStartDate,
@@ -111,7 +116,7 @@ class CurriculumMembershipServiceTest {
   }
 
   @Test
-  void shouldPatchCmDto() {
+  void shouldPatchCmDto() throws MethodArgumentNotValidException, NoSuchMethodException {
     CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, START_DATE, END_DATE);
     dto.setId(CURRICULUM_ID);
 
@@ -123,7 +128,6 @@ class CurriculumMembershipServiceTest {
 
     ProgrammeMembership pm = new ProgrammeMembership();
     pm.setUuid(PM_UUID);
-    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
 
     CurriculumMembership returnedCm = new CurriculumMembership();
     returnedCm.setId(CURRICULUM_ID);
@@ -147,7 +151,8 @@ class CurriculumMembershipServiceTest {
   }
 
   @Test
-  void shouldReturnMessageWhenCurriculumMembershipNotFound() {
+  void shouldReturnMessageWhenCurriculumMembershipNotFound()
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setId(CM_ID);
     when(cmRepository.findById(CM_ID)).thenReturn(Optional.empty());
@@ -159,29 +164,8 @@ class CurriculumMembershipServiceTest {
   }
 
   @Test
-  void shouldReturnMessageWhenProgrammeMembershipNotFound() {
-    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
-    cmDto.setId(CM_ID);
-    cmDto.setProgrammeMembershipUuid(PM_UUID);
-
-    CurriculumMembership returnedCm = new CurriculumMembership();
-    returnedCm.setId(CURRICULUM_ID);
-    returnedCm.setCurriculumStartDate(START_DATE);
-    returnedCm.setCurriculumEndDate(END_DATE);
-    returnedCm.setCurriculumId(CURRICULUM_ID);
-    returnedCm.setId(CM_ID);
-
-    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(returnedCm));
-    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.empty());
-
-    CurriculumMembershipDTO result = cmService.patch(cmDto);
-
-    assertEquals("Programme membership id not found.", result.getMessageList().get(0));
-    verify(cmRepository, never()).save(any());
-  }
-
-  @Test
-  void shouldKeepDatabaseCurriculumMembershipStartAndEndDateWhenTheyAreEmptyInTemplate() {
+  void shouldKeepDatabaseCurriculumMembershipStartAndEndDateWhenTheyAreEmptyInTemplate()
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setId(CM_ID);
     cmDto.setCurriculumStartDate(null);
@@ -204,7 +188,6 @@ class CurriculumMembershipServiceTest {
     when(cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm)).thenReturn(
         returnedCmDto);
     when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(returnedCm));
-    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
 
     CurriculumMembershipDTO result = cmService.patch(cmDto);
 
@@ -213,7 +196,8 @@ class CurriculumMembershipServiceTest {
   }
 
   @Test
-  void shouldKeepDatabaseCurriculumMembershipStartWhenTheyAreEmptyInTemplate() {
+  void shouldKeepDatabaseCurriculumMembershipStartWhenTheyAreEmptyInTemplate()
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setId(CM_ID);
     cmDto.setCurriculumStartDate(null);
@@ -236,7 +220,6 @@ class CurriculumMembershipServiceTest {
     when(cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm)).thenReturn(
         returnedCmDto);
     when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(returnedCm));
-    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
 
     CurriculumMembershipDTO result = cmService.patch(cmDto);
 

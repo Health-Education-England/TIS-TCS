@@ -74,7 +74,8 @@ public class CurriculumMembershipResource {
   @PatchMapping("/curriculum-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<CurriculumMembershipDTO> patchCurriculumMembership(
-      @RequestBody CurriculumMembershipDTO curriculumMembershipDto) {
+      @RequestBody CurriculumMembershipDTO curriculumMembershipDto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to patch CurriculumMembership : {}", curriculumMembershipDto);
 
     if (curriculumMembershipDto.getId() == null) {
@@ -82,7 +83,6 @@ public class CurriculumMembershipResource {
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "id_missing",
               "The ID is required for patching an existing curriculumMembership.")).body(null);
     }
-    cmValidator.validateForBulkUploadPatch(curriculumMembershipDto);
     CurriculumMembershipDTO result = cmService.patch(curriculumMembershipDto);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,

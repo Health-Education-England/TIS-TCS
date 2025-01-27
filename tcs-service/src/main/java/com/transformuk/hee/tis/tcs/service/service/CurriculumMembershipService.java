@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * Service Interface for managing CurriculumMembership.
@@ -15,6 +16,6 @@ public interface CurriculumMembershipService {
    */
   CurriculumMembershipDTO save(CurriculumMembershipDTO cmDto);
 
-  CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto);
-
+  CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto)
+      throws MethodArgumentNotValidException, NoSuchMethodException;
 }
