@@ -5,8 +5,6 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
@@ -38,12 +36,6 @@ public class CurriculumMembershipDTO implements Serializable {
   private Long curriculumId;
 
   private LocalDateTime amendedDate;
-
-  private List<String> messageList = new ArrayList<>();
-
-  public void addMessage(String message) {
-    messageList.add(message);
-  }
 
   @Override
   public boolean equals(Object o) {

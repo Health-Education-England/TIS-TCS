@@ -9,6 +9,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeMembershipReposit
 import com.transformuk.hee.tis.tcs.service.service.CurriculumMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.CurriculumMembershipMapper;
 import java.util.NoSuchElementException;
+import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
    * @param cmRepository Curriculum Membership repository
    * @param cmMapper     Curriculum Membership mapper
    * @param pmRepository Programme Membership repository
+   * @param cmValidator  Curriculum Membership validator
    */
   public CurriculumMembershipServiceImpl(CurriculumMembershipRepository cmRepository,
       CurriculumMembershipMapper cmMapper, ProgrammeMembershipRepository pmRepository,
@@ -74,23 +76,22 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
       throws MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("Request to patch CurriculumMembership : {}", cmDto);
     CurriculumMembership curriculumMembershipDb = cmRepository.findById(cmDto.getId())
-        .orElse(null);
-    if (curriculumMembershipDb == null) {
-      cmDto.addMessage("Curriculum membership id not found.");
-      return cmDto;
-    }
+        .orElseThrow(() -> new EntityNotFoundException(
+            "CurriculumMembership not found for ID: " + cmDto.getId()));
+
     if (cmDto.getCurriculumStartDate() == null) {
       cmDto.setCurriculumStartDate(curriculumMembershipDb.getCurriculumStartDate());
     }
     if (cmDto.getCurriculumEndDate() == null) {
       cmDto.setCurriculumEndDate(curriculumMembershipDb.getCurriculumEndDate());
     }
+
     cmValidator.validateForBulkUploadPatch(cmDto);
 
     curriculumMembershipDb.setCurriculumStartDate(cmDto.getCurriculumStartDate());
     curriculumMembershipDb.curriculumEndDate(cmDto.getCurriculumEndDate());
-    CurriculumMembership returnedCm = cmRepository.save(curriculumMembershipDb);
 
+    CurriculumMembership returnedCm = cmRepository.save(curriculumMembershipDb);
     return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
   }
 }

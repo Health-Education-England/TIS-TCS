@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -151,19 +152,6 @@ class CurriculumMembershipServiceTest {
   }
 
   @Test
-  void shouldReturnMessageWhenCurriculumMembershipNotFound()
-      throws MethodArgumentNotValidException, NoSuchMethodException {
-    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
-    cmDto.setId(CM_ID);
-    when(cmRepository.findById(CM_ID)).thenReturn(Optional.empty());
-
-   CurriculumMembershipDTO result = cmService.patch(cmDto);
-
-    assertEquals("Curriculum membership id not found.", result.getMessageList().get(0));
-    verify(cmRepository, never()).save(any());
-  }
-
-  @Test
   void shouldKeepDatabaseCurriculumMembershipStartAndEndDateWhenTheyAreEmptyInTemplate()
       throws MethodArgumentNotValidException, NoSuchMethodException {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
@@ -225,5 +213,21 @@ class CurriculumMembershipServiceTest {
 
     assertEquals(returnedCm.getCurriculumEndDate(), result.getCurriculumEndDate());
     assertEquals(returnedCm.getCurriculumStartDate(), result.getCurriculumStartDate());
+  }
+
+  @Test
+  void shouldThrowEntityNotFoundExceptionWhenCurriculumMembershipNotFound() {
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(CM_ID);
+    cmDto.setCurriculumStartDate(null);
+    cmDto.setCurriculumEndDate(END_DATE);
+    cmDto.setProgrammeMembershipUuid(PM_UUID);
+
+    when(cmRepository.findById(cmDto.getId())).thenReturn(Optional.empty());
+
+    assertThrows(EntityNotFoundException.class, () -> {
+      cmService.patch(cmDto);
+    });
+    verify(cmRepository, times(1)).findById(cmDto.getId());
   }
 }

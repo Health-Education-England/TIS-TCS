@@ -7,10 +7,8 @@ import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembe
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CM_END_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CM_START_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CURRICULUM_ID;
-import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CURRICULUM_MEMBERSHIP_ID;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_PM_UUID;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.NO_MATCHING_CURRICULUM;
-import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.NO_MATCHING_CURRICULUM_MEMBERSHIP;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.NO_PROGRAMME_MEMBERSHIP_FOR_ID;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.NULL_PROGRAMME_MEMBERSHIP_ID;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -51,6 +49,7 @@ class CurriculumMembershipValidatorTest {
   private static final long CM_ID_2 = 112L;
   private static final long PROGRAMME_ID = 1L;
   private static final UUID PM_UUID = UUID.randomUUID();
+  private static final UUID PM_UUID2 = UUID.randomUUID();
   private static final LocalDate START_DATE_1 = LocalDate.of(2020, 1, 1);
   private static final LocalDate END_DATE_1 = LocalDate.of(2025, 1, 1);
   private static final LocalDate START_DATE_2 = LocalDate.of(2021, 1, 1);
@@ -284,31 +283,6 @@ class CurriculumMembershipValidatorTest {
   }
 
   @Test
-  void shouldNotHaveAnyErrorIfCmStartAndEndDateIsNull()
-      throws MethodArgumentNotValidException, NoSuchMethodException {
-    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, null, null);
-
-    ProgrammeMembership pm = new ProgrammeMembership();
-    pm.setProgrammeStartDate(START_DATE_1);
-    pm.setProgrammeEndDate(END_DATE_1);
-
-    Programme programme = new Programme();
-    programme.setId(PROGRAMME_ID);
-
-    Curriculum curriculum1 = new Curriculum();
-    curriculum1.setId(1L);
-    curriculum1.setStatus(Status.CURRENT);
-    ProgrammeCurriculum pc1 = new ProgrammeCurriculum();
-    pc1.setCurriculum(curriculum1);
-
-    programme.getCurricula().addAll(Lists.newArrayList(pc1));
-    pm.setProgramme(programme);
-
-    cmValidator.validateForBulkUploadPatch(dto);
-    assertThat("should contain 0 error", dto.getMessageList().size(), is(0));
-  }
-
-  @Test
   void shouldThrowExceptionsWhenCmDatesNotValid_ForBulk() {
     CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, END_DATE_2, START_DATE_2);
     dto.setId(CM_ID);
@@ -320,6 +294,7 @@ class CurriculumMembershipValidatorTest {
 
     CurriculumMembership cm = new CurriculumMembership();
     cm.setId(CM_ID);
+    cm.setProgrammeMembership(pm);
     pm.setCurriculumMemberships(Collections.singleton(cm));
 
     Programme programme = new Programme();
@@ -335,7 +310,7 @@ class CurriculumMembershipValidatorTest {
     programme.getCurricula().addAll(Lists.newArrayList(pc));
     pm.setProgramme(programme);
 
-    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(cm));
 
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
@@ -354,16 +329,14 @@ class CurriculumMembershipValidatorTest {
     CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, START_DATE_1, END_DATE_1);
     dto.setId(CM_ID);
 
-    CurriculumMembershipDTO dto2 = createDto(CURRICULUM_ID, PM_UUID, START_DATE_1, END_DATE_1);
-    dto2.setId(CM_ID_2);
-
     ProgrammeMembership pm = new ProgrammeMembership();
     pm.setProgrammeStartDate(START_DATE_1);
     pm.setProgrammeEndDate(END_DATE_1);
-    pm.setUuid(PM_UUID);
+    pm.setUuid(PM_UUID2);
 
     CurriculumMembership cm = new CurriculumMembership();
     cm.setId(CM_ID);
+    cm.setProgrammeMembership(pm);
     pm.setCurriculumMemberships(Collections.singleton(cm));
 
     Programme programme = new Programme();
@@ -379,33 +352,17 @@ class CurriculumMembershipValidatorTest {
     programme.getCurricula().addAll(Lists.newArrayList(pc));
     pm.setProgramme(programme);
 
-    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.of(pm));
-
-    MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class,
-            () -> cmValidator.validateForBulkUploadPatch(dto2));
-
-    BindingResult result = thrown.getBindingResult();
-    FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
-        FIELD_CURRICULUM_MEMBERSHIP_ID, String.format(NO_MATCHING_CURRICULUM_MEMBERSHIP, CM_ID_2));
-    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
-    assertThat("Expected field error not found.", result.getFieldErrors(),
-        hasItems(fieldError));
-  }
-
-  @Test
-  void shouldThrowExceptionsWhenProgrammeMembershipNotFound_Bulk() {
-    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, START_DATE_1, END_DATE_1);
-    when(pmRepository.findByUuid(PM_UUID)).thenReturn(Optional.empty());
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(cm));
 
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
             () -> cmValidator.validateForBulkUploadPatch(dto));
-    BindingResult result = thrown.getBindingResult();
 
+    BindingResult result = thrown.getBindingResult();
     FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
-        FIELD_PM_UUID, NO_PROGRAMME_MEMBERSHIP_FOR_ID);
+        FIELD_PM_UUID, String.format(NO_PROGRAMME_MEMBERSHIP_FOR_ID, CM_ID));
     assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
-    assertThat("Expected field error not found.", result.getFieldErrors(), hasItems(fieldError));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError));
   }
 }

@@ -163,13 +163,15 @@ public class CurriculumMembershipValidator {
 
   private List<FieldError> checkCmWithPmForBulk(CurriculumMembershipDTO cmDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    Optional<ProgrammeMembership> optionalPm = pmRepository.findByUuid(
-        cmDto.getProgrammeMembershipUuid());
-    if (optionalPm.isPresent()) {
-      ProgrammeMembership pm = optionalPm.get();
+    Optional<CurriculumMembership> dbCm = cmRepository.findById(cmDto.getId());
+    if (dbCm == null) {
+      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
+          NO_MATCHING_CURRICULUM));
+      return fieldErrors;
+    }
+    ProgrammeMembership pm = dbCm.get().getProgrammeMembership();
+    if (dbCm.get().getProgrammeMembership().getUuid().equals(cmDto.getProgrammeMembershipUuid())) {
       fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
-      fieldErrors.addAll(
-          checkCurriculumMembershipBelongsToCorrectPm(pm, cmDto.getId()));
     } else {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
           NO_PROGRAMME_MEMBERSHIP_FOR_ID));
@@ -186,18 +188,6 @@ public class CurriculumMembershipValidator {
     if (!optionalPc.isPresent()) {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
           String.format(NO_MATCHING_CURRICULUM, curriculumId)));
-    }
-    return fieldErrors;
-  }
-
-  private List<FieldError> checkCurriculumMembershipBelongsToCorrectPm(ProgrammeMembership pm,
-      Long cmId) {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    Optional<CurriculumMembership> correctCm = pm.getCurriculumMemberships().stream()
-        .filter(cms -> cms.getId().equals(cmId)).findFirst();
-    if (!correctCm.isPresent()) {
-      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_MEMBERSHIP_ID,
-          String.format(NO_MATCHING_CURRICULUM_MEMBERSHIP, cmId)));
     }
     return fieldErrors;
   }

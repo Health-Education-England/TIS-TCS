@@ -508,7 +508,7 @@ public class TcsServiceImpl extends AbstractClientService {
   }
 
   /**
-   * Update a Curriculum Membership under a Programme Membership.
+   * Patch a Curriculum Membership under a Programme Membership.
    *
    * @param cmDto the Curriculum Membership dto to patch
    * @return the updated Curriculum Membership dto
