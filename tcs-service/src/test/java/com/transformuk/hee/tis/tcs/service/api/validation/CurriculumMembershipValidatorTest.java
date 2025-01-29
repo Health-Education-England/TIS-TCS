@@ -46,7 +46,6 @@ class CurriculumMembershipValidatorTest {
 
   private static final long CURRICULUM_ID = 1L;
   private static final long CM_ID = 111L;
-  private static final long CM_ID_2 = 112L;
   private static final long PROGRAMME_ID = 1L;
   private static final UUID PM_UUID = UUID.randomUUID();
   private static final UUID PM_UUID2 = UUID.randomUUID();

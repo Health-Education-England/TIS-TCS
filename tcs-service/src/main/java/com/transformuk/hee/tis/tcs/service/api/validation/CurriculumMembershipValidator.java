@@ -164,17 +164,19 @@ public class CurriculumMembershipValidator {
   private List<FieldError> checkCmWithPmForBulk(CurriculumMembershipDTO cmDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
     Optional<CurriculumMembership> dbCm = cmRepository.findById(cmDto.getId());
-    if (dbCm == null) {
+    if (!dbCm.isPresent()) {
       fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
           NO_MATCHING_CURRICULUM));
       return fieldErrors;
-    }
-    ProgrammeMembership pm = dbCm.get().getProgrammeMembership();
-    if (dbCm.get().getProgrammeMembership().getUuid().equals(cmDto.getProgrammeMembershipUuid())) {
-      fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
     } else {
-      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
-          NO_PROGRAMME_MEMBERSHIP_FOR_ID));
+      ProgrammeMembership pm = dbCm.get().getProgrammeMembership();
+      if (dbCm.get().getProgrammeMembership().getUuid()
+          .equals(cmDto.getProgrammeMembershipUuid())) {
+        fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
+      } else {
+        fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
+            NO_PROGRAMME_MEMBERSHIP_FOR_ID));
+      }
     }
     return fieldErrors;
   }

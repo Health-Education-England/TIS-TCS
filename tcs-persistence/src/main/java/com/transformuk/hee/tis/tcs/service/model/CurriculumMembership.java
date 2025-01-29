@@ -28,7 +28,7 @@ public class CurriculumMembership implements Serializable {
 
   @ManyToOne(targetEntity = ProgrammeMembership.class)
   @JoinColumn(name = "programmeMembershipUuid")
-  private ProgrammeMembership programmeMembership;//uuid from the template
+  private ProgrammeMembership programmeMembership;
 
   private String intrepidId;
 
