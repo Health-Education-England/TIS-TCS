@@ -11,10 +11,9 @@ import org.springframework.data.repository.query.Param;
 @SuppressWarnings("unused")
 public interface PostFundingRepository extends JpaRepository<PostFunding, Long> {
 
-  @Query("SELECT count(id) FROM PostFunding\n"
-      + "WHERE postId = :postId\n"
-      + "AND startDate IS NOT NULL\n"
-      + "AND (endDate >= current_date() OR endDate IS NULL)")
+  @Query("SELECT count(id) FROM PostFunding "
+      + "WHERE postId = :postId "
+      + "AND (endDate >= current_date() OR"
+      + "(endDate IS NULL AND startDate IS NOT NULL))")
   long countCurrentFundings(@Param("postId") Long postId);
-
 }
