@@ -31,7 +31,7 @@ public class CurriculumMembershipValidator {
 
   protected static final String CURRICULUM_MEMBERSHIP_DTO_NAME = "CurriculumMembershipDTO";
   protected static final String FIELD_CURRICULUM_ID = "Curriculum Id";
-  protected static final String FIELD_CURRICULUM_MEMBERSHIP_ID = "Curriculum membership Id";
+  protected static final String FIELD_CM_ID = "Curriculum membership Id";
   protected static final String FIELD_PM_UUID = "ProgrammeMembership Uuid";
   protected static final String FIELD_CM_START_DATE = "Curriculum Start Date";
   protected static final String FIELD_CM_END_DATE = "Curriculum End Date";
@@ -53,8 +53,8 @@ public class CurriculumMembershipValidator {
   protected static final String NO_MATCHING_CURRICULUM =
       "Could not find current curriculum for id \"%s\" under the programme.";
 
-  protected static final String NO_MATCHING_CURRICULUM_MEMBERSHIP =
-      "Could not find current curriculum membership for id \"%s\" under the programme membership.";
+  protected static final String CURRICULUM_MEMBERSHIP_NOT_FOUND =
+      "Could not find curriculum membership for id \"%s\".";
 
   protected static final String EXISTING_CM_FOUND =
       "Curriculum membership with the same curriculumId, programme membership uuid, "
@@ -98,17 +98,33 @@ public class CurriculumMembershipValidator {
   }
 
   /**
-   * Validate a CurriculumMembershipDTO.
-   * for bulk update
+   * Validate a CurriculumMembershipDTO for patch. If either date is missing in the cmDto, it will
+   * be filled using the date from the DB, and the filled date will be propagated to the caller of
+   * this method.
    *
    * @param cmDto the curriculumMembership Dto to validate
    */
   @Transactional(readOnly = true)
-  public void validateForBulkUploadPatch(CurriculumMembershipDTO cmDto)
+  public void validateForPatch(CurriculumMembershipDTO cmDto)
       throws MethodArgumentNotValidException, NoSuchMethodException {
+
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (cmDto.getCurriculumEndDate() != null && cmDto.getCurriculumStartDate() != null) {
-      fieldErrors.addAll(checkCmWithPmForBulk(cmDto));
+
+    // Check existence of cmId
+    CurriculumMembership cmFromDb = null;
+    Long cmId = cmDto.getId();
+    Optional<CurriculumMembership> optionalCmFromDb = cmRepository.findById(cmDto.getId());
+    if (optionalCmFromDb.isPresent()) {
+      cmFromDb = optionalCmFromDb.get();
+    } else {
+      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CM_ID,
+          String.format(CURRICULUM_MEMBERSHIP_NOT_FOUND, cmId)));
+    }
+
+    if (cmFromDb != null) {
+      // The effect will be propagated to the caller.
+      fillCmDtoWithDatesFromDb(cmDto, cmFromDb);
+      fieldErrors.addAll(checkCmWithPmForPatch(cmFromDb.getProgrammeMembership(), cmDto));
       fieldErrors.addAll(checkCmDates(cmDto));
     }
 
@@ -117,9 +133,19 @@ public class CurriculumMembershipValidator {
           cmDto, CURRICULUM_MEMBERSHIP_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       Method method = this.getClass()
-          .getMethod("validateForBulkUploadPatch", CurriculumMembershipDTO.class);
+          .getMethod("validateForPatch", CurriculumMembershipDTO.class);
       MethodParameter methodParameter = new MethodParameter(method, 0);
       throw new MethodArgumentNotValidException(methodParameter, bindingResult);
+    }
+  }
+
+  private void fillCmDtoWithDatesFromDb(CurriculumMembershipDTO cmDto,
+      CurriculumMembership cmFromDb) {
+    if (cmDto.getCurriculumStartDate() == null) {
+      cmDto.setCurriculumStartDate(cmFromDb.getCurriculumStartDate());
+    }
+    if (cmDto.getCurriculumEndDate() == null) {
+      cmDto.setCurriculumEndDate(cmFromDb.getCurriculumEndDate());
     }
   }
 
@@ -161,22 +187,15 @@ public class CurriculumMembershipValidator {
     return fieldErrors;
   }
 
-  private List<FieldError> checkCmWithPmForBulk(CurriculumMembershipDTO cmDto) {
+  private List<FieldError> checkCmWithPmForPatch(ProgrammeMembership pm,
+      CurriculumMembershipDTO cmDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    Optional<CurriculumMembership> dbCm = cmRepository.findById(cmDto.getId());
-    if (!dbCm.isPresent()) {
-      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_CURRICULUM_ID,
-          NO_MATCHING_CURRICULUM));
-      return fieldErrors;
+
+    if (pm.getUuid().equals(cmDto.getProgrammeMembershipUuid())) {
+      fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
     } else {
-      ProgrammeMembership pm = dbCm.get().getProgrammeMembership();
-      if (dbCm.get().getProgrammeMembership().getUuid()
-          .equals(cmDto.getProgrammeMembershipUuid())) {
-        fieldErrors.addAll(checkCmDatesWithPm(pm, cmDto));
-      } else {
-        fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
-            NO_PROGRAMME_MEMBERSHIP_FOR_ID));
-      }
+      fieldErrors.add(new FieldError(CURRICULUM_MEMBERSHIP_DTO_NAME, FIELD_PM_UUID,
+          NO_PROGRAMME_MEMBERSHIP_FOR_ID));
     }
     return fieldErrors;
   }
