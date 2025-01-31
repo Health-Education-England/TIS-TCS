@@ -625,6 +625,8 @@ public class PostResource {
               REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     }
     List<PostFundingDTO> checkList = postService.patchPostFundings(postDto);
+    //TODO On upgrade to Spring 6+ move publish to service and use transactional event listeners
+    applicationEventPublisher.publishEvent(new PostSavedEvent(postDto));
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDto.getId().toString()))
         .body(checkList);
@@ -636,7 +638,6 @@ public class PostResource {
 
     List<PostDTO> foundPosts = postService.findPostsForProgrammeIdAndNpn(id, npn);
     return new ResponseEntity<>(foundPosts, HttpStatus.OK);
-
   }
 
   /**

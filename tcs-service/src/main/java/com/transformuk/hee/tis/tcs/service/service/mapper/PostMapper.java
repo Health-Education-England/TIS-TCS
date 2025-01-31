@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
@@ -229,6 +230,13 @@ public class PostMapper {
     result.setTrainingDescription(postDTO.getTrainingDescription());
     result.setLocalPostNumber(postDTO.getLocalPostNumber());
     result.setBypassNPNGeneration(postDTO.isBypassNPNGeneration());
+    // Set default fundingStatus to INACTIVE.
+    // the fundingStatus will then be populated via the event listener after create/update.
+    if (postDTO.getFundingStatus() != null) {
+      result.setFundingStatus(postDTO.getFundingStatus());
+    } else {
+      result.setFundingStatus(Status.INACTIVE);
+    }
 
     if (traverseRelatedPosts) {
       if (postDTO.getOldPost() != null) {
