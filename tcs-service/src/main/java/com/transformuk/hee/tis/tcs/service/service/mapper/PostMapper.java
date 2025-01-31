@@ -230,13 +230,8 @@ public class PostMapper {
     result.setTrainingDescription(postDTO.getTrainingDescription());
     result.setLocalPostNumber(postDTO.getLocalPostNumber());
     result.setBypassNPNGeneration(postDTO.isBypassNPNGeneration());
-    // Set default fundingStatus to INACTIVE.
-    // the fundingStatus will then be populated via the event listener after create/update.
-    if (postDTO.getFundingStatus() != null) {
-      result.setFundingStatus(postDTO.getFundingStatus());
-    } else {
-      result.setFundingStatus(Status.INACTIVE);
-    }
+
+    setFundingStatusWhenPostDtoToPost(postDTO, result);
 
     if (traverseRelatedPosts) {
       if (postDTO.getOldPost() != null) {
@@ -294,6 +289,16 @@ public class PostMapper {
     result.setProgrammes(programmeDTOToProgramme(postDTO.getProgrammes()));
 
     return result;
+  }
+
+  // Set default fundingStatus to INACTIVE.
+  // the fundingStatus will then be populated via the event listener after create/update.
+  private void setFundingStatusWhenPostDtoToPost(PostDTO postDTO, Post result) {
+    if (postDTO.getFundingStatus() != null) {
+      result.setFundingStatus(postDTO.getFundingStatus());
+    } else {
+      result.setFundingStatus(Status.INACTIVE);
+    }
   }
 
   private Specialty specialtyDTOToSpecialty(SpecialtyDTO specialtyDTO) {
