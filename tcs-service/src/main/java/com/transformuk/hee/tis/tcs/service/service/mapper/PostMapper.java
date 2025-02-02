@@ -293,9 +293,9 @@ public class PostMapper {
 
   // Set default fundingStatus to INACTIVE.
   // the fundingStatus will then be populated via the event listener after create/update.
-  private void setFundingStatusWhenPostDtoToPost(PostDTO postDTO, Post result) {
-    if (postDTO.getFundingStatus() != null) {
-      result.setFundingStatus(postDTO.getFundingStatus());
+  private void setFundingStatusWhenPostDtoToPost(PostDTO postDto, Post result) {
+    if (postDto.getFundingStatus() != null) {
+      result.setFundingStatus(postDto.getFundingStatus());
     } else {
       result.setFundingStatus(Status.INACTIVE);
     }
