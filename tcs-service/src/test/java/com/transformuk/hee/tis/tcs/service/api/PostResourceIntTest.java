@@ -6,6 +6,9 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -40,7 +43,9 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorat
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
+import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.listener.person.PostEventListener;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -81,6 +86,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -182,6 +188,8 @@ public class PostResourceIntTest {
   private ApplicationEventPublisher applicationEventPublisher;
   @Autowired
   private PlacementRepository placementRepository;
+  @SpyBean
+  private PostEventListener postEventListener;
   private MockMvc restPostMockMvc;
   private Post post;
   private Specialty specialty;
@@ -211,7 +219,6 @@ public class PostResourceIntTest {
     return new Post()
         .nationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER)
         .status(DEFAULT_STATUS)
-        .fundingStatus(DEFAULT_STATUS)
         .suffix(DEFAULT_SUFFIX)
         .owner(OWNER)
         .postFamily(DEFAULT_POST_FAMILY)
@@ -884,12 +891,16 @@ public class PostResourceIntTest {
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
         .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
-        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER)
+        .setFundingStatus(Status.CURRENT);
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
     restPostMockMvc.perform(put("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.fundingStatus").value("CURRENT"));
+
+    verify(postEventListener, times(1)).handlePostSavedEvent(any(PostSavedEvent.class));
     // Validate the Post in the database
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeUpdate);
@@ -1492,7 +1503,7 @@ public class PostResourceIntTest {
     // Valid fundings
     PostFundingDTO validFunding1 = new PostFundingDTO();
     validFunding1.setStartDate(LocalDate.now().minusDays(10));
-    validFunding1.setEndDate(LocalDate.now());
+    validFunding1.setEndDate(LocalDate.now().plusDays(1));
 
     PostFundingDTO validFunding2 = new PostFundingDTO();
     validFunding2.setStartDate(LocalDate.now());
@@ -1510,8 +1521,12 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isCreated());
-
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.fundingStatus").value("INACTIVE"));
+    // As fundingStatus is not specified in the DTO, the default value "INACTIVE" is set.
+    // FundingStatus will then be re-populated by checking the post fundings in the evert listener.
+    verify(postEventListener, times(1))
+        .handlePostSavedEvent(any(PostSavedEvent.class));
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
   }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
@@ -55,14 +56,28 @@ class PostMapperTest {
     PostDTO postDto = new PostDTO();
     postDto.setId(3L);
     postDto.setFundings(Collections.singleton(postFundingDto));
+    postDto.setFundingStatus(Status.CURRENT);
     postFundingDto.setPostId(3L);
 
     //when
     Post post = postMapper.postDTOToPost(postDto);
 
     //then
+    assertEquals(Status.CURRENT, post.getFundingStatus());
     assertEquals(1, post.getFundings().size());
     PostFunding postFunding = post.getFundings().iterator().next();
     assertEquals(fundingSubTypeId, postFunding.getFundingSubTypeId());
+  }
+
+  @Test
+  void shouldSetDefaultFundingStatusWhenPostDtoToPost() {
+    PostDTO postDto = new PostDTO();
+    postDto.setId(3L);
+
+    //when
+    Post post = postMapper.postDTOToPost(postDto);
+
+    //then
+    assertEquals(Status.INACTIVE, post.getFundingStatus());
   }
 }

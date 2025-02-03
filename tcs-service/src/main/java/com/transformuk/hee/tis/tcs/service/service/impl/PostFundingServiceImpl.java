@@ -114,8 +114,7 @@ public class PostFundingServiceImpl implements PostFundingService {
    */
   @Override
   public Status getPostFundingStatusForPost(Long postId) {
-    if (postFundingRepository.countCurrentFundings(postId)
-        > 0) {
+    if (postFundingRepository.countCurrentFundings(postId) > 0) {
       return Status.CURRENT;
     }
     return Status.INACTIVE;

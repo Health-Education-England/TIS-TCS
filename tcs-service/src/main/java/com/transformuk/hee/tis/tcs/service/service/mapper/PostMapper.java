@@ -10,6 +10,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.model.PostGrade;
@@ -230,6 +231,8 @@ public class PostMapper {
     result.setLocalPostNumber(postDTO.getLocalPostNumber());
     result.setBypassNPNGeneration(postDTO.isBypassNPNGeneration());
 
+    setFundingStatusWhenPostDtoToPost(postDTO, result);
+
     if (traverseRelatedPosts) {
       if (postDTO.getOldPost() != null) {
         result.setOldPost(postDTOToPost(postDTO.getOldPost(), false));
@@ -286,6 +289,16 @@ public class PostMapper {
     result.setProgrammes(programmeDTOToProgramme(postDTO.getProgrammes()));
 
     return result;
+  }
+
+  // Set default fundingStatus to INACTIVE.
+  // the fundingStatus will then be populated via the event listener after create/update.
+  private void setFundingStatusWhenPostDtoToPost(PostDTO postDto, Post result) {
+    if (postDto.getFundingStatus() != null) {
+      result.setFundingStatus(postDto.getFundingStatus());
+    } else {
+      result.setFundingStatus(Status.INACTIVE);
+    }
   }
 
   private Specialty specialtyDTOToSpecialty(SpecialtyDTO specialtyDTO) {
