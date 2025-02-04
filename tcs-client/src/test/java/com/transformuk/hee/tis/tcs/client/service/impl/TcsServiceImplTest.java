@@ -418,7 +418,7 @@ public class TcsServiceImplTest {
 
     CurriculumMembershipDTO result = testObj.patchCurriculumMembership(dto);
 
-    assertThat("Unexpected result", result, is(dto));
+    assertThat("Expected result", result, is(dto));
     verify(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,
         new ParameterizedTypeReference<CurriculumMembershipDTO>() {
         });
