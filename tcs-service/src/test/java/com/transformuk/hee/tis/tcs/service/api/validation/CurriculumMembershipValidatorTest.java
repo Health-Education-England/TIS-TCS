@@ -3,8 +3,10 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.CM_END_DATE_AFTER_PM_END_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.CM_START_DATE_AFTER_END_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.CM_START_DATE_BEFORE_PM_START_DATE;
+import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.CURRICULUM_MEMBERSHIP_NOT_FOUND;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.EXISTING_CM_FOUND;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CM_END_DATE;
+import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CM_ID;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CM_START_DATE;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_CURRICULUM_ID;
 import static com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator.FIELD_PM_UUID;
@@ -47,6 +49,7 @@ class CurriculumMembershipValidatorTest {
   private static final long CM_ID = 111L;
   private static final long PROGRAMME_ID = 1L;
   private static final UUID PM_UUID = UUID.randomUUID();
+  private static final UUID PM_UUID_2 = UUID.randomUUID();
   private static final LocalDate START_DATE_1 = LocalDate.of(2020, 1, 1);
   private static final LocalDate END_DATE_1 = LocalDate.of(2025, 1, 1);
   private static final LocalDate START_DATE_2 = LocalDate.of(2021, 1, 1);
@@ -277,5 +280,106 @@ class CurriculumMembershipValidatorTest {
 
     // When.
     assertDoesNotThrow(() -> cmValidator.validate(dto));
+  }
+
+  @Test
+  void shouldThrowExceptionsWhenCmDatesNotValid_ForPatch() {
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, END_DATE_2, START_DATE_2);
+    dto.setId(CM_ID);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setProgrammeStartDate(START_DATE_1);
+    pm.setProgrammeEndDate(END_DATE_1);
+    pm.setUuid(PM_UUID);
+
+    CurriculumMembership cm = new CurriculumMembership();
+    cm.setId(CM_ID);
+    cm.setProgrammeMembership(pm);
+
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(cm));
+
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> cmValidator.validateForPatch(dto));
+
+    BindingResult result = thrown.getBindingResult();
+    FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
+        FIELD_CM_START_DATE, CM_START_DATE_AFTER_END_DATE);
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError));
+  }
+
+  @Test
+  void shouldThrowExceptionsWhenCurriculumMembershipDoesNotBelongToCorrectPM_ForPatch() {
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, START_DATE_1, END_DATE_1);
+    dto.setId(CM_ID);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setProgrammeStartDate(START_DATE_1);
+    pm.setProgrammeEndDate(END_DATE_1);
+    pm.setUuid(PM_UUID_2);
+
+    CurriculumMembership cm = new CurriculumMembership();
+    cm.setId(CM_ID);
+    cm.setProgrammeMembership(pm);
+
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(cm));
+
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> cmValidator.validateForPatch(dto));
+
+    BindingResult result = thrown.getBindingResult();
+    FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
+        FIELD_PM_UUID, String.format(NO_PROGRAMME_MEMBERSHIP_FOR_ID, CM_ID));
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError));
+  }
+
+  @Test
+  void shouldThrowExceptionsWhenCMNotFound_ForPatch() {
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, START_DATE_1, END_DATE_1);
+    dto.setId(CM_ID);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setProgrammeStartDate(START_DATE_1);
+    pm.setProgrammeEndDate(END_DATE_1);
+    pm.setUuid(PM_UUID_2);
+
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.empty());
+
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> cmValidator.validateForPatch(dto));
+
+    BindingResult result = thrown.getBindingResult();
+    FieldError fieldError = new FieldError(CurriculumMembershipDTO.class.getSimpleName(),
+        FIELD_CM_ID, String.format(CURRICULUM_MEMBERSHIP_NOT_FOUND, CM_ID));
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), is(1));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError));
+  }
+
+  @Test
+  void shouldNotThrowExceptionsWhenValidationPasses_ForPatch() {
+    CurriculumMembershipDTO dto = createDto(CURRICULUM_ID, PM_UUID, null, END_DATE_2);
+    dto.setId(CM_ID);
+
+    ProgrammeMembership pm = new ProgrammeMembership();
+    pm.setProgrammeStartDate(START_DATE_1);
+    pm.setProgrammeEndDate(END_DATE_1);
+    pm.setUuid(PM_UUID);
+
+    CurriculumMembership cm = new CurriculumMembership();
+    cm.setId(CM_ID);
+    cm.setCurriculumStartDate(START_DATE_2);
+    cm.setProgrammeMembership(pm);
+
+    when(cmRepository.findById(CM_ID)).thenReturn(Optional.of(cm));
+
+    assertDoesNotThrow(() -> cmValidator.validateForPatch(dto));
+    assertThat(START_DATE_2, is(dto.getCurriculumStartDate()));
   }
 }

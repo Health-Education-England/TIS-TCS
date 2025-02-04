@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * Service Implementation for managing CurriculumMembership.
@@ -29,7 +30,7 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
    * Initialise the CurriculumMembershipServiceImpl.
    *
    * @param cmRepository Curriculum Membership repository
-   * @param cmMapper Curriculum Membership mapper
+   * @param cmMapper     Curriculum Membership mapper
    * @param pmRepository Programme Membership repository
    */
   public CurriculumMembershipServiceImpl(CurriculumMembershipRepository cmRepository,
@@ -55,6 +56,28 @@ public class CurriculumMembershipServiceImpl implements CurriculumMembershipServ
             .orElseThrow(() -> new NoSuchElementException("No value present"));
     cm.setProgrammeMembership(pm);
     CurriculumMembership returnedCm = cmRepository.save(cm);
+    return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
+  }
+
+  /**
+   * Patch a curriculumMembership.
+   *
+   * @param cmDto the dto to patch
+   * @return the persisted object
+   */
+  @Transactional
+  public CurriculumMembershipDTO patch(CurriculumMembershipDTO cmDto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
+    log.debug("Request to patch CurriculumMembership : {}", cmDto);
+    // As we have done the validation before patch, so it's very unlikely that cm is not found.
+    CurriculumMembership curriculumMembershipDb = cmRepository.findById(cmDto.getId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "CurriculumMembership not found for ID: " + cmDto.getId()));
+
+    curriculumMembershipDb.setCurriculumStartDate(cmDto.getCurriculumStartDate());
+    curriculumMembershipDb.setCurriculumEndDate(cmDto.getCurriculumEndDate());
+
+    CurriculumMembership returnedCm = cmRepository.save(curriculumMembershipDb);
     return cmMapper.curriculumMembershipToCurriculumMembershipDto(returnedCm);
   }
 }

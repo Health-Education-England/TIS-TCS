@@ -507,6 +507,22 @@ public class TcsServiceImpl extends AbstractClientService {
         .getBody();
   }
 
+  /**
+   * Patch a Curriculum Membership under a Programme Membership.
+   *
+   * @param cmDto the Curriculum Membership dto to patch
+   * @return the updated Curriculum Membership dto
+   */
+  public CurriculumMembershipDTO patchCurriculumMembership(CurriculumMembershipDTO cmDto) {
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(cmDto, headers);
+    return tcsRestTemplate
+        .exchange(serviceUrl + API_CURRICULUM_MEMBERSHIPS, HttpMethod.PATCH, httpEntity,
+            new ParameterizedTypeReference<CurriculumMembershipDTO>() {
+            })
+        .getBody();
+  }
+
   public ProgrammeMembershipDTO createProgrammeMembership(
       ProgrammeMembershipDTO programmeMembershipDTO) {
     HttpHeaders headers = new HttpHeaders();

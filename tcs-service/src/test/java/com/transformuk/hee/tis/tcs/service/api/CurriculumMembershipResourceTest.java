@@ -4,8 +4,8 @@ import static com.transformuk.hee.tis.tcs.service.api.CurriculumResourceIntTest.
 import static com.transformuk.hee.tis.tcs.service.api.ProgrammeMembershipResourceIntTest.createPersonEntity;
 import static com.transformuk.hee.tis.tcs.service.api.ProgrammeMembershipResourceIntTest.createProgrammeMembershipEntity;
 import static com.transformuk.hee.tis.tcs.service.api.ProgrammeResourceIntTest.createEntity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +15,7 @@ import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.CurriculumMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
@@ -119,7 +120,6 @@ class CurriculumMembershipResourceTest {
     restCmMockMvc.perform(post("/api/curriculum-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
-        .andDo(print())
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty())
         .andExpect(jsonPath("$.curriculumStartDate").value(START_DATE_2.toString()))
@@ -131,7 +131,7 @@ class CurriculumMembershipResourceTest {
 
   @Test
   @Transactional
-  void shouldGetBadRequestWhenIdSpecified() throws Exception {
+  void shouldGetBadRequestWhenCreateCmWithIdSpecified() throws Exception {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setId(1L);
     cmDto.setCurriculumId(1L);
@@ -142,13 +142,12 @@ class CurriculumMembershipResourceTest {
     restCmMockMvc.perform(post("/api/curriculum-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
-        .andDo(print())
         .andExpect(status().isBadRequest());
   }
 
   @Test
   @Transactional
-  void shouldGetBadRequestWhenDataValidationFails() throws Exception {
+  void shouldGetBadRequestWhenCreateCmAndDataValidationFails() throws Exception {
     personRepository.saveAndFlush(person);
     curriculum.setStatus(Status.INACTIVE);
     cmRepository.saveAndFlush(curriculum);
@@ -169,10 +168,190 @@ class CurriculumMembershipResourceTest {
     restCmMockMvc.perform(post("/api/curriculum-memberships")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(cmDto)))
-        .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[0].message").value(
             String.format("Could not find current curriculum for id \"%s\" under the programme.",
                 curriculumId)));
   }
+
+  @Test
+  @Transactional
+  void shouldPatchCurriculumMembershipWhenStartDateAndEndDateBothSpecified() throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculum.setStatus(Status.CURRENT);
+    cmRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setProgrammeStartDate(START_DATE_1);
+    programmeMembership.setProgrammeEndDate(END_DATE_1);
+
+    CurriculumMembership curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setCurriculumId(curriculum.getId());
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumStartDate(START_DATE_1);
+    curriculumMembership.setCurriculumEndDate(END_DATE_1);
+    programmeMembership.setCurriculumMemberships(Collections.singleton(curriculumMembership));
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    Long curriculumId = programme.getCurricula().iterator().next().getCurriculum().getId();
+    cmDto.setId(curriculumMembership.getId());
+    cmDto.setCurriculumId(curriculumId);
+    cmDto.setCurriculumStartDate(START_DATE_2);
+    cmDto.setCurriculumEndDate(END_DATE_2);
+    cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
+
+    restCmMockMvc.perform(patch("/api/curriculum-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(cmDto)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").isNotEmpty())
+        .andExpect(jsonPath("$.curriculumStartDate").value(START_DATE_2.toString()))
+        .andExpect(jsonPath("$.curriculumEndDate").value(END_DATE_2.toString()))
+        .andExpect(
+            jsonPath("$.programmeMembershipUuid").value(programmeMembership.getUuid().toString()))
+        .andExpect(jsonPath("$.curriculumId").value(curriculumId));
+  }
+
+  @Test
+  @Transactional
+  void shouldPatchCurriculumMembershipWhenOnlyEndDateSpecified() throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculum.setStatus(Status.CURRENT);
+    cmRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setProgrammeStartDate(START_DATE_1);
+    programmeMembership.setProgrammeEndDate(END_DATE_1);
+
+    CurriculumMembership curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setCurriculumId(curriculum.getId());
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumStartDate(START_DATE_1);
+    curriculumMembership.setCurriculumEndDate(END_DATE_1);
+    programmeMembership.setCurriculumMemberships(Collections.singleton(curriculumMembership));
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    Long curriculumId = programme.getCurricula().iterator().next().getCurriculum().getId();
+    cmDto.setId(curriculumMembership.getId());
+    cmDto.setCurriculumId(curriculumId);
+    cmDto.setCurriculumStartDate(null);
+    cmDto.setCurriculumEndDate(END_DATE_2);
+    cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
+
+    restCmMockMvc.perform(patch("/api/curriculum-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(cmDto)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").isNotEmpty())
+        .andExpect(jsonPath("$.curriculumStartDate").value(START_DATE_1.toString()))
+        .andExpect(jsonPath("$.curriculumEndDate").value(END_DATE_2.toString()))
+        .andExpect(
+            jsonPath("$.programmeMembershipUuid").value(programmeMembership.getUuid().toString()))
+        .andExpect(jsonPath("$.curriculumId").value(curriculumId));
+  }
+
+  @Test
+  @Transactional
+  void shouldPatchCurriculumMembershipWhenOnlyStartDateSpecified() throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculum.setStatus(Status.CURRENT);
+    cmRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setProgrammeStartDate(START_DATE_1);
+    programmeMembership.setProgrammeEndDate(END_DATE_1);
+
+    CurriculumMembership curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setCurriculumId(curriculum.getId());
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumStartDate(START_DATE_1);
+    curriculumMembership.setCurriculumEndDate(END_DATE_1);
+    programmeMembership.setCurriculumMemberships(Collections.singleton(curriculumMembership));
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    Long curriculumId = programme.getCurricula().iterator().next().getCurriculum().getId();
+    cmDto.setId(curriculumMembership.getId());
+    cmDto.setCurriculumId(curriculumId);
+    cmDto.setCurriculumStartDate(START_DATE_2);
+    cmDto.setCurriculumEndDate(null);
+    cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
+
+    restCmMockMvc.perform(patch("/api/curriculum-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(cmDto)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").isNotEmpty())
+        .andExpect(jsonPath("$.curriculumStartDate").value(START_DATE_2.toString()))
+        .andExpect(jsonPath("$.curriculumEndDate").value(END_DATE_1.toString()))
+        .andExpect(
+            jsonPath("$.programmeMembershipUuid").value(programmeMembership.getUuid().toString()))
+        .andExpect(jsonPath("$.curriculumId").value(curriculumId));
+  }
+
+  @Test
+  @Transactional
+  void shouldGetBadRequestWhenPatchCmAndDataValidationFails() throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculum.setStatus(Status.CURRENT);
+    cmRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    programmeMembership.setProgramme(programme);
+    programmeMembership.setProgrammeStartDate(START_DATE_2);
+    programmeMembership.setProgrammeEndDate(END_DATE_2);
+
+    CurriculumMembership curriculumMembership = new CurriculumMembership();
+    curriculumMembership.setCurriculumId(curriculum.getId());
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumStartDate(START_DATE_2);
+    curriculumMembership.setCurriculumEndDate(END_DATE_2);
+    programmeMembership.setCurriculumMemberships(Collections.singleton(curriculumMembership));
+
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+    curriculumMembershipRepository.saveAndFlush(curriculumMembership);
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    Long curriculumId = programme.getCurricula().iterator().next().getCurriculum().getId();
+    cmDto.setId(curriculumMembership.getId());
+    cmDto.setCurriculumId(curriculumId);
+    cmDto.setCurriculumStartDate(null);
+    cmDto.setCurriculumEndDate(END_DATE_1);
+    cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
+
+    restCmMockMvc.perform(patch("/api/curriculum-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(cmDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value(
+            "Curriculum membership end date must not be later than "
+                + "the programme membership end date."));
+  }
+
+  @Test
+  @Transactional
+  void shouldGetBadRequestWhenPatchCmWithIdNotSpecified() throws Exception {
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setCurriculumId(1L);
+    cmDto.setCurriculumStartDate(START_DATE_2);
+    cmDto.setCurriculumEndDate(END_DATE_2);
+    cmDto.setProgrammeMembershipUuid(programmeMembership.getUuid());
+
+    restCmMockMvc.perform(patch("/api/curriculum-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(cmDto)))
+        .andExpect(status().isBadRequest());
+  }
 }
+

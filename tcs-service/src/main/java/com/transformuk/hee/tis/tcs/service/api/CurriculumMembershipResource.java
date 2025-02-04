@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,8 +42,8 @@ public class CurriculumMembershipResource {
    *
    * @param cmDto the curriculumMembershipDto to add
    * @return the ResponseEntity with status 201 (Created) and with body the new
-   *         CurriculumMembershipDTO, or with status 400 (Bad Request)
-   *         if the curriculumMembershipDto has already an ID
+   *     CurriculumMembershipDTO, or with status 400 (Bad Request) if the
+   *     curriculumMembershipDto already has an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/curriculum-memberships")
@@ -61,6 +62,32 @@ public class CurriculumMembershipResource {
     return ResponseEntity.created(
             new URI("/api/curriculum-memberships/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+        .body(result);
+  }
+
+  /**
+   * PATCH /curriculum-membership : patch a curriculum membership via bulk upload.
+   *
+   * @param curriculumMembershipDto the dto to patch
+   * @return the ResponseEntity with status 200 (OK) and with body the patched dto
+   */
+  @PatchMapping("/curriculum-memberships")
+  @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
+  public ResponseEntity<CurriculumMembershipDTO> patchCurriculumMembership(
+      @RequestBody CurriculumMembershipDTO curriculumMembershipDto)
+      throws MethodArgumentNotValidException, NoSuchMethodException {
+    log.debug("REST request to patch CurriculumMembership : {}", curriculumMembershipDto);
+
+    if (curriculumMembershipDto.getId() == null) {
+      return ResponseEntity.badRequest()
+          .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "id_missing",
+              "The ID is required for patching an existing curriculumMembership.")).body(null);
+    }
+    cmValidator.validateForPatch(curriculumMembershipDto);
+    CurriculumMembershipDTO result = cmService.patch(curriculumMembershipDto);
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
+            curriculumMembershipDto.getId().toString()))
         .body(result);
   }
 }

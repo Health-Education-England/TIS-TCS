@@ -402,4 +402,25 @@ public class TcsServiceImplTest {
     // RestTemplate hasn't been set up to find any GMC, so should throw exception
     testObj.getGmcDetailsById(20L);
   }
+
+  @Test
+  public void patchCurriculumMembershipShouldReturnSavedDto() {
+    CurriculumMembershipDTO dto = new CurriculumMembershipDTO();
+
+    String url = "http://localhost:9999/tcs/api/curriculum-memberships";
+
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<CurriculumMembershipDTO> httpEntity = new HttpEntity<>(dto, headers);
+    ResponseEntity responseEntity = new ResponseEntity(dto, HttpStatus.OK);
+    doReturn(responseEntity).when(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,
+        new ParameterizedTypeReference<CurriculumMembershipDTO>() {
+        });
+
+    CurriculumMembershipDTO result = testObj.patchCurriculumMembership(dto);
+
+    assertThat("Unexpected result", result, is(dto));
+    verify(restTemplate).exchange(url, HttpMethod.PATCH, httpEntity,
+        new ParameterizedTypeReference<CurriculumMembershipDTO>() {
+        });
+  }
 }
