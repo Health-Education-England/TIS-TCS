@@ -177,7 +177,7 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.deleteAll(allPostSites);
     postSpecialtyRepository.deleteAll(allPostSpecialties);
     posts = postRepository.saveAll(posts);
-    posts.forEach(post -> updateFundingStatus(post));
+    posts.forEach(this::updateFundingStatus);
     return postMapper.postsToPostDTOs(posts);
   }
 
@@ -414,11 +414,16 @@ public class PostServiceImpl implements PostService {
     updateFundingStatus(currentInDbPost);
   }
 
+  /**
+   * Update post funding status.
+   *
+   * @param post the post entity to update
+   */
   protected void updateFundingStatus(Post post) {
     if (post != null) {
       Status fundingStatus = getFundingStatusForPost(post);
       post.setFundingStatus(fundingStatus);
-       postRepository.save(post);
+      postRepository.save(post);
     }
   }
 
@@ -442,12 +447,12 @@ public class PostServiceImpl implements PostService {
       LocalDate startDate = pf.getStartDate();
       LocalDate endDate = pf.getEndDate();
 
-      if (endDate != null && endDate.isAfter(LocalDate.now())) {
+      if ((endDate != null && !endDate.isBefore(LocalDate.now())) ||
+          (endDate == null && startDate != null)) {
         return true;
-      } else if (endDate == null && startDate != null) {
-        return true;
+      } else {
+        return false;
       }
-      return false;
     }).count();
   }
 

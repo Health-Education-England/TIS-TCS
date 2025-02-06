@@ -1,11 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
