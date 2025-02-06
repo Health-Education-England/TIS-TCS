@@ -447,12 +447,8 @@ public class PostServiceImpl implements PostService {
       LocalDate startDate = pf.getStartDate();
       LocalDate endDate = pf.getEndDate();
 
-      if ((endDate != null && !endDate.isBefore(LocalDate.now())) ||
-          (endDate == null && startDate != null)) {
-        return true;
-      } else {
-        return false;
-      }
+      return ((endDate != null && !endDate.isBefore(LocalDate.now()))
+          || (endDate == null && startDate != null));
     }).count();
   }
 
