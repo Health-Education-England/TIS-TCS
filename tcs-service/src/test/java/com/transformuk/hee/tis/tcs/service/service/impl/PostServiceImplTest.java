@@ -58,6 +58,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -270,8 +271,12 @@ class PostServiceImplTest {
   void updateFundingStatusShouldSetFundingStatus() {
     Post testPost = new Post();
     testPost.setId(1L);
+    PostFunding postFunding = new PostFunding();
+    postFunding.setStartDate(LocalDate.now().minusDays(1));
+    postFunding.setEndDate(LocalDate.now().plusDays(1));
+    testPost.setFundings(Sets.newHashSet(postFunding));
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(testPost));
-    testObj.updateFundingStatus(1L, Status.CURRENT);
+    testObj.updateFundingStatus(1L);
     verify(postRepositoryMock).save(postArgumentCaptor.capture());
     Post result = postArgumentCaptor.getValue();
     assertEquals(Status.CURRENT, result.getFundingStatus());
@@ -282,9 +287,11 @@ class PostServiceImplTest {
     Post testPost = new Post();
     testPost.setId(1L);
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.empty());
-    testObj.updateFundingStatus(1L, Status.CURRENT);
+    testObj.updateFundingStatus(1L);
     verify(postRepositoryMock, never()).save(testPost);
   }
+
+  // todo: add tests for 2 other methods.
 
   @Test
   void findAllShouldRetrieveAllInstances() {

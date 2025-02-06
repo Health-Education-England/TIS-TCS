@@ -106,17 +106,4 @@ public class PostFundingServiceImpl implements PostFundingService {
     log.debug("Request to delete PostFunding : {}", id);
     postFundingRepository.deleteById(id);
   }
-
-  /**
-   * return the funding Status of the Post.
-   *
-   * @param postId the id of the associated post
-   */
-  @Override
-  public Status getPostFundingStatusForPost(Long postId) {
-    if (postFundingRepository.countCurrentFundings(postId) > 0) {
-      return Status.CURRENT;
-    }
-    return Status.INACTIVE;
-  }
 }

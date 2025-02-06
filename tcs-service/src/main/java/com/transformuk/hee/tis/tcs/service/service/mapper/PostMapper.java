@@ -79,7 +79,7 @@ public class PostMapper {
     if (post != null) {
       result.setId(post.getId());
       result.setNationalPostNumber(post.getNationalPostNumber());
-      result.setStatus(post.getStatus());
+      result.setStatus(post.getFundingStatus());
       result.setOwner(post.getOwner());
     }
     return result;
@@ -91,8 +91,7 @@ public class PostMapper {
     result.setId(post.getId());
     result.setIntrepidId(post.getIntrepidId());
     result.setNationalPostNumber(post.getNationalPostNumber());
-    result.setStatus(post.getStatus());
-    result.setFundingStatus(post.getFundingStatus());
+    result.setStatus(post.getFundingStatus());
     result.setSuffix(post.getSuffix());
     result.setOwner(post.getOwner());
     result.setPostFamily(post.getPostFamily());
@@ -220,8 +219,6 @@ public class PostMapper {
     result.setId(postDTO.getId());
     result.setIntrepidId(postDTO.getIntrepidId());
     result.setNationalPostNumber(postDTO.getNationalPostNumber());
-    result.setStatus(postDTO.getStatus());
-    result.setFundingStatus(postDTO.getFundingStatus());
     result.setSuffix(postDTO.getSuffix());
     result.setOwner(postDTO.getOwner());
     result.setPostFamily(postDTO.getPostFamily());
@@ -294,8 +291,8 @@ public class PostMapper {
   // Set default fundingStatus to INACTIVE.
   // the fundingStatus will then be populated via the event listener after create/update.
   private void setFundingStatusWhenPostDtoToPost(PostDTO postDto, Post result) {
-    if (postDto.getFundingStatus() != null) {
-      result.setFundingStatus(postDto.getFundingStatus());
+    if (postDto.getStatus() != null) {
+      result.setFundingStatus(postDto.getStatus());
     } else {
       result.setFundingStatus(Status.INACTIVE);
     }

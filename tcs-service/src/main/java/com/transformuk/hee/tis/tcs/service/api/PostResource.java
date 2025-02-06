@@ -23,7 +23,6 @@ import com.transformuk.hee.tis.tcs.service.api.util.HeaderUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.PaginationUtil;
 import com.transformuk.hee.tis.tcs.service.api.util.UrlDecoderUtil;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
-import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
@@ -43,7 +42,6 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -85,15 +83,13 @@ public class PostResource {
   private final PlacementViewMapper placementViewMapper;
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
-  private final ApplicationEventPublisher applicationEventPublisher;
 
   public PostResource(PostService postService, PostValidator postValidator,
       PlacementViewRepository placementViewRepository,
       PlacementViewDecorator placementViewDecorator,
       PlacementViewMapper placementViewMapper,
       PlacementService placementService,
-      PlacementSummaryDecorator placementSummaryDecorator,
-      ApplicationEventPublisher applicationEventPublisher) {
+      PlacementSummaryDecorator placementSummaryDecorator) {
     this.postService = postService;
     this.postValidator = postValidator;
     this.placementViewRepository = placementViewRepository;
@@ -101,7 +97,6 @@ public class PostResource {
     this.placementViewMapper = placementViewMapper;
     this.placementService = placementService;
     this.placementSummaryDecorator = placementSummaryDecorator;
-    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -125,8 +120,6 @@ public class PostResource {
           .body(null);
     }
     PostDTO result = postService.save(postDTO);
-    //TODO On upgrade to Spring 6+ move publish to service and use transactional event listeners
-    applicationEventPublisher.publishEvent(new PostSavedEvent(result));
     return ResponseEntity.created(new URI("/api/posts/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -154,8 +147,6 @@ public class PostResource {
 
     postService.canLoggedInUserViewOrAmend(postDTO.getId());
     PostDTO result = postService.update(postDTO);
-    //TODO On upgrade to Spring 6+ move publish to service and use transactional event listeners
-    applicationEventPublisher.publishEvent(new PostSavedEvent(result));
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDTO.getId().toString()))
         .body(result);
@@ -353,10 +344,6 @@ public class PostResource {
     }
     List<PostDTO> result = postService.save(postDTOS);
     List<Long> ids = result.stream().map(PostDTO::getId).collect(Collectors.toList());
-    //TODO On upgrade to Spring 6+ move publish to service and use transactional event listeners
-    result.stream().forEach(postDto ->
-        applicationEventPublisher.publishEvent(new PostSavedEvent(postDto))
-    );
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(result);
@@ -391,10 +378,6 @@ public class PostResource {
 
     List<PostDTO> results = postService.save(postDTOS);
     List<Long> ids = results.stream().map(PostDTO::getId).collect(Collectors.toList());
-    //TODO On upgrade to Spring 6+ move publish to service and use transactional event listeners
-    results.stream().forEach(postDto ->
-        applicationEventPublisher.publishEvent(new PostSavedEvent(postDto))
-    );
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, StringUtils.join(ids, ",")))
         .body(results);
@@ -625,8 +608,6 @@ public class PostResource {
               REQUEST_BODY_CANNOT_BE_EMPTY)).body(null);
     }
     List<PostFundingDTO> checkList = postService.patchPostFundings(postDto);
-    //TODO On upgrade to Spring 6+ move publish to service and use transactional event listeners
-    applicationEventPublisher.publishEvent(new PostSavedEvent(postDto));
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, postDto.getId().toString()))
         .body(checkList);

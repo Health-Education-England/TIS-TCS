@@ -26,9 +26,7 @@ public class PostDTO implements Serializable {
   private Long id;
   private String intrepidId;
   private String nationalPostNumber;
-  @NotNull(message = "Status is required", groups = {Update.class, Create.class})
   private Status status;
-  private Status fundingStatus;
   private PostSuffix suffix;
   @NotNull(message = "Owner is required", groups = {Update.class, Create.class})
   private String owner;
