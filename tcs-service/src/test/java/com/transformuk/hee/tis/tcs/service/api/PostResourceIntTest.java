@@ -3,6 +3,8 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -60,6 +62,7 @@ import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
@@ -188,6 +191,8 @@ public class PostResourceIntTest {
   private ApplicationEventPublisher applicationEventPublisher;
   @Autowired
   private PlacementRepository placementRepository;
+  @Autowired
+  private PostFundingRepository postFundingRepository;
   @SpyBean
   private PostEventListener postEventListener;
   private MockMvc restPostMockMvc;
@@ -1029,7 +1034,7 @@ public class PostResourceIntTest {
         .trainingBodyId(UPDATED_TRAINING_BODY)
         .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER)
-        .fundings(postFundingDTOs);
+        .fundings(Sets.newHashSet(pfDto1));
     PostFundingDTO pfDto2 = new PostFundingDTO();
     pfDto2.setStartDate(LocalDate.now().minusDays(2));
     pfDto2.setEndDate(null);
@@ -1457,11 +1462,13 @@ public class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid end date for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setStartDate(LocalDate.now());
     invalidFunding.setEndDate(LocalDate.now().minusDays(10));
 
@@ -1494,11 +1501,13 @@ public class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
@@ -1568,11 +1577,13 @@ public class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
