@@ -306,6 +306,10 @@ public class PostValidator {
             && !postFundingDto.getEndDate().isAfter(postFundingDto.getStartDate())) {
           fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
               "Post funding end date must not be equal to or before start date"));
+        } else if (postFundingDto.getFundingType() == null) {
+          fieldErrors.add(
+              new FieldError(POST_DTO_NAME, "fundings",
+              "Post Funding must have a funding type"));
         }
       }
     }
