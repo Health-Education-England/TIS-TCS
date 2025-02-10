@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
@@ -105,18 +104,5 @@ public class PostFundingServiceImpl implements PostFundingService {
   public void delete(Long id) {
     log.debug("Request to delete PostFunding : {}", id);
     postFundingRepository.deleteById(id);
-  }
-
-  /**
-   * return the funding Status of the Post.
-   *
-   * @param postId the id of the associated post
-   */
-  @Override
-  public Status getPostFundingStatusForPost(Long postId) {
-    if (postFundingRepository.countCurrentFundings(postId) > 0) {
-      return Status.CURRENT;
-    }
-    return Status.INACTIVE;
   }
 }

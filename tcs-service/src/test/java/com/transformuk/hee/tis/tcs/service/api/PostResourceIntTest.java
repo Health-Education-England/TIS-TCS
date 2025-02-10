@@ -3,12 +3,11 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,9 +42,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorat
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
-import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.listener.person.PostEventListener;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -86,7 +83,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -106,6 +102,10 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = Application.class)
 public class PostResourceIntTest {
 
+  public static final String DEFAULT_TRAINEE_EMAIL = "EMAIL@email.com";
+  public static final String DEFAULT_TRAINEE_SURNAME = "PERSON_SURNAME";
+  public static final String DEFAULT_TRAINEE_FORENAMES = "PERSON_FORENAMES";
+  public static final String DEFAULT_TRAINEE_GRADE_ABBREVIATION = "F1";
   private static final String SPECIALTY_INTREPID_ID = "SPECIALTY INTREPID ID";
   private static final String PROGRAMME_INTREPID_ID = "programme intrepid id";
   private static final String POST_INTREPID_ID = "post intrepid id";
@@ -113,8 +113,8 @@ public class PostResourceIntTest {
   private static final String PROGRAMME_NUMBER = "123456";
   private static final String DEFAULT_NATIONAL_POST_NUMBER = "AAAAAAAAAA";
   private static final String UPDATED_NATIONAL_POST_NUMBER = "BBBBBBBBBB";
-  private static final Status DEFAULT_STATUS = Status.CURRENT;
-  private static final Status UPDATED_STATUS = Status.INACTIVE;
+  private static final Status INACTIVE_STATUS = Status.INACTIVE;
+  private static final Status CURRENT_STATUS = Status.CURRENT;
   private static final Long DEFAULT_EMPLOYING_BODY = 1L;
   private static final Long UPDATED_EMPLOYING_BODY = 2L;
   private static final Long DEFAULT_TRAINING_BODY_ID = 10L;
@@ -142,10 +142,6 @@ public class PostResourceIntTest {
   private static final String FUNDING_TYPE_TRUST = "TRUST";
   private static final String FUNDING_TYPE_TARIFF = "TARIFF";
   private static final String UPDATED_OWNER = "North West London";
-  public static final String DEFAULT_TRAINEE_EMAIL = "EMAIL@email.com";
-  public static final String DEFAULT_TRAINEE_SURNAME = "PERSON_SURNAME";
-  public static final String DEFAULT_TRAINEE_FORENAMES = "PERSON_FORENAMES";
-  public static final String DEFAULT_TRAINEE_GRADE_ABBREVIATION = "F1";
   @Autowired
   private PostRepository postRepository;
   @Autowired
@@ -188,8 +184,6 @@ public class PostResourceIntTest {
   private ApplicationEventPublisher applicationEventPublisher;
   @Autowired
   private PlacementRepository placementRepository;
-  @SpyBean
-  private PostEventListener postEventListener;
   private MockMvc restPostMockMvc;
   private Post post;
   private Specialty specialty;
@@ -218,7 +212,7 @@ public class PostResourceIntTest {
   public static Post createEntity() {
     return new Post()
         .nationalPostNumber(DEFAULT_NATIONAL_POST_NUMBER)
-        .status(DEFAULT_STATUS)
+        .fundingStatus(CURRENT_STATUS)
         .suffix(DEFAULT_SUFFIX)
         .owner(OWNER)
         .postFamily(DEFAULT_POST_FAMILY)
@@ -276,7 +270,7 @@ public class PostResourceIntTest {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator, placementViewMapper, placementService,
-        placementSummaryDecorator, applicationEventPublisher);
+        placementSummaryDecorator);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -321,7 +315,7 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
-    post.setStatus(Status.CURRENT);
+    post.setFundingStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
     restPostMockMvc.perform(
@@ -344,7 +338,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("programmes", "owner", "status", "employingBodyId",
+            value(containsInAnyOrder("programmes", "owner", "employingBodyId",
                 "trainingBodyId")));
   }
 
@@ -361,7 +355,7 @@ public class PostResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
-            value(containsInAnyOrder("programmes", "owner", "status", "employingBodyId",
+            value(containsInAnyOrder("programmes", "owner", "employingBodyId",
                 "trainingBodyId")));
   }
 
@@ -419,7 +413,7 @@ public class PostResourceIntTest {
     post = createEntity();
     PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY,
         post);
-    post.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty)));
+    post.setSpecialties(new HashSet<>(Collections.singletonList(primaryPostSpecialty)));
     postRepository.saveAndFlush(post);
 
     // Attempt to update a Post with a specialty of specialtyType.PLACEMENT.
@@ -470,7 +464,7 @@ public class PostResourceIntTest {
     post = createEntity();
     PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY,
         post);
-    post.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty)));
+    post.setSpecialties(new HashSet<>(Collections.singletonList(primaryPostSpecialty)));
     postRepository.saveAndFlush(post);
 
     // Attempt to update a Post with a specialty of specialtyType.SUB_SPECIALTY.
@@ -604,7 +598,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(
             jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(CURRENT_STATUS.name())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
 
@@ -625,7 +619,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(
             jsonPath("$.[*].nationalPostNumber").value(hasItem(DEFAULT_NATIONAL_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(CURRENT_STATUS.name())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER_NORTH_EAST)));
   }
@@ -641,7 +635,7 @@ public class PostResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))
+        .andExpect(jsonPath("$.[*].status").value(hasItem(CURRENT_STATUS.name())))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
 
@@ -656,7 +650,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(
-            jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+            jsonPath("$.[*].status").value(hasItem(CURRENT_STATUS.name())));
   }
 
   @Test
@@ -664,7 +658,7 @@ public class PostResourceIntTest {
   public void shouldSearchByNationalPostNumber() throws Exception {
     Post post = new Post();
     post.setNationalPostNumber(TEST_POST_NUMBER);
-    post.setStatus(Status.CURRENT);
+    post.setFundingStatus(CURRENT_STATUS);
     postRepository.saveAndFlush(post);
     restPostMockMvc.perform(get("/api/findByNationalPostNumber?searchQuery=TESTPOST"))
         .andExpect(status().isOk())
@@ -672,14 +666,14 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
         .andExpect(
-            jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())));
+            jsonPath("$.[*].status").value(hasItem(CURRENT_STATUS.name())));
   }
 
   @Test
   @Transactional
   public void shouldSearchByNationalPostNumberAndStatus() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
-    post.setStatus(Status.CURRENT);
+    post.setFundingStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
     restPostMockMvc.perform(
@@ -688,7 +682,7 @@ public class PostResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(post.getId().intValue())))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(hasItem(TEST_POST_NUMBER)))
-        .andExpect(jsonPath("$.[*].status").value(hasItem(Status.CURRENT.name())));
+        .andExpect(jsonPath("$.[*].status").value(hasItem(CURRENT_STATUS.name())));
   }
 
   @Test
@@ -738,7 +732,7 @@ public class PostResourceIntTest {
   public void shouldFilterColumns() throws Exception {
     //given
     // Initialize the database
-    post.setStatus(Status.INACTIVE);
+    post.setFundingStatus(INACTIVE_STATUS);
     post.setOwner(OWNER);
     postRepository.saveAndFlush(post);
     //when & then
@@ -748,7 +742,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&columnFilters=" +
             colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].status").value("INACTIVE"))
+        .andExpect(jsonPath("$.[*].status").value(INACTIVE_STATUS.name()))
         .andExpect(jsonPath("$.[*].owner").value(hasItem(OWNER)));
   }
 
@@ -807,11 +801,11 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(createEntity());
     Post otherStatusPost = createEntity();
     otherStatusPost.setOwner(OWNER);
-    otherStatusPost.setStatus(Status.INACTIVE);
+    otherStatusPost.setFundingStatus(INACTIVE_STATUS);
     postRepository.saveAndFlush(otherStatusPost);
     Post otherNumberPostView = createEntity();
     otherNumberPostView.setNationalPostNumber(TEST_POST_NUMBER);
-    otherNumberPostView.setStatus(Status.INACTIVE);
+    otherNumberPostView.setFundingStatus(Status.INACTIVE);
     otherNumberPostView.setOwner(OWNER);
     postRepository.saveAndFlush(otherNumberPostView);
     //when & then
@@ -821,7 +815,7 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(get("/api/posts?sort=id,desc&searchQuery=TEST&columnFilters=" +
             colFilters))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.[*].status").value("INACTIVE"));
+        .andExpect(jsonPath("$.[*].status").value(INACTIVE_STATUS.name()));
   }
 
   @Test
@@ -833,7 +827,7 @@ public class PostResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.id").value(post.getId().intValue()))
         .andExpect(jsonPath("$.nationalPostNumber").value(DEFAULT_NATIONAL_POST_NUMBER))
-        .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString().toUpperCase()))
+        .andExpect(jsonPath("$.status").value(CURRENT_STATUS.name()))
         .andExpect(jsonPath("$.suffix").value(DEFAULT_SUFFIX.toString()))
         .andExpect(jsonPath("$.owner").value(OWNER))
         .andExpect(jsonPath("$.postFamily").value(DEFAULT_POST_FAMILY))
@@ -856,7 +850,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[0].id").value(post.getId().intValue()))
         .andExpect(
             jsonPath("$.[0].nationalPostNumber").value(nationalPostNumberWithSpecialCharacters))
-        .andExpect(jsonPath("$.[0].status").value(DEFAULT_STATUS.toString().toUpperCase()))
+        .andExpect(jsonPath("$.[0].status").value(CURRENT_STATUS.name()))
         .andExpect(jsonPath("$.[0].suffix").value(DEFAULT_SUFFIX.toString()))
         .andExpect(jsonPath("$.[0].owner").value(OWNER))
         .andExpect(jsonPath("$.[0].postFamily").value(DEFAULT_POST_FAMILY))
@@ -884,7 +878,6 @@ public class PostResourceIntTest {
     Post updatedPost = postRepository.findById(post.getId()).orElse(null);
     updatedPost
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
         .owner(UPDATED_OWNER)
         .postFamily(UPDATED_POST_FAMILY)
@@ -893,20 +886,25 @@ public class PostResourceIntTest {
         .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER)
         .setFundingStatus(Status.CURRENT);
+    // Current post funding
+    PostFunding postFunding = new PostFunding();
+    postFunding.setStartDate(LocalDate.now().minusDays(1));
+    postFunding.setEndDate(LocalDate.now().plusDays(1));
+    updatedPost.setFundings(Sets.newHashSet(postFunding));
+
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
     restPostMockMvc.perform(put("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.fundingStatus").value("CURRENT"));
+        .andExpect(jsonPath("$.status").value(CURRENT_STATUS.name()));
 
-    verify(postEventListener, times(1)).handlePostSavedEvent(any(PostSavedEvent.class));
     // Validate the Post in the database
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeUpdate);
     Post testPost = postList.get(postList.size() - 1);
     assertThat(testPost.getNationalPostNumber()).isEqualTo(UPDATED_NATIONAL_POST_NUMBER);
-    assertThat(testPost.getStatus()).isEqualTo(UPDATED_STATUS);
+    assertThat(testPost.getFundingStatus()).isEqualTo(CURRENT_STATUS);
     assertThat(testPost.getSuffix()).isEqualTo(UPDATED_SUFFIX);
     assertThat(testPost.getOwner()).isEqualTo(UPDATED_OWNER);
     assertThat(testPost.getPostFamily()).isEqualTo(UPDATED_POST_FAMILY);
@@ -954,7 +952,6 @@ public class PostResourceIntTest {
   public void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
         .owner(UPDATED_OWNER)
         .postFamily(UPDATED_POST_FAMILY)
@@ -964,7 +961,6 @@ public class PostResourceIntTest {
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
     PostDTO anotherPostDTO = new PostDTO()
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
         .owner(UPDATED_OWNER)
         .postFamily(UPDATED_POST_FAMILY)
@@ -978,7 +974,8 @@ public class PostResourceIntTest {
     restPostMockMvc.perform(post("/api/bulk-posts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].status").value(everyItem(is(INACTIVE_STATUS.name()))));
     // Validate that both Post are in the database
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkCreate);
@@ -990,7 +987,6 @@ public class PostResourceIntTest {
     PostDTO postDTO = new PostDTO()
         .id(post.getId())
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
         .owner(OWNER)
         .postFamily(UPDATED_POST_FAMILY)
@@ -998,13 +994,17 @@ public class PostResourceIntTest {
         .trainingBodyId(UPDATED_TRAINING_BODY)
         .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+    PostFundingDTO pfDto1 = new PostFundingDTO();
+    pfDto1.setStartDate(LocalDate.now().minusDays(2));
+    pfDto1.setEndDate(LocalDate.now().minusDays(1));
+    postDTO.setFundings(Sets.newHashSet(pfDto1));
+
     Post anotherPost = createEntity();
     anotherPost.setIntrepidId(POST_INTREPID_ID);
     em.persist(anotherPost);
     PostDTO anotherPostDTO = new PostDTO()
         .id(anotherPost.getId())
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
         .owner(OWNER)
         .postFamily(UPDATED_POST_FAMILY)
@@ -1012,12 +1012,19 @@ public class PostResourceIntTest {
         .trainingBodyId(UPDATED_TRAINING_BODY)
         .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+    PostFundingDTO pfDto2 = new PostFundingDTO();
+    pfDto2.setStartDate(LocalDate.now().minusDays(2));
+    pfDto2.setEndDate(null);
+    anotherPostDTO.setFundings(Sets.newHashSet(pfDto2));
+
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO, anotherPostDTO);
     restPostMockMvc.perform(put("/api/bulk-posts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].status").value(
+            containsInRelativeOrder(INACTIVE_STATUS.name(), CURRENT_STATUS.name())));
     // Validate that both Post are still in the database
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
@@ -1029,7 +1036,6 @@ public class PostResourceIntTest {
     PostDTO postDTO = new PostDTO()
         .id(post.getId())
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
         .owner(OWNER)
         .postFamily(UPDATED_POST_FAMILY)
@@ -1044,7 +1050,6 @@ public class PostResourceIntTest {
     PostDTO oldPostDTO = new PostDTO()
         .id(oldPost.getId())
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
-        .status(UPDATED_STATUS)
         .suffix(UPDATED_SUFFIX)
         .owner(OWNER)
         .postFamily(UPDATED_POST_FAMILY)
@@ -1313,8 +1318,9 @@ public class PostResourceIntTest {
   @Transactional
   public void patchPostFundingsShouldSucceedWhenDataIsValid() throws Exception {
     // Initialize the database
-    post.setStatus(Status.CURRENT);
-    postRepository.saveAndFlush(post);
+    post.setStatus(CURRENT_STATUS);
+    post.setFundings(Sets.newHashSet());
+    Post savedPost = postRepository.saveAndFlush(post);
 
     // Initialize the payload
     PostDTO postDTO = new PostDTO();
@@ -1351,6 +1357,10 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.[0].messageList", hasSize(0)))
         .andExpect(jsonPath("$.[1].messageList", hasSize(1)))
         .andExpect(jsonPath("$.[1].messageList.[0]", is("Funding type does not exist.")));
+
+    Post updatedPost = postRepository.findById(savedPost.getId()).orElse(null);
+    assertThat(updatedPost).isNotNull();
+    assertThat(updatedPost.getFundingStatus()).isEqualTo(INACTIVE_STATUS);
   }
 
   @Test
@@ -1522,13 +1532,12 @@ public class PostResourceIntTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.fundingStatus").value("INACTIVE"));
-    // As fundingStatus is not specified in the DTO, the default value "INACTIVE" is set.
-    // FundingStatus will then be re-populated by checking the post fundings in the evert listener.
-    verify(postEventListener, times(1))
-        .handlePostSavedEvent(any(PostSavedEvent.class));
+        .andExpect(jsonPath("$.status").value(CURRENT_STATUS.name()));
+
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
+    Post savedPost = postList.get(postList.size() - 1);
+    assertThat(savedPost.getFundingStatus()).isEqualTo(CURRENT_STATUS);
   }
 
   @Test

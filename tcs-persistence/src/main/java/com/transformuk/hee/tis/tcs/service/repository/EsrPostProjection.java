@@ -13,6 +13,5 @@ public interface EsrPostProjection {
 
   String getNationalPostNumber();
 
-  Status getStatus();
-
+  Status getFundingStatus();
 }

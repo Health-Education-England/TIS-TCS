@@ -7,7 +7,7 @@ from (
     sp.`name` as `primarySpecialtyName`,
     pst.`siteId` as `primarySiteId`,
     p.`nationalPostNumber`,
-    p.`status`,
+    p.`fundingStatus`,
     p.`owner`,
     pt.trustId
     FROM `Post` p
