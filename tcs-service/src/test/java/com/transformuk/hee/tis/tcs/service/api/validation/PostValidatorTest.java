@@ -91,7 +91,7 @@ class PostValidatorTest {
 
   @ParameterizedTest
   @CsvSource(value = {"null,null", "null,2023-04-01"}, nullValues = {"null"})
-  void shouldFailValidationWhenDatesNotValid(LocalDate start, LocalDate end) {
+  void shouldFailValidationWhenFundingDatesNotValid(LocalDate start, LocalDate end) {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(start);
     funding.setEndDate(end);
@@ -102,6 +102,20 @@ class PostValidatorTest {
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getDefaultMessage(),
         equalTo("Post funding start date cannot be null or empty"));
+  }
+
+  @Test
+  void shouldFailValidationWhenFundingTypeNull() {
+    PostFundingDTO funding = new PostFundingDTO();
+    funding.setStartDate(LocalDate.now().minusDays(1));
+    funding.setEndDate(LocalDate.now().plusMonths(1));
+    dto.setFundings(Collections.singleton(funding));
+    MethodArgumentNotValidException exception =
+        assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
+    List<FieldError> errors = exception.getBindingResult().getFieldErrors();
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getDefaultMessage(),
+        equalTo("Post Funding must have a funding type"));
   }
 
   @Test

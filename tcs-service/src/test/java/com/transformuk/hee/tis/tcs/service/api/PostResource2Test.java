@@ -23,6 +23,7 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
+import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -40,6 +41,7 @@ import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -132,6 +134,11 @@ public class PostResource2Test {
         .setMessageConverters(jacksonMessageConverter).build();
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
 
+    PostFundingDTO postFundingDTO = new PostFundingDTO();
+    postFundingDTO.setStartDate(LocalDate.now().minusDays(1));
+    postFundingDTO.setEndDate(LocalDate.now().plusMonths(1));
+    postFundingDTO.setFundingType("HEE Funded - Tariff");
+
     postDTO = new PostDTO();
     postDTO.setStatus(Status.CURRENT);
     postDTO.setFundingStatus(Status.CURRENT);
@@ -141,6 +148,7 @@ public class PostResource2Test {
     postDTO.setEmployingBodyId(1L);
     ProgrammeDTO programmeDto = new ProgrammeDTO();
     postDTO.setProgrammes(Collections.singleton(programmeDto));
+    postDTO.setFundings(Collections.singleton(postFundingDTO));
 
     setupPostEsrReconciledDto();
   }

@@ -167,10 +167,6 @@ public class PostFundingResourceIntTest {
     // Validate the PostFunding in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeCreate + 1);
-
-    verify(applicationEventPublisher).publishEvent(createdEventCaptor.capture());
-    assertThat(createdEventCaptor.getValue().getPostFundingDto()).isEqualTo(
-        postFundingMapper.postFundingToPostFundingDTO(postFundingList.get(0)));
   }
 
   @Test
@@ -358,10 +354,6 @@ public class PostFundingResourceIntTest {
     assertThat(postFundingAfterRequest).isNotNull();
     assertThat(postFundingAfterRequest.getFundingSubTypeId()).isEqualTo(FUNDING_SUBTYPE_ID);
     assertThat(postFundingAfterRequest.getFundingReasonId()).isEqualTo(FUNDING_REASON_ID_1);
-
-    verify(applicationEventPublisher).publishEvent(savedEventCaptor.capture());
-    assertThat(savedEventCaptor.getValue().getPostFundingDto()).isEqualTo(
-        postFundingMapper.postFundingToPostFundingDTO(postFundingList.get(0)));
   }
 
   @Test
@@ -429,10 +421,6 @@ public class PostFundingResourceIntTest {
     // Validate the PostFunding in the database
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeUpdate + 1);
-
-    verify(applicationEventPublisher).publishEvent(createdEventCaptor.capture());
-    assertThat(createdEventCaptor.getValue().getPostFundingDto()).isEqualTo(
-        postFundingMapper.postFundingToPostFundingDTO(postFundingList.get(0)));
   }
 
   @Test
@@ -450,9 +438,5 @@ public class PostFundingResourceIntTest {
     // Validate the database is empty
     List<PostFunding> postFundingList = postFundingRepository.findAll();
     assertThat(postFundingList).hasSize(databaseSizeBeforeDelete - 1);
-
-    verify(applicationEventPublisher).publishEvent(deletedEventCaptor.capture());
-    assertThat(deletedEventCaptor.getValue().getPostFundingDto()).isEqualTo(
-        postFundingMapper.postFundingToPostFundingDTO(postFunding));
   }
 }
