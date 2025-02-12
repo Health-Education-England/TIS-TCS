@@ -320,7 +320,6 @@ public class PostResourceIntTest {
     postSite = createPostSite(SITE_ID, PostSiteType.PRIMARY, post);
     postSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY, post);
     postFundings = createPostFundings(post);
-    postFundings.stream().forEach(pf -> em.persist(pf));
     post = linkEntities(post, Sets.newHashSet(postSite), Sets.newHashSet(postGrade),
         Sets.newHashSet(postSpecialty), Sets.newHashSet(postFundings));
     em.persist(post);
@@ -380,8 +379,10 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldValidateIdWhenCreating() throws Exception {
     //given
-    PostDTO postDTO = postMapper.postToPostDTO(createEntity());
-    postDTO.setId(-1L);
+    Post post = createEntity();
+    post.setId(-1L);
+    post.setFundings(createPostFundings(post));
+    PostDTO postDTO = postMapper.postToPostDTO(post);
     //when & then
     restPostMockMvc.perform(post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
@@ -431,6 +432,7 @@ public class PostResourceIntTest {
     PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY,
         post);
     post.setSpecialties(new HashSet<>(Arrays.asList(primaryPostSpecialty)));
+    post.setFundings(createPostFundings(post));
     postRepository.saveAndFlush(post);
 
     // Attempt to update a Post with a specialty of specialtyType.PLACEMENT.
@@ -452,6 +454,8 @@ public class PostResourceIntTest {
         .ifPresent(ps -> primaryPostSpecialty.setId(ps.getId()));
     updatedPost.setSpecialties(
         new HashSet<>(Arrays.asList(primaryPostSpecialty, subspecialtyPostSpecialty)));
+
+    updatedPost.setFundings(createPostFundings(updatedPost));
 
     PostDTO updatedPostDto = postMapper.postToPostDTO(updatedPost);
 
@@ -504,6 +508,7 @@ public class PostResourceIntTest {
     updatedPost.setSpecialties(
         new HashSet<>(Arrays.asList(primaryPostSpecialty, subspecialtyPostSpecialty)));
 
+    updatedPost.setFundings(createPostFundings(updatedPost));
     PostDTO updatedPostDto = postMapper.postToPostDTO(updatedPost);
 
     restPostMockMvc.perform(put("/api/posts")
@@ -542,6 +547,7 @@ public class PostResourceIntTest {
     PostSpecialty postSpecialty = createPostSpecialty(persistedNonSubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
     post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
+    post.setFundings(createPostFundings(post));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
     restPostMockMvc.perform(post("/api/posts")
@@ -576,6 +582,7 @@ public class PostResourceIntTest {
     PostSpecialty postSpecialty = createPostSpecialty(persistedSubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
     post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
+    post.setFundings(createPostFundings(post));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
     restPostMockMvc.perform(post("/api/posts")
@@ -905,10 +912,7 @@ public class PostResourceIntTest {
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER)
         .setFundingStatus(Status.CURRENT);
     // Current post funding
-    PostFunding postFunding = new PostFunding();
-    postFunding.setStartDate(LocalDate.now().minusDays(1));
-    postFunding.setEndDate(LocalDate.now().plusDays(1));
-    updatedPost.setFundings(Sets.newHashSet(postFunding));
+    updatedPost.setFundings(createPostFundings(post));
 
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
     restPostMockMvc.perform(put("/api/posts")
