@@ -348,7 +348,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("programmes", "owner", "employingBodyId",
-                "trainingBodyId")));
+                "trainingBodyId", "fundings")));
   }
 
   @Test
@@ -365,7 +365,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("programmes", "owner", "employingBodyId",
-                "trainingBodyId")));
+                "trainingBodyId", "fundings")));
   }
 
   @Test
@@ -383,42 +383,6 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
 
-  @Test
-  @Transactional
-  public void shouldValidateCreateCurrentPostWithoutPostFundings() throws Exception {
-    //given
-    Post currentPostWithoutFundings = createEntity();
-    currentPostWithoutFundings.setStatus(Status.CURRENT);
-    currentPostWithoutFundings.setNationalPostNumber("number2");
-    PostDTO postDTO = postMapper.postToPostDTO(currentPostWithoutFundings);
-
-    //when & then
-    restPostMockMvc.perform(post("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value("Current Posts Must have at least 1 Post Funding"));
-  }
-
-  @Test
-  @Transactional
-  public void shouldValidateUpdateCurrentPostWithoutPostFundings() throws Exception {
-    //given
-    Post currentPostWithoutFundings = createEntity();
-    currentPostWithoutFundings.setId(1L);
-    currentPostWithoutFundings.setStatus(Status.CURRENT);
-    currentPostWithoutFundings.setNationalPostNumber("number2");
-    PostDTO postDTO = postMapper.postToPostDTO(currentPostWithoutFundings);
-
-    //when & then
-    restPostMockMvc.perform(put("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("error.validation"))
-        .andExpect(jsonPath("$.fieldErrors[0].message").value("Current Posts Must have at least 1 Post Funding"));
-  }
   @Ignore("Purpose unclear, we might modify by adding specialties to the DTO")
   @Test
   @Transactional
@@ -594,7 +558,6 @@ public class PostResourceIntTest {
     // The creation should succeed.
 
     Post post = createEntity();
-    post.setStatus(INACTIVE_STATUS);
     post.setNationalPostNumber("NEW_NPN");
     Specialty subspecialty = createSpecialty();
     subspecialty.setSpecialtyTypes(new HashSet<>(
@@ -605,7 +568,6 @@ public class PostResourceIntTest {
     PostSpecialty postSpecialty = createPostSpecialty(persistedSubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
     post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
-
     PostDTO postDto = postMapper.postToPostDTO(post);
 
     restPostMockMvc.perform(post("/api/posts")
