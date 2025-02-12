@@ -11,7 +11,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
@@ -313,10 +312,6 @@ public class PostValidator {
               "Post Funding must have a funding type"));
         }
       }
-    } else if (postDto.getStatus() == Status.CURRENT) { //No Post Funding but CURRENT
-      fieldErrors.add(
-          new FieldError(POST_DTO_NAME, "fundings",
-              "Current Posts Must have at least 1 Post Funding"));
     }
     return fieldErrors;
   }

@@ -47,6 +47,7 @@ public class PostDTO implements Serializable {
   private Set<PlacementDTO> placementHistory;
   @NotNull(message = "Programme is required", groups = {Update.class, Create.class})
   private Set<ProgrammeDTO> programmes;
+  @NotNull(message = "Post Funding is required", groups = {Update.class, Create.class})
   private Set<PostFundingDTO> fundings;
   private boolean bypassNPNGeneration;
   private Set<PostEsrEventDto> currentReconciledEvents;
