@@ -69,6 +69,7 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PostServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.LocalDate;
@@ -968,6 +969,65 @@ public class PostResourceIntTest {
     // Validate the database is empty
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeDelete - 1);
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailCreateWhenNoPostFundingProvided() throws Exception {
+    Post post = createEntity();
+    post.fundings(null);
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailCreateWhenEmptyPostFundingProvided() throws Exception {
+    Post post = createEntity();
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+    postDTO.setFundings(new HashSet<>());
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailUpdateWhenNoPostFundingProvided() throws Exception {
+    post = createEntity();
+    postRepository.saveAndFlush(post);
+
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+
+    restPostMockMvc.perform(put("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailUpdateWhenEmptyPostFundingProvided() throws Exception {
+    post = createEntity();
+    postRepository.saveAndFlush(post);
+
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+    postDTO.setFundings(new HashSet<>());
+
+    restPostMockMvc.perform(put("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
   }
 
   @Test

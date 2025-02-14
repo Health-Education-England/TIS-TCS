@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import lombok.Data;
@@ -47,7 +48,7 @@ public class PostDTO implements Serializable {
   private Set<PlacementDTO> placementHistory;
   @NotNull(message = "Programme is required", groups = {Update.class, Create.class})
   private Set<ProgrammeDTO> programmes;
-  @NotNull(message = "Post Funding is required", groups = {Update.class, Create.class})
+  @NotEmpty(message = "Post Funding is required", groups = {Update.class, Create.class})
   private Set<PostFundingDTO> fundings;
   private boolean bypassNPNGeneration;
   private Set<PostEsrEventDto> currentReconciledEvents;
