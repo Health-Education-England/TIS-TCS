@@ -57,12 +57,14 @@ import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
+import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PostServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.LocalDate;
@@ -184,6 +186,8 @@ public class PostResourceIntTest {
   private ApplicationEventPublisher applicationEventPublisher;
   @Autowired
   private PlacementRepository placementRepository;
+  @Autowired
+  private PostFundingRepository postFundingRepository;
   private MockMvc restPostMockMvc;
   private Post post;
   private Specialty specialty;
@@ -191,7 +195,7 @@ public class PostResourceIntTest {
   private PostSite postSite;
   private PostSpecialty postSpecialty;
   private Programme programme;
-
+  private Set<PostFunding> postFundings;
   @Mock
   private ReferenceService referenceServiceMock;
 
@@ -202,10 +206,11 @@ public class PostResourceIntTest {
    * which requires the current entity.
    */
   public static Post linkEntities(Post post, Set<PostSite> sites, Set<PostGrade> grades,
-      Set<PostSpecialty> specialties) {
+      Set<PostSpecialty> specialties, Set<PostFunding> fundings) {
     post.sites(sites)
         .grades(grades)
-        .specialties(specialties);
+        .specialties(specialties)
+        .fundings(fundings);
     return post;
   }
 
@@ -265,6 +270,25 @@ public class PostResourceIntTest {
     return programme;
   }
 
+  private static Set<PostFunding> createPostFundings(Post post) {
+    Set<PostFunding> postFundings = new HashSet<>();
+    PostFunding postFundingTrust = new PostFunding();
+    postFundingTrust.setFundingType(FUNDING_TYPE_TRUST);
+    PostFunding postFundingTarrif = new PostFunding();
+    postFundingTarrif.setFundingType(FUNDING_TYPE_TARIFF);
+    LocalDate futureDate = LocalDate.now().plusYears(5);
+    LocalDate oldDate = LocalDate.now().minusMonths(6);
+    postFundingTrust.setEndDate(futureDate);
+    postFundingTrust.setStartDate(oldDate);
+    postFundingTarrif.setEndDate(futureDate);
+    postFundingTarrif.setStartDate(oldDate);
+    postFundingTarrif.setPost(post);
+    postFundingTrust.setPost(post);
+    postFundings.add(postFundingTarrif);
+    postFundings.add(postFundingTrust);
+    return postFundings;
+  }
+
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
@@ -288,27 +312,12 @@ public class PostResourceIntTest {
     postGrade = createPostGrade(GRADE_ID, PostGradeType.APPROVED, post);
     postSite = createPostSite(SITE_ID, PostSiteType.PRIMARY, post);
     postSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY, post);
+    postFundings = createPostFundings(post);
     post = linkEntities(post, Sets.newHashSet(postSite), Sets.newHashSet(postGrade),
-        Sets.newHashSet(postSpecialty));
+        Sets.newHashSet(postSpecialty), Sets.newHashSet(postFundings));
     em.persist(post);
     programme = createProgramme();
     em.persist(programme);
-    PostFunding postFundingTrust = new PostFunding();
-    postFundingTrust.setFundingType(FUNDING_TYPE_TRUST);
-    PostFunding postFundingTarrif = new PostFunding();
-    postFundingTarrif.setFundingType(FUNDING_TYPE_TARIFF);
-    LocalDate futureDate = LocalDate.of(2099, 12, 12);
-    LocalDate oldDate = LocalDate.of(1999, 12, 12);
-    postFundingTrust.setEndDate(futureDate);
-    postFundingTrust.setStartDate(oldDate);
-    postFundingTarrif.setEndDate(futureDate);
-    postFundingTarrif.setStartDate(oldDate);
-    postFundingTarrif.setPost(post);
-    postFundingTrust.setPost(post);
-    em.persist(postFundingTarrif);
-    em.persist(postFundingTrust);
-    Set<PostFunding> postFundings = Sets.newHashSet(postFundingTarrif, postFundingTrust);
-    post.setFundings(postFundings);
   }
 
   @Test
@@ -339,7 +348,7 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("programmes", "owner", "employingBodyId",
-                "trainingBodyId")));
+                "trainingBodyId", "fundings")));
   }
 
   @Test
@@ -356,15 +365,17 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[*].field").
             value(containsInAnyOrder("programmes", "owner", "employingBodyId",
-                "trainingBodyId")));
+                "trainingBodyId", "fundings")));
   }
 
   @Test
   @Transactional
   public void shouldValidateIdWhenCreating() throws Exception {
     //given
-    PostDTO postDTO = postMapper.postToPostDTO(createEntity());
-    postDTO.setId(-1L);
+    Post post = createEntity();
+    post.setId(-1L);
+    post.setFundings(createPostFundings(post));
+    PostDTO postDTO = postMapper.postToPostDTO(post);
     //when & then
     restPostMockMvc.perform(post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
@@ -414,6 +425,7 @@ public class PostResourceIntTest {
     PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY,
         post);
     post.setSpecialties(new HashSet<>(Collections.singletonList(primaryPostSpecialty)));
+    post.setFundings(createPostFundings(post));
     postRepository.saveAndFlush(post);
 
     // Attempt to update a Post with a specialty of specialtyType.PLACEMENT.
@@ -435,6 +447,8 @@ public class PostResourceIntTest {
         .ifPresent(ps -> primaryPostSpecialty.setId(ps.getId()));
     updatedPost.setSpecialties(
         new HashSet<>(Arrays.asList(primaryPostSpecialty, subspecialtyPostSpecialty)));
+
+    updatedPost.setFundings(createPostFundings(updatedPost));
 
     PostDTO updatedPostDto = postMapper.postToPostDTO(updatedPost);
 
@@ -487,6 +501,7 @@ public class PostResourceIntTest {
     updatedPost.setSpecialties(
         new HashSet<>(Arrays.asList(primaryPostSpecialty, subspecialtyPostSpecialty)));
 
+    updatedPost.setFundings(createPostFundings(updatedPost));
     PostDTO updatedPostDto = postMapper.postToPostDTO(updatedPost);
 
     restPostMockMvc.perform(put("/api/posts")
@@ -525,6 +540,7 @@ public class PostResourceIntTest {
     PostSpecialty postSpecialty = createPostSpecialty(persistedNonSubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
     post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
+    post.setFundings(createPostFundings(post));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
     restPostMockMvc.perform(post("/api/posts")
@@ -559,6 +575,7 @@ public class PostResourceIntTest {
     PostSpecialty postSpecialty = createPostSpecialty(persistedSubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
     post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
+    post.setFundings(createPostFundings(post));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
     restPostMockMvc.perform(post("/api/posts")
@@ -887,10 +904,7 @@ public class PostResourceIntTest {
         .localPostNumber(UPDATED_LOCAL_POST_NUMBER)
         .setFundingStatus(Status.CURRENT);
     // Current post funding
-    PostFunding postFunding = new PostFunding();
-    postFunding.setStartDate(LocalDate.now().minusDays(1));
-    postFunding.setEndDate(LocalDate.now().plusDays(1));
-    updatedPost.setFundings(Sets.newHashSet(postFunding));
+    updatedPost.setFundings(createPostFundings(post));
 
     PostDTO postDTO = postMapper.postToPostDTO(updatedPost);
     restPostMockMvc.perform(put("/api/posts")
@@ -945,6 +959,65 @@ public class PostResourceIntTest {
     // Validate the database is empty
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeDelete - 1);
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailCreateWhenNoPostFundingProvided() throws Exception {
+    Post post = createEntity();
+    post.fundings(null);
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailCreateWhenEmptyPostFundingProvided() throws Exception {
+    Post post = createEntity();
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+    postDTO.setFundings(new HashSet<>());
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailUpdateWhenNoPostFundingProvided() throws Exception {
+    post = createEntity();
+    postRepository.saveAndFlush(post);
+
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+
+    restPostMockMvc.perform(put("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
+  }
+
+  @Test
+  @Transactional
+  public void shouldFailUpdateWhenEmptyPostFundingProvided() throws Exception {
+    post = createEntity();
+    postRepository.saveAndFlush(post);
+
+    PostDTO postDTO = postMapper.postToPostDTO(post);
+    postDTO.setFundings(new HashSet<>());
+
+    restPostMockMvc.perform(put("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
   }
 
   @Test
@@ -1011,12 +1084,12 @@ public class PostResourceIntTest {
         .employingBodyId(UPDATED_EMPLOYING_BODY)
         .trainingBodyId(UPDATED_TRAINING_BODY)
         .trainingDescription(UPDATED_TRAINING_DESCRIPTION)
-        .localPostNumber(UPDATED_LOCAL_POST_NUMBER);
+        .localPostNumber(UPDATED_LOCAL_POST_NUMBER)
+        .fundings(Sets.newHashSet(pfDto1));
     PostFundingDTO pfDto2 = new PostFundingDTO();
     pfDto2.setStartDate(LocalDate.now().minusDays(2));
     pfDto2.setEndDate(null);
     anotherPostDTO.setFundings(Sets.newHashSet(pfDto2));
-
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList(postDTO, anotherPostDTO);
     restPostMockMvc.perform(put("/api/bulk-posts")
@@ -1440,11 +1513,13 @@ public class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid end date for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setStartDate(LocalDate.now());
     invalidFunding.setEndDate(LocalDate.now().minusDays(10));
 
@@ -1477,11 +1552,13 @@ public class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
@@ -1514,9 +1591,11 @@ public class PostResourceIntTest {
     PostFundingDTO validFunding1 = new PostFundingDTO();
     validFunding1.setStartDate(LocalDate.now().minusDays(10));
     validFunding1.setEndDate(LocalDate.now().plusDays(1));
+    validFunding1.setFundingType(FUNDING_TYPE_TARIFF);
 
     PostFundingDTO validFunding2 = new PostFundingDTO();
     validFunding2.setStartDate(LocalDate.now());
+    validFunding2.setFundingType(FUNDING_TYPE_TARIFF);
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
     Post testPost = createEntity();
@@ -1546,11 +1625,13 @@ public class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
+    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
+    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
