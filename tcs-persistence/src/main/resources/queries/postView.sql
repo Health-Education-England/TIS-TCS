@@ -7,11 +7,10 @@ primarySiteId,
 GROUP_CONCAT(distinct programmeName SEPARATOR ', ') programmes,
 GROUP_CONCAT(distinct fundingType SEPARATOR ', ') fundingType,
 nationalPostNumber,
-fundingStatus,
+status,
 owner,
 intrepidId,
-GROUP_CONCAT(surnames SEPARATOR ', ') surnames,
-GROUP_CONCAT(forenames SEPARATOR ', ') forenames
+GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR ', ') forenames
  from (SELECT p.`id`,
     pg.`gradeId` as `approvedGradeId`,
     ps.`specialtyId` as `primarySpecialtyId`,
@@ -21,7 +20,7 @@ GROUP_CONCAT(forenames SEPARATOR ', ') forenames
     prg.`programmeName`,
     pf.`fundingType`,
     p.`nationalPostNumber`,
-    p.`fundingStatus`,
+    p.`status`,
     p.`owner`,
     p.`intrepidId`,
     c.surname surnames, c.forenames forenames
@@ -38,7 +37,7 @@ GROUP_CONCAT(forenames SEPARATOR ', ') forenames
  TRUST_JOIN
  WHERECLAUSE
 ) as ot
-group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,fundingStatus,owner,intrepidId
+group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,status,owner,intrepidId
  ORDERBYCLAUSE
  LIMITCLAUSE
 ;

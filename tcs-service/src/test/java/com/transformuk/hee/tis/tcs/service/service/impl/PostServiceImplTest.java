@@ -58,7 +58,6 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -271,12 +270,8 @@ class PostServiceImplTest {
   void updateFundingStatusShouldSetFundingStatus() {
     Post testPost = new Post();
     testPost.setId(1L);
-    PostFunding postFunding = new PostFunding();
-    postFunding.setStartDate(LocalDate.now().minusDays(1));
-    postFunding.setEndDate(LocalDate.now().plusDays(1));
-    testPost.setFundings(Sets.newHashSet(postFunding));
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(testPost));
-    testObj.updateFundingStatus(1L);
+    testObj.updateFundingStatus(1L, Status.CURRENT);
     verify(postRepositoryMock).save(postArgumentCaptor.capture());
     Post result = postArgumentCaptor.getValue();
     assertEquals(Status.CURRENT, result.getFundingStatus());
@@ -287,96 +282,8 @@ class PostServiceImplTest {
     Post testPost = new Post();
     testPost.setId(1L);
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.empty());
-    testObj.updateFundingStatus(1L);
+    testObj.updateFundingStatus(1L, Status.CURRENT);
     verify(postRepositoryMock, never()).save(testPost);
-  }
-
-  @Test
-  void shouldReturnCurrentFundingStatusForPost() {
-    Post testPost = new Post();
-    PostFunding postFunding1 = new PostFunding();
-    postFunding1.setStartDate(LocalDate.now().minusDays(1));
-    postFunding1.setEndDate(LocalDate.now());
-    testPost.setFundings(Sets.newHashSet(postFunding1));
-
-    Status fundingStatus = testObj.getFundingStatusForPost(testPost);
-    assertEquals(Status.CURRENT, fundingStatus);
-  }
-
-  @Test
-  void shouldReturnInactiveFundingStatusForPost() {
-    Post testPost = new Post();
-
-    Status fundingStatus = testObj.getFundingStatusForPost(testPost);
-    assertEquals(Status.INACTIVE, fundingStatus);
-  }
-
-  @Test
-  void shouldReturnCorrectFundingCountWhenStartDateNotNullAndEndDateNotNull(){
-    Post testPost = new Post();
-    PostFunding postFunding1 = new PostFunding();
-    postFunding1.setStartDate(LocalDate.now().minusDays(1));
-    postFunding1.setEndDate(LocalDate.now());
-    PostFunding postFunding2 = new PostFunding();
-    postFunding2.setStartDate(LocalDate.now().minusDays(10));
-    postFunding2.setEndDate(LocalDate.now().minusDays(1));
-    testPost.setFundings(Sets.newHashSet(postFunding1, postFunding2));
-
-    long count = testObj.countCurrentFundings(testPost);
-    assertEquals(1L, count);
-  }
-
-  @Test
-  void shouldReturnCorrectFundingCountWhenStartDateNullAndEndDateNotNull(){
-    Post testPost = new Post();
-    PostFunding postFunding1 = new PostFunding();
-    postFunding1.setStartDate(null);
-    postFunding1.setEndDate(LocalDate.now());
-    PostFunding postFunding2 = new PostFunding();
-    postFunding2.setStartDate(null);
-    postFunding2.setEndDate(LocalDate.now().minusDays(1));
-    testPost.setFundings(Sets.newHashSet(postFunding1, postFunding2));
-
-    long count = testObj.countCurrentFundings(testPost);
-    assertEquals(1L, count);
-  }
-
-  @Test
-  void shouldReturnCorrectFundingCountWhenStartDateNotNullAndEndDateNull(){
-    Post testPost = new Post();
-    PostFunding postFunding1 = new PostFunding();
-    postFunding1.setStartDate(LocalDate.now());
-    postFunding1.setEndDate(null);
-    PostFunding postFunding2 = new PostFunding();
-    postFunding2.setStartDate(LocalDate.now().minusDays(1));
-    postFunding2.setEndDate(null);
-    PostFunding postFunding3 = new PostFunding();
-    postFunding3.setStartDate(LocalDate.now().plusDays(1));
-    postFunding3.setEndDate(null);
-    testPost.setFundings(Sets.newHashSet(postFunding1, postFunding2, postFunding3));
-
-    long count = testObj.countCurrentFundings(testPost);
-    assertEquals(3L, count);
-  }
-
-  @Test
-  void shouldReturnCorrectFundingCountWhenStartDateNullAndEndDateNull(){
-    Post testPost = new Post();
-    PostFunding postFunding1 = new PostFunding();
-    PostFunding postFunding2 = new PostFunding();
-
-    testPost.setFundings(Sets.newHashSet(postFunding1, postFunding2));
-
-    long count = testObj.countCurrentFundings(testPost);
-    assertEquals(0L, count);
-  }
-
-  @Test
-  void shouldReturnCorrectFundingCountWhenNoFundings(){
-    Post testPost = new Post();
-
-    long count = testObj.countCurrentFundings(testPost);
-    assertEquals(0L, count);
   }
 
   @Test
