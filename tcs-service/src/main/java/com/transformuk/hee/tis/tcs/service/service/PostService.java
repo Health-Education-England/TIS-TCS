@@ -5,6 +5,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import java.util.List;
 import java.util.Optional;
@@ -96,8 +97,9 @@ public interface PostService {
    * Update post funding status.
    *
    * @param postId        the id of the post to update
+   * @param fundingStatus the new funding status
    */
-  void updateFundingStatus(long postId);
+  void updateFundingStatus(long postId, Status fundingStatus);
 
   /**
    * Get all the post by dbcs

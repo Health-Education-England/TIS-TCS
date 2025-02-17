@@ -1,8 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
+import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -15,8 +17,11 @@ public class PostFundingEventListener {
 
   PostService postService;
 
-  public PostFundingEventListener(PostService postService) {
+  PostFundingService postFundingService;
+
+  public PostFundingEventListener(PostService postService, PostFundingService postFundingService) {
     this.postService = postService;
+    this.postFundingService = postFundingService;
   }
 
   /**
@@ -53,6 +58,7 @@ public class PostFundingEventListener {
   }
 
   private void updatePostFundingStatus(Long postId) {
-    postService.updateFundingStatus(postId);
+    Status fundingStatus = postFundingService.getPostFundingStatusForPost(postId);
+    postService.updateFundingStatus(postId, fundingStatus);
   }
 }
