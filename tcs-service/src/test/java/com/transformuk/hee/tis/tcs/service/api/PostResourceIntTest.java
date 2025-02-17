@@ -3,8 +3,6 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -69,7 +67,6 @@ import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PostServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.LocalDate;
@@ -380,10 +377,10 @@ public class PostResourceIntTest {
   @Transactional
   public void shouldValidateIdWhenCreating() throws Exception {
     //given
-    Post post = createEntity();
-    post.setId(-1L);
-    post.setFundings(createPostFundings(post));
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    Post newPost = createEntity();
+    newPost.setId(-1L);
+    newPost.setFundings(createPostFundings(newPost));
+    PostDTO postDTO = postMapper.postToPostDTO(newPost);
     //when & then
     restPostMockMvc.perform(post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
@@ -974,9 +971,9 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldFailCreateWhenNoPostFundingProvided() throws Exception {
-    Post post = createEntity();
-    post.fundings(null);
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    Post newPost = createEntity();
+    newPost.fundings(null);
+    PostDTO postDTO = postMapper.postToPostDTO(newPost);
 
     restPostMockMvc.perform(post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
@@ -988,8 +985,8 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldFailCreateWhenEmptyPostFundingProvided() throws Exception {
-    Post post = createEntity();
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    Post newPost = createEntity();
+    PostDTO postDTO = postMapper.postToPostDTO(newPost);
     postDTO.setFundings(new HashSet<>());
 
     restPostMockMvc.perform(post("/api/posts")
@@ -1002,10 +999,10 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldFailUpdateWhenNoPostFundingProvided() throws Exception {
-    post = createEntity();
-    postRepository.saveAndFlush(post);
+    Post updatePost = createEntity();
+    postRepository.saveAndFlush(updatePost);
 
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    PostDTO postDTO = postMapper.postToPostDTO(updatePost);
 
     restPostMockMvc.perform(put("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
@@ -1017,10 +1014,10 @@ public class PostResourceIntTest {
   @Test
   @Transactional
   public void shouldFailUpdateWhenEmptyPostFundingProvided() throws Exception {
-    post = createEntity();
-    postRepository.saveAndFlush(post);
+    Post updatePost = createEntity();
+    postRepository.saveAndFlush(updatePost);
 
-    PostDTO postDTO = postMapper.postToPostDTO(post);
+    PostDTO postDTO = postMapper.postToPostDTO(updatePost);
     postDTO.setFundings(new HashSet<>());
 
     restPostMockMvc.perform(put("/api/posts")
@@ -1631,7 +1628,6 @@ public class PostResourceIntTest {
         .handlePostSavedEvent(any(PostSavedEvent.class));
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
-    Post savedPost = postList.get(postList.size() - 1);
   }
 
   @Test

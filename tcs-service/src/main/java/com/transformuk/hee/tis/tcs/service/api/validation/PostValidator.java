@@ -43,6 +43,7 @@ public class PostValidator {
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String SPECIALTIES = "specialties";
   public static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
+  public static final String FUNDINGS = "fundings";
   private ProgrammeRepository programmeRepository;
   private PostRepository postRepository;
   private SpecialtyRepository specialtyRepository;
@@ -300,15 +301,15 @@ public class PostValidator {
     if (postDto.getFundings() != null && !postDto.getFundings().isEmpty()) {
       for (PostFundingDTO postFundingDto : postDto.getFundings()) {
         if (postFundingDto.getStartDate() == null) {
-          fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
+          fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
               "Post funding start date cannot be null or empty"));
         } else if (postFundingDto.getEndDate() != null
             && !postFundingDto.getEndDate().isAfter(postFundingDto.getStartDate())) {
-          fieldErrors.add(new FieldError(POST_DTO_NAME, "fundings",
+          fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
               "Post funding end date must not be equal to or before start date"));
         } else if (postFundingDto.getFundingType() == null) {
           fieldErrors.add(
-              new FieldError(POST_DTO_NAME, "fundings",
+              new FieldError(POST_DTO_NAME, FUNDINGS,
               "Post Funding must have a funding type"));
         }
       }
