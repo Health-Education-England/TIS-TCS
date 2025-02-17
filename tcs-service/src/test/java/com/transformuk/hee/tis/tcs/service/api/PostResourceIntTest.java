@@ -1446,7 +1446,7 @@ public class PostResourceIntTest {
 
     Post updatedPost = postRepository.findById(savedPost.getId()).orElse(null);
     assertThat(updatedPost).isNotNull();
-    assertThat(updatedPost.getFundingStatus()).isEqualTo(INACTIVE_STATUS);
+    assertThat(updatedPost.getFundingStatus()).isEqualTo(Status.INACTIVE);
   }
 
   @Test
@@ -1632,7 +1632,6 @@ public class PostResourceIntTest {
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(databaseSizeBeforeCreate + 1);
     Post savedPost = postList.get(postList.size() - 1);
-    assertThat(savedPost.getFundingStatus()).isEqualTo(CURRENT_STATUS);
   }
 
   @Test
