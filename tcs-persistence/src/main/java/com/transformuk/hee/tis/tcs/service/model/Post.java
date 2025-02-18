@@ -208,6 +208,11 @@ public class Post implements Serializable {
     return this;
   }
 
+  public Post fundings(final Set<PostFunding> fundings) {
+    this.fundings = fundings;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
