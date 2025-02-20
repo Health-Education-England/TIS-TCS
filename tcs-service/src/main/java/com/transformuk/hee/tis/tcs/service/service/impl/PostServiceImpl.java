@@ -47,6 +47,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -141,6 +142,7 @@ public class PostServiceImpl implements PostService {
     }
     Post post = postMapper.postDTOToPost(postDTO);
     post = postRepository.save(post);
+    updateFundingStatus(post);
     PostDTO savedPostDto = postMapper.postToPostDTO(post);
     handleNewPostEsrNotification(postDTO);
     return savedPostDto;
@@ -175,6 +177,7 @@ public class PostServiceImpl implements PostService {
     postSiteRepository.deleteAll(allPostSites);
     postSpecialtyRepository.deleteAll(allPostSpecialties);
     posts = postRepository.saveAll(posts);
+    posts.forEach(this::updateFundingStatus);
     return postMapper.postsToPostDTOs(posts);
   }
 
@@ -396,22 +399,57 @@ public class PostServiceImpl implements PostService {
 
     postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
+    updateFundingStatus(currentInDbPost);
     return postMapper.postToPostDTO(currentInDbPost);
   }
 
   /**
    * Update post funding status.
    *
-   * @param postId        the id of the post to update
-   * @param fundingStatus the new funding status
+   * @param postId the id of the post to update
    */
   @Override
-  public void updateFundingStatus(long postId, Status fundingStatus) {
+  public void updateFundingStatus(long postId) {
     Post currentInDbPost = postRepository.findById(postId).orElse(null);
-    if (currentInDbPost != null) {
-      currentInDbPost.setFundingStatus(fundingStatus);
-      postRepository.save(currentInDbPost);
+    updateFundingStatus(currentInDbPost);
+  }
+
+  /**
+   * Update post funding status.
+   *
+   * @param post the post entity to update
+   */
+  protected void updateFundingStatus(Post post) {
+    if (post != null) {
+      Status fundingStatus = getFundingStatusForPost(post);
+      post.setFundingStatus(fundingStatus);
+      postRepository.save(post);
     }
+  }
+
+  /**
+   * Return the funding Status of the Post.
+   *
+   * @param post the associated post
+   * @return the status of the post
+   */
+  protected Status getFundingStatusForPost(Post post) {
+    if (countCurrentFundings(post) > 0) {
+      return Status.CURRENT;
+    } else {
+      return Status.INACTIVE;
+    }
+  }
+
+  protected long countCurrentFundings(Post post) {
+    Set<PostFunding> postFundings = post.getFundings();
+    return postFundings.stream().filter(pf -> {
+      LocalDate startDate = pf.getStartDate();
+      LocalDate endDate = pf.getEndDate();
+
+      return ((endDate != null && !endDate.isBefore(LocalDate.now()))
+          || (endDate == null && startDate != null));
+    }).count();
   }
 
   /**
@@ -722,7 +760,7 @@ public class PostServiceImpl implements PostService {
             whereClause.append(" AND nationalPostNumber in (:nationalPostNumberList)");
             break;
           case "status":
-            whereClause.append(" AND p.status in (:statusList)");
+            whereClause.append(" AND p.fundingStatus in (:fundingStatusList)");
             break;
           case "owner":
             whereClause.append(" AND p.owner in (:ownerList)");
@@ -787,7 +825,7 @@ public class PostServiceImpl implements PostService {
             paramSource.addValue("nationalPostNumberList", cf.getValues());
             break;
           case "status":
-            paramSource.addValue("statusList",
+            paramSource.addValue("fundingStatusList",
                 cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
             break;
           case "owner":
@@ -848,7 +886,7 @@ public class PostServiceImpl implements PostService {
       columnFilters.forEach(cf -> {
         switch (cf.getName()) {
           case "status":
-            whereClause.append(" AND p.status in (:statusList)");
+            whereClause.append(" AND p.fundingStatus in (:fundingStatusList)");
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
@@ -889,9 +927,9 @@ public class PostServiceImpl implements PostService {
         view.setPrimarySiteId(null);
       }
       view.setNationalPostNumber(rs.getString("nationalPostNumber"));
-      String status = rs.getString("status");
-      if (StringUtils.isNotEmpty(status)) {
-        view.setStatus(Status.valueOf(status));
+      String fundingStatus = rs.getString("fundingStatus");
+      if (StringUtils.isNotEmpty(fundingStatus)) {
+        view.setStatus(Status.valueOf(fundingStatus));
       }
       view.setOwner(rs.getString("owner"));
       return view;

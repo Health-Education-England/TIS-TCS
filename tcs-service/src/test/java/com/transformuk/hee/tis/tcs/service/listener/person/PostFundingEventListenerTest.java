@@ -1,16 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.Post;
-import com.transformuk.hee.tis.tcs.service.model.PostFunding;
 import com.transformuk.hee.tis.tcs.service.service.PostFundingService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import java.time.LocalDate;
@@ -50,7 +46,6 @@ public class PostFundingEventListenerTest {
     post1 = new Post();
     post1.setId(1L);
 
-
     postFundingSavedEvent = new PostFundingSavedEvent(postFundingDTO1);
     postFundingCreatedEvent = new PostFundingCreatedEvent(postFundingDTO2);
     postFundingDeletedEvent = new PostFundingDeletedEvent(postFundingDTO2);
@@ -58,23 +53,20 @@ public class PostFundingEventListenerTest {
 
   @Test
   public void shouldHandlePostFundingSavedEvent() {
-    when(postFundingService.getPostFundingStatusForPost(any())).thenReturn(Status.CURRENT);
     postFundingEventListener.handlePostFundingSavedEvent(postFundingSavedEvent);
-    verify(postService).updateFundingStatus(1L, Status.CURRENT);
+    verify(postService).updateFundingStatus(1L);
   }
 
   @Test
   public void shouldHandlePostFundingCreatedEvent() {
-    when(postFundingService.getPostFundingStatusForPost(any())).thenReturn(Status.CURRENT);
     postFundingEventListener.handlePostFundingCreatedEvent(postFundingCreatedEvent);
-    verify(postService).updateFundingStatus(2L, Status.CURRENT);
+    verify(postService).updateFundingStatus(2L);
   }
 
   @Test
   public void shouldHandlePostFundingDeletedEvent() {
-    when(postFundingService.getPostFundingStatusForPost(any())).thenReturn(Status.INACTIVE);
     postFundingEventListener.handlePostFundingDeletedEvent(postFundingDeletedEvent);
-    verify(postService).updateFundingStatus(2L, Status.INACTIVE);
+    verify(postService).updateFundingStatus(2L);
   }
 
 }

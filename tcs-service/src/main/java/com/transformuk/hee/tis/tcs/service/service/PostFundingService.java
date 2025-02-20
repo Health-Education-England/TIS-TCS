@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,11 +48,4 @@ public interface PostFundingService {
    * @param id the id of the entity
    */
   void delete(Long id);
-
-  /**
-   * return the funding Status of the Post.
-   *
-   * @param postId the id of the associated post
-   */
-  Status getPostFundingStatusForPost(Long postId);
 }

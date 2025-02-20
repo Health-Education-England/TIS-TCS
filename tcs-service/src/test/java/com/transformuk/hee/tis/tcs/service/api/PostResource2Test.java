@@ -39,7 +39,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,7 +59,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -102,9 +100,6 @@ public class PostResource2Test {
   private PlacementService placementService;
   @MockBean
   private PlacementSummaryDecorator placementSummaryDecorator;
-  @MockBean
-  private ApplicationEventPublisher applicationEventPublisher;
-
   private MockMvc restPostMockMvc;
   @Autowired
   private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -127,7 +122,7 @@ public class PostResource2Test {
   public void setup() {
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator, applicationEventPublisher);
+        placementViewMapper, placementService, placementSummaryDecorator);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
@@ -141,7 +136,6 @@ public class PostResource2Test {
 
     postDTO = new PostDTO();
     postDTO.setStatus(Status.CURRENT);
-    postDTO.setFundingStatus(Status.CURRENT);
     postDTO.setOwner("Owner");
     postDTO.setNationalPostNumber("test");
     postDTO.setTrainingBodyId(1L);
@@ -227,24 +221,6 @@ public class PostResource2Test {
   }
 
   @Test
-  public void createPostShouldPublishPostSavedEvent() throws Exception {
-    PostDTO savedPostDTO = new PostDTO();
-    savedPostDTO.setId(1L);
-    when(postService.save(postDTOArgumentCaptor.capture())).thenReturn(savedPostDTO);
-
-    // Create the Post
-    restPostMockMvc.perform(post("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isCreated())
-        .andExpect(header().string("location", "/api/posts/1"))
-        .andExpect(jsonPath("$.id").value(1));
-
-    verify(applicationEventPublisher).publishEvent(postSavedEventArgumentCaptor.capture());
-    Assert.assertEquals(postSavedEventArgumentCaptor.getValue().getPostDto(), savedPostDTO);
-  }
-
-  @Test
   public void updatePostShouldFailValidationWhenNoIdIsProvided() throws Exception {
     restPostMockMvc.perform(put("/api/posts")
         .contentType(MediaType.APPLICATION_JSON)
@@ -276,9 +252,6 @@ public class PostResource2Test {
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value("1"));
-
-    verify(applicationEventPublisher).publishEvent(postSavedEventArgumentCaptor.capture());
-    Assert.assertEquals(postSavedEventArgumentCaptor.getValue().getPostDto(), updatedPost);
   }
 
   @Test
@@ -295,22 +268,6 @@ public class PostResource2Test {
         .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
-  }
-
-  @Test
-  public void updatePostShouldPublishPostSavedEvent() throws Exception {
-    postDTO.setId(1L);
-    PostDTO updatedPost = new PostDTO().id(1L);
-
-    when(postService.update(postDTO)).thenReturn(updatedPost);
-
-    restPostMockMvc.perform(put("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().isOk());
-
-    verify(applicationEventPublisher).publishEvent(postSavedEventArgumentCaptor.capture());
-    Assert.assertEquals(postSavedEventArgumentCaptor.getValue().getPostDto(), updatedPost);
   }
 
   @Test
