@@ -56,7 +56,7 @@ class PostMapperTest {
     PostDTO postDto = new PostDTO();
     postDto.setId(3L);
     postDto.setFundings(Collections.singleton(postFundingDto));
-    postDto.setFundingStatus(Status.CURRENT);
+    postDto.setStatus(Status.CURRENT);
     postFundingDto.setPostId(3L);
 
     //when

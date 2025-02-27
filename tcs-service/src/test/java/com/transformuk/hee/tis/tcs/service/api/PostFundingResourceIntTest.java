@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -341,7 +340,6 @@ public class PostFundingResourceIntTest {
     restPostFundingMockMvc.perform(put("/api/post-fundings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postFundingDto)))
-        .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.messageList").isEmpty());
 
@@ -387,7 +385,6 @@ public class PostFundingResourceIntTest {
     restPostFundingMockMvc.perform(put("/api/post-fundings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postFundingDto)))
-        .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.messageList").isNotEmpty());
 
