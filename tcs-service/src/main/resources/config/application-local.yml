@@ -7,7 +7,6 @@ spring:
     username: ${DBUSER:root}
     password: ${DBPASSWORD:}
   flyway:
-    ignore-missing-migrations: true
     password: ${DBPASSWORD:}
     schemas: ${DBNAME:tcs}
   elasticsearch:
