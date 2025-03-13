@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfileFromContext;
 import static uk.nhs.tis.StringConverter.getConverter;
 
 import com.google.common.collect.Lists;
@@ -308,11 +309,10 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/posts/{id}")
-  @PreAuthorize("hasAuthority('tcs:delete:entities')")
+  @PreAuthorize("hasAuthority('tcs:delete:entities') and hasAuthority('post:delete:posts')")
   public ResponseEntity<Void> deletePost(@PathVariable Long id) {
     log.debug("REST request to delete Post : {}", id);
-    postService.canLoggedInUserViewOrAmend(id);
-
+    postService.checkTheLoggedInUserDbSameAsPostOwner(id, getProfileFromContext());
     postService.delete(id);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
@@ -20,6 +21,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
@@ -31,6 +33,7 @@ import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrLatestEventViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
@@ -77,6 +80,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
+import org.springframework.validation.FieldError;
 import org.springframework.web.client.ResourceAccessException;
 
 /**
@@ -121,6 +125,8 @@ public class PostServiceImpl implements PostService {
   private PostEsrEventDtoMapper postEsrEventDtoMapper;
   @Autowired
   private PostEsrLatestEventViewRepository postEsrLatestEventViewRepository;
+  @Autowired
+  private PlacementRepository placementRepository;
 
   /**
    * Save a post.
@@ -664,7 +670,14 @@ public class PostServiceImpl implements PostService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
-    postRepository.deleteById(id);
+    List<Placement> attachedPlacements = placementRepository.findByPostId(id);
+    if(attachedPlacements.isEmpty()) {
+      postRepository.deleteById(id);
+      List<PostFunding> postFundingsToDelete = postFundingRepository.findByPostId(id);
+      postFundingRepository.deleteAll(postFundingsToDelete);
+    } else {
+      throw new IllegalStateException("Cannot delete post as it has associated placements.");
+    }
   }
 
   /**
@@ -695,6 +708,19 @@ public class PostServiceImpl implements PostService {
                 "You cannot view or modify Post with id: " + postId);
           }
         }
+      }
+    }
+  }
+
+  @Override
+  public void checkTheLoggedInUserDbSameAsPostOwner(Long postId, UserProfile userProfile) {
+    Optional<Post> optionalPost = postRepository.findById(postId);
+    if (optionalPost.isPresent()) {
+      String postOwner = optionalPost.get().getOwner();
+      if (!DesignatedBodyMapper.
+          map(userProfile.getDesignatedBodyCodes()).contains(postOwner)) {
+        throw new AccessUnauthorisedException(
+            "You cannot delete Post with id: " + postId);
       }
     }
   }

@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -8,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 @SuppressWarnings("unused")
 public interface PostFundingRepository extends JpaRepository<PostFunding, Long> {
-
+  List<PostFunding> findByPostId(Long postId);
 }

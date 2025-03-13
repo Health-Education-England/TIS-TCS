@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -313,21 +312,6 @@ public class PostResource2Test {
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(placementService, never()).getPlacementForPost(any());
     verify(placementSummaryDecorator, never()).decorate(any());
-  }
-
-  @Test
-  public void deletePostShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
-    long personId = 1L;
-    postDTO.setId(personId);
-
-    doThrow(new AccessUnauthorisedException("")).when(postService)
-        .canLoggedInUserViewOrAmend(personId);
-
-    restPostMockMvc.perform(delete("/api/posts/{id}", personId)
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.message").value("error.accessDenied"));
-    verify(postService, never()).delete(any());
   }
 
   @Test

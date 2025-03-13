@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
@@ -176,6 +177,15 @@ public interface PostService {
    * @param personId the db managed id of the person record
    */
   void canLoggedInUserViewOrAmend(Long personId);
+
+  /**
+   * Method that will throw a not authorized exception if the current logged in user's
+   * designated body does not match with post owner
+   *
+   * @param postId the db managed id of the post record
+   * @param userProfile logged in user's profile
+   */
+  void checkTheLoggedInUserDbSameAsPostOwner(Long postId, UserProfile userProfile);
 
   /**
    * Find all Posts that are linked to a certain Programme and NPN

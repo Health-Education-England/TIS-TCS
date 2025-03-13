@@ -293,7 +293,7 @@ public class PostResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
+    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA", "1-1RSSPZ7");
   }
 
   @Before
@@ -947,6 +947,7 @@ public class PostResourceIntTest {
   public void deletePost() throws Exception {
     // Initialize the database
     int databaseSizeBeforeDelete = postRepository.findAll().size();
+    post.setOwner("East Midlands");
     // Get the post
     restPostMockMvc.perform(delete("/api/posts/{id}", post.getId())
             .accept(MediaType.APPLICATION_JSON))

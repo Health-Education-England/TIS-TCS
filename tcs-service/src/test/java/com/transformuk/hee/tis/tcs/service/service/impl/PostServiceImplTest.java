@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -37,6 +38,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
@@ -47,6 +49,7 @@ import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
+import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrLatestEventViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
@@ -189,6 +192,8 @@ class PostServiceImplTest {
   private PostViewDecorator postViewDecoratorMock;
   @Mock
   private PostFundingValidator postFundingValidatorMock;
+  @Mock
+  private PlacementRepository placementRepository;
 
   @Test
   void saveShouldSavePost() {
@@ -429,8 +434,39 @@ class PostServiceImplTest {
 
   @Test
   void deleteShouldDeleteOneInstanceById() {
+    when(placementRepository.findByPostId(1L)).thenReturn(Collections.emptyList());
+    List<PostFunding> mockPostFundings = Collections.singletonList(new PostFunding());
+    when(postFundingRepositoryMock.findByPostId(1L)).thenReturn(mockPostFundings);
+
     testObj.delete(1L);
+
     verify(postRepositoryMock).deleteById(1L);
+    verify(postFundingRepositoryMock).deleteAll(mockPostFundings);
+  }
+
+  @Test
+  void deleteFailsWhenPostHasPlacementsExist() {
+    List<Placement> mockPlacements = Collections.singletonList(new Placement());
+    when(placementRepository.findByPostId(1L)).thenReturn(mockPlacements);
+
+    IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
+      testObj.delete(1L);
+    });
+
+    assertEquals("Cannot delete post as it has associated placements.", thrown.getMessage());
+    verify(postRepositoryMock, never()).deleteById(1L);
+    verify(postFundingRepositoryMock, never()).deleteAll(anyList());
+  }
+
+  @Test
+  void deleteSucceedsWhenNoPostFundingsExist() {
+    when(placementRepository.findByPostId(1L)).thenReturn(Collections.emptyList());
+    when(postFundingRepositoryMock.findByPostId(1L)).thenReturn(Collections.emptyList());
+
+    testObj.delete(1L);
+
+    verify(postRepositoryMock).deleteById(1L);
+    verify(postFundingRepositoryMock).deleteAll(Collections.emptyList());
   }
 
   @Test
