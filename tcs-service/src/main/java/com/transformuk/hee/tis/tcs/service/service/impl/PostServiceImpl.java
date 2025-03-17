@@ -80,7 +80,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
-import org.springframework.validation.FieldError;
 import org.springframework.web.client.ResourceAccessException;
 
 /**
@@ -671,7 +670,7 @@ public class PostServiceImpl implements PostService {
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
     List<Placement> attachedPlacements = placementRepository.findByPostId(id);
-    if(attachedPlacements.isEmpty()) {
+    if (attachedPlacements.isEmpty()) {
       postRepository.deleteById(id);
       List<PostFunding> postFundingsToDelete = postFundingRepository.findByPostId(id);
       postFundingRepository.deleteAll(postFundingsToDelete);

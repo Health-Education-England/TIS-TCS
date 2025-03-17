@@ -180,7 +180,7 @@ public interface PostService {
 
   /**
    * Method that will throw a not authorized exception if the current logged in user's
-   * designated body does not match with post owner
+   * designated body does not match with post owner.
    *
    * @param postId the db managed id of the post record
    * @param userProfile logged in user's profile
