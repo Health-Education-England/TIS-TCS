@@ -174,9 +174,9 @@ public interface PostService {
    * Method that will throw a not authorized exception if the current logged in user cannot view or
    * modify the person record
    *
-   * @param personId the db managed id of the person record
+   * @param postId the db managed id of the post record
    */
-  void canLoggedInUserViewOrAmend(Long personId);
+  void canLoggedInUserViewOrAmend(Long postId);
 
   /**
    * Method that will throw a not authorized exception if the current logged in user's

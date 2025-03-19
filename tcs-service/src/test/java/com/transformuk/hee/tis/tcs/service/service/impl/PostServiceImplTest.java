@@ -434,20 +434,22 @@ class PostServiceImplTest {
 
   @Test
   void deleteShouldDeleteOneInstanceById() {
-    when(placementRepository.findByPostId(1L)).thenReturn(Collections.emptyList());
-    List<PostFunding> mockPostFundings = Collections.singletonList(new PostFunding());
-    when(postFundingRepositoryMock.findByPostId(1L)).thenReturn(mockPostFundings);
+    Post postToDelete = new Post();
+    postToDelete.setId(1L);
+    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postToDelete));
 
     testObj.delete(1L);
 
     verify(postRepositoryMock).deleteById(1L);
-    verify(postFundingRepositoryMock).deleteAll(mockPostFundings);
   }
 
   @Test
   void deleteFailsWhenPostHasPlacementsExist() {
-    List<Placement> mockPlacements = Collections.singletonList(new Placement());
-    when(placementRepository.findByPostId(1L)).thenReturn(mockPlacements);
+    Post postToDelete = new Post();
+    postToDelete.setId(1L);
+    Placement placement = new Placement();
+    postToDelete.setPlacementHistory(new HashSet<>(Collections.singleton(placement)));
+    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postToDelete));
 
     IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
       testObj.delete(1L);
@@ -456,17 +458,6 @@ class PostServiceImplTest {
     assertEquals("Cannot delete post as it has associated placements.", thrown.getMessage());
     verify(postRepositoryMock, never()).deleteById(1L);
     verify(postFundingRepositoryMock, never()).deleteAll(anyList());
-  }
-
-  @Test
-  void deleteSucceedsWhenNoPostFundingsExist() {
-    when(placementRepository.findByPostId(1L)).thenReturn(Collections.emptyList());
-    when(postFundingRepositoryMock.findByPostId(1L)).thenReturn(Collections.emptyList());
-
-    testObj.delete(1L);
-
-    verify(postRepositoryMock).deleteById(1L);
-    verify(postFundingRepositoryMock).deleteAll(Collections.emptyList());
   }
 
   @Test

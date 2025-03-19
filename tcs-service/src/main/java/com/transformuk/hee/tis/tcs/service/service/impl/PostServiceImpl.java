@@ -33,7 +33,6 @@ import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrLatestEventViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
@@ -124,8 +123,6 @@ public class PostServiceImpl implements PostService {
   private PostEsrEventDtoMapper postEsrEventDtoMapper;
   @Autowired
   private PostEsrLatestEventViewRepository postEsrLatestEventViewRepository;
-  @Autowired
-  private PlacementRepository placementRepository;
 
   /**
    * Save a post.
@@ -669,13 +666,15 @@ public class PostServiceImpl implements PostService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
-    List<Placement> attachedPlacements = placementRepository.findByPostId(id);
-    if (attachedPlacements.isEmpty()) {
-      postRepository.deleteById(id);
-      List<PostFunding> postFundingsToDelete = postFundingRepository.findByPostId(id);
-      postFundingRepository.deleteAll(postFundingsToDelete);
-    } else {
-      throw new IllegalStateException("Cannot delete post as it has associated placements.");
+    Optional<Post> optionalPost = postRepository.findById(id);
+    if (optionalPost.isPresent()) {
+      Set<Placement> attachedPlacements = optionalPost.get().getPlacementHistory();
+      if (attachedPlacements.isEmpty()) {
+        postRepository.deleteById(id);
+        // Related PostFunding records will be cascade deleted
+      } else {
+        throw new IllegalStateException("Cannot delete post as it has associated placements.");
+      }
     }
   }
 

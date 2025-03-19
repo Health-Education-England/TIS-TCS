@@ -293,7 +293,7 @@ public class PostResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA", "1-1RSSPZ7");
+    TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7");
   }
 
   @Before
