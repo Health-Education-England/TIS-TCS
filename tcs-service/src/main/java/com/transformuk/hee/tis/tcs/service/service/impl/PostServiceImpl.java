@@ -666,7 +666,7 @@ public class PostServiceImpl implements PostService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
-    checkIfReconciledWithESR(id);
+    checkIfReconciledWithEsr(id);
     Optional<Post> optionalPost = postRepository.findById(id);
     if (optionalPost.isPresent()) {
       Set<Placement> attachedPlacements = optionalPost.get().getPlacementHistory();
@@ -722,7 +722,7 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  private void checkIfReconciledWithESR(Long postId) {
+  private void checkIfReconciledWithEsr(Long postId) {
     PostDTO postDTO = findOne(postId);
     if (postDTO != null) {
       Set<PostEsrEventDto> currentReconciledEvents = postDTO.getCurrentReconciledEvents();

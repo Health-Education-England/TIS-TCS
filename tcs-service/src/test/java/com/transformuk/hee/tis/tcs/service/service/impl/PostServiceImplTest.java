@@ -441,7 +441,7 @@ class PostServiceImplTest {
   }
 
   @Test
-  void deleteShouldFailWhenPostIsReconciledWithESR() {
+  void deleteShouldFailWhenPostIsReconciledWithEsr() {
     Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet(postEsrEventDtoMock);
     doReturn(postDTOMock1).when(testObj).findOne(1L);
     when(postDTOMock1.getCurrentReconciledEvents()).thenReturn(postEsrEventDtos);

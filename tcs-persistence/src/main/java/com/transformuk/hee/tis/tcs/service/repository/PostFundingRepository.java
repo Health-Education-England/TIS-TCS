@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 @SuppressWarnings("unused")
 public interface PostFundingRepository extends JpaRepository<PostFunding, Long> {
+
 }
