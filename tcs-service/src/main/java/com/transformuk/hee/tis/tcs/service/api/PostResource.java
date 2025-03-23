@@ -309,7 +309,7 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/posts/{id}")
-  @PreAuthorize("hasAuthority('post:delete:posts')")
+  @PreAuthorize("hasAuthority('post:delete')")
   public ResponseEntity<Void> deletePost(@PathVariable Long id) {
     log.debug("REST request to delete Post : {}", id);
     postService.checkTheLoggedInUserDbSameAsPostOwner(id, getProfileFromContext());

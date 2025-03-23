@@ -666,12 +666,12 @@ public class PostServiceImpl implements PostService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
+    checkIfReconciledWithESR(id);
     Optional<Post> optionalPost = postRepository.findById(id);
     if (optionalPost.isPresent()) {
       Set<Placement> attachedPlacements = optionalPost.get().getPlacementHistory();
       if (attachedPlacements.isEmpty()) {
         postRepository.deleteById(id);
-        // Related PostFunding records will be cascade deleted
       } else {
         throw new IllegalStateException("Cannot delete post as it has associated placements.");
       }
@@ -717,8 +717,18 @@ public class PostServiceImpl implements PostService {
       String postOwner = optionalPost.get().getOwner();
       if (!DesignatedBodyMapper.
           map(userProfile.getDesignatedBodyCodes()).contains(postOwner)) {
-        throw new AccessUnauthorisedException(
-            "You cannot delete Post with id: " + postId);
+        throw new AccessUnauthorisedException("You cannot delete Post with id: " + postId);
+      }
+    }
+  }
+
+  private void checkIfReconciledWithESR(Long postId) {
+    PostDTO postDTO = findOne(postId);
+    if (postDTO != null) {
+      Set<PostEsrEventDto> currentReconciledEvents = postDTO.getCurrentReconciledEvents();
+      if (currentReconciledEvents != null && currentReconciledEvents.size() >= 1) {
+        throw new IllegalStateException(
+            "The post has been reconciled with ESR. Do you still want to delete the post?");
       }
     }
   }
