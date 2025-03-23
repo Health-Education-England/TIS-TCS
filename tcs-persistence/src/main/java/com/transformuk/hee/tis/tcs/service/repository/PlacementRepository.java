@@ -17,8 +17,6 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
 
   Placement findByIntrepidId(String intrepidId);
 
-  List<Placement> findByPostId(Long postId);
-
   Set<Placement> findByIntrepidIdIn(Set<String> intrepidId);
 
   @Query(value =
