@@ -49,7 +49,6 @@ import com.transformuk.hee.tis.tcs.service.model.PostSpecialty;
 import com.transformuk.hee.tis.tcs.service.model.PostTrust;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
-import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrEventRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostEsrLatestEventViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostFundingRepository;
@@ -192,8 +191,6 @@ class PostServiceImplTest {
   private PostViewDecorator postViewDecoratorMock;
   @Mock
   private PostFundingValidator postFundingValidatorMock;
-  @Mock
-  private PlacementRepository placementRepository;
 
   @Test
   void saveShouldSavePost() {
@@ -441,6 +438,21 @@ class PostServiceImplTest {
     testObj.delete(1L);
 
     verify(postRepositoryMock).deleteById(1L);
+  }
+
+  @Test
+  void deleteShouldFailWhenPostIsReconciledWithESR() {
+    Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet(postEsrEventDtoMock);
+    doReturn(postDTOMock1).when(testObj).findOne(1L);
+    when(postDTOMock1.getCurrentReconciledEvents()).thenReturn(postEsrEventDtos);
+
+    IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
+      testObj.delete(1L);
+    });
+
+    assertEquals("The post has been reconciled with ESR. Do you still want to delete the post?",
+        thrown.getMessage());
+    verify(postRepositoryMock, never()).deleteById(1L);
   }
 
   @Test

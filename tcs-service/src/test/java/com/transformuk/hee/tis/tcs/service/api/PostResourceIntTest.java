@@ -25,6 +25,7 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
@@ -293,7 +294,7 @@ public class PostResourceIntTest {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7");
+    TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7", "1-1RUZV1D");
   }
 
   @Before
@@ -947,9 +948,11 @@ public class PostResourceIntTest {
   public void deletePost() throws Exception {
     // Initialize the database
     int databaseSizeBeforeDelete = postRepository.findAll().size();
-    post.setOwner("East Midlands");
+    PostDTO postDto = postMapper.postToPostDTO(post);
+    Set<PostEsrEventDto> reconciledEvents = Collections.emptySet();
+    postDto.setCurrentReconciledEvents(reconciledEvents);
     // Get the post
-    restPostMockMvc.perform(delete("/api/posts/{id}", post.getId())
+    restPostMockMvc.perform(delete("/api/posts/{id}", postDto.getId())
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
     // Validate the database is empty

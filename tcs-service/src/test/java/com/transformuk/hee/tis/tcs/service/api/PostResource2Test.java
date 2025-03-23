@@ -1,12 +1,14 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -19,6 +21,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
@@ -45,7 +48,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
@@ -54,7 +56,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -126,7 +127,7 @@ public class PostResource2Test {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
+    TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7");
 
     PostFundingDTO postFundingDTO = new PostFundingDTO();
     postFundingDTO.setStartDate(LocalDate.now().minusDays(1));
@@ -315,6 +316,20 @@ public class PostResource2Test {
   }
 
   @Test
+  public void deletePostShouldReturnUnauthWhenUserDbNotSameAsPostOwner() throws Exception {
+    long postId = 1L;
+
+    doThrow(new AccessUnauthorisedException("")).when(postService)
+        .checkTheLoggedInUserDbSameAsPostOwner(eq(postId), any(UserProfile.class));
+
+    restPostMockMvc.perform(delete("/api/posts/{id}", postId)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.message").value("error.accessDenied"));
+    verify(postService, never()).delete(any());
+  }
+
+  @Test
   public void updatePostShouldFailWhenThereAreMultiplePrimarySpecialtiesAttached()
       throws Exception {
 
@@ -412,7 +427,7 @@ public class PostResource2Test {
     PostEsrEvent newPostEvent = new PostEsrEvent();
     doReturn(Optional.of(newPostEvent))
         .when(postService)
-        .markPostAsEsrPositionChanged(Mockito.eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
+        .markPostAsEsrPositionChanged(eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
         .capture());
 
     ObjectMapper mapper = new ObjectMapper();
