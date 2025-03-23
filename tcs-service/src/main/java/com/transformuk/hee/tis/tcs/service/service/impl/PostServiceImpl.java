@@ -723,10 +723,10 @@ public class PostServiceImpl implements PostService {
   }
 
   private void checkIfReconciledWithEsr(Long postId) {
-    PostDTO postDTO = findOne(postId);
-    if (postDTO != null) {
-      Set<PostEsrEventDto> currentReconciledEvents = postDTO.getCurrentReconciledEvents();
-      if (currentReconciledEvents != null && currentReconciledEvents.size() >= 1) {
+    PostDTO postDto = findOne(postId);
+    if (postDto != null) {
+      Set<PostEsrEventDto> currentReconciledEvents = postDto.getCurrentReconciledEvents();
+      if (currentReconciledEvents != null && !(currentReconciledEvents.isEmpty())) {
         throw new IllegalStateException(
             "The post has been reconciled with ESR. Do you still want to delete the post?");
       }
