@@ -318,7 +318,7 @@ public class PostResource2Test {
   public void deletePostShouldReturnUnauthWhenUserDbNotSameAsPostOwner() throws Exception {
     long postId = 1L;
 
-    doThrow(new AccessUnauthorisedException("")).when(postService).delete(eq(postId));
+    doThrow(new AccessUnauthorisedException("")).when(postService).delete(postId);
 
     restPostMockMvc.perform(delete("/api/posts/{id}", postId)
             .contentType(MediaType.APPLICATION_JSON))
