@@ -7,7 +7,6 @@ import com.transformuk.hee.tis.security.util.TisSecurityHelper;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -78,5 +77,10 @@ public class PermissionService {
     }
 
     return Collections.EMPTY_SET;
+  }
+
+  public Set<String> getUserProfileDesignatedBodies() {
+    UserProfile loggedInUserProfile = TisSecurityHelper.getProfileFromContext();
+    return loggedInUserProfile.getDesignatedBodyCodes();
   }
 }

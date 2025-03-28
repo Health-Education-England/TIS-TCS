@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
@@ -319,14 +318,12 @@ public class PostResource2Test {
   public void deletePostShouldReturnUnauthWhenUserDbNotSameAsPostOwner() throws Exception {
     long postId = 1L;
 
-    doThrow(new AccessUnauthorisedException("")).when(postService)
-        .checkTheLoggedInUserDbSameAsPostOwner(eq(postId), any(UserProfile.class));
+    doThrow(new AccessUnauthorisedException("")).when(postService).delete(eq(postId));
 
     restPostMockMvc.perform(delete("/api/posts/{id}", postId)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
-    verify(postService, never()).delete(any());
   }
 
   @Test

@@ -432,36 +432,26 @@ class PostServiceImplTest {
   @Test
   void deleteShouldDeleteOneInstanceById() {
     Post postToDelete = new Post();
+    postToDelete.setOwner("North West London");
     postToDelete.setId(1L);
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postToDelete));
+    when(permissionServiceMock.getUserProfileDesignatedBodies()).thenReturn(
+        Collections.singleton("1-1RUZV6H"));
 
     testObj.delete(1L);
-
     verify(postRepositoryMock).deleteById(1L);
-  }
-
-  @Test
-  void deleteShouldFailWhenPostIsReconciledWithEsr() {
-    Set<PostEsrEventDto> postEsrEventDtos = Sets.newHashSet(postEsrEventDtoMock);
-    doReturn(postDTOMock1).when(testObj).findOne(1L);
-    when(postDTOMock1.getCurrentReconciledEvents()).thenReturn(postEsrEventDtos);
-
-    IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
-      testObj.delete(1L);
-    });
-
-    assertEquals("The post has been reconciled with ESR. Do you still want to delete the post?",
-        thrown.getMessage());
-    verify(postRepositoryMock, never()).deleteById(1L);
   }
 
   @Test
   void deleteFailsWhenPostHasPlacementsExist() {
     Post postToDelete = new Post();
+    postToDelete.setOwner("North West London");
     postToDelete.setId(1L);
     Placement placement = new Placement();
     postToDelete.setPlacementHistory(new HashSet<>(Collections.singleton(placement)));
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postToDelete));
+    when(permissionServiceMock.getUserProfileDesignatedBodies()).thenReturn(
+        Collections.singleton("1-1RUZV6H"));
 
     IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
       testObj.delete(1L);

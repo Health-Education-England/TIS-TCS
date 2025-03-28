@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.transformuk.hee.tis.security.model.UserProfile;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
@@ -666,10 +665,11 @@ public class PostServiceImpl implements PostService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
-    checkIfReconciledWithEsr(id);
     Optional<Post> optionalPost = postRepository.findById(id);
     if (optionalPost.isPresent()) {
-      Set<Placement> attachedPlacements = optionalPost.get().getPlacementHistory();
+      Post postFromDb = optionalPost.get();
+      checkTheLoggedInUserDbSameAsPostOwner(postFromDb);
+      Set<Placement> attachedPlacements = postFromDb.getPlacementHistory();
       if (attachedPlacements.isEmpty()) {
         postRepository.deleteById(id);
       } else {
@@ -710,26 +710,11 @@ public class PostServiceImpl implements PostService {
     }
   }
 
-  @Override
-  public void checkTheLoggedInUserDbSameAsPostOwner(Long postId, UserProfile userProfile) {
-    Optional<Post> optionalPost = postRepository.findById(postId);
-    if (optionalPost.isPresent()) {
-      String postOwner = optionalPost.get().getOwner();
-      if (!DesignatedBodyMapper.
-          map(userProfile.getDesignatedBodyCodes()).contains(postOwner)) {
-        throw new AccessUnauthorisedException("You cannot delete Post with id: " + postId);
-      }
-    }
-  }
-
-  private void checkIfReconciledWithEsr(Long postId) {
-    PostDTO postDto = findOne(postId);
-    if (postDto != null) {
-      Set<PostEsrEventDto> currentReconciledEvents = postDto.getCurrentReconciledEvents();
-      if (currentReconciledEvents != null && !(currentReconciledEvents.isEmpty())) {
-        throw new IllegalStateException(
-            "The post has been reconciled with ESR. Do you still want to delete the post?");
-      }
+  private void checkTheLoggedInUserDbSameAsPostOwner(Post post) {
+    String postOwner = post.getOwner();
+    if (!DesignatedBodyMapper.map(permissionService.getUserProfileDesignatedBodies())
+        .contains(postOwner)) {
+      throw new AccessUnauthorisedException("You cannot delete Post with id: " + post.getId());
     }
   }
 

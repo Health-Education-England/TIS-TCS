@@ -1,8 +1,11 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.tcs.TestUtils;
-import com.transformuk.hee.tis.tcs.service.api.TestUtil;
+import java.util.Collections;
+import java.util.Set;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Test;
@@ -93,5 +96,14 @@ public class PermissionServiceTest {
     boolean result = testObj.canApprovePlacement();
 
     Assert.assertFalse(result);
+  }
+
+  @Test
+  public void shouldGetUserProfileDesignatedBodies() {
+    TestUtils.mockUserprofile("jamesh", "1-1RUZV6H");
+    Set<String> expectedBodies = Collections.singleton("1-1RUZV6H");
+
+    Set<String> result = testObj.getUserProfileDesignatedBodies();
+    assertEquals(expectedBodies, result);
   }
 }
