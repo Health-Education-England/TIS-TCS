@@ -79,7 +79,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
       "LEFT JOIN FETCH sp.specialtyTypes st " +
       "WHERE pr.id = :id " +
       "AND p.nationalPostNumber LIKE %:npn% " +
-      "AND p.status = :status ")
+      "AND p.fundingStatus = :status ")
   List<Post> findPostsForProgrammeIdAndNpnLike(@Param("id") Long id, @Param("npn") String npn,
       @Param("status") Status status);
 
