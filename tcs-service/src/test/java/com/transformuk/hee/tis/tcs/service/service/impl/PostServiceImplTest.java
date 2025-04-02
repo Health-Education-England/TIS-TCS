@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -37,6 +38,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
@@ -429,8 +431,35 @@ class PostServiceImplTest {
 
   @Test
   void deleteShouldDeleteOneInstanceById() {
+    Post postToDelete = new Post();
+    postToDelete.setOwner("North West London");
+    postToDelete.setId(1L);
+    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postToDelete));
+    when(permissionServiceMock.getUserProfileDesignatedBodies()).thenReturn(
+        Collections.singleton("1-1RUZV6H"));
+
     testObj.delete(1L);
     verify(postRepositoryMock).deleteById(1L);
+  }
+
+  @Test
+  void deleteFailsWhenPostHasPlacementsExist() {
+    Post postToDelete = new Post();
+    postToDelete.setOwner("North West London");
+    postToDelete.setId(1L);
+    Placement placement = new Placement();
+    postToDelete.setPlacementHistory(new HashSet<>(Collections.singleton(placement)));
+    when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postToDelete));
+    when(permissionServiceMock.getUserProfileDesignatedBodies()).thenReturn(
+        Collections.singleton("1-1RUZV6H"));
+
+    IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
+      testObj.delete(1L);
+    });
+
+    assertEquals("Cannot delete post as it has associated placements.", thrown.getMessage());
+    verify(postRepositoryMock, never()).deleteById(1L);
+    verify(postFundingRepositoryMock, never()).deleteAll(anyList());
   }
 
   @Test

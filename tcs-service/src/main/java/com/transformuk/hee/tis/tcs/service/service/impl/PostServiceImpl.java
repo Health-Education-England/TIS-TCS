@@ -20,6 +20,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
+import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrLatestEventView;
@@ -664,7 +665,17 @@ public class PostServiceImpl implements PostService {
   @Override
   public void delete(Long id) {
     log.debug("Request to delete Post : {}", id);
-    postRepository.deleteById(id);
+    Optional<Post> optionalPost = postRepository.findById(id);
+    if (optionalPost.isPresent()) {
+      Post postFromDb = optionalPost.get();
+      checkTheLoggedInUserDbSameAsPostOwner(postFromDb);
+      Set<Placement> attachedPlacements = postFromDb.getPlacementHistory();
+      if (attachedPlacements.isEmpty()) {
+        postRepository.deleteById(id);
+      } else {
+        throw new IllegalStateException("Cannot delete post as it has associated placements.");
+      }
+    }
   }
 
   /**
@@ -696,6 +707,14 @@ public class PostServiceImpl implements PostService {
           }
         }
       }
+    }
+  }
+
+  private void checkTheLoggedInUserDbSameAsPostOwner(Post post) {
+    String postOwner = post.getOwner();
+    if (!DesignatedBodyMapper.map(permissionService.getUserProfileDesignatedBodies())
+        .contains(postOwner)) {
+      throw new AccessUnauthorisedException("You cannot delete Post with id: " + post.getId());
     }
   }
 

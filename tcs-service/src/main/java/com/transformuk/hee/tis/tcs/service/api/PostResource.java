@@ -308,16 +308,13 @@ public class PostResource {
    * @return the ResponseEntity with status 200 (OK)
    */
   @DeleteMapping("/posts/{id}")
-  @PreAuthorize("hasAuthority('tcs:delete:entities')")
+  @PreAuthorize("hasAuthority('post:delete')")
   public ResponseEntity<Void> deletePost(@PathVariable Long id) {
     log.debug("REST request to delete Post : {}", id);
-    postService.canLoggedInUserViewOrAmend(id);
-
     postService.delete(id);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
   }
-
 
   /**
    * POST  /bulk-posts : Bulk create a new Posts.
