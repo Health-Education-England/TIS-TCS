@@ -439,6 +439,7 @@ class PostServiceImplTest {
         Collections.singleton("1-1RUZV6H"));
 
     testObj.delete(1L);
+    verify(postRepositoryMock).clearPostReferences(1L);
     verify(postRepositoryMock).deleteById(1L);
   }
 

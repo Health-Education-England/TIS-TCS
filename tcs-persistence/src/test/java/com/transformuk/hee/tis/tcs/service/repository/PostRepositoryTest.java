@@ -55,7 +55,6 @@ public class PostRepositoryTest {
   @After
   @Transactional
   public void tearDown() {
-    entityManager.remove(postWithTrusts);
     entityManager.remove(associatedTrust1);
     entityManager.remove(associatedTrust2);
   }
@@ -172,6 +171,61 @@ public class PostRepositoryTest {
               .getForenames()));
 
     }
+  }
 
+  @Test
+  public void testClearOldPostReferencesInPostTableWhenDelete() {
+    Post post1 = new Post();
+    entityManager.persist(post1);
+
+    Post post2 = new Post();
+    post2.setOldPost(post1);
+    entityManager.persist(post2);
+    entityManager.flush();
+
+    postRepository.clearOldPostReferences(post1.getId());
+    entityManager.flush();
+    entityManager.clear();
+
+    Post updatedPost = entityManager.find(Post.class, post2.getId());
+    Assert.assertNull(updatedPost.getOldPost());
+  }
+
+  @Test
+  public void testClearNewPostReferencesInPostTableWhenDelete() {
+    Post post1 = new Post();
+    entityManager.persist(post1);
+
+    Post post2 = new Post();
+    post2.setOldPost(post1);
+    entityManager.persist(post2);
+    entityManager.flush();
+
+    postRepository.clearNewPostReferences(post1.getId());
+    entityManager.flush();
+    entityManager.clear();
+
+    Post updatedPost = entityManager.find(Post.class, post2.getId());
+    Assert.assertNull(updatedPost.getNewPost());
+  }
+
+  @Test
+  public void testClearPostReferencesForBothOldAndNewPostWhenDelete() {
+    Post post1 = new Post();
+    entityManager.persist(post1);
+
+    Post post2 = new Post();
+    post2.setOldPost(post1);
+    post2.setNewPost(post1);
+    entityManager.persist(post2);
+    entityManager.flush();
+
+    postRepository.clearPostReferences(post1.getId());
+    entityManager.flush();
+    entityManager.clear();
+
+    Post updatedPost = entityManager.find(Post.class, post2.getId());
+    Assert.assertNull(updatedPost.getOldPost());
+    Assert.assertNull(updatedPost.getNewPost());
   }
 }

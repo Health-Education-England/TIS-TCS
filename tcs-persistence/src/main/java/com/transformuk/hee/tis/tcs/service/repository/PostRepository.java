@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
@@ -95,4 +96,18 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
       "AND p.status = 'CURRENT'")
   Set<Post> findPostsByProgrammeIdAndSpecialtyId(@Param("programmeId") Long programmeId,
       @Param("specialtyId") Long specialtyId);
+
+  @Modifying
+  @Query("UPDATE Post p SET p.oldPost = null WHERE p.oldPost.id = :id")
+  void clearOldPostReferences(@Param("id") Long id);
+
+  @Modifying
+  @Query("UPDATE Post p SET p.newPost = null WHERE p.newPost.id = :id")
+  void clearNewPostReferences(@Param("id") Long id);
+
+  default void clearPostReferences(Long id) {
+    clearOldPostReferences(id);
+    clearNewPostReferences(id);
+  }
+
 }
