@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.TestConfig;
@@ -206,7 +208,7 @@ public class PostRepositoryTest {
     entityManager.clear();
 
     Post updatedPost = entityManager.find(Post.class, post2.getId());
-    Assert.assertNull(updatedPost.getNewPost());
+    assertNull(updatedPost.getNewPost());
   }
 
   @Test
@@ -225,7 +227,18 @@ public class PostRepositoryTest {
     entityManager.clear();
 
     Post updatedPost = entityManager.find(Post.class, post2.getId());
-    Assert.assertNull(updatedPost.getOldPost());
-    Assert.assertNull(updatedPost.getNewPost());
+    assertNull(updatedPost.getOldPost());
+    assertNull(updatedPost.getNewPost());
+  }
+
+  @Test
+  public void testClearPostReferencesShouldCallClearOldAndNewReferences() {
+    Long postId = 1L;
+
+    postRepository.clearPostReferences(postId);
+
+    Optional<Post> oldRefs = postRepository.findById(postId);
+    assertNull(oldRefs.get().getOldPost());
+    assertNull(oldRefs.get().getNewPost());
   }
 }
