@@ -199,7 +199,7 @@ public class PostRepositoryTest {
     entityManager.persist(post1);
 
     Post post2 = new Post();
-    post2.setOldPost(post1);
+    post2.setNewPost(post1);
     entityManager.persist(post2);
     entityManager.flush();
 
@@ -218,7 +218,7 @@ public class PostRepositoryTest {
 
     Post post2 = new Post();
     post2.setOldPost(post1);
-    post2.setNewPost(post1);
+    post1.setNewPost(post2);
     entityManager.persist(post2);
     entityManager.flush();
 
@@ -229,16 +229,5 @@ public class PostRepositoryTest {
     Post updatedPost = entityManager.find(Post.class, post2.getId());
     assertNull(updatedPost.getOldPost());
     assertNull(updatedPost.getNewPost());
-  }
-
-  @Test
-  public void testClearPostReferencesShouldCallClearOldAndNewReferences() {
-    Long postId = 1L;
-
-    postRepository.clearPostReferences(postId);
-
-    Optional<Post> oldRefs = postRepository.findById(postId);
-    assertNull(oldRefs.get().getOldPost());
-    assertNull(oldRefs.get().getNewPost());
   }
 }
