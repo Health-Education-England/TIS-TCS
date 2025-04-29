@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.google.common.collect.Sets;
@@ -178,10 +179,10 @@ public class PostRepositoryTest {
   @Test
   public void testClearOldPostReferencesInPostTableWhenDelete() {
     Post post1 = new Post();
-    entityManager.persist(post1);
-
     Post post2 = new Post();
     post2.setOldPost(post1);
+
+    entityManager.persist(post1);
     entityManager.persist(post2);
     entityManager.flush();
 
@@ -189,17 +190,17 @@ public class PostRepositoryTest {
     entityManager.flush();
     entityManager.clear();
 
-    Post updatedPost = entityManager.find(Post.class, post2.getId());
-    Assert.assertNull(updatedPost.getOldPost());
+    Post updatedPost2 = entityManager.find(Post.class, post2.getId());
+    assertNull(updatedPost2.getOldPost());
   }
 
   @Test
   public void testClearNewPostReferencesInPostTableWhenDelete() {
     Post post1 = new Post();
-    entityManager.persist(post1);
-
     Post post2 = new Post();
     post2.setNewPost(post1);
+
+    entityManager.persist(post1);
     entityManager.persist(post2);
     entityManager.flush();
 
@@ -207,27 +208,41 @@ public class PostRepositoryTest {
     entityManager.flush();
     entityManager.clear();
 
-    Post updatedPost = entityManager.find(Post.class, post2.getId());
-    assertNull(updatedPost.getNewPost());
+    Post updatedPost2 = entityManager.find(Post.class, post2.getId());
+    assertNull(updatedPost2.getNewPost());
   }
 
   @Test
   public void testClearPostReferencesForBothOldAndNewPostWhenDelete() {
     Post post1 = new Post();
-    entityManager.persist(post1);
-
     Post post2 = new Post();
-    post2.setOldPost(post1);
-    post1.setNewPost(post2);
-    entityManager.persist(post2);
-    entityManager.flush();
+    Post post3 = new Post();
 
-    postRepository.clearPostReferences(post1.getId());
+    post1.setNewPost(post2);
+    post2.setOldPost(post1);
+    post2.setNewPost(post3);
+    post3.setOldPost(post2);
+
+    entityManager.persist(post1);
+    entityManager.persist(post2);
+    entityManager.persist(post3);
+
     entityManager.flush();
     entityManager.clear();
 
-    Post updatedPost = entityManager.find(Post.class, post2.getId());
-    assertNull(updatedPost.getOldPost());
-    assertNull(updatedPost.getNewPost());
+    // Clear references for post2, as it will be deleted
+    postRepository.clearPostReferences(post2.getId());
+    entityManager.flush();
+    entityManager.clear();
+
+    // Fetch updated posts at where post2 references are cleared
+    Post updatedPost1 = entityManager.find(Post.class, post1.getId());
+    Post updatedPost3 = entityManager.find(Post.class, post3.getId());
+
+    // post1.newPost should be cleared
+    assertThat(updatedPost1.getNewPost()).isNull();
+
+    // post3.oldPost should be cleared
+    assertThat(updatedPost3.getOldPost()).isNull();
   }
 }
