@@ -1,8 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.TestConfig;
@@ -191,7 +188,7 @@ public class PostRepositoryTest {
     entityManager.clear();
 
     Post updatedPost2 = entityManager.find(Post.class, post2.getId());
-    assertNull(updatedPost2.getOldPost());
+    Assert.assertNull(updatedPost2.getOldPost());
   }
 
   @Test
@@ -209,7 +206,7 @@ public class PostRepositoryTest {
     entityManager.clear();
 
     Post updatedPost2 = entityManager.find(Post.class, post2.getId());
-    assertNull(updatedPost2.getNewPost());
+    Assert.assertNull(updatedPost2.getNewPost());
   }
 
   @Test
@@ -240,9 +237,9 @@ public class PostRepositoryTest {
     Post updatedPost3 = entityManager.find(Post.class, post3.getId());
 
     // post1.newPost should be cleared
-    assertNull(updatedPost1.getNewPost());
+    Assert.assertNull(updatedPost1.getNewPost());
 
     // post3.oldPost should be cleared
-    assertNull(updatedPost3.getOldPost());
+    Assert.assertNull(updatedPost3.getOldPost());
   }
 }
