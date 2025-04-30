@@ -240,9 +240,9 @@ public class PostRepositoryTest {
     Post updatedPost3 = entityManager.find(Post.class, post3.getId());
 
     // post1.newPost should be cleared
-    assertThat(updatedPost1.getNewPost()).isNull();
+    assertNull(updatedPost1.getNewPost());
 
     // post3.oldPost should be cleared
-    assertThat(updatedPost3.getOldPost()).isNull();
+    assertNull(updatedPost3.getOldPost());
   }
 }
