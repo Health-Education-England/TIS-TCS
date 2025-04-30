@@ -671,6 +671,7 @@ public class PostServiceImpl implements PostService {
       checkTheLoggedInUserDbSameAsPostOwner(postFromDb);
       Set<Placement> attachedPlacements = postFromDb.getPlacementHistory();
       if (attachedPlacements.isEmpty()) {
+        postRepository.clearPostReferences(id);
         postRepository.deleteById(id);
       } else {
         throw new IllegalStateException("Cannot delete post as it has associated placements.");
