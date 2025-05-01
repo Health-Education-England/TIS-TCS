@@ -5,7 +5,6 @@ import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfile
 
 import com.transformuk.hee.tis.audit.enumeration.GenericAuditEventType;
 import com.transformuk.hee.tis.security.model.UserProfile;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
@@ -34,9 +33,12 @@ public class AuditingAspect {
   private static final String RESOURCE_POSTFIX = "Resource";
   private static final Object[] SINGLE_LONG_ENTRY = {Long.class};
   private final AuditEventRepository auditEventRepository;
+  private final AuditHelperService auditHelperService;
 
-  public AuditingAspect(AuditEventRepository auditEventRepository) {
+  public AuditingAspect(AuditEventRepository auditEventRepository,
+      AuditHelperService auditHelperService) {
     this.auditEventRepository = auditEventRepository;
+    this.auditHelperService = auditHelperService;
   }
 
 
@@ -70,7 +72,6 @@ public class AuditingAspect {
    */
   @Before("execution(* com.transformuk.hee.tis.tcs.service.api.*.delete*(..))")
   public void auditDeleteBeforeExecution(JoinPoint joinPoint) {
-    // Audit log the dto which we want to delete it
     UserProfile userPofile = getProfileFromContext();
     if (userPofile.getUserName().equalsIgnoreCase(ETL_USERNAME)) {
       return;
@@ -86,18 +87,21 @@ public class AuditingAspect {
           .filter(m -> (GET_PREFIX + entityName).equals(m.getName()))
           .filter(m -> Arrays.equals(SINGLE_LONG_ENTRY, m.getParameterTypes()))
           .findAny();
+
       if (method.isPresent()) {
         try {
           final Object responseEntity = method.get().invoke(joinPoint.getTarget(), deleteId);
-          Object dto = ((ResponseEntity) responseEntity).getBody();
+          Object dto = ((ResponseEntity<?>) responseEntity).getBody();
+
           AuditEvent auditEvent = createEvent(userPofile.getUserName(), TCS_PREFIX,
-              joinPoint.getSignature().getName()
-              , GenericAuditEventType.delete, dto);
-          auditEventRepository.add(auditEvent);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-          LOG.info(
-              String.format("Failed to get %s{id:%s} to audit the delete", entityName, deleteId),
-              e);
+              joinPoint.getSignature().getName(), GenericAuditEventType.delete, dto);
+          try {
+            auditHelperService.saveDeleteAudit(auditEvent);
+          } catch (Exception e) {
+            LOG.warn("Audit failed, but delete will proceed: {}", e.getMessage());
+          }
+        } catch (Exception e) {
+          LOG.warn("Failed to get {}{{id:{}}} to audit the delete", entityName, deleteId, e);
         }
       }
     }

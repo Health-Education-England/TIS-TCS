@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.config;
 
 import com.transformuk.hee.tis.audit.repository.TisAuditRepository;
+import com.transformuk.hee.tis.tcs.service.aop.auditing.AuditHelperService;
 import com.transformuk.hee.tis.tcs.service.aop.auditing.AuditingAspect;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,13 @@ public class AuditingAspectConfiguration {
   }
 
   @Bean
-  public AuditingAspect auditingAspect() {
-    return new AuditingAspect(auditEventRepository());
+  public AuditHelperService auditHelperService(AuditEventRepository auditEventRepository) {
+    return new AuditHelperService(auditEventRepository);
+  }
+
+  @Bean
+  public AuditingAspect auditingAspect(AuditEventRepository auditEventRepository,
+      AuditHelperService auditHelperService) {
+    return new AuditingAspect(auditEventRepository, auditHelperService);
   }
 }
