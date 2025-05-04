@@ -19,6 +19,7 @@ import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyTypeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -259,7 +260,7 @@ public class TcsServiceImplTest {
     SpecialtyDTO specialty = new SpecialtyDTO();
     specialty.setName("specialtyName");
     specialty.setSpecialtyTypes(new HashSet<>(
-        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+        Collections.singletonList(new SpecialtyTypeDTO("SUB_SPECIALTY"))));
     specialty.setId(20L);
 
     String encodedParameters = new URLCodec().encode("{\"name\":[\"specialtyName\"],"
@@ -285,7 +286,7 @@ public class TcsServiceImplTest {
     SpecialtyDTO specialty = new SpecialtyDTO();
     specialty.setName("specialtyName");
     specialty.setSpecialtyTypes(new HashSet<>(
-        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+        Collections.singletonList(new SpecialtyTypeDTO("SUB_SPECIALTY"))));
     specialty.setId(20L);
 
     String encodedParametersForSpecialtiesOfTypeSubspecialty = new URLCodec()

@@ -2,10 +2,16 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyTypeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.model.SpecialtyGroup;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.Mapper;
 
 /**
@@ -25,7 +31,16 @@ public class SpecialtyMapper {
       result.setCollege(specialty.getCollege());
       result.setIntrepidId(specialty.getIntrepidId());
       result.setSpecialtyCode(specialty.getSpecialtyCode());
-      result.setSpecialtyTypes(specialty.getSpecialtyTypes());
+
+      if (CollectionUtils.isNotEmpty(specialty.getSpecialtyTypes())) {
+        Set<SpecialtyTypeDTO> typeDTOs = specialty.getSpecialtyTypes().stream()
+            .map(type -> {
+              SpecialtyTypeDTO dto = new SpecialtyTypeDTO();
+              dto.setName(type.getName());
+              return dto;
+            }).collect(Collectors.toSet());
+        result.setSpecialtyTypes(typeDTOs);
+      }
       result.setStatus(specialty.getStatus());
       result.setSpecialtyGroup(specialtyGroupToSpecialtyGroupDTO(specialty.getSpecialtyGroup()));
       result.setBlockIndemnity(specialty.isBlockIndemnity());
@@ -52,7 +67,14 @@ public class SpecialtyMapper {
       result.setCollege(specialtyDTO.getCollege());
       result.setIntrepidId(specialtyDTO.getIntrepidId());
       result.setSpecialtyCode(specialtyDTO.getSpecialtyCode());
-      result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
+
+      if (CollectionUtils.isNotEmpty(specialtyDTO.getSpecialtyTypes())) {
+        Set<SpecialtyType> types = specialtyDTO.getSpecialtyTypes().stream()
+            .filter(Objects::nonNull)
+            .map(dto -> SpecialtyType.valueOf(dto.getName()))
+            .collect(Collectors.toSet());
+        result.setSpecialtyTypes(types);
+      }
       result.setStatus(specialtyDTO.getStatus());
       result.setSpecialtyGroup(specialtyGroupDTOToSpecialtyGroup(specialtyDTO.getSpecialtyGroup()));
       result.setBlockIndemnity(specialtyDTO.isBlockIndemnity());

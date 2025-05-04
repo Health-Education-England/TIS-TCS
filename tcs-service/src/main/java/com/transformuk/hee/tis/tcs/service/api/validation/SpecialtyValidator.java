@@ -3,7 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyTypeDTO;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyGroupRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class SpecialtyValidator {
     }
   }
 
-  private List<FieldError> checkSpecialtyTypes(Set<SpecialtyType> specialtyTypes) {
+  private List<FieldError> checkSpecialtyTypes(Set<SpecialtyTypeDTO> specialtyTypes) {
     List<FieldError> fieldErrors = Lists.newArrayList();
     if (specialtyTypes == null) {
       fieldErrors

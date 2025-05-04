@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
-import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.util.Objects;
@@ -38,7 +37,7 @@ public class SpecialtyDTO implements Serializable {
   @NotBlank(groups = {Create.class, Update.class}, message = "specialtyCode cannot be blank")
   private String specialtyCode;
 
-  private Set<SpecialtyType> specialtyTypes;
+  private Set<SpecialtyTypeDTO> specialtyTypes;
 
   private SpecialtyGroupDTO specialtyGroup;
 

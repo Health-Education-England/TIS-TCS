@@ -10,6 +10,8 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtyTypeDTO;
+import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostFunding;
@@ -20,6 +22,7 @@ import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.EsrPostProjection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -182,9 +185,18 @@ public class PostMapper {
       result = new SpecialtyDTO();
       result.setId(specialty.getId());
       result.setName(specialty.getName());
-      result.setSpecialtyTypes(specialty.getSpecialtyTypes());
       result.setSpecialtyCode(specialty.getSpecialtyCode());
       result.setStatus(specialty.getStatus());
+
+      if (CollectionUtils.isNotEmpty(specialty.getSpecialtyTypes())) {
+        Set<SpecialtyTypeDTO> typeDTOs = specialty.getSpecialtyTypes().stream()
+            .map(type -> {
+              SpecialtyTypeDTO dto = new SpecialtyTypeDTO();
+              dto.setName(type.getName());
+              return dto;
+            }).collect(Collectors.toSet());
+        result.setSpecialtyTypes(typeDTOs);
+      }
     }
     return result;
   }
@@ -304,9 +316,16 @@ public class PostMapper {
       result = new Specialty();
       result.setId(specialtyDTO.getId());
       result.setName(specialtyDTO.getName());
-      result.setSpecialtyTypes(specialtyDTO.getSpecialtyTypes());
       result.setSpecialtyCode(specialtyDTO.getSpecialtyCode());
       result.setStatus(specialtyDTO.getStatus());
+
+      if (CollectionUtils.isNotEmpty(specialtyDTO.getSpecialtyTypes())) {
+        Set<SpecialtyType> types = specialtyDTO.getSpecialtyTypes().stream()
+            .filter(Objects::nonNull)
+            .map(dto -> SpecialtyType.valueOf(dto.getName()))
+            .collect(Collectors.toSet());
+        result.setSpecialtyTypes(types);
+      }
     }
     return result;
   }
