@@ -119,13 +119,13 @@ public class SpecialtyGroupMapper {
       result.setName(specialty.getName());
 
       if (CollectionUtils.isNotEmpty(specialty.getSpecialtyTypes())) {
-        Set<SpecialtyTypeDTO> typeDTOs = specialty.getSpecialtyTypes().stream()
+        Set<SpecialtyTypeDTO> typeDtos = specialty.getSpecialtyTypes().stream()
             .map(type -> {
               SpecialtyTypeDTO dto = new SpecialtyTypeDTO();
               dto.setName(type.getName());
               return dto;
             }).collect(Collectors.toSet());
-        result.setSpecialtyTypes(typeDTOs);
+        result.setSpecialtyTypes(typeDtos);
       }
       result.setSpecialtyCode(specialty.getSpecialtyCode());
       result.setStatus(specialty.getStatus());

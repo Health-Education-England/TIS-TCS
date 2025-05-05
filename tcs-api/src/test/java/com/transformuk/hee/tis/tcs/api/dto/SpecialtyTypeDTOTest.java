@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class SpecialtyTypeDTOTest {
+class SpecialtyTypeDTOTest {
 
   @Test
   void testDefaultConstructor() {
@@ -52,6 +52,6 @@ public class SpecialtyTypeDTOTest {
     SpecialtyTypeDTO dto = new SpecialtyTypeDTO("CURRICULUM");
 
     assertNotEquals(null, dto);
-    assertNotEquals(dto, "some string");
+    assertNotEquals("some string", dto);
   }
 }

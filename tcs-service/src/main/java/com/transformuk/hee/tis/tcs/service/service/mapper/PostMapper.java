@@ -189,13 +189,13 @@ public class PostMapper {
       result.setStatus(specialty.getStatus());
 
       if (CollectionUtils.isNotEmpty(specialty.getSpecialtyTypes())) {
-        Set<SpecialtyTypeDTO> typeDTOs = specialty.getSpecialtyTypes().stream()
+        Set<SpecialtyTypeDTO> typeDtos = specialty.getSpecialtyTypes().stream()
             .map(type -> {
               SpecialtyTypeDTO dto = new SpecialtyTypeDTO();
               dto.setName(type.getName());
               return dto;
             }).collect(Collectors.toSet());
-        result.setSpecialtyTypes(typeDTOs);
+        result.setSpecialtyTypes(typeDtos);
       }
     }
     return result;

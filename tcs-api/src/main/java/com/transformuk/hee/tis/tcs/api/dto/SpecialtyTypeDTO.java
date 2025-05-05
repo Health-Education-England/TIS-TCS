@@ -5,6 +5,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 import lombok.Data;
 
+/**
+ * Data Transfer Object representing a {@link com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType}.
+ * <p>
+ * This class is used to transfer specialty type information, especially for JSON serialization/deserialization.
+ */
 @Data
 public class SpecialtyTypeDTO {
 

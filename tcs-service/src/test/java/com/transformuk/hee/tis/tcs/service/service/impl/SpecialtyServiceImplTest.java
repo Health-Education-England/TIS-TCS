@@ -12,7 +12,6 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyGroupDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyTypeDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.model.Specialty;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
@@ -41,7 +40,6 @@ public class SpecialtyServiceImplTest {
   private static final String INTREPID_ID = "12345";
   private static final String NHS_CODE = "NHS_CODE";
   private static final String COLLEGE = "A MEDIA COLLEGE";
-  private static final SpecialtyType SUB_SPECIALTY = SpecialtyType.SUB_SPECIALTY;
 
   @InjectMocks
   private SpecialtyServiceImpl testObj;
