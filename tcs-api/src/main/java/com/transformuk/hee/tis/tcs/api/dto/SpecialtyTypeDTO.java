@@ -6,9 +6,7 @@ import java.util.Objects;
 import lombok.Data;
 
 /**
- * Data Transfer Object representing a {@link com.transformuk.hee.tis.tcs.api.enumeration.SpecialtyType}.
- * <p>
- * This class is used to transfer specialty type information, especially for JSON serialization/deserialization.
+ * A DTO for the SpecialtyType entity
  */
 @Data
 public class SpecialtyTypeDTO {
