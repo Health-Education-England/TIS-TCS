@@ -1,20 +1,31 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator.FIELD_NAME_GMC_NUMBER;
+import static com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator.FIELD_NAME_GMC_STATUS;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,7 +72,7 @@ class GmcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(gmcDetailsDtoMock_whitespace));
+            () -> validator.validate(gmcDetailsDtoMock_whitespace, null, Create.class));
 
     // Then.
     MethodParameter parameter = thrown.getParameter();
@@ -80,7 +91,7 @@ class GmcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(gmcDetailsDtoMock_whitespace));
+            () -> validator.validate(gmcDetailsDtoMock_whitespace, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -105,7 +116,7 @@ class GmcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(gmcDetailsDtoMock));
+            () -> validator.validate(gmcDetailsDtoMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -132,7 +143,7 @@ class GmcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(gmcDetailsDtoMock));
+            () -> validator.validate(gmcDetailsDtoMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -159,7 +170,7 @@ class GmcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(gmcDetailsDtoMock));
+            () -> validator.validate(gmcDetailsDtoMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -182,7 +193,7 @@ class GmcDetailsValidatorTest {
         .thenReturn(Lists.newArrayList());
 
     // When, then.
-    assertDoesNotThrow(() -> validator.validate(gmcDetailsDtoMock));
+    assertDoesNotThrow(() -> validator.validate(gmcDetailsDtoMock, null, Create.class));
   }
 
   @Test
@@ -191,7 +202,7 @@ class GmcDetailsValidatorTest {
     when(gmcDetailsDtoMock.getGmcNumber()).thenReturn(UNKNOWN_GMC_NUMBER);
 
     // When, then.
-    assertDoesNotThrow(() -> validator.validate(gmcDetailsDtoMock));
+    assertDoesNotThrow(() -> validator.validate(gmcDetailsDtoMock, null, Create.class));
   }
 
   @Test
@@ -205,7 +216,7 @@ class GmcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(gmcDetailsDtoMock));
+            () -> validator.validate(gmcDetailsDtoMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -226,7 +237,7 @@ class GmcDetailsValidatorTest {
         .thenReturn(true);
 
     // When, then.
-    assertDoesNotThrow(() -> validator.validate(gmcDetailsDtoMock));
+    assertDoesNotThrow(() -> validator.validate(gmcDetailsDtoMock, null, Create.class));
   }
 
   @Test
@@ -260,5 +271,61 @@ class GmcDetailsValidatorTest {
     List<FieldError> fieldErrors = validator.validateForBulk(gmcDetailsDtoMock);
     // Then.
     assertThat("Error list should contain 2 errors.", fieldErrors.size(), equalTo(2));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithValidFields() {
+    GmcDetailsDTO dto = new GmcDetailsDTO();
+    dto.setGmcNumber(DEFAULT_GMC_NUMBER);
+    dto.setGmcStatus(DEFAULT_GMC_STATUS);
+
+    GmcDetailsDTO originalDto = new GmcDetailsDTO();
+    when(referenceService.isValueExists(GmcStatusDTO.class, DEFAULT_GMC_STATUS, true))
+        .thenReturn(true);
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenUpdateWithInvalidFields() {
+    GmcDetailsDTO dto = new GmcDetailsDTO();
+    dto.setGmcNumber(WHITESPACE_GMC_NUMBER);
+    dto.setGmcStatus(DEFAULT_GMC_STATUS);
+
+    GmcDetailsDTO originalDto = new GmcDetailsDTO();
+    when(referenceService.isValueExists(GmcStatusDTO.class, DEFAULT_GMC_STATUS, true))
+        .thenReturn(false);
+
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(dto, originalDto, Update.class));
+
+    BindingResult result = thrown.getBindingResult();
+    assertThat("Unexpected object name.", result.getObjectName(),
+        Matchers.is(DTO_NAME));
+    assertThat("Unexpected target object.", result.getTarget(), Matchers.is(dto));
+
+    FieldError fieldError1 = new FieldError(DTO_NAME, FIELD_NAME_GMC_NUMBER,
+        "gmcNumber should not contain any whitespaces");
+    FieldError fieldError2 = new FieldError(DTO_NAME, FIELD_NAME_GMC_STATUS,
+        String.format("gmcStatus %s does not exist", DEFAULT_GMC_STATUS));
+
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), Matchers.is(2));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError1, fieldError2));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithExistingFieldValues() {
+    GmcDetailsDTO dto = new GmcDetailsDTO();
+    dto.setGmcNumber(WHITESPACE_GMC_NUMBER);
+    dto.setGmcStatus(DEFAULT_GMC_STATUS);
+
+    GmcDetailsDTO originalDto = new GmcDetailsDTO();
+    originalDto.setGmcNumber(WHITESPACE_GMC_NUMBER);
+    originalDto.setGmcStatus(DEFAULT_GMC_STATUS);
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+    verify(referenceService, never()).isValueExists(any(Class.class), anyString(), anyBoolean());
   }
 }

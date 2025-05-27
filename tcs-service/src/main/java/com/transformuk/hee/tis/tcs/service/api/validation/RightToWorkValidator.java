@@ -3,8 +3,10 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.EeaResident;
 import com.transformuk.hee.tis.tcs.api.enumeration.Settled;
+import com.transformuk.hee.tis.tcs.service.api.util.FieldDiffUtil;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
@@ -13,7 +15,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,8 +32,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class RightToWorkValidator {
 
   private static final String DTO_NAME = "RightToWorkDTO";
-  private static final String FIELD_NAME_VISA_ISSUED = "visaIssued";
-  private static final String FIELD_NAME_VISA_VALID_TO = "visaValidTo";
+  protected static final String FIELD_NAME_PERMIT_TO_WORK = "permitToWork";
+  protected static final String FIELD_NAME_VISA_ISSUED = "visaIssued";
+  protected static final String FIELD_NAME_VISA_VALID_TO = "visaValidTo";
 
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
@@ -43,20 +48,35 @@ public class RightToWorkValidator {
    * Custom validation on the rightToWork DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the permit to work, visa status and EEA residency.
    *
-   * @param dto the rightToWork to check
+   * @param rightToWorkDto the rightToWork to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(RightToWorkDTO dto) throws MethodArgumentNotValidException {
-    if (dto == null) {
+  public void validate(RightToWorkDTO rightToWorkDto, RightToWorkDTO originalDto, Class<?> validationType)
+      throws MethodArgumentNotValidException {
+    if (rightToWorkDto == null) {
       return;
     }
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    checkPermitToWork(dto, fieldErrors);
-    checkVisaDates(dto, fieldErrors, false);
+
+    Set<String> visaDateFields = Set.of(FIELD_NAME_VISA_ISSUED, FIELD_NAME_VISA_VALID_TO);
+
+    if (validationType.equals(Update.class)) {
+      Map<String, Object[]> diff = FieldDiffUtil.diff(rightToWorkDto, originalDto);
+
+      if (diff.keySet().stream().anyMatch(visaDateFields::contains)) {
+        checkVisaDates(rightToWorkDto, fieldErrors, false);
+      }
+      if (diff.containsKey(FIELD_NAME_PERMIT_TO_WORK)) {
+        checkPermitToWork(rightToWorkDto, fieldErrors);
+      }
+    } else {
+      checkPermitToWork(rightToWorkDto, fieldErrors);
+      checkVisaDates(rightToWorkDto, fieldErrors, false);
+    }
 
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(dto, DTO_NAME);
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(rightToWorkDto, DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
 
       Method method = this.getClass().getMethods()[0];
@@ -156,7 +176,7 @@ public class RightToWorkValidator {
       boolean exists = referenceService.isValueExists(PermitToWorkDTO.class, permitToWork, true);
 
       if (!exists) {
-        FieldError fieldError = new FieldError(DTO_NAME, "permitToWork",
+        FieldError fieldError = new FieldError(DTO_NAME, FIELD_NAME_PERMIT_TO_WORK,
             "permitToWork must match a current reference value.");
         fieldErrors.add(fieldError);
       }

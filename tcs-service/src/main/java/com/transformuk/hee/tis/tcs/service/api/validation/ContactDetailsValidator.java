@@ -3,11 +3,15 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.reference.api.dto.TitleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.service.api.util.FieldDiffUtil;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
@@ -24,6 +28,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class ContactDetailsValidator {
 
   private static final String CONTACT_DETAILS_DTO_NAME = "ContactDetailsDTO";
+  protected static final String FIELD_NAME_TITLE = "title";
+  protected static final String FIELD_NAME_EMAIL = "email";
 
   // TODO: Better way to validate emails.
   private static final String REGEX_EMAIL = "^$|[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?";
@@ -51,22 +57,41 @@ public class ContactDetailsValidator {
    * Custom validation on the ContactDetails DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the title and email address of the person.
    *
-   * @param dto the contactDetails to check
+   * @param contactDetailsDto the contactDetails to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(ContactDetailsDTO dto)
-      throws MethodArgumentNotValidException, NoSuchMethodException {
-    final boolean currentOnly = true;
+  public void validate(ContactDetailsDTO contactDetailsDto, ContactDetailsDTO originalDto,
+      Class<?> validationType) throws MethodArgumentNotValidException, NoSuchMethodException {
+
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkTitle(dto, currentOnly));
-    fieldErrors.addAll(checkEmail(dto));
+    final boolean currentOnly = true;
+
+    Map<String, Function<ContactDetailsDTO, List<FieldError>>> validators = Map.of(
+        FIELD_NAME_TITLE, dto -> checkTitle(dto, currentOnly),
+        FIELD_NAME_EMAIL, this::checkEmail
+    );
+
+    if (validationType.equals(Update.class)) {
+      Map<String, Object[]> diff = FieldDiffUtil.diff(contactDetailsDto, originalDto);
+      validators.forEach((field, validator) -> {
+        if (diff.containsKey(field)) {
+          fieldErrors.addAll(validator.apply(contactDetailsDto));
+        }
+      });
+    } else {
+      validators.values().forEach(validator ->
+          fieldErrors.addAll(validator.apply(contactDetailsDto))
+      );
+    }
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult =
-          new BeanPropertyBindingResult(dto, CONTACT_DETAILS_DTO_NAME);
+          new BeanPropertyBindingResult(contactDetailsDto, CONTACT_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
 
-      Method method = this.getClass().getMethod("validate", ContactDetailsDTO.class);
+      Method method = this.getClass()
+          .getMethod("validate", ContactDetailsDTO.class,
+              ContactDetailsDTO.class, Class.class);
       MethodParameter methodParameter = new MethodParameter(method, 0);
       throw new MethodArgumentNotValidException(methodParameter, bindingResult);
     }
@@ -76,10 +101,10 @@ public class ContactDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     // then check the grades
     if (StringUtils.isNotEmpty(contactDetailsDto.getTitle())) {
-      Boolean isExists = referenceService
+      boolean isExists = referenceService
           .isValueExists(TitleDTO.class, contactDetailsDto.getTitle(), currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, "title",
+        fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, FIELD_NAME_TITLE,
             String.format("title %s does not exist", contactDetailsDto.getTitle())));
       }
     }
@@ -136,19 +161,19 @@ public class ContactDetailsValidator {
 
   private List<FieldError> checkEmail(ContactDetailsDTO dto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    String fieldName = "email";
-    validateEmailFormat(fieldName, dto.getEmail(), fieldErrors);
-    validateEmailUniqueness(fieldName, dto, fieldErrors);
+    validateEmailFormat(dto.getEmail(), fieldErrors);
+    validateEmailUniqueness(dto, fieldErrors);
     return fieldErrors;
   }
 
-  private void validateEmailFormat(String fieldName, String value, List<FieldError> fieldErrors) {
+  private void validateEmailFormat(String value, List<FieldError> fieldErrors) {
     if (value != null && !value.matches(REGEX_EMAIL)) {
-      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName, REGEX_EMAIL_ERROR));
+      fieldErrors.add(
+          new FieldError(CONTACT_DETAILS_DTO_NAME, FIELD_NAME_EMAIL, REGEX_EMAIL_ERROR));
     }
   }
 
-  private void validateEmailUniqueness(String fieldName, ContactDetailsDTO dto,
+  private void validateEmailUniqueness(ContactDetailsDTO dto,
       List<FieldError> fieldErrors) {
     String email = dto.getEmail();
     if (StringUtils.isEmpty(email)) {
@@ -164,7 +189,7 @@ public class ContactDetailsValidator {
     }
     int existingSize = existingContactDetails.size();
     if (existingSize > 0) {
-      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, fieldName,
+      fieldErrors.add(new FieldError(CONTACT_DETAILS_DTO_NAME, FIELD_NAME_EMAIL,
           String.format(
               "email %s is not unique, there %s currently %d %s with this email (Person ID: %s)",
               dto.getEmail(), existingSize > 1 ? "are" : "is", existingSize,

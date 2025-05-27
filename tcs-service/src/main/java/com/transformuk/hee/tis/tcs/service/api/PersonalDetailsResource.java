@@ -68,7 +68,7 @@ public class PersonalDetailsResource {
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save PersonalDetails : {}", personalDetailsDTO);
 
-    personalDetailsValidator.validate(personalDetailsDTO);
+    personalDetailsValidator.validate(personalDetailsDTO, null, Create.class);
     PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDTO);
     return ResponseEntity.created(new URI("/api/personal-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -90,16 +90,18 @@ public class PersonalDetailsResource {
       @RequestBody @Validated(Update.class) PersonalDetailsDTO personalDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update PersonalDetails : {}", personalDetailsDTO);
-    if (personalDetailsDTO.getId() == null) {
+    Long personalDetailsId = personalDetailsDTO.getId();
+    if (personalDetailsId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating Personal details")).body(null);
     }
-    personalDetailsValidator.validate(personalDetailsDTO);
+    PersonalDetailsDTO originalDto = personalDetailsService.findOne(personalDetailsId);
+    personalDetailsValidator.validate(personalDetailsDTO, originalDto, Update.class);
     PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDTO);
     return ResponseEntity.ok()
         .headers(
-            HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personalDetailsDTO.getId().toString()))
+            HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personalDetailsId.toString()))
         .body(result);
   }
 
