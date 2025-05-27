@@ -126,7 +126,7 @@ public class PersonResource {
    *
    * @param personDTO the personDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new personDTO, or with
-   *     status 400 (Bad Request) if the person has already an ID
+   * status 400 (Bad Request) if the person has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/people")
@@ -137,7 +137,7 @@ public class PersonResource {
     log.debug("REST request to save Person : {}", personDTO);
     if (personDTO.getId() != null) {
       return ResponseEntity.badRequest().headers(HeaderUtil
-          .createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID"))
+              .createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID"))
           .body(null);
     }
     personValidator.validate(personDTO, null, Create.class);
@@ -158,8 +158,8 @@ public class PersonResource {
    *
    * @param personDTO the personDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated personDTO, or with
-   *     status 400 (Bad Request) if the personDTO is not valid, or with status 500 (Internal Server
-   *     Error) if the personDTO couldn't be updated
+   * status 400 (Bad Request) if the personDTO is not valid, or with status 500 (Internal Server
+   * Error) if the personDTO couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/people")
@@ -175,11 +175,16 @@ public class PersonResource {
     personService.canLoggedInUserViewOrAmend(personId);
     PersonDTO originalDto = personService.findOne(personId);
     personValidator.validate(personDTO, originalDto, Update.class);
-    gmcDetailsValidator.validate(personDTO.getGmcDetails(), originalDto.getGmcDetails(), Update.class);
-    gdcDetailsValidator.validate(personDTO.getGdcDetails(), originalDto.getGdcDetails(), Update.class);
-    personalDetailsValidator.validate(personDTO.getPersonalDetails(), originalDto.getPersonalDetails(), Update.class);
-    contactDetailsValidator.validate(personDTO.getContactDetails(), originalDto.getContactDetails(), Update.class);
-    rightToWorkValidator.validate(personDTO.getRightToWork(), originalDto.getRightToWork(), Update.class);
+    gmcDetailsValidator.validate(personDTO.getGmcDetails(), originalDto.getGmcDetails(),
+        Update.class);
+    gdcDetailsValidator.validate(personDTO.getGdcDetails(), originalDto.getGdcDetails(),
+        Update.class);
+    personalDetailsValidator.validate(personDTO.getPersonalDetails(),
+        originalDto.getPersonalDetails(), Update.class);
+    contactDetailsValidator.validate(personDTO.getContactDetails(), originalDto.getContactDetails(),
+        Update.class);
+    rightToWorkValidator.validate(personDTO.getRightToWork(), originalDto.getRightToWork(),
+        Update.class);
 
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
@@ -298,7 +303,7 @@ public class PersonResource {
    *
    * @param ids the ids to search by
    * @return the ResponseEntity with status 200 (OK)  and the list of personBasicDetails in body, or
-   *     empty list
+   * empty list
    */
   @GetMapping("/people/in/{ids}/basic")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -333,7 +338,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   *     (Not Found)
+   * (Not Found)
    */
   @GetMapping("/people/{id}")
   @PreAuthorize("hasRole('ETL') or hasPermission('tis:people::person:', 'View')")
@@ -353,7 +358,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   *     (Not Found)
+   * (Not Found)
    */
   @GetMapping("/people/v2/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")

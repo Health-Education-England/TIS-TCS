@@ -27,9 +27,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class GmcDetailsValidator {
 
-  private static final String GMC_DETAILS_DTO_NAME = "GmcDetailsDTO";
   protected static final String FIELD_NAME_GMC_NUMBER = "gmcNumber";
   protected static final String FIELD_NAME_GMC_STATUS = "gmcStatus";
+  private static final String GMC_DETAILS_DTO_NAME = "GmcDetailsDTO";
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
 
@@ -79,7 +79,8 @@ public class GmcDetailsValidator {
       fieldErrors.forEach(bindingResult::addError);
 
       try {
-        Method method = this.getClass().getDeclaredMethod("validate", GmcDetailsDTO.class, GmcDetailsDTO.class, Class.class);
+        Method method = this.getClass()
+            .getDeclaredMethod("validate", GmcDetailsDTO.class, GmcDetailsDTO.class, Class.class);
         throw new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult);
       } catch (NoSuchMethodException e) {
         // This should only happen if the method name is changed without updating the code.

@@ -31,11 +31,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class RightToWorkValidator {
 
-  private static final String DTO_NAME = "RightToWorkDTO";
   protected static final String FIELD_NAME_PERMIT_TO_WORK = "permitToWork";
   protected static final String FIELD_NAME_VISA_ISSUED = "visaIssued";
   protected static final String FIELD_NAME_VISA_VALID_TO = "visaValidTo";
-
+  private static final String DTO_NAME = "RightToWorkDTO";
   private final ReferenceService referenceService;
   private final PersonRepository personRepository;
 
@@ -51,7 +50,8 @@ public class RightToWorkValidator {
    * @param rightToWorkDto the rightToWork to check
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(RightToWorkDTO rightToWorkDto, RightToWorkDTO originalDto, Class<?> validationType)
+  public void validate(RightToWorkDTO rightToWorkDto, RightToWorkDTO originalDto,
+      Class<?> validationType)
       throws MethodArgumentNotValidException {
     if (rightToWorkDto == null) {
       return;
@@ -76,7 +76,8 @@ public class RightToWorkValidator {
     }
 
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(rightToWorkDto, DTO_NAME);
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(rightToWorkDto,
+          DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
 
       Method method = this.getClass().getMethods()[0];
@@ -112,7 +113,7 @@ public class RightToWorkValidator {
   }
 
   private void checkVisaDates(RightToWorkDTO dto, List<FieldError> fieldErrors,
-                              boolean checkExistingDbValues) {
+      boolean checkExistingDbValues) {
 
     if (dto != null) {
       LocalDate visaIssued = dto.getVisaIssued();
@@ -138,7 +139,7 @@ public class RightToWorkValidator {
   }
 
   private void checkDbVisaDates(List<FieldError> fieldErrors, Long personId,
-                                   LocalDate visaIssued, LocalDate visaValidTo) {
+      LocalDate visaIssued, LocalDate visaValidTo) {
 
     if (personId == null) {
       return;
