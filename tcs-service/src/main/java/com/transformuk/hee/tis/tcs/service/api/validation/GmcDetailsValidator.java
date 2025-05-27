@@ -45,8 +45,12 @@ public class GmcDetailsValidator {
   /**
    * Custom validation on the gmcDetailsDTO DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the gmc status if gmc number is entered.
+   * Validation for update doesn't validate the values which are not changed.
    *
-   * @param gmcDetailsDto the gmcDetails to check
+   * @param gmcDetailsDto  the gmcDetails to check
+   * @param originalDto    the original gmcDetails to update if validation type is Update,
+   *                       can be set to null if validation type is Create
+   * @param validationType the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(GmcDetailsDTO gmcDetailsDto, GmcDetailsDTO originalDto,

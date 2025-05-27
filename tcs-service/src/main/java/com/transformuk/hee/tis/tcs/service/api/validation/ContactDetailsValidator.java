@@ -56,8 +56,12 @@ public class ContactDetailsValidator {
   /**
    * Custom validation on the ContactDetails DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the title and email address of the person.
+   * Validation for update doesn't validate the values which are not changed.
    *
    * @param contactDetailsDto the contactDetails to check
+   * @param originalDto       the original contactDetails to update if validation type is Update,
+   *                          can be set to null if validation type is Create
+   * @param validationType    the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(ContactDetailsDTO contactDetailsDto, ContactDetailsDTO originalDto,

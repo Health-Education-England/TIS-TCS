@@ -71,8 +71,12 @@ public class PersonValidator {
    * Custom validation on the personDto DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the public health number unique check if it is
    * entered.
+   * Validation for update doesn't validate the values which are not changed.
    *
-   * @param personDto the person to check
+   * @param personDto      the person to check
+   * @param originalDto    the original person to update if validation type is Update,
+   *                       can be set to null if validation type is Create
+   * @param validationType the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(PersonDTO personDto, PersonDTO originalDto, Class<?> validationType)

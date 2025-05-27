@@ -51,8 +51,12 @@ public class PersonalDetailsValidator {
   /**
    * Custom validation on the personalDetailsDTO DTO, this is meant to supplement the annotation
    * based validation already in place. It checks that the gmc status if gmc number is entered.
+   * Validation for update doesn't validate the values which are not changed.
    *
    * @param personalDetailsDto the personalDetails to check
+   * @param originalDto        the original personalDetails to update if validation type is Update,
+   *                           can be set to null if validation type is Create
+   * @param validationType     the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(PersonalDetailsDTO personalDetailsDto, PersonalDetailsDTO originalDto,

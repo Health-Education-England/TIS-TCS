@@ -46,8 +46,12 @@ public class RightToWorkValidator {
   /**
    * Custom validation on the rightToWork DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the permit to work, visa status and EEA residency.
+   * Validation for update doesn't validate the values which are not changed.
    *
    * @param rightToWorkDto the rightToWork to check
+   * @param originalDto    the original rightToWork to update if validation type is Update,
+   *                       can be set to null if validation type is Create
+   * @param validationType the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(RightToWorkDTO rightToWorkDto, RightToWorkDTO originalDto,
