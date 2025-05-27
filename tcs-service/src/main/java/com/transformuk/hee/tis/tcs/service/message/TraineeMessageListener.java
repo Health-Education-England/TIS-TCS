@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.TraineeUpdate;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
@@ -85,7 +86,8 @@ public class TraineeMessageListener {
     }
 
     try {
-      gmcDetailsValidator.validate(gmcDetails);
+      // Keep the validation as what it is, so use Create mode here
+      gmcDetailsValidator.validate(gmcDetails, null, Create.class);
     } catch (MethodArgumentNotValidException e) {
       throw new AmqpRejectAndDontRequeueException("Invalid GMC details.", e);
     }

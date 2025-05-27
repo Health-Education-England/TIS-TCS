@@ -1,21 +1,32 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator.FIELD_NAME_GDC_NUMBER;
+import static com.transformuk.hee.tis.tcs.service.api.validation.GdcDetailsValidator.FIELD_NAME_GDC_STATUS;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.GdcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.IdProjection;
 import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,7 +71,7 @@ class GdcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(GdcDetailsDTOMock_whitespace));
+            () -> validator.validate(GdcDetailsDTOMock_whitespace, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -91,7 +102,7 @@ class GdcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(GdcDetailsDTOMock));
+            () -> validator.validate(GdcDetailsDTOMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -124,7 +135,7 @@ class GdcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(GdcDetailsDTOMock));
+            () -> validator.validate(GdcDetailsDTOMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -157,7 +168,7 @@ class GdcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(GdcDetailsDTOMock));
+            () -> validator.validate(GdcDetailsDTOMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -180,7 +191,7 @@ class GdcDetailsValidatorTest {
         .thenReturn(Lists.newArrayList());
 
     // When, then.
-    assertDoesNotThrow(() -> validator.validate(GdcDetailsDTOMock));
+    assertDoesNotThrow(() -> validator.validate(GdcDetailsDTOMock, null, Create.class));
   }
 
   @Test
@@ -189,7 +200,7 @@ class GdcDetailsValidatorTest {
     when(GdcDetailsDTOMock.getGdcNumber()).thenReturn(UNKNOWN_GDC_NUMBER);
 
     // When, then.
-    assertDoesNotThrow(() -> validator.validate(GdcDetailsDTOMock));
+    assertDoesNotThrow(() -> validator.validate(GdcDetailsDTOMock, null, Create.class));
   }
 
   @Test
@@ -203,7 +214,7 @@ class GdcDetailsValidatorTest {
     // When.
     MethodArgumentNotValidException thrown =
         assertThrows(MethodArgumentNotValidException.class,
-            () -> validator.validate(GdcDetailsDTOMock));
+            () -> validator.validate(GdcDetailsDTOMock, null, Create.class));
 
     // Then.
     BindingResult result = thrown.getBindingResult();
@@ -224,7 +235,7 @@ class GdcDetailsValidatorTest {
         .thenReturn(true);
 
     // When, then.
-    assertDoesNotThrow(() -> validator.validate(GdcDetailsDTOMock));
+    assertDoesNotThrow(() -> validator.validate(GdcDetailsDTOMock, null, Create.class));
   }
 
   // bulk upload
@@ -265,5 +276,61 @@ class GdcDetailsValidatorTest {
     List<FieldError> fieldErrors = validator.validateForBulk(GdcDetailsDTOMock);
     // Then.
     assertThat("Error list should contain 2 errors.", fieldErrors.size(), equalTo(2));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithValidFields() {
+    GdcDetailsDTO dto = new GdcDetailsDTO();
+    dto.setGdcNumber(DEFAULT_GDC_NUMBER);
+    dto.setGdcStatus(DEFAULT_GDC_STATUS);
+
+    GdcDetailsDTO originalDto = new GdcDetailsDTO();
+    when(referenceService.isValueExists(GdcStatusDTO.class, DEFAULT_GDC_STATUS, true))
+        .thenReturn(true);
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenUpdateWithInvalidFields() {
+    GdcDetailsDTO dto = new GdcDetailsDTO();
+    dto.setGdcNumber(WHITESPACE_GDC_NUMBER);
+    dto.setGdcStatus(DEFAULT_GDC_STATUS);
+
+    GdcDetailsDTO originalDto = new GdcDetailsDTO();
+    when(referenceService.isValueExists(GdcStatusDTO.class, DEFAULT_GDC_STATUS, true))
+        .thenReturn(false);
+
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(dto, originalDto, Update.class));
+
+    BindingResult result = thrown.getBindingResult();
+    assertThat("Unexpected object name.", result.getObjectName(),
+        Matchers.is(DTO_NAME));
+    assertThat("Unexpected target object.", result.getTarget(), Matchers.is(dto));
+
+    FieldError fieldError1 = new FieldError(DTO_NAME, FIELD_NAME_GDC_NUMBER,
+        "gdcNumber should not contain any whitespaces");
+    FieldError fieldError2 = new FieldError(DTO_NAME, FIELD_NAME_GDC_STATUS,
+        String.format("gdcStatus %s does not exist", DEFAULT_GDC_STATUS));
+
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), Matchers.is(2));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError1, fieldError2));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithExistingFieldValues() {
+    GdcDetailsDTO dto = new GdcDetailsDTO();
+    dto.setGdcNumber(WHITESPACE_GDC_NUMBER);
+    dto.setGdcStatus(DEFAULT_GDC_STATUS);
+
+    GdcDetailsDTO originalDto = new GdcDetailsDTO();
+    originalDto.setGdcNumber(WHITESPACE_GDC_NUMBER);
+    originalDto.setGdcStatus(DEFAULT_GDC_STATUS);
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+    verify(referenceService, never()).isValueExists(any(Class.class), anyString(), anyBoolean());
   }
 }

@@ -1,22 +1,33 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator.FIELD_NAME_EMAIL;
+import static com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator.FIELD_NAME_TITLE;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.TitleDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +76,8 @@ class ContactDetailsValidatorTest {
 
     // When.
     MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(dto, null, Create.class));
 
     // Then
     BindingResult result = thrown.getBindingResult();
@@ -87,7 +99,7 @@ class ContactDetailsValidatorTest {
     when(referenceService.isValueExists(TitleDTO.class, "myTitle", true)).thenReturn(true);
 
     // When.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    assertDoesNotThrow(() -> validator.validate(dto, null, Create.class));
   }
 
   @Test
@@ -267,7 +279,7 @@ class ContactDetailsValidatorTest {
     ContactDetailsDTO dto = new ContactDetailsDTO();
 
     // When, Then.
-    assertDoesNotThrow(() -> validator.validate(dto));
+    assertDoesNotThrow(() -> validator.validate(dto, null, Create.class));
   }
 
   @Test
@@ -893,7 +905,8 @@ class ContactDetailsValidatorTest {
 
     // When.
     MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(dto, null, Create.class));
 
     // Then
     BindingResult result = thrown.getBindingResult();
@@ -922,7 +935,8 @@ class ContactDetailsValidatorTest {
 
     // When.
     MethodArgumentNotValidException thrown =
-        assertThrows(MethodArgumentNotValidException.class, () -> validator.validate(dto));
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(dto, null, Create.class));
 
     // Then
     BindingResult result = thrown.getBindingResult();
@@ -1063,5 +1077,63 @@ class ContactDetailsValidatorTest {
 
     // Then.
     assertThat("Unexpected number of field errors.", fieldErrors.size(), is(0));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithValidFields() {
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setTitle("myTitle");
+    dto.setEmail("a@b.com");
+
+    ContactDetailsDTO originalDto = new ContactDetailsDTO();
+
+    when(referenceService.isValueExists(TitleDTO.class, "myTitle", true)).thenReturn(true);
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenUpdateWithInvalidFields() {
+    String title = "myTitle";
+    String email = "a.b.com";
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setTitle(title);
+    dto.setEmail(email);
+    ContactDetailsDTO originalDto = new ContactDetailsDTO();
+
+    when(referenceService.isValueExists(TitleDTO.class, title, true)).thenReturn(false);
+
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(dto, originalDto, Update.class));
+
+    BindingResult result = thrown.getBindingResult();
+    assertThat("Unexpected object name.", result.getObjectName(),
+        Matchers.is(DTO_NAME));
+    assertThat("Unexpected target object.", result.getTarget(), Matchers.is(dto));
+
+    FieldError fieldError1 = new FieldError(DTO_NAME, FIELD_NAME_TITLE,
+        String.format("title %s does not exist", title));
+    FieldError fieldError2 = new FieldError(DTO_NAME, FIELD_NAME_EMAIL,
+        REGEX_EMAIL_ERROR);
+
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), Matchers.is(2));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError1, fieldError2));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithExistingFieldValues() {
+    String title = "myTitle";
+    String email = "a.b.com";
+    ContactDetailsDTO dto = new ContactDetailsDTO();
+    dto.setTitle(title);
+    dto.setEmail(email);
+    ContactDetailsDTO originalDto = new ContactDetailsDTO();
+    originalDto.setTitle(title);
+    originalDto.setEmail(email);
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+    verify(referenceService, never()).isValueExists(any(Class.class), anyString(), anyBoolean());
   }
 }

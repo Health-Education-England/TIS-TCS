@@ -68,7 +68,7 @@ public class ContactDetailsResource {
       throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to save ContactDetails : {}", contactDetailsDTO);
 
-    contactDetailsValidator.validate(contactDetailsDTO);
+    contactDetailsValidator.validate(contactDetailsDTO, null, Create.class);
     ContactDetailsDTO result = contactDetailsService.save(contactDetailsDTO);
     return ResponseEntity.created(new URI("/api/contact-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -89,16 +89,18 @@ public class ContactDetailsResource {
       @RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO)
       throws MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to update ContactDetails : {}", contactDetailsDTO);
-    if (contactDetailsDTO.getId() == null) {
+    Long contactDetailsId = contactDetailsDTO.getId();
+    if (contactDetailsId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating contact details")).body(null);
     }
-    contactDetailsValidator.validate(contactDetailsDTO);
+    ContactDetailsDTO originalDto = contactDetailsService.findOne(contactDetailsId);
+    contactDetailsValidator.validate(contactDetailsDTO, originalDto, Update.class);
     ContactDetailsDTO result = contactDetailsService.save(contactDetailsDTO);
     return ResponseEntity.ok()
         .headers(
-            HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, contactDetailsDTO.getId().toString()))
+            HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, contactDetailsId.toString()))
         .body(result);
   }
 

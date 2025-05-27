@@ -8,12 +8,16 @@ import com.transformuk.hee.tis.reference.api.dto.ReligiousBeliefDTO;
 import com.transformuk.hee.tis.reference.api.dto.SexualOrientationDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.Disability;
+import com.transformuk.hee.tis.tcs.service.api.util.FieldDiffUtil;
 import com.transformuk.hee.tis.tcs.service.model.PersonalDetails;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -29,6 +33,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class PersonalDetailsValidator {
 
   private static final String PERSONAL_DETAILS_DTO_NAME = "PersonalDetailsDTO";
+  protected static final String FIELD_NAME_GENDER = "gender";
+  protected static final String FIELD_NAME_NATIONALITY = "nationality";
+  protected static final String FIELD_NAME_DUAL_NATIONALITY = "dualNationality";
+  protected static final String FIELD_NAME_ETHNIC_ORIGIN = "ethnicOrigin";
+  protected static final String FIELD_NAME_MARITAL_STATUS = "maritalStatus";
+  protected static final String FIELD_NAME_SEXUAL_ORIENTATION = "sexualOrientation";
+  protected static final String FIELD_NAME_RELIGIOUS_BELIEF = "religiousBelief";
+  protected static final String FIELD_NAME_DISABILITY = "disability";
+
   private final ReferenceServiceImpl referenceService;
 
   public PersonalDetailsValidator(ReferenceServiceImpl referenceService) {
@@ -38,24 +51,45 @@ public class PersonalDetailsValidator {
   /**
    * Custom validation on the personalDetailsDTO DTO, this is meant to supplement the annotation
    * based validation already in place. It checks that the gmc status if gmc number is entered.
+   * Validation for update doesn't validate the values which are not changed.
    *
-   * @param personalDetailsDTO the personalDetails to check
+   * @param personalDetailsDto the personalDetails to check
+   * @param originalDto        the original personalDetails to update if validation type is Update,
+   *                           can be set to null if validation type is Create
+   * @param validationType     the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(PersonalDetailsDTO personalDetailsDTO)
-      throws MethodArgumentNotValidException {
+  public void validate(PersonalDetailsDTO personalDetailsDto, PersonalDetailsDTO originalDto,
+      Class<?> validationType) throws MethodArgumentNotValidException {
     final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkGender(personalDetailsDTO, currentOnly));
-    fieldErrors.addAll(checkNationality(personalDetailsDTO, currentOnly));
-    fieldErrors.addAll(checkDualNationality(personalDetailsDTO, currentOnly));
-    fieldErrors.addAll(checkEthnicOrigin(personalDetailsDTO, currentOnly));
-    fieldErrors.addAll(checkMaritalStatus(personalDetailsDTO, currentOnly));
-    fieldErrors.addAll(checkSexualOrientation(personalDetailsDTO, currentOnly));
-    fieldErrors.addAll(checkReligiousBelief(personalDetailsDTO, currentOnly));
+
+    Map<String, Function<PersonalDetailsDTO, List<FieldError>>> validators = Map.of(
+        FIELD_NAME_GENDER, dto -> checkGender(dto, currentOnly),
+        FIELD_NAME_NATIONALITY, dto -> checkNationality(dto, currentOnly),
+        FIELD_NAME_DUAL_NATIONALITY, dto -> checkDualNationality(dto, currentOnly),
+        FIELD_NAME_ETHNIC_ORIGIN, dto -> checkEthnicOrigin(dto, currentOnly),
+        FIELD_NAME_MARITAL_STATUS, dto -> checkMaritalStatus(dto, currentOnly),
+        FIELD_NAME_SEXUAL_ORIENTATION, dto -> checkSexualOrientation(dto, currentOnly),
+        FIELD_NAME_RELIGIOUS_BELIEF, dto -> checkReligiousBelief(dto, currentOnly),
+        FIELD_NAME_DISABILITY, this::checkDisability
+    );
+
+    if (validationType.equals(Update.class)) {
+      Map<String, Object[]> diff = FieldDiffUtil.diff(personalDetailsDto, originalDto);
+      validators.forEach((field, validator) -> {
+        if (diff.containsKey(field)) {
+          fieldErrors.addAll(validator.apply(personalDetailsDto));
+        }
+      });
+    } else {
+      validators.values().forEach(validator ->
+          fieldErrors.addAll(validator.apply(personalDetailsDto))
+      );
+    }
 
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personalDetailsDTO,
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personalDetailsDto,
           PERSONAL_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
 
@@ -73,7 +107,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService
           .isValueExists(NationalityDTO.class, personalDetailsDto.getNationality(), currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "nationality",
+        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_NATIONALITY,
             String.format("Nationality %s does not exist", personalDetailsDto.getNationality())));
       }
     }
@@ -87,7 +121,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService
           .isValueExists(GenderDTO.class, personalDetailsDto.getGender(), currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "gender",
+        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_GENDER,
             String.format("Gender %s does not exist", personalDetailsDto.getGender())));
       }
     }
@@ -100,7 +134,7 @@ public class PersonalDetailsValidator {
 
     if (disability != null && Arrays.stream(Disability.values()).map(Enum::name)
         .noneMatch(n -> n.equals(disability))) {
-      FieldError fieldError = new FieldError(PERSONAL_DETAILS_DTO_NAME, "disability",
+      FieldError fieldError = new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_DISABILITY,
           "disability must match a reference value.");
       fieldErrors.add(fieldError);
     }
@@ -117,7 +151,7 @@ public class PersonalDetailsValidator {
           .isValueExists(NationalityDTO.class, personalDetailsDto.getDualNationality(),
               currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "dualNationality",
+        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_DUAL_NATIONALITY,
             String.format("DualNationality %s does not exist",
                 personalDetailsDto.getDualNationality())));
       }
@@ -133,7 +167,7 @@ public class PersonalDetailsValidator {
       Boolean isExists = referenceService
           .isValueExists(EthnicOriginDTO.class, personalDetailsDto.getEthnicOrigin(), currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "ethnicOrigin",
+        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_ETHNIC_ORIGIN,
             String.format("EthnicOrigin %s does not exist", personalDetailsDto.getEthnicOrigin())));
       }
     }
@@ -149,7 +183,7 @@ public class PersonalDetailsValidator {
           .isValueExists(MaritalStatusDTO.class, personalDetailsDto.getMaritalStatus(),
               currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "maritalStatus",
+        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_MARITAL_STATUS,
             String
                 .format("MaritalStatus %s does not exist", personalDetailsDto.getMaritalStatus())));
       }
@@ -166,7 +200,7 @@ public class PersonalDetailsValidator {
           .isValueExists(SexualOrientationDTO.class, personalDetailsDto.getSexualOrientation(),
               currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "sexualOrientation",
+        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_SEXUAL_ORIENTATION,
             String.format("SexualOrientation %s does not exist",
                 personalDetailsDto.getSexualOrientation())));
       }
@@ -183,7 +217,7 @@ public class PersonalDetailsValidator {
           .isValueExists(ReligiousBeliefDTO.class, personalDetailsDto.getReligiousBelief(),
               currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, "religiousBelief",
+        fieldErrors.add(new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_RELIGIOUS_BELIEF,
             String.format("ReligiousBelief %s does not exist",
                 personalDetailsDto.getReligiousBelief())));
       }

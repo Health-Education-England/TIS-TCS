@@ -1,34 +1,44 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator.FIELD_NAME_PERMIT_TO_WORK;
+import static com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator.FIELD_NAME_VISA_ISSUED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.reference.api.dto.PermitToWorkDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.RightToWork;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 class RightToWorkValidatorTest {
 
+  private static final String DTO_NAME = RightToWorkDTO.class.getSimpleName();
   private RightToWorkValidator validator;
   private PersonRepository personRepository;
   private ReferenceService referenceService;
@@ -347,7 +357,7 @@ class RightToWorkValidatorTest {
 
     verify(personRepository, times(0)).findPersonById(personId);
 
-    assertDoesNotThrow(() -> validator.validate(dto));
+    assertDoesNotThrow(() -> validator.validate(dto, null, Create.class));
   }
 
   @Test
@@ -396,7 +406,7 @@ class RightToWorkValidatorTest {
 
   @Test
   void shouldPassValidationWhenDtoNull() {
-    assertDoesNotThrow(() -> validator.validate(null));
+    assertDoesNotThrow(() -> validator.validate(null, null, Create.class));
   }
 
   @Test
@@ -408,7 +418,7 @@ class RightToWorkValidatorTest {
         .thenReturn(false);
 
     MethodArgumentNotValidException exception = assertThrows(MethodArgumentNotValidException.class,
-        () -> validator.validate(dto));
+        () -> validator.validate(dto, null, Create.class));
 
     List<FieldError> permitToWorkErrors = exception.getBindingResult()
         .getFieldErrors("permitToWork");
@@ -426,6 +436,66 @@ class RightToWorkValidatorTest {
 
     when(referenceService.isValueExists(PermitToWorkDTO.class, "doesExist", true)).thenReturn(true);
 
-    assertDoesNotThrow(() -> validator.validate(dto));
+    assertDoesNotThrow(() -> validator.validate(dto, null, Create.class));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithValidFields() {
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setPermitToWork("Exists");
+    dto.setVisaIssued(LocalDate.now().minusDays(1));
+    dto.setVisaValidTo(LocalDate.now().plusDays(1));
+
+    RightToWorkDTO originalDto = new RightToWorkDTO();
+    when(referenceService.isValueExists(PermitToWorkDTO.class, "Exists", true))
+        .thenReturn(true);
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+  }
+
+  @Test
+  void shouldThrowExceptionWhenUpdateWithInvalidFields() {
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setPermitToWork("NotExists");
+    dto.setVisaIssued(LocalDate.now().plusDays(1));
+    dto.setVisaValidTo(LocalDate.now().minusDays(1));
+
+    RightToWorkDTO originalDto = new RightToWorkDTO();
+    when(referenceService.isValueExists(RightToWorkDTO.class, "NotExists", true))
+        .thenReturn(false);
+
+    MethodArgumentNotValidException thrown =
+        assertThrows(MethodArgumentNotValidException.class,
+            () -> validator.validate(dto, originalDto, Update.class));
+
+    BindingResult result = thrown.getBindingResult();
+    assertThat("Unexpected object name.", result.getObjectName(),
+        Matchers.is(DTO_NAME));
+    assertThat("Unexpected target object.", result.getTarget(), Matchers.is(dto));
+
+    FieldError fieldError1 = new FieldError(DTO_NAME, FIELD_NAME_PERMIT_TO_WORK,
+        "permitToWork must match a current reference value.");
+    FieldError fieldError2 = new FieldError(DTO_NAME, FIELD_NAME_VISA_ISSUED,
+        "visaIssued must be before visaValidTo.");
+
+    assertThat("Unexpected error count.", result.getFieldErrors().size(), Matchers.is(2));
+    assertThat("Expected field error not found.", result.getFieldErrors(),
+        hasItems(fieldError1, fieldError2));
+  }
+
+  @Test
+  void shouldNotThrowExceptionWhenUpdateWithExistingFieldValues() {
+    RightToWorkDTO dto = new RightToWorkDTO();
+    dto.setPermitToWork("NotExists");
+    dto.setVisaIssued(LocalDate.now().plusDays(1));
+    dto.setVisaValidTo(LocalDate.now().minusDays(1));
+
+    RightToWorkDTO originalDto = new RightToWorkDTO();
+    originalDto.setPermitToWork("NotExists");
+    originalDto.setVisaIssued(LocalDate.now().plusDays(1));
+    originalDto.setVisaValidTo(LocalDate.now().minusDays(1));
+
+    assertDoesNotThrow(() -> validator.validate(dto, originalDto, Update.class));
+    verify(referenceService, never()).isValueExists(any(Class.class), anyString(), anyBoolean());
   }
 }

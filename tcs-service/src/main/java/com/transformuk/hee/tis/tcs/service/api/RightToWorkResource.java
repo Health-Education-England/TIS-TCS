@@ -67,7 +67,7 @@ public class RightToWorkResource {
       @RequestBody @Validated(Create.class) RightToWorkDTO rightToWorkDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save RightToWork : {}", rightToWorkDTO);
-    rightToWorkValidator.validate(rightToWorkDTO);
+    rightToWorkValidator.validate(rightToWorkDTO, null, Create.class);
     RightToWorkDTO result = rightToWorkService.save(rightToWorkDTO);
     return ResponseEntity.created(new URI("/api/right-to-works/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -89,15 +89,17 @@ public class RightToWorkResource {
       @RequestBody @Validated(Update.class) RightToWorkDTO rightToWorkDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update RightToWork : {}", rightToWorkDTO);
-    rightToWorkValidator.validate(rightToWorkDTO);
-    if (rightToWorkDTO.getId() == null) {
+    Long rightToWorkId = rightToWorkDTO.getId();
+    if (rightToWorkId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating a right to work")).body(null);
     }
+    RightToWorkDTO originalDto = rightToWorkService.findOne(rightToWorkId);
+    rightToWorkValidator.validate(rightToWorkDTO, originalDto, Update.class);
     RightToWorkDTO result = rightToWorkService.save(rightToWorkDTO);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, rightToWorkDTO.getId().toString()))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, rightToWorkId.toString()))
         .body(result);
   }
 
