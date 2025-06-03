@@ -136,16 +136,17 @@ public class PersonResource {
       throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to save Person : {}", personDTO);
     if (personDTO.getId() != null) {
-      return ResponseEntity.badRequest().headers(HeaderUtil
-          .createFailureAlert(ENTITY_NAME, "idexists", "A new person cannot already have an ID"))
+      return ResponseEntity.badRequest().headers(
+          HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists",
+              "A new person cannot already have an ID"))
           .body(null);
     }
-    personValidator.validate(personDTO);
-    gmcDetailsValidator.validate(personDTO.getGmcDetails());
-    gdcDetailsValidator.validate(personDTO.getGdcDetails());
-    personalDetailsValidator.validate(personDTO.getPersonalDetails());
-    contactDetailsValidator.validate(personDTO.getContactDetails());
-    rightToWorkValidator.validate(personDTO.getRightToWork());
+    personValidator.validate(personDTO, null, Create.class);
+    gmcDetailsValidator.validate(personDTO.getGmcDetails(), null, Create.class);
+    gdcDetailsValidator.validate(personDTO.getGdcDetails(), null, Create.class);
+    personalDetailsValidator.validate(personDTO.getPersonalDetails(), null, Create.class);
+    contactDetailsValidator.validate(personDTO.getContactDetails(), null, Create.class);
+    rightToWorkValidator.validate(personDTO.getRightToWork(), null, Create.class);
 
     final PersonDTO result = personService.create(personDTO);
     return ResponseEntity.created(new URI("/api/people/" + result.getId()))
@@ -168,21 +169,27 @@ public class PersonResource {
       @RequestBody @Validated(Update.class) PersonDTO personDTO)
       throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
     log.debug("REST request to update Person : {}", personDTO);
-    if (personDTO.getId() == null) {
+    Long personId = personDTO.getId();
+    if (personId == null) {
       return createPerson(personDTO);
     }
-    personService.canLoggedInUserViewOrAmend(personDTO.getId());
-
-    personValidator.validate(personDTO);
-    gmcDetailsValidator.validate(personDTO.getGmcDetails());
-    gdcDetailsValidator.validate(personDTO.getGdcDetails());
-    personalDetailsValidator.validate(personDTO.getPersonalDetails());
-    contactDetailsValidator.validate(personDTO.getContactDetails());
-    rightToWorkValidator.validate(personDTO.getRightToWork());
+    personService.canLoggedInUserViewOrAmend(personId);
+    PersonDTO originalDto = personService.findOne(personId);
+    personValidator.validate(personDTO, originalDto, Update.class);
+    gmcDetailsValidator.validate(personDTO.getGmcDetails(), originalDto.getGmcDetails(),
+        Update.class);
+    gdcDetailsValidator.validate(personDTO.getGdcDetails(), originalDto.getGdcDetails(),
+        Update.class);
+    personalDetailsValidator.validate(personDTO.getPersonalDetails(),
+        originalDto.getPersonalDetails(), Update.class);
+    contactDetailsValidator.validate(personDTO.getContactDetails(), originalDto.getContactDetails(),
+        Update.class);
+    rightToWorkValidator.validate(personDTO.getRightToWork(), originalDto.getRightToWork(),
+        Update.class);
 
     PersonDTO result = personService.save(personDTO);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personDTO.getId().toString()))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personId.toString()))
         .body(result);
   }
 

@@ -69,7 +69,7 @@ public class GmcDetailsResource {
       @RequestBody @Validated(Create.class) GmcDetailsDTO gmcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save GmcDetails : {}", gmcDetailsDTO);
-    gmcDetailsValidator.validate(gmcDetailsDTO);
+    gmcDetailsValidator.validate(gmcDetailsDTO, null, Create.class);
     GmcDetailsDTO result = gmcDetailsService.save(gmcDetailsDTO);
     return ResponseEntity.created(new URI("/api/gmc-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -91,7 +91,8 @@ public class GmcDetailsResource {
       @RequestBody @Validated(Update.class) GmcDetailsDTO gmcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update GmcDetails : {}", gmcDetailsDTO);
-    gmcDetailsValidator.validate(gmcDetailsDTO);
+    GmcDetailsDTO originalDto = gmcDetailsService.findOne(gmcDetailsDTO.getId());
+    gmcDetailsValidator.validate(gmcDetailsDTO, originalDto, Update.class);
     if (gmcDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",

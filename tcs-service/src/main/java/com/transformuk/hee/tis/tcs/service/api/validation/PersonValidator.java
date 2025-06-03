@@ -4,6 +4,8 @@ import com.transformuk.hee.tis.reference.api.dto.RoleDTO;
 import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.service.api.util.FieldDiffUtil;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.repository.PersonRepository;
 import java.lang.reflect.Method;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,6 +37,8 @@ public class PersonValidator {
   private static final Logger LOGGER = LoggerFactory.getLogger(PersonValidator.class);
 
   private static final String PERSON_DTO_NAME = "PersonDTO";
+  protected static final String FIELD_NAME_ROLE = "role";
+  protected static final String FIELD_NAME_PH_NUMBER = "publicHealthNumber";
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
   private final PersonRepository personRepository;
@@ -66,15 +71,35 @@ public class PersonValidator {
    * Custom validation on the personDto DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the public health number unique check if it is
    * entered.
+   * Validation for update doesn't validate the values which are not changed.
    *
-   * @param personDto the person to check
+   * @param personDto      the person to check
+   * @param originalDto    the original person to update if validation type is Update,
+   *                       can be set to null if validation type is Create
+   * @param validationType the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(PersonDTO personDto) throws MethodArgumentNotValidException {
-    List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkMandatoryFields(personDto));
-    fieldErrors.addAll(checkRole(personDto));
-    fieldErrors.addAll(checkPublicHealthNumber(personDto));
+  public void validate(PersonDTO personDto, PersonDTO originalDto, Class<?> validationType)
+      throws MethodArgumentNotValidException {
+    List<FieldError> fieldErrors = new ArrayList<>(checkMandatoryFields(personDto));
+
+    Map<String, Function<PersonDTO, List<FieldError>>> validators = Map.of(
+        FIELD_NAME_ROLE, this::checkRole,
+        FIELD_NAME_PH_NUMBER, this::checkPublicHealthNumber
+    );
+
+    if (validationType.equals(Update.class)) {
+      Map<String, Object[]> diff = FieldDiffUtil.diff(personDto, originalDto);
+      validators.forEach((field, validator) -> {
+        if (diff.containsKey(field)) {
+          fieldErrors.addAll(validator.apply(personDto));
+        }
+      });
+    } else {
+      validators.values().forEach(validator ->
+          fieldErrors.addAll(validator.apply(personDto))
+      );
+    }
 
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(personDto,
@@ -152,7 +177,7 @@ public class PersonValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String publicHealthNumber = personDto.getPublicHealthNumber();
     if (StringUtils.containsWhitespace(publicHealthNumber)) {
-      fieldErrors.add(new FieldError(PERSON_DTO_NAME, "publicHealthNumber",
+      fieldErrors.add(new FieldError(PERSON_DTO_NAME, FIELD_NAME_PH_NUMBER,
           "publicHealthNumber should not contain any whitespaces"));
       return fieldErrors;
     }
@@ -172,7 +197,7 @@ public class PersonValidator {
 
       int existingSize = existingPersons.size();
       if (existingSize > 0) {
-        fieldErrors.add(new FieldError(PERSON_DTO_NAME, "publicHealthNumber",
+        fieldErrors.add(new FieldError(PERSON_DTO_NAME, FIELD_NAME_PH_NUMBER,
             String.format(
                 "publicHealthNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
                 personDto.getPublicHealthNumber(), existingSize > 1 ? "are" : "is", existingSize,
@@ -217,7 +242,7 @@ public class PersonValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String roles = personDto.getRole();
     if (roles == null || StringUtils.isEmpty(roles)) {
-      fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+      fieldErrors.add(new FieldError(PERSON_DTO_NAME, FIELD_NAME_ROLE,
           "Role is required."));
     }
     return fieldErrors;
@@ -249,7 +274,7 @@ public class PersonValidator {
 
       for (Entry<String, String> roleMatch : rolesMatch.entrySet()) {
         if (StringUtils.isEmpty(roleMatch.getValue())) {
-          fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+          fieldErrors.add(new FieldError(PERSON_DTO_NAME, FIELD_NAME_ROLE,
               String.format("Role '%s' did not match a reference value.", roleMatch.getKey())));
         }
       }
@@ -310,7 +335,7 @@ public class PersonValidator {
       boolean eligibleForTrainerApproval =
           roleDtos.stream().filter(roleDTO -> roleDTO.getRoleCategory().getId() != 3).count() > 0;
       if (!eligibleForTrainerApproval && !personDto.getTrainerApprovals().isEmpty()) {
-        fieldErrors.add(new FieldError(PERSON_DTO_NAME, "role",
+        fieldErrors.add(new FieldError(PERSON_DTO_NAME, FIELD_NAME_ROLE,
             "To have a Trainer Approval, the role should contain at least one of 'Educational supervisors/Clinical supervisors/Leave approvers' categories"));
       }
     }

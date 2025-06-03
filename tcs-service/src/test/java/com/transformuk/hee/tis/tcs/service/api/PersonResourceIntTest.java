@@ -29,6 +29,8 @@ import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -323,12 +325,12 @@ public class PersonResourceIntTest {
     assertThat(testPerson.getPublicHealthNumber()).isEqualTo(DEFAULT_PUBLIC_HEALTH_NUMBER);
     assertThat(testPerson.getRegulator()).isEqualTo(DEFAULT_REGULATOR);
 
-    verify(personValidatorSpy).validate(any(PersonDTO.class));
-    verify(gmcDetailsValidator).validate(any(GmcDetailsDTO.class));
-    verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class));
-    verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class));
-    verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class));
-    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class));
+    verify(personValidatorSpy).validate(any(PersonDTO.class), eq(null), eq(Create.class));
+    verify(gmcDetailsValidator).validate(any(GmcDetailsDTO.class), eq(null), eq(Create.class));
+    verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class), eq(null), eq(Create.class));
+    verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class), eq(null), eq(Create.class));
+    verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class), eq(null), eq(Create.class));
+    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class), eq(null), eq(Create.class));
   }
 
   @Test
@@ -711,12 +713,12 @@ public class PersonResourceIntTest {
     assertThat(testPerson.getPublicHealthNumber()).isEqualTo(UPDATED_PUBLIC_HEALTH_NUMBER);
     assertThat(testPerson.getRegulator()).isEqualTo(UPDATED_REGULATOR);
 
-    verify(personValidatorSpy).validate(any(PersonDTO.class));
-    verify(gmcDetailsValidator).validate(any(GmcDetailsDTO.class));
-    verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class));
-    verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class));
-    verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class));
-    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class));
+    verify(personValidatorSpy).validate(any(PersonDTO.class), any(PersonDTO.class), eq(Update.class));
+    verify(gmcDetailsValidator).validate(any(GmcDetailsDTO.class), any(GmcDetailsDTO.class), eq(Update.class));
+    verify(gdcDetailsValidator).validate(any(GdcDetailsDTO.class), any(GdcDetailsDTO.class), eq(Update.class));
+    verify(personalDetailsValidator).validate(any(PersonalDetailsDTO.class), any(PersonalDetailsDTO.class), eq(Update.class));
+    verify(contactDetailsValidator).validate(any(ContactDetailsDTO.class), any(ContactDetailsDTO.class), eq(Update.class));
+    verify(rightToWorkValidator).validate(any(RightToWorkDTO.class), any(RightToWorkDTO.class), eq(Update.class));
   }
 
   @Test

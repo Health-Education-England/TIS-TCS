@@ -69,7 +69,7 @@ public class GdcDetailsResource {
       @RequestBody @Validated(Create.class) GdcDetailsDTO gdcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to save GdcDetails : {}", gdcDetailsDTO);
-    gdcDetailsValidator.validate(gdcDetailsDTO);
+    gdcDetailsValidator.validate(gdcDetailsDTO, null, Create.class);
     GdcDetailsDTO result = gdcDetailsService.save(gdcDetailsDTO);
     return ResponseEntity.created(new URI("/api/gdc-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -91,7 +91,8 @@ public class GdcDetailsResource {
       @RequestBody @Validated(Update.class) GdcDetailsDTO gdcDetailsDTO)
       throws URISyntaxException, MethodArgumentNotValidException {
     log.debug("REST request to update GdcDetails : {}", gdcDetailsDTO);
-    gdcDetailsValidator.validate(gdcDetailsDTO);
+    GdcDetailsDTO originalDto = gdcDetailsService.findOne(gdcDetailsDTO.getId());
+    gdcDetailsValidator.validate(gdcDetailsDTO, originalDto, Update.class);
     if (gdcDetailsDTO.getId() == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",

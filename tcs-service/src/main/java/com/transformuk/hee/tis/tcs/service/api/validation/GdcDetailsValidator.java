@@ -3,11 +3,15 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.reference.api.dto.GdcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.service.api.util.FieldDiffUtil;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GdcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.repository.IdProjection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -23,11 +27,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class GdcDetailsValidator {
 
   private static final String GDC_DETAILS_DTO_NAME = "GdcDetailsDTO";
+  protected static final String FIELD_NAME_GDC_NUMBER = "gdcNumber";
+  protected static final String FIELD_NAME_GDC_STATUS = "gdcStatus";
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
 
-  private GdcDetailsRepository gdcDetailsRepository;
-  private ReferenceServiceImpl referenceService;
+  private final GdcDetailsRepository gdcDetailsRepository;
+  private final ReferenceServiceImpl referenceService;
 
   public GdcDetailsValidator(GdcDetailsRepository gdcDetailsRepository,
       ReferenceServiceImpl referenceService) {
@@ -38,20 +44,41 @@ public class GdcDetailsValidator {
   /**
    * Custom validation on the gdcDetailsDTO DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the gmc status if gdc number is entered.
+   * Validation for update doesn't validate the values which are not changed.
    *
-   * @param gdcDetailsDTO the gdcDetails to check
+   * @param gdcDetailsDto  the gdcDetails to check
+   * @param originalDto    the original gdcDetails to update if validation type is Update,
+   *                       can be set to null if validation type is Create
+   * @param validationType the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(GdcDetailsDTO gdcDetailsDTO) throws MethodArgumentNotValidException {
+  public void validate(GdcDetailsDTO gdcDetailsDto, GdcDetailsDTO originalDto,
+      Class<?> validationType) throws MethodArgumentNotValidException {
 
     final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-//    fieldErrors.addAll(checkGdcStatus(gdcDetailsDTO));
-    fieldErrors.addAll(checkGdcNumber(gdcDetailsDTO));
-    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDTO, currentOnly));
+
+    Map<String, Function<GdcDetailsDTO, List<FieldError>>> validators = Map.of(
+        FIELD_NAME_GDC_NUMBER, this::checkGdcNumber,
+        FIELD_NAME_GDC_STATUS, dto -> checkGdcStatusExists(dto, currentOnly)
+    );
+
+    if (validationType.equals(Update.class)) {
+      Map<String, Object[]> diff = FieldDiffUtil.diff(gdcDetailsDto, originalDto);
+      validators.forEach((field, validator) -> {
+        if (diff.containsKey(field)) {
+          fieldErrors.addAll(validator.apply(gdcDetailsDto));
+        }
+      });
+    } else {
+      validators.values().forEach(validator ->
+          fieldErrors.addAll(validator.apply(gdcDetailsDto))
+      );
+    }
+
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDTO,
-          "GdcDetailsDTO");
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gdcDetailsDto,
+          GDC_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
       throw new MethodArgumentNotValidException(null, bindingResult);
     }
@@ -67,7 +94,7 @@ public class GdcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gdcNumber = gdcDetailsDTO.getGdcNumber();
     if (StringUtils.containsWhitespace(gdcNumber)) {
-      fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+      fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, FIELD_NAME_GDC_NUMBER,
           "gdcNumber should not contain any whitespaces"));
       return fieldErrors;
     }
@@ -86,7 +113,7 @@ public class GdcDetailsValidator {
 
       int existingSize = existingGdcDetails.size();
       if (existingSize > 0) {
-        fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcNumber",
+        fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, FIELD_NAME_GDC_NUMBER,
             String.format(
                 "gdcNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
                 gdcDetailsDTO.getGdcNumber(), existingSize > 1 ? "are" : "is", existingSize,
@@ -106,7 +133,7 @@ public class GdcDetailsValidator {
       Boolean isExists = referenceService
           .isValueExists(GdcStatusDTO.class, gdcDetailsDto.getGdcStatus(), currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, "gdcStatus",
+        fieldErrors.add(new FieldError(GDC_DETAILS_DTO_NAME, FIELD_NAME_GDC_STATUS,
             String.format("gdcStatus %s does not exist", gdcDetailsDto.getGdcStatus())));
       }
     }
@@ -119,7 +146,7 @@ public class GdcDetailsValidator {
     boolean isGdcStatusPresent = StringUtils.isNotEmpty(gdcDetailsDTO.getGdcStatus());
     if (gdcDetailsDTO != null) {
       if (isGdcNumberPresent && !isGdcStatusPresent) {
-        requireFieldErrors(fieldErrors, "gdcStatus");
+        requireFieldErrors(fieldErrors, FIELD_NAME_GDC_STATUS);
       }
     }
     return fieldErrors;

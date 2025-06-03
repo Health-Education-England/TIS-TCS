@@ -3,11 +3,15 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.transformuk.hee.tis.reference.api.dto.GmcStatusDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.service.api.util.FieldDiffUtil;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
@@ -23,11 +27,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @Component
 public class GmcDetailsValidator {
 
+  protected static final String FIELD_NAME_GMC_NUMBER = "gmcNumber";
+  protected static final String FIELD_NAME_GMC_STATUS = "gmcStatus";
   private static final String GMC_DETAILS_DTO_NAME = "GmcDetailsDTO";
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
-  private GmcDetailsRepository gmcDetailsRepository;
-  private ReferenceServiceImpl referenceService;
+
+  private final GmcDetailsRepository gmcDetailsRepository;
+  private final ReferenceServiceImpl referenceService;
 
   public GmcDetailsValidator(GmcDetailsRepository gmcDetailsRepository,
       ReferenceServiceImpl referenceService) {
@@ -38,24 +45,46 @@ public class GmcDetailsValidator {
   /**
    * Custom validation on the gmcDetailsDTO DTO, this is meant to supplement the annotation based
    * validation already in place. It checks that the gmc status if gmc number is entered.
+   * Validation for update doesn't validate the values which are not changed.
    *
-   * @param gmcDetailsDTO the gmcDetails to check
+   * @param gmcDetailsDto  the gmcDetails to check
+   * @param originalDto    the original gmcDetails to update if validation type is Update,
+   *                       can be set to null if validation type is Create
+   * @param validationType the validation type
    * @throws MethodArgumentNotValidException if there are validation errors
    */
-  public void validate(GmcDetailsDTO gmcDetailsDTO) throws MethodArgumentNotValidException {
+  public void validate(GmcDetailsDTO gmcDetailsDto, GmcDetailsDTO originalDto,
+      Class<?> validationType) throws MethodArgumentNotValidException {
 
     final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-//    fieldErrors.addAll(checkGmcStatus(gmcDetailsDTO));
-    fieldErrors.addAll(checkGmcNumber(gmcDetailsDTO));
-    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDTO, currentOnly));
+
+    Map<String, Function<GmcDetailsDTO, List<FieldError>>> validators = Map.of(
+        FIELD_NAME_GMC_NUMBER, this::checkGmcNumber,
+        FIELD_NAME_GMC_STATUS, dto -> checkGmcStatusExists(dto, currentOnly)
+    );
+
+    if (validationType.equals(Update.class)) {
+      Map<String, Object[]> diff = FieldDiffUtil.diff(gmcDetailsDto, originalDto);
+      validators.forEach((field, validator) -> {
+        if (diff.containsKey(field)) {
+          fieldErrors.addAll(validator.apply(gmcDetailsDto));
+        }
+      });
+    } else {
+      validators.values().forEach(validator ->
+          fieldErrors.addAll(validator.apply(gmcDetailsDto))
+      );
+    }
+
     if (!fieldErrors.isEmpty()) {
-      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDTO,
-          "GmcDetailsDTO");
+      BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(gmcDetailsDto,
+          GMC_DETAILS_DTO_NAME);
       fieldErrors.forEach(bindingResult::addError);
 
       try {
-        Method method = this.getClass().getDeclaredMethod("validate", GmcDetailsDTO.class);
+        Method method = this.getClass()
+            .getDeclaredMethod("validate", GmcDetailsDTO.class, GmcDetailsDTO.class, Class.class);
         throw new MethodArgumentNotValidException(new MethodParameter(method, 0), bindingResult);
       } catch (NoSuchMethodException e) {
         // This should only happen if the method name is changed without updating the code.
@@ -74,7 +103,7 @@ public class GmcDetailsValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
     String gmcNumber = gmcDetailsDTO.getGmcNumber();
     if (StringUtils.containsWhitespace(gmcNumber)) {
-      fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
+      fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, FIELD_NAME_GMC_NUMBER,
           "gmcNumber should not contain any whitespaces"));
       return fieldErrors;
     }
@@ -94,7 +123,7 @@ public class GmcDetailsValidator {
 
       int existingSize = existingGmcDetails.size();
       if (existingSize > 0) {
-        fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcNumber",
+        fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, FIELD_NAME_GMC_NUMBER,
             String.format(
                 "gmcNumber %s is not unique, there %s currently %d %s with this number (Person ID: %s)",
                 gmcDetailsDTO.getGmcNumber(), existingSize > 1 ? "are" : "is", existingSize,
@@ -114,7 +143,7 @@ public class GmcDetailsValidator {
       Boolean isExists = referenceService
           .isValueExists(GmcStatusDTO.class, gmcDetailsDto.getGmcStatus(), currentOnly);
       if (!isExists) {
-        fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, "gmcStatus",
+        fieldErrors.add(new FieldError(GMC_DETAILS_DTO_NAME, FIELD_NAME_GMC_STATUS,
             String.format("gmcStatus %s does not exist", gmcDetailsDto.getGmcStatus())));
       }
     }
@@ -133,7 +162,7 @@ public class GmcDetailsValidator {
     boolean isGmcStatusPresent = StringUtils.isNotEmpty(gmcDetailsDTO.getGmcStatus());
     if (gmcDetailsDTO != null) {
       if (isGmcNumberPresent && !isGmcStatusPresent) {
-        requireFieldErrors(fieldErrors, "gmcStatus");
+        requireFieldErrors(fieldErrors, FIELD_NAME_GMC_STATUS);
       }
     }
     return fieldErrors;

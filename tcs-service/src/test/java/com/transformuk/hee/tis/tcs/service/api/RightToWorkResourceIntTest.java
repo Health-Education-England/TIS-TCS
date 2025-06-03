@@ -221,9 +221,11 @@ public class RightToWorkResourceIntTest {
     when(referenceService.isValueExists(PermitToWorkDTO.class, DEFAULT_PERMIT_TO_WORK, true))
         .thenReturn(false);
 
+    rightToWorkRepository.saveAndFlush(rightToWork);
+
     RightToWorkDTO rightToWorkDTO = new RightToWorkDTO();
     rightToWorkDTO.setId(1L);
-    rightToWorkDTO.setPermitToWork(DEFAULT_PERMIT_TO_WORK);
+    rightToWorkDTO.setPermitToWork(UPDATED_PERMIT_TO_WORK);
 
     //when & then
     restRightToWorkMockMvc.perform(put("/api/right-to-works")

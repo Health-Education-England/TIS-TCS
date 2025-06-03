@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
@@ -151,7 +153,8 @@ class TraineeMessageListenerTest {
 
     GmcDetailsProvidedEvent event = new GmcDetailsProvidedEvent(40L, gmcDetails);
 
-    doThrow(MethodArgumentNotValidException.class).when(gmcDetailsValidator).validate(any());
+    doThrow(MethodArgumentNotValidException.class).when(gmcDetailsValidator).validate(any(),
+        eq(null), eq(Create.class));
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveGmcDetailsProvidedMessage(event));
