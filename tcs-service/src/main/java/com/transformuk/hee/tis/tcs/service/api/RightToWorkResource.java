@@ -56,19 +56,19 @@ public class RightToWorkResource {
   /**
    * POST  /right-to-works : Create a new rightToWork.
    *
-   * @param rightToWorkDTO the rightToWorkDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new rightToWorkDTO, or
+   * @param rightToWorkDto the rightToWorkDto to create
+   * @return the ResponseEntity with status 201 (Created) and with body the new rightToWorkDto, or
    * with status 400 (Bad Request) if the rightToWork has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/right-to-works")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<RightToWorkDTO> createRightToWork(
-      @RequestBody @Validated(Create.class) RightToWorkDTO rightToWorkDTO)
+      @RequestBody @Validated(Create.class) RightToWorkDTO rightToWorkDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to save RightToWork : {}", rightToWorkDTO);
-    rightToWorkValidator.validate(rightToWorkDTO, null, Create.class);
-    RightToWorkDTO result = rightToWorkService.save(rightToWorkDTO);
+    log.debug("REST request to save RightToWork : {}", rightToWorkDto);
+    rightToWorkValidator.validate(rightToWorkDto, null, Create.class);
+    RightToWorkDTO result = rightToWorkService.save(rightToWorkDto);
     return ResponseEntity.created(new URI("/api/right-to-works/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -77,27 +77,27 @@ public class RightToWorkResource {
   /**
    * PUT  /right-to-works : Updates an existing rightToWork.
    *
-   * @param rightToWorkDTO the rightToWorkDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated rightToWorkDTO, or
-   * with status 400 (Bad Request) if the rightToWorkDTO is not valid, or with status 500 (Internal
-   * Server Error) if the rightToWorkDTO couldn't be updated
+   * @param rightToWorkDto the rightToWorkDto to update
+   * @return the ResponseEntity with status 200 (OK) and with body the updated rightToWorkDto, or
+   * with status 400 (Bad Request) if the rightToWorkDto is not valid, or with status 500 (Internal
+   * Server Error) if the rightToWorkDto couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/right-to-works")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<RightToWorkDTO> updateRightToWork(
-      @RequestBody @Validated(Update.class) RightToWorkDTO rightToWorkDTO)
+      @RequestBody @Validated(Update.class) RightToWorkDTO rightToWorkDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to update RightToWork : {}", rightToWorkDTO);
-    Long rightToWorkId = rightToWorkDTO.getId();
+    log.debug("REST request to update RightToWork : {}", rightToWorkDto);
+    Long rightToWorkId = rightToWorkDto.getId();
     if (rightToWorkId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating a right to work")).body(null);
     }
     RightToWorkDTO originalDto = rightToWorkService.findOne(rightToWorkId);
-    rightToWorkValidator.validate(rightToWorkDTO, originalDto, Update.class);
-    RightToWorkDTO result = rightToWorkService.save(rightToWorkDTO);
+    rightToWorkValidator.validate(rightToWorkDto, originalDto, Update.class);
+    RightToWorkDTO result = rightToWorkService.save(rightToWorkDto);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, rightToWorkId.toString()))
         .body(result);

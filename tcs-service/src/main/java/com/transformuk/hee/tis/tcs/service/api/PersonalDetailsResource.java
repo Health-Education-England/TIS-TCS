@@ -56,20 +56,20 @@ public class PersonalDetailsResource {
   /**
    * POST  /personal-details : Create a new personalDetails.
    *
-   * @param personalDetailsDTO the personalDetailsDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new personalDetailsDTO,
+   * @param personalDetailsDto the personalDetailsDto to create
+   * @return the ResponseEntity with status 201 (Created) and with body the new personalDetailsDto,
    * or with status 400 (Bad Request) if the personalDetails has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/personal-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<PersonalDetailsDTO> createPersonalDetails(
-      @RequestBody @Validated(Create.class) PersonalDetailsDTO personalDetailsDTO)
+      @RequestBody @Validated(Create.class) PersonalDetailsDTO personalDetailsDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to save PersonalDetails : {}", personalDetailsDTO);
+    log.debug("REST request to save PersonalDetails : {}", personalDetailsDto);
 
-    personalDetailsValidator.validate(personalDetailsDTO, null, Create.class);
-    PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDTO);
+    personalDetailsValidator.validate(personalDetailsDto, null, Create.class);
+    PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDto);
     return ResponseEntity.created(new URI("/api/personal-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -78,27 +78,27 @@ public class PersonalDetailsResource {
   /**
    * PUT  /personal-details : Updates an existing personalDetails.
    *
-   * @param personalDetailsDTO the personalDetailsDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated personalDetailsDTO,
-   * or with status 400 (Bad Request) if the personalDetailsDTO is not valid, or with status 500
-   * (Internal Server Error) if the personalDetailsDTO couldn't be updated
+   * @param personalDetailsDto the personalDetailsDto to update
+   * @return the ResponseEntity with status 200 (OK) and with body the updated personalDetailsDto,
+   * or with status 400 (Bad Request) if the personalDetailsDto is not valid, or with status 500
+   * (Internal Server Error) if the personalDetailsDto couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/personal-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<PersonalDetailsDTO> updatePersonalDetails(
-      @RequestBody @Validated(Update.class) PersonalDetailsDTO personalDetailsDTO)
+      @RequestBody @Validated(Update.class) PersonalDetailsDTO personalDetailsDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to update PersonalDetails : {}", personalDetailsDTO);
-    Long personalDetailsId = personalDetailsDTO.getId();
+    log.debug("REST request to update PersonalDetails : {}", personalDetailsDto);
+    Long personalDetailsId = personalDetailsDto.getId();
     if (personalDetailsId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating Personal details")).body(null);
     }
     PersonalDetailsDTO originalDto = personalDetailsService.findOne(personalDetailsId);
-    personalDetailsValidator.validate(personalDetailsDTO, originalDto, Update.class);
-    PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDTO);
+    personalDetailsValidator.validate(personalDetailsDto, originalDto, Update.class);
+    PersonalDetailsDTO result = personalDetailsService.save(personalDetailsDto);
     return ResponseEntity.ok()
         .headers(
             HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personalDetailsId.toString()))

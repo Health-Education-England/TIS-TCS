@@ -32,6 +32,14 @@ public class GdcDetailsValidator {
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
 
+  private static final boolean CURRENT_ONLY = true;
+
+  private final Map<String, Function<GdcDetailsDTO, List<FieldError>>> validators =
+      Map.of(
+          FIELD_NAME_GDC_NUMBER, this::checkGdcNumber,
+          FIELD_NAME_GDC_STATUS, dto -> checkGdcStatusExists(dto, CURRENT_ONLY)
+      );
+
   private final GdcDetailsRepository gdcDetailsRepository;
   private final ReferenceServiceImpl referenceService;
 
@@ -54,14 +62,7 @@ public class GdcDetailsValidator {
    */
   public void validate(GdcDetailsDTO gdcDetailsDto, GdcDetailsDTO originalDto,
       Class<?> validationType) throws MethodArgumentNotValidException {
-
-    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-
-    Map<String, Function<GdcDetailsDTO, List<FieldError>>> validators = Map.of(
-        FIELD_NAME_GDC_NUMBER, this::checkGdcNumber,
-        FIELD_NAME_GDC_STATUS, dto -> checkGdcStatusExists(dto, currentOnly)
-    );
 
     if (validationType.equals(Update.class)) {
       Map<String, Object[]> diff = FieldDiffUtil.diff(gdcDetailsDto, originalDto);
@@ -164,10 +165,9 @@ public class GdcDetailsValidator {
    * @return list of FieldErrors
    */
   public List<FieldError> validateForBulk(GdcDetailsDTO gdcDetailsDto) {
-    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkGdcNumber(gdcDetailsDto));
-    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDto, currentOnly));
+    fieldErrors.addAll(checkGdcStatusExists(gdcDetailsDto, CURRENT_ONLY));
     return fieldErrors;
   }
 }
