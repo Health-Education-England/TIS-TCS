@@ -56,20 +56,20 @@ public class ContactDetailsResource {
   /**
    * POST  /contact-details : Create a new contactDetails.
    *
-   * @param contactDetailsDTO the contactDetailsDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new contactDetailsDTO,
+   * @param contactDetailsDto the contactDetailsDto to create
+   * @return the ResponseEntity with status 201 (Created) and with body the new contactDetailsDto,
    * or with status 400 (Bad Request) if the contactDetails has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/contact-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<ContactDetailsDTO> createContactDetails(
-      @RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDTO)
+      @RequestBody @Validated(Create.class) ContactDetailsDTO contactDetailsDto)
       throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
-    log.debug("REST request to save ContactDetails : {}", contactDetailsDTO);
+    log.debug("REST request to save ContactDetails : {}", contactDetailsDto);
 
-    contactDetailsValidator.validate(contactDetailsDTO, null, Create.class);
-    ContactDetailsDTO result = contactDetailsService.save(contactDetailsDTO);
+    contactDetailsValidator.validate(contactDetailsDto, null, Create.class);
+    ContactDetailsDTO result = contactDetailsService.save(contactDetailsDto);
     return ResponseEntity.created(new URI("/api/contact-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -78,26 +78,26 @@ public class ContactDetailsResource {
   /**
    * PUT  /contact-details : Updates an existing contactDetails.
    *
-   * @param contactDetailsDTO the contactDetailsDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated contactDetailsDTO, or
-   * with status 400 (Bad Request) if the contactDetailsDTO is not valid, or with status 500
-   * (Internal Server Error) if the contactDetailsDTO couldn't be updated
+   * @param contactDetailsDto the contactDetailsDto to update
+   * @return the ResponseEntity with status 200 (OK) and with body the updated contactDetailsDto, or
+   * with status 400 (Bad Request) if the contactDetailsDto is not valid, or with status 500
+   * (Internal Server Error) if the contactDetailsDto couldn't be updated
    */
   @PutMapping("/contact-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<ContactDetailsDTO> updateContactDetails(
-      @RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDTO)
+      @RequestBody @Validated(Update.class) ContactDetailsDTO contactDetailsDto)
       throws MethodArgumentNotValidException, NoSuchMethodException {
-    log.debug("REST request to update ContactDetails : {}", contactDetailsDTO);
-    Long contactDetailsId = contactDetailsDTO.getId();
+    log.debug("REST request to update ContactDetails : {}", contactDetailsDto);
+    Long contactDetailsId = contactDetailsDto.getId();
     if (contactDetailsId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating contact details")).body(null);
     }
     ContactDetailsDTO originalDto = contactDetailsService.findOne(contactDetailsId);
-    contactDetailsValidator.validate(contactDetailsDTO, originalDto, Update.class);
-    ContactDetailsDTO result = contactDetailsService.save(contactDetailsDTO);
+    contactDetailsValidator.validate(contactDetailsDto, originalDto, Update.class);
+    ContactDetailsDTO result = contactDetailsService.save(contactDetailsDto);
     return ResponseEntity.ok()
         .headers(
             HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, contactDetailsId.toString()))

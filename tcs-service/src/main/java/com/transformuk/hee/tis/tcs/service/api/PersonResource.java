@@ -124,31 +124,31 @@ public class PersonResource {
   /**
    * POST  /people : Create a new person.
    *
-   * @param personDTO the personDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new personDTO, or with
+   * @param personDto the personDto to create
+   * @return the ResponseEntity with status 201 (Created) and with body the new personDto, or with
    *     status 400 (Bad Request) if the person has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/people")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<PersonDTO> createPerson(
-      @RequestBody @Validated(Create.class) final PersonDTO personDTO)
+      @RequestBody @Validated(Create.class) final PersonDTO personDto)
       throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
-    log.debug("REST request to save Person : {}", personDTO);
-    if (personDTO.getId() != null) {
+    log.debug("REST request to save Person : {}", personDto);
+    if (personDto.getId() != null) {
       return ResponseEntity.badRequest().headers(
           HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists",
               "A new person cannot already have an ID"))
           .body(null);
     }
-    personValidator.validate(personDTO, null, Create.class);
-    gmcDetailsValidator.validate(personDTO.getGmcDetails(), null, Create.class);
-    gdcDetailsValidator.validate(personDTO.getGdcDetails(), null, Create.class);
-    personalDetailsValidator.validate(personDTO.getPersonalDetails(), null, Create.class);
-    contactDetailsValidator.validate(personDTO.getContactDetails(), null, Create.class);
-    rightToWorkValidator.validate(personDTO.getRightToWork(), null, Create.class);
+    personValidator.validate(personDto, null, Create.class);
+    gmcDetailsValidator.validate(personDto.getGmcDetails(), null, Create.class);
+    gdcDetailsValidator.validate(personDto.getGdcDetails(), null, Create.class);
+    personalDetailsValidator.validate(personDto.getPersonalDetails(), null, Create.class);
+    contactDetailsValidator.validate(personDto.getContactDetails(), null, Create.class);
+    rightToWorkValidator.validate(personDto.getRightToWork(), null, Create.class);
 
-    final PersonDTO result = personService.create(personDTO);
+    final PersonDTO result = personService.create(personDto);
     return ResponseEntity.created(new URI("/api/people/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -157,37 +157,37 @@ public class PersonResource {
   /**
    * PUT  /people : Updates an existing person.
    *
-   * @param personDTO the personDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated personDTO, or with
-   *     status 400 (Bad Request) if the personDTO is not valid, or with status 500 (Internal Server
-   *     Error) if the personDTO couldn't be updated
+   * @param personDto the personDto to update
+   * @return the ResponseEntity with status 200 (OK) and with body the updated personDto, or with
+   *     status 400 (Bad Request) if the personDto is not valid, or with status 500 (Internal Server
+   *     Error) if the personDto couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/people")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<PersonDTO> updatePerson(
-      @RequestBody @Validated(Update.class) PersonDTO personDTO)
+      @RequestBody @Validated(Update.class) PersonDTO personDto)
       throws URISyntaxException, MethodArgumentNotValidException, NoSuchMethodException {
-    log.debug("REST request to update Person : {}", personDTO);
-    Long personId = personDTO.getId();
+    log.debug("REST request to update Person : {}", personDto);
+    Long personId = personDto.getId();
     if (personId == null) {
-      return createPerson(personDTO);
+      return createPerson(personDto);
     }
     personService.canLoggedInUserViewOrAmend(personId);
     PersonDTO originalDto = personService.findOne(personId);
-    personValidator.validate(personDTO, originalDto, Update.class);
-    gmcDetailsValidator.validate(personDTO.getGmcDetails(), originalDto.getGmcDetails(),
+    personValidator.validate(personDto, originalDto, Update.class);
+    gmcDetailsValidator.validate(personDto.getGmcDetails(), originalDto.getGmcDetails(),
         Update.class);
-    gdcDetailsValidator.validate(personDTO.getGdcDetails(), originalDto.getGdcDetails(),
+    gdcDetailsValidator.validate(personDto.getGdcDetails(), originalDto.getGdcDetails(),
         Update.class);
-    personalDetailsValidator.validate(personDTO.getPersonalDetails(),
+    personalDetailsValidator.validate(personDto.getPersonalDetails(),
         originalDto.getPersonalDetails(), Update.class);
-    contactDetailsValidator.validate(personDTO.getContactDetails(), originalDto.getContactDetails(),
+    contactDetailsValidator.validate(personDto.getContactDetails(), originalDto.getContactDetails(),
         Update.class);
-    rightToWorkValidator.validate(personDTO.getRightToWork(), originalDto.getRightToWork(),
+    rightToWorkValidator.validate(personDto.getRightToWork(), originalDto.getRightToWork(),
         Update.class);
 
-    PersonDTO result = personService.save(personDTO);
+    PersonDTO result = personService.save(personDto);
     return ResponseEntity.ok()
         .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, personId.toString()))
         .body(result);

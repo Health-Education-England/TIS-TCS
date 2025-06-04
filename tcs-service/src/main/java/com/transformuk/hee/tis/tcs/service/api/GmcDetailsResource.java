@@ -58,19 +58,19 @@ public class GmcDetailsResource {
   /**
    * POST  /gmc-details : Create a new gmcDetails.
    *
-   * @param gmcDetailsDTO the gmcDetailsDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new gmcDetailsDTO, or
+   * @param gmcDetailsDto the gmcDetailsDto to create
+   * @return the ResponseEntity with status 201 (Created) and with body the new gmcDetailsDto, or
    * with status 400 (Bad Request) if the gmcDetails has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/gmc-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<GmcDetailsDTO> createGmcDetails(
-      @RequestBody @Validated(Create.class) GmcDetailsDTO gmcDetailsDTO)
+      @RequestBody @Validated(Create.class) GmcDetailsDTO gmcDetailsDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to save GmcDetails : {}", gmcDetailsDTO);
-    gmcDetailsValidator.validate(gmcDetailsDTO, null, Create.class);
-    GmcDetailsDTO result = gmcDetailsService.save(gmcDetailsDTO);
+    log.debug("REST request to save GmcDetails : {}", gmcDetailsDto);
+    gmcDetailsValidator.validate(gmcDetailsDto, null, Create.class);
+    GmcDetailsDTO result = gmcDetailsService.save(gmcDetailsDto);
     return ResponseEntity.created(new URI("/api/gmc-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -79,28 +79,29 @@ public class GmcDetailsResource {
   /**
    * PUT  /gmc-details : Updates an existing gmcDetails.
    *
-   * @param gmcDetailsDTO the gmcDetailsDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated gmcDetailsDTO, or
-   * with status 400 (Bad Request) if the gmcDetailsDTO is not valid, or with status 500 (Internal
-   * Server Error) if the gmcDetailsDTO couldn't be updated
+   * @param gmcDetailsDto the gmcDetailsDto to update
+   * @return the ResponseEntity with status 200 (OK) and with body the updated gmcDetailsDto, or
+   * with status 400 (Bad Request) if the gmcDetailsDto is not valid, or with status 500 (Internal
+   * Server Error) if the gmcDetailsDto couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/gmc-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<GmcDetailsDTO> updateGmcDetails(
-      @RequestBody @Validated(Update.class) GmcDetailsDTO gmcDetailsDTO)
+      @RequestBody @Validated(Update.class) GmcDetailsDTO gmcDetailsDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to update GmcDetails : {}", gmcDetailsDTO);
-    GmcDetailsDTO originalDto = gmcDetailsService.findOne(gmcDetailsDTO.getId());
-    gmcDetailsValidator.validate(gmcDetailsDTO, originalDto, Update.class);
-    if (gmcDetailsDTO.getId() == null) {
+    log.debug("REST request to update GmcDetails : {}", gmcDetailsDto);
+    Long gmcDetailsId = gmcDetailsDto.getId();
+    if (gmcDetailsId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating GMC details")).body(null);
     }
-    GmcDetailsDTO result = gmcDetailsService.save(gmcDetailsDTO);
+    GmcDetailsDTO originalDto = gmcDetailsService.findOne(gmcDetailsId);
+    gmcDetailsValidator.validate(gmcDetailsDto, originalDto, Update.class);
+    GmcDetailsDTO result = gmcDetailsService.save(gmcDetailsDto);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, gmcDetailsDTO.getId().toString()))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, gmcDetailsId.toString()))
         .body(result);
   }
 

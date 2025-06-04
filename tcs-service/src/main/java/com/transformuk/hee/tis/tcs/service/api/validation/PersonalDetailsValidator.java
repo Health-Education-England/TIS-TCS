@@ -42,6 +42,19 @@ public class PersonalDetailsValidator {
   protected static final String FIELD_NAME_RELIGIOUS_BELIEF = "religiousBelief";
   protected static final String FIELD_NAME_DISABILITY = "disability";
 
+  private static final boolean CURRENT_ONLY = true;
+
+  private final Map<String, Function<PersonalDetailsDTO, List<FieldError>>> validators = Map.of(
+      FIELD_NAME_GENDER, dto -> checkGender(dto, CURRENT_ONLY),
+      FIELD_NAME_NATIONALITY, dto -> checkNationality(dto, CURRENT_ONLY),
+      FIELD_NAME_DUAL_NATIONALITY, dto -> checkDualNationality(dto, CURRENT_ONLY),
+      FIELD_NAME_ETHNIC_ORIGIN, dto -> checkEthnicOrigin(dto, CURRENT_ONLY),
+      FIELD_NAME_MARITAL_STATUS, dto -> checkMaritalStatus(dto, CURRENT_ONLY),
+      FIELD_NAME_SEXUAL_ORIENTATION, dto -> checkSexualOrientation(dto, CURRENT_ONLY),
+      FIELD_NAME_RELIGIOUS_BELIEF, dto -> checkReligiousBelief(dto, CURRENT_ONLY),
+      FIELD_NAME_DISABILITY, this::checkDisability
+  );
+
   private final ReferenceServiceImpl referenceService;
 
   public PersonalDetailsValidator(ReferenceServiceImpl referenceService) {
@@ -61,19 +74,7 @@ public class PersonalDetailsValidator {
    */
   public void validate(PersonalDetailsDTO personalDetailsDto, PersonalDetailsDTO originalDto,
       Class<?> validationType) throws MethodArgumentNotValidException {
-    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-
-    Map<String, Function<PersonalDetailsDTO, List<FieldError>>> validators = Map.of(
-        FIELD_NAME_GENDER, dto -> checkGender(dto, currentOnly),
-        FIELD_NAME_NATIONALITY, dto -> checkNationality(dto, currentOnly),
-        FIELD_NAME_DUAL_NATIONALITY, dto -> checkDualNationality(dto, currentOnly),
-        FIELD_NAME_ETHNIC_ORIGIN, dto -> checkEthnicOrigin(dto, currentOnly),
-        FIELD_NAME_MARITAL_STATUS, dto -> checkMaritalStatus(dto, currentOnly),
-        FIELD_NAME_SEXUAL_ORIENTATION, dto -> checkSexualOrientation(dto, currentOnly),
-        FIELD_NAME_RELIGIOUS_BELIEF, dto -> checkReligiousBelief(dto, currentOnly),
-        FIELD_NAME_DISABILITY, this::checkDisability
-    );
 
     if (validationType.equals(Update.class)) {
       Map<String, Object[]> diff = FieldDiffUtil.diff(personalDetailsDto, originalDto);
@@ -232,15 +233,14 @@ public class PersonalDetailsValidator {
    * @return list of FieldErrors
    */
   public List<FieldError> validateForBulk(PersonalDetailsDTO personalDetailsDto) {
-    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkGender(personalDetailsDto, currentOnly));
-    fieldErrors.addAll(checkNationality(personalDetailsDto, currentOnly));
+    fieldErrors.addAll(checkGender(personalDetailsDto, CURRENT_ONLY));
+    fieldErrors.addAll(checkNationality(personalDetailsDto, CURRENT_ONLY));
     fieldErrors.addAll(checkDisability(personalDetailsDto));
-    fieldErrors.addAll(checkEthnicOrigin(personalDetailsDto, currentOnly));
-    fieldErrors.addAll(checkMaritalStatus(personalDetailsDto, currentOnly));
-    fieldErrors.addAll(checkSexualOrientation(personalDetailsDto, currentOnly));
-    fieldErrors.addAll(checkReligiousBelief(personalDetailsDto, currentOnly));
+    fieldErrors.addAll(checkEthnicOrigin(personalDetailsDto, CURRENT_ONLY));
+    fieldErrors.addAll(checkMaritalStatus(personalDetailsDto, CURRENT_ONLY));
+    fieldErrors.addAll(checkSexualOrientation(personalDetailsDto, CURRENT_ONLY));
+    fieldErrors.addAll(checkReligiousBelief(personalDetailsDto, CURRENT_ONLY));
 
     return fieldErrors;
   }

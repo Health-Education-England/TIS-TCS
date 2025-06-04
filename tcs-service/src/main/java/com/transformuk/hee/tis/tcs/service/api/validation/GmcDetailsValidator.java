@@ -33,6 +33,14 @@ public class GmcDetailsValidator {
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
 
+  private static final boolean CURRENT_ONLY = true;
+
+  private final Map<String, Function<GmcDetailsDTO, List<FieldError>>> validators =
+      Map.of(
+          FIELD_NAME_GMC_NUMBER, this::checkGmcNumber,
+          FIELD_NAME_GMC_STATUS, dto -> checkGmcStatusExists(dto, CURRENT_ONLY)
+      );
+
   private final GmcDetailsRepository gmcDetailsRepository;
   private final ReferenceServiceImpl referenceService;
 
@@ -55,14 +63,7 @@ public class GmcDetailsValidator {
    */
   public void validate(GmcDetailsDTO gmcDetailsDto, GmcDetailsDTO originalDto,
       Class<?> validationType) throws MethodArgumentNotValidException {
-
-    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-
-    Map<String, Function<GmcDetailsDTO, List<FieldError>>> validators = Map.of(
-        FIELD_NAME_GMC_NUMBER, this::checkGmcNumber,
-        FIELD_NAME_GMC_STATUS, dto -> checkGmcStatusExists(dto, currentOnly)
-    );
 
     if (validationType.equals(Update.class)) {
       Map<String, Object[]> diff = FieldDiffUtil.diff(gmcDetailsDto, originalDto);
@@ -180,10 +181,9 @@ public class GmcDetailsValidator {
    * @return list of FieldErrors
    */
   public List<FieldError> validateForBulk(GmcDetailsDTO gmcDetailsDto) {
-    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
     fieldErrors.addAll(checkGmcNumber(gmcDetailsDto));
-    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDto, currentOnly));
+    fieldErrors.addAll(checkGmcStatusExists(gmcDetailsDto, CURRENT_ONLY));
     return fieldErrors;
   }
 }

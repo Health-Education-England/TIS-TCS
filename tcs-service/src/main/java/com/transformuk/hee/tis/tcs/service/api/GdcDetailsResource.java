@@ -58,19 +58,19 @@ public class GdcDetailsResource {
   /**
    * POST  /gdc-details : Create a new gdcDetails.
    *
-   * @param gdcDetailsDTO the gdcDetailsDTO to create
-   * @return the ResponseEntity with status 201 (Created) and with body the new gdcDetailsDTO, or
+   * @param gdcDetailsDto the gdcDetailsDto to create
+   * @return the ResponseEntity with status 201 (Created) and with body the new gdcDetailsDto, or
    * with status 400 (Bad Request) if the gdcDetails has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/gdc-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Create')")
   public ResponseEntity<GdcDetailsDTO> createGdcDetails(
-      @RequestBody @Validated(Create.class) GdcDetailsDTO gdcDetailsDTO)
+      @RequestBody @Validated(Create.class) GdcDetailsDTO gdcDetailsDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to save GdcDetails : {}", gdcDetailsDTO);
-    gdcDetailsValidator.validate(gdcDetailsDTO, null, Create.class);
-    GdcDetailsDTO result = gdcDetailsService.save(gdcDetailsDTO);
+    log.debug("REST request to save GdcDetails : {}", gdcDetailsDto);
+    gdcDetailsValidator.validate(gdcDetailsDto, null, Create.class);
+    GdcDetailsDTO result = gdcDetailsService.save(gdcDetailsDto);
     return ResponseEntity.created(new URI("/api/gdc-details/" + result.getId()))
         .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
         .body(result);
@@ -79,28 +79,29 @@ public class GdcDetailsResource {
   /**
    * PUT  /gdc-details : Updates an existing gdcDetails.
    *
-   * @param gdcDetailsDTO the gdcDetailsDTO to update
-   * @return the ResponseEntity with status 200 (OK) and with body the updated gdcDetailsDTO, or
-   * with status 400 (Bad Request) if the gdcDetailsDTO is not valid, or with status 500 (Internal
-   * Server Error) if the gdcDetailsDTO couldn't be updated
+   * @param gdcDetailsDto the gdcDetailsDto to update
+   * @return the ResponseEntity with status 200 (OK) and with body the updated gdcDetailsDto, or
+   * with status 400 (Bad Request) if the gdcDetailsDto is not valid, or with status 500 (Internal
+   * Server Error) if the gdcDetailsDto couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/gdc-details")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
   public ResponseEntity<GdcDetailsDTO> updateGdcDetails(
-      @RequestBody @Validated(Update.class) GdcDetailsDTO gdcDetailsDTO)
+      @RequestBody @Validated(Update.class) GdcDetailsDTO gdcDetailsDto)
       throws URISyntaxException, MethodArgumentNotValidException {
-    log.debug("REST request to update GdcDetails : {}", gdcDetailsDTO);
-    GdcDetailsDTO originalDto = gdcDetailsService.findOne(gdcDetailsDTO.getId());
-    gdcDetailsValidator.validate(gdcDetailsDTO, originalDto, Update.class);
-    if (gdcDetailsDTO.getId() == null) {
+    log.debug("REST request to update GdcDetails : {}", gdcDetailsDto);
+    Long gdcDetailsId = gdcDetailsDto.getId();
+    if (gdcDetailsId == null) {
       return ResponseEntity.badRequest()
           .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "must_provide_id",
               "You must provide an ID when updating GDC details")).body(null);
     }
-    GdcDetailsDTO result = gdcDetailsService.save(gdcDetailsDTO);
+    GdcDetailsDTO originalDto = gdcDetailsService.findOne(gdcDetailsId);
+    gdcDetailsValidator.validate(gdcDetailsDto, originalDto, Update.class);
+    GdcDetailsDTO result = gdcDetailsService.save(gdcDetailsDto);
     return ResponseEntity.ok()
-        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, gdcDetailsDTO.getId().toString()))
+        .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, gdcDetailsId.toString()))
         .body(result);
   }
 

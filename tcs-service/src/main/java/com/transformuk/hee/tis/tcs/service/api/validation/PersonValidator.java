@@ -41,6 +41,13 @@ public class PersonValidator {
   protected static final String FIELD_NAME_PH_NUMBER = "publicHealthNumber";
   private static final String NA = "N/A";
   private static final String UNKNOWN = "UNKNOWN";
+
+  private final Map<String, Function<PersonDTO, List<FieldError>>> validators =
+      Map.of(
+          FIELD_NAME_ROLE, this::checkRole,
+          FIELD_NAME_PH_NUMBER, this::checkPublicHealthNumber
+      );
+
   private final PersonRepository personRepository;
   private final ReferenceService referenceService;
   private final ContactDetailsValidator contactDetailsValidator;
@@ -82,11 +89,6 @@ public class PersonValidator {
   public void validate(PersonDTO personDto, PersonDTO originalDto, Class<?> validationType)
       throws MethodArgumentNotValidException {
     List<FieldError> fieldErrors = new ArrayList<>(checkMandatoryFields(personDto));
-
-    Map<String, Function<PersonDTO, List<FieldError>>> validators = Map.of(
-        FIELD_NAME_ROLE, this::checkRole,
-        FIELD_NAME_PH_NUMBER, this::checkPublicHealthNumber
-    );
 
     if (validationType.equals(Update.class)) {
       Map<String, Object[]> diff = FieldDiffUtil.diff(personDto, originalDto);

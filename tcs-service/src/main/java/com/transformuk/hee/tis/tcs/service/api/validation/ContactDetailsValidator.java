@@ -44,6 +44,14 @@ public class ContactDetailsValidator {
   private static final String REGEX_PHONE_ERROR =
       "Only numerical values allowed for %s, no special characters, with the exception of plus, minus and spaces.";
 
+  private static final boolean CURRENT_ONLY = true;
+
+  private final Map<String, Function<ContactDetailsDTO, List<FieldError>>> validators =
+      Map.of(
+          FIELD_NAME_TITLE, dto -> checkTitle(dto, CURRENT_ONLY),
+          FIELD_NAME_EMAIL, this::checkEmail
+      );
+
   private final ReferenceServiceImpl referenceService;
   private final ContactDetailsRepository contactDetailsRepository;
 
@@ -68,12 +76,6 @@ public class ContactDetailsValidator {
       Class<?> validationType) throws MethodArgumentNotValidException, NoSuchMethodException {
 
     List<FieldError> fieldErrors = new ArrayList<>();
-    final boolean currentOnly = true;
-
-    Map<String, Function<ContactDetailsDTO, List<FieldError>>> validators = Map.of(
-        FIELD_NAME_TITLE, dto -> checkTitle(dto, currentOnly),
-        FIELD_NAME_EMAIL, this::checkEmail
-    );
 
     if (validationType.equals(Update.class)) {
       Map<String, Object[]> diff = FieldDiffUtil.diff(contactDetailsDto, originalDto);
@@ -264,9 +266,8 @@ public class ContactDetailsValidator {
    * @return list of FieldErrors
    */
   public List<FieldError> validateForBulk(ContactDetailsDTO dto) {
-    final boolean currentOnly = true;
     List<FieldError> fieldErrors = new ArrayList<>();
-    fieldErrors.addAll(checkTitle(dto, currentOnly));
+    fieldErrors.addAll(checkTitle(dto, CURRENT_ONLY));
     fieldErrors.addAll(checkForenames(dto));
     fieldErrors.addAll(checkSurname(dto));
     fieldErrors.addAll(checkKnownAs(dto));
