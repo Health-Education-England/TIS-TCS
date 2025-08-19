@@ -119,6 +119,30 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     ProgrammeMembership programmeMembership
         = programmeMembershipMapper.toEntity(programmeMembershipDto);
 
+    if (programmeMembershipDto.getCurriculumMemberships() != null) {
+      for (CurriculumMembershipDTO cmDto : programmeMembershipDto.getCurriculumMemberships()) {
+        if (cmDto.getId() != null) {
+          CurriculumMembership existingCm = curriculumMembershipRepository.findById(cmDto.getId())
+              .orElseThrow(() -> new RuntimeException("Curriculum membership not found: " + cmDto.getId()));
+
+          // check if this CM is already attached to another ProgrammeMembership
+          Optional<ProgrammeMembership> existingPmOpt = programmeMembershipRepository.findByCurriculumMembershipId(existingCm.getId());
+          if (existingPmOpt.isPresent()) {
+            ProgrammeMembership existingPm = existingPmOpt.get();
+
+            // if the existing PM is different from the one we're trying to save, throw error
+            if (programmeMembershipDto.getUuid() == null ||
+                !programmeMembershipDto.getUuid().equals(existingPm.getUuid())) {
+              throw new RuntimeException("Curriculum membership already assigned. Please reload the page.");
+            }
+          }
+
+          // attach the managed CM entity to the programme membership
+          programmeMembership.getCurriculumMemberships().add(existingCm);
+        }
+      }
+    }
+
     programmeMembership = programmeMembershipRepository.save(programmeMembership);
 
     ProgrammeMembershipDTO programmeMembershipSavedDto
