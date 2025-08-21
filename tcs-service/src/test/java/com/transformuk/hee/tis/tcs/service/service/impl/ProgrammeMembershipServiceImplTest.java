@@ -603,13 +603,22 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(curriculum2.getId(), pmc2.getCurriculumDTO().getId());
   }
 
-  @Ignore("Ignored for now, will fix once the new logic works out")
   @Test
   public void shouldSaveProgrammeMembershipDtoToRepository() {
     //given
     when(programmeMembershipRepositoryMock.save(any()))
         .thenReturn(programmeMembership1);
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
+
+    CurriculumMembership cm1 = new CurriculumMembership();
+    cm1.setId(CURRICULUM_MEMBERSHIP_ID_1);
+    CurriculumMembership cm2 = new CurriculumMembership();
+    cm2.setId(CURRICULUM_MEMBERSHIP_ID_2);
+
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(cm1));
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_2))
+        .thenReturn(Optional.of(cm2));
 
     //when
     ProgrammeMembershipDTO programmeMembershipDTO = testObj.save(programmeMembershipDto1);
@@ -623,45 +632,49 @@ public class ProgrammeMembershipServiceImplTest {
   }
 
   @Test
-  public void shouldSaveWithoutErrorWhenExistingCMAndTheyAreFetchedAndAttached() {
+  public void shouldSaveWithoutErrorWhenExistingCmAlreadyAttachedToSamePM() {
+    UUID pmUuid = UUID.fromString("123e4567-e89b-12d3-a456-aaaaa");
     Long cmId = 1L;
+
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setId(cmId);
 
     ProgrammeMembershipDTO requestDto = new ProgrammeMembershipDTO();
-    requestDto.setUuid(UUID.fromString("123e4567-e89b-12d3-a456-aaaaa"));
+    requestDto.setUuid(pmUuid);
     requestDto.setPerson(personDto);
     requestDto.setCurriculumMemberships(List.of(cmDto));
 
+    // existing CM in DB already linked to the same PM
     CurriculumMembership existingCm = new CurriculumMembership();
     existingCm.setId(cmId);
 
+    ProgrammeMembership existingPm = new ProgrammeMembership();
+    existingPm.setUuid(pmUuid);
+    existingCm.setProgrammeMembership(existingPm);
+
     when(curriculumMembershipRepositoryMock.findById(cmId))
         .thenReturn(Optional.of(existingCm));
-
-    when(programmeMembershipRepositoryMock.save(any(ProgrammeMembership.class)))
+    when(programmeMembershipRepositoryMock.save(any()))
         .thenAnswer(inv -> inv.getArgument(0));
 
-    Person personMock = mock(Person.class);
-    when(personMock.programmeMembershipsStatus()).thenReturn(Status.CURRENT);
-    when(personMock.getStatus()).thenReturn(Status.CURRENT);
-
-    when(personRepositoryMock.getOne(personDto.getId())).thenReturn(personMock);
+    Person managedPerson = new Person();
+    managedPerson.setId(personDto.getId());
+    managedPerson.setStatus(Status.CURRENT);
+    when(personRepositoryMock.getOne(personDto.getId()))
+        .thenReturn(managedPerson);
 
     ProgrammeMembershipDTO result = testObj.save(requestDto);
 
-    verify(curriculumMembershipRepositoryMock).findById(cmId);
-    verify(programmeMembershipRepositoryMock).save(any(ProgrammeMembership.class));
-    verify(personRepositoryMock).getOne(personDto.getId());
-
     assertNotNull(result);
-    assertEquals(requestDto.getUuid(), result.getUuid());
-    assertEquals(requestDto.getPerson().getId(), result.getPerson().getId());
+    assertEquals(pmUuid, result.getUuid());
+    verify(programmeMembershipRepositoryMock).save(any());
+    verify(personRepositoryMock).getOne(personDto.getId());
   }
 
   @Test
   public void shouldThrowExceptionWhenCurriculumMembershipAlreadyAttachedToAnotherPM() {
     Long cmId = 1L;
+
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setId(cmId);
 
@@ -670,17 +683,16 @@ public class ProgrammeMembershipServiceImplTest {
     requestDto.setPerson(personDto);
     requestDto.setCurriculumMemberships(List.of(cmDto));
 
-    CurriculumMembership existingCm = new CurriculumMembership();
-    existingCm.setId(cmId);
-
-    when(curriculumMembershipRepositoryMock.findById(cmId))
-        .thenReturn(Optional.of(existingCm));
-
+    // existing CurriculumMembership linked to a different ProgrammeMembership
     ProgrammeMembership anotherPm = new ProgrammeMembership();
     anotherPm.setUuid(UUID.fromString("999e4567-e89b-12d3-a456-bbbbb"));
 
-    when(programmeMembershipRepositoryMock.findByCurriculumMembershipId(cmId))
-        .thenReturn(Optional.of(anotherPm));
+    CurriculumMembership existingCm = new CurriculumMembership();
+    existingCm.setId(cmId);
+    existingCm.setProgrammeMembership(anotherPm);
+
+    when(curriculumMembershipRepositoryMock.findById(cmId))
+        .thenReturn(Optional.of(existingCm));
 
     RuntimeException ex = assertThrows(RuntimeException.class, () -> {
       testObj.save(requestDto);
