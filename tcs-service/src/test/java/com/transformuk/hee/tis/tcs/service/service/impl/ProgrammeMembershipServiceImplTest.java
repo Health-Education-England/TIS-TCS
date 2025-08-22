@@ -610,15 +610,10 @@ public class ProgrammeMembershipServiceImplTest {
         .thenReturn(programmeMembership1);
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
 
-    CurriculumMembership cm1 = new CurriculumMembership();
-    cm1.setId(CURRICULUM_MEMBERSHIP_ID_1);
-    CurriculumMembership cm2 = new CurriculumMembership();
-    cm2.setId(CURRICULUM_MEMBERSHIP_ID_2);
-
     when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_1))
-        .thenReturn(Optional.of(cm1));
+        .thenReturn(Optional.of(curriculumMembership1));
     when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_2))
-        .thenReturn(Optional.of(cm2));
+        .thenReturn(Optional.of(curriculumMembership2));
 
     //when
     ProgrammeMembershipDTO programmeMembershipDTO = testObj.save(programmeMembershipDto1);
@@ -779,11 +774,15 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(1, returnDto.getMessageList().size());
   }
 
-  @Ignore("Ignored for now, will fix once the new logic works out")
   @Test
   public void shouldPatchProgrammeMembership() {
     ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
     dto.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
+
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_1))
+       .thenReturn(Optional.of(curriculumMembership1));
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_2))
+        .thenReturn(Optional.of(curriculumMembership2));
 
     when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
         .thenReturn(Optional.of(programmeMembership1));
