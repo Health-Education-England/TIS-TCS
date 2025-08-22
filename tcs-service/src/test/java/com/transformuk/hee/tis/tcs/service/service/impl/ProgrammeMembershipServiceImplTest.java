@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,6 +26,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.exception.DuplicateCurriculumMembershipException;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -64,7 +64,6 @@ import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -689,7 +688,7 @@ public class ProgrammeMembershipServiceImplTest {
     when(curriculumMembershipRepositoryMock.findById(cmId))
         .thenReturn(Optional.of(existingCm));
 
-    RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+    RuntimeException ex = assertThrows(DuplicateCurriculumMembershipException.class, () -> {
       testObj.save(requestDto);
     });
 

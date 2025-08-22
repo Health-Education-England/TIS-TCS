@@ -12,6 +12,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
+import com.transformuk.hee.tis.tcs.service.exception.DuplicateCurriculumMembershipException;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -123,14 +124,15 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
       for (CurriculumMembershipDTO cmDto : programmeMembershipDto.getCurriculumMemberships()) {
         if (cmDto.getId() != null) {
           CurriculumMembership existingCm = curriculumMembershipRepository.findById(cmDto.getId())
-              .orElseThrow(() -> new RuntimeException("Curriculum membership not found: " + cmDto.getId()));
+              .orElseThrow(
+                  () -> new RuntimeException("Curriculum membership not found: " + cmDto.getId()));
 
           // check if this CM is already attached to another ProgrammeMembership
           ProgrammeMembership existingPm = existingCm.getProgrammeMembership();
-          if (existingPm != null &&
-              (programmeMembershipDto.getUuid() == null ||
-                  !programmeMembershipDto.getUuid().equals(existingPm.getUuid()))) {
-            throw new RuntimeException(
+          if (existingPm != null
+              && (programmeMembershipDto.getUuid() == null
+              || !programmeMembershipDto.getUuid().equals(existingPm.getUuid()))) {
+            throw new DuplicateCurriculumMembershipException(
                 "Curriculum membership already assigned. Please reload the page.");
           }
 
