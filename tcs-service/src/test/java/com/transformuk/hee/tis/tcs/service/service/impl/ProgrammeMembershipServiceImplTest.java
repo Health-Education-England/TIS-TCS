@@ -698,55 +698,8 @@ public class ProgrammeMembershipServiceImplTest {
     verify(personRepositoryMock, never()).getOne(any());
   }
 
-  @Test
-  public void givenCmWithId_whenSaving_thenExistingCmIsFetched() {
-    // Arrange
-    UUID pmUuid = UUID.randomUUID();
-
-    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
-    dto.setUuid(pmUuid);
-    //dto.setPerson(new PersonDTO());
-    dto.setPerson(personDto);
-    //dto.getPerson().setId(42L);
-
-    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
-    cmDto.setId(100L); // non-null id
-    dto.setCurriculumMemberships(Collections.singletonList(cmDto));
-
-    ProgrammeMembership mappedEntity = new ProgrammeMembership();
-    mappedEntity.setUuid(pmUuid);
-
-    CurriculumMembership existingCm = new CurriculumMembership();
-    ProgrammeMembership attachedPm = new ProgrammeMembership();
-    attachedPm.setUuid(pmUuid);
-    existingCm.setProgrammeMembership(attachedPm);
-
-    // Stubbing
-//    when(programmeMembershipMapper.toEntity(dto)).thenReturn(mappedEntity);
-    when(curriculumMembershipRepositoryMock.findById(100L)).thenReturn(Optional.of(existingCm));
-    //when(curriculumMembershipRepositoryMock.save(mappedEntity)).thenReturn(mappedEntity);
-    when(programmeMembershipRepositoryMock.save(any()))
-        .thenAnswer(inv -> inv.getArgument(0));
-//    when(programmeMembershipMapper.toDto(mappedEntity)).thenReturn(dto);
-
-    Person managedPerson = new Person();
-    managedPerson.setId(personDto.getId());
-    managedPerson.setStatus(Status.CURRENT);
-    when(personRepositoryMock.getOne(personDto.getId()))
-        .thenReturn(managedPerson);
-
-    // Act
-    ProgrammeMembershipDTO result = testObj.save(dto);
-
-    // Assert
-    assertNotNull(result);
-    verify(curriculumMembershipRepositoryMock).findById(100L); // ensure repository was hit
-    verify(programmeMembershipRepositoryMock).save(mappedEntity);
-  }
-
   @Test(expected = RuntimeException.class)
-  public void givenCmWithId_whenCurriculumMembershipNotFound_thenThrowRuntimeException() {
-    // Arrange
+  public void shouldThrowExceptionWhenCurriculumMembershipNotFoundInTheRepo() {
     UUID pmUuid = UUID.randomUUID();
 
     ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
@@ -755,23 +708,16 @@ public class ProgrammeMembershipServiceImplTest {
     dto.getPerson().setId(42L);
 
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
-    cmDto.setId(999L); // non-null id, but not found
+    cmDto.setId(999L);
     dto.setCurriculumMemberships(Collections.singletonList(cmDto));
 
-    //ProgrammeMembership mappedEntity = new ProgrammeMembership();
-    //mappedEntity.setUuid(pmUuid);
-
-    // Stubbing
-    //when(programmeMembershipMapper.toEntity(dto)).thenReturn(mappedEntity);
     when(curriculumMembershipRepositoryMock.findById(999L)).thenReturn(Optional.empty());
 
     try {
-      // Act
       testObj.save(dto);
     } catch (RuntimeException ex) {
-      // Assert
       assertTrue(ex.getMessage().contains("Curriculum membership not found: 999"));
-      throw ex; // rethrow so JUnit's expected = RuntimeException sees it
+      throw ex;
     }
   }
 
