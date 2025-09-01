@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -698,7 +700,7 @@ public class ProgrammeMembershipServiceImplTest {
     verify(personRepositoryMock, never()).getOne(any());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void shouldThrowExceptionWhenCurriculumMembershipNotFoundInTheRepo() {
     UUID pmUuid = UUID.randomUUID();
 
@@ -713,12 +715,11 @@ public class ProgrammeMembershipServiceImplTest {
 
     when(curriculumMembershipRepositoryMock.findById(999L)).thenReturn(Optional.empty());
 
-    try {
-      testObj.save(dto);
-    } catch (RuntimeException ex) {
-      assertTrue(ex.getMessage().contains("Curriculum membership not found: 999"));
-      throw ex;
-    }
+    RuntimeException ex = Assert.assertThrows(
+        RuntimeException.class,
+        () -> testObj.save(dto)
+    );
+    assertThat(ex.getMessage(), containsString("Curriculum membership not found: 999"));
   }
 
   @Test
