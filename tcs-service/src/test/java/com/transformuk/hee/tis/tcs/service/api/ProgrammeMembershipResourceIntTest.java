@@ -55,6 +55,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1210,6 +1211,47 @@ class ProgrammeMembershipResourceIntTest {
 
   @Test
   @Transactional
+  void shouldNotUpdateWhenCurriculumMembershipHasIdButProgrammeMembershipIsWithoutUuid()
+      throws Exception {
+    personRepository.saveAndFlush(person);
+    curriculumRepository.saveAndFlush(curriculum);
+    programme.setCurricula(Collections.singleton(programmeCurriculum));
+    programmeRepository.saveAndFlush(programme);
+    rotation.setProgrammeId(programme.getId());
+    rotationRepository.saveAndFlush(rotation);
+
+    programmeMembership.setPerson(person);
+    programmeMembership.setProgramme(programme);
+    curriculumMembership.setProgrammeMembership(programmeMembership);
+    curriculumMembership.setCurriculumId(
+        programme.getCurricula().iterator().next().getCurriculum().getId());
+    programmeMembership.setCurriculumMemberships(Sets.newLinkedHashSet(curriculumMembership));
+    programmeMembershipRepository.saveAndFlush(programmeMembership);
+
+    int databaseSizeBeforeUpdate = programmeMembershipRepository.findAll().size();
+
+    // Create DTO with uuid null but CM id set
+    ProgrammeMembershipDTO programmeMembershipDTO = curriculumMembershipMapper.toDto(
+        curriculumMembership);
+    programmeMembershipDTO.setUuid(null); // deliberately null
+
+    CurriculumMembershipDTO curriculumMembershipDto =
+        programmeMembershipDTO.getCurriculumMemberships().iterator().next();
+    assertThat(curriculumMembershipDto.getId()).isNotNull(); // sanity check
+
+    restProgrammeMembershipMockMvc.perform(put("/api/programme-memberships")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(programmeMembershipDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string(Matchers.containsString("Please reload the page.")));
+
+    // Ensure no extra ProgrammeMemberships are created
+    List<ProgrammeMembership> programmeMembershipList = programmeMembershipRepository.findAll();
+    assertThat(programmeMembershipList).hasSize(databaseSizeBeforeUpdate);
+  }
+
+  @Test
+  @Transactional
   @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
   void deleteCurriculumMembershipShouldNotDeleteContainingProgrammeMembership()
       throws Exception {
@@ -1357,6 +1399,7 @@ class ProgrammeMembershipResourceIntTest {
 
     curriculumMembership
         .setCurriculumId(programme.getCurricula().iterator().next().getCurriculum().getId());
+    curriculumMembership.setProgrammeMembership(programmeMembership);
 
     programmeMembershipRepository.saveAndFlush(programmeMembership);
 

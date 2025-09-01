@@ -129,15 +129,10 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
 
           // check if this CM is already attached to another ProgrammeMembership
           ProgrammeMembership existingPm = existingCm.getProgrammeMembership();
-          if (existingPm != null
-              && (programmeMembershipDto.getUuid() == null
-              || !programmeMembershipDto.getUuid().equals(existingPm.getUuid()))) {
-            throw new DuplicateCurriculumMembershipException(
-                "Curriculum membership already assigned. Please reload the page.");
-          }
 
-          // attach the managed CM entity to the programme membership
-          programmeMembership.getCurriculumMemberships().add(existingCm);
+          if (!existingPm.getUuid().equals(programmeMembershipDto.getUuid())) {
+            throw new DuplicateCurriculumMembershipException("Please reload the page.");
+          }
         }
       }
     }

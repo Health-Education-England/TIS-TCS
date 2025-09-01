@@ -158,4 +158,10 @@ public class ExceptionTranslator {
   public ErrorVM accessUnauthorisedException(AccessUnauthorisedException ex) {
     return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, ex.getMessage());
   }
+
+  @ExceptionHandler(DuplicateCurriculumMembershipException.class)
+  public ResponseEntity<ErrorVM> handleDuplicateCurriculumMembership(DuplicateCurriculumMembershipException ex) {
+    log.error("Duplicate curriculum membership error", ex);
+    return ResponseEntity.badRequest().body(new ErrorVM(ex.getMessage()));
+  }
 }
