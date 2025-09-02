@@ -59,9 +59,9 @@ public class ExceptionTranslator {
   }
 
   /**
-   * This exception occurs if we have an enum in a DTO such as {@link
-   * com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO#status} and the REST request coming in does
-   * not provide the proper ENUM value.
+   * This exception occurs if we have an enum in a DTO such as
+   * {@link com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO#status} and the REST request coming in
+   * does not provide the proper ENUM value.
    *
    * @param ex the exception to intercept
    * @return the error object to return to the user
@@ -157,5 +157,12 @@ public class ExceptionTranslator {
   @ResponseBody
   public ErrorVM accessUnauthorisedException(AccessUnauthorisedException ex) {
     return new ErrorVM(ErrorConstants.ERR_ACCESS_DENIED, ex.getMessage());
+  }
+
+  @ExceptionHandler(DuplicateCurriculumMembershipException.class)
+  public ResponseEntity<ErrorVM> handleDuplicateCurriculumMembership(
+      DuplicateCurriculumMembershipException ex) {
+    log.error("Duplicate curriculum membership error", ex);
+    return ResponseEntity.badRequest().body(new ErrorVM(ex.getMessage()));
   }
 }

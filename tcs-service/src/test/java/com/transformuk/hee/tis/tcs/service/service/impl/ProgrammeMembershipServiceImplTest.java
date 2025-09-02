@@ -1,5 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -14,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.CurriculumDTO;
+import com.transformuk.hee.tis.tcs.api.dto.CurriculumMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipCurriculaDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
@@ -23,6 +29,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.exception.DuplicateCurriculumMembershipException;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -482,7 +489,7 @@ public class ProgrammeMembershipServiceImplTest {
 
     Optional<ProgrammeMembershipCurriculaDTO> any = result.stream()
         .filter(pmc -> pmc.getProgrammeStartDate().equals(dateFrom)).findAny();
-    Assert.assertTrue(any.isPresent());
+    assertTrue(any.isPresent());
     ProgrammeMembershipCurriculaDTO programmeMembershipCurriculaDTO = any.get();
     Assert.assertEquals(2,
         programmeMembershipCurriculaDTO.getCurriculumMemberships().size());
@@ -605,6 +612,11 @@ public class ProgrammeMembershipServiceImplTest {
         .thenReturn(programmeMembership1);
     when(personRepositoryMock.getOne(anyLong())).thenReturn(person);
 
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(curriculumMembership1));
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_2))
+        .thenReturn(Optional.of(curriculumMembership2));
+
     //when
     ProgrammeMembershipDTO programmeMembershipDTO = testObj.save(programmeMembershipDto1);
 
@@ -614,6 +626,100 @@ public class ProgrammeMembershipServiceImplTest {
     Assert.assertEquals(PROGRAMME_ID, programmeMembershipDTO.getProgrammeId().longValue());
     Assert.assertEquals(CURRICULUM_1_ID, programmeMembershipDTO.getCurriculumMemberships()
         .get(0).getCurriculumId().longValue());
+  }
+
+  @Test
+  public void shouldSaveWithoutErrorWhenExistingCmAlreadyAttachedToSamePM() {
+    UUID pmUuid = UUID.fromString("123e4567-e89b-12d3-a456-aaaaa");
+    Long cmId = 1L;
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(cmId);
+
+    ProgrammeMembershipDTO requestDto = new ProgrammeMembershipDTO();
+    requestDto.setUuid(pmUuid);
+    requestDto.setPerson(personDto);
+    requestDto.setCurriculumMemberships(List.of(cmDto));
+
+    // existing CM in DB already linked to the same PM
+    CurriculumMembership existingCm = new CurriculumMembership();
+    existingCm.setId(cmId);
+
+    ProgrammeMembership existingPm = new ProgrammeMembership();
+    existingPm.setUuid(pmUuid);
+    existingCm.setProgrammeMembership(existingPm);
+
+    when(curriculumMembershipRepositoryMock.findById(cmId))
+        .thenReturn(Optional.of(existingCm));
+    when(programmeMembershipRepositoryMock.save(any()))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    Person managedPerson = new Person();
+    managedPerson.setId(personDto.getId());
+    managedPerson.setStatus(Status.CURRENT);
+    when(personRepositoryMock.getOne(personDto.getId()))
+        .thenReturn(managedPerson);
+
+    ProgrammeMembershipDTO result = testObj.save(requestDto);
+
+    assertNotNull(result);
+    assertEquals(pmUuid, result.getUuid());
+    verify(programmeMembershipRepositoryMock).save(any());
+    verify(personRepositoryMock).getOne(personDto.getId());
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenCurriculumMembershipAlreadyAttachedToAnotherPM() {
+    Long cmId = 1L;
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(cmId);
+
+    ProgrammeMembershipDTO requestDto = new ProgrammeMembershipDTO();
+    requestDto.setUuid(UUID.fromString("123e4567-e89b-12d3-a456-aaaaa"));
+    requestDto.setPerson(personDto);
+    requestDto.setCurriculumMemberships(List.of(cmDto));
+
+    // existing CurriculumMembership linked to a different ProgrammeMembership
+    ProgrammeMembership anotherPm = new ProgrammeMembership();
+    anotherPm.setUuid(UUID.fromString("999e4567-e89b-12d3-a456-bbbbb"));
+
+    CurriculumMembership existingCm = new CurriculumMembership();
+    existingCm.setId(cmId);
+    existingCm.setProgrammeMembership(anotherPm);
+
+    when(curriculumMembershipRepositoryMock.findById(cmId))
+        .thenReturn(Optional.of(existingCm));
+
+    RuntimeException ex = assertThrows(DuplicateCurriculumMembershipException.class, () -> {
+      testObj.save(requestDto);
+    });
+
+    assertEquals("Please reload the page.", ex.getMessage());
+    verify(programmeMembershipRepositoryMock, never()).save(any());
+    verify(personRepositoryMock, never()).getOne(any());
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenCurriculumMembershipNotFoundInTheRepo() {
+    UUID pmUuid = UUID.randomUUID();
+
+    ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
+    dto.setUuid(pmUuid);
+    dto.setPerson(new PersonDTO());
+    dto.getPerson().setId(42L);
+
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setId(999L);
+    dto.setCurriculumMemberships(Collections.singletonList(cmDto));
+
+    when(curriculumMembershipRepositoryMock.findById(999L)).thenReturn(Optional.empty());
+
+    RuntimeException ex = Assert.assertThrows(
+        RuntimeException.class,
+        () -> testObj.save(dto)
+    );
+    assertThat(ex.getMessage(), containsString("Curriculum membership not found: 999"));
   }
 
   @Test
@@ -696,6 +802,11 @@ public class ProgrammeMembershipServiceImplTest {
   public void shouldPatchProgrammeMembership() {
     ProgrammeMembershipDTO dto = new ProgrammeMembershipDTO();
     dto.setUuid(PROGRAMME_MEMBERSHIP_ID_1);
+
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_1))
+       .thenReturn(Optional.of(curriculumMembership1));
+    when(curriculumMembershipRepositoryMock.findById(CURRICULUM_MEMBERSHIP_ID_2))
+        .thenReturn(Optional.of(curriculumMembership2));
 
     when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
         .thenReturn(Optional.of(programmeMembership1));
