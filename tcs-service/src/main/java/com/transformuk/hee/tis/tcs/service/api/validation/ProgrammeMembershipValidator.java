@@ -73,7 +73,6 @@ public class ProgrammeMembershipValidator {
    * entered.
    *
    * @param programmeMembershipDto the programmeMembership to check
-   * @return
    * @throws MethodArgumentNotValidException if there are validation errors
    */
   public void validate(ProgrammeMembershipDTO programmeMembershipDto)
@@ -85,6 +84,7 @@ public class ProgrammeMembershipValidator {
     fieldErrors.addAll(checkCurriculum(programmeMembershipDto));
     fieldErrors.addAll(checkRotation(programmeMembershipDto));
     fieldErrors.addAll(checkProgrammeDates(programmeMembershipDto));
+    fieldErrors.addAll(checkProgrammeDatesWithCurriculumDates(programmeMembershipDto));
     if (!fieldErrors.isEmpty()) {
       BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(
           programmeMembershipDto, PROGRAMME_MEMBERSHIP_DTO_NAME);
@@ -102,9 +102,9 @@ public class ProgrammeMembershipValidator {
     List<FieldError> fieldErrors = new ArrayList<>();
 
     fieldErrors.addAll(checkRotationExists(programmeMembershipDto));
-    fieldErrors.addAll(checkProgrammeDates(programmeMembershipDto));
     fieldErrors.addAll(checkLeavingReason(programmeMembershipDto));
     fieldErrors.addAll(checkTrainingPathway(programmeMembershipDto));
+    fieldErrors.addAll(checkProgrammeDates(programmeMembershipDto));
     fieldErrors.addAll(checkProgrammeDatesWithCurriculumDates(programmeMembershipDto));
     fieldErrors.addAll(checkProgrammeMembershipType(programmeMembershipDto));
 
@@ -142,8 +142,8 @@ public class ProgrammeMembershipValidator {
   }
 
   /**
-   * Check if the programme start date is earlier than every curriculum start date.
-   * And the programme end date is later than every curriculum end date.
+   * Check if the programme start date is earlier than every curriculum start date. And the
+   * programme end date is later than every curriculum end date.
    *
    * @param programmeMembershipDto the dto to check
    * @return a list of field errors
@@ -176,8 +176,8 @@ public class ProgrammeMembershipValidator {
   }
 
   /**
-   * Check if programme membership type exists and is current in Reference service.
-   * The enumeration helps do the first check, and this step would be a further check on Reference.
+   * Check if programme membership type exists and is current in Reference service. The enumeration
+   * helps do the first check, and this step would be a further check on Reference.
    *
    * @param programmeMembershipDto the dto to check
    * @return a list of field errors

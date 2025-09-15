@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,7 +22,6 @@ import java.time.Month;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -67,19 +67,19 @@ class ProgrammeMembershipValidatorTest {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setCurriculumStartDate(START_DATE);
     cmDto.setCurriculumEndDate(END_DATE);
-    pmDto.setCurriculumMemberships(Lists.newArrayList(cmDto));
+    pmDto.setCurriculumMemberships(List.of(cmDto));
 
     when(rotationServiceMock.getCurrentRotationsByNameAndProgrammeId(DEFAULT_ROTATION_NAME,
-        PROGRAMME_ID)).thenReturn(Lists.newArrayList(rotationDto));
+        PROGRAMME_ID)).thenReturn(List.of(rotationDto));
 
     Map<String, String> leavingReasonsExistMap = new HashMap<>();
     leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, DEFAULT_LEAVING_REASON.toUpperCase());
-    when(referenceServiceMock.leavingReasonsMatch(Lists.newArrayList(DEFAULT_LEAVING_REASON),
+    when(referenceServiceMock.leavingReasonsMatch(List.of(DEFAULT_LEAVING_REASON),
         true)).thenReturn(leavingReasonsExistMap);
 
     Map<String, Boolean> programmeMembershipsExistMap = new HashMap<>();
     programmeMembershipsExistMap.put(DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.name(), true);
-    when(referenceServiceMock.programmeMembershipTypesExist(Lists.newArrayList(
+    when(referenceServiceMock.programmeMembershipTypesExist(List.of(
         DEFAULT_PROGRAMME_MEMBERSHIP_TYPE.name()), true)).thenReturn(programmeMembershipsExistMap);
 
     validator.validateForBulk(pmDto);
@@ -105,22 +105,22 @@ class ProgrammeMembershipValidatorTest {
     CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
     cmDto.setCurriculumStartDate(START_DATE.minusDays(1));
     cmDto.setCurriculumEndDate(END_DATE.plusDays(1));
-    pmDto.setCurriculumMemberships(Lists.newArrayList(cmDto));
+    pmDto.setCurriculumMemberships(List.of(cmDto));
 
     // rotation not found
     when(rotationServiceMock.getCurrentRotationsByNameAndProgrammeId(DEFAULT_ROTATION_NAME,
-        PROGRAMME_ID)).thenReturn(Lists.newArrayList());
+        PROGRAMME_ID)).thenReturn(emptyList());
 
     // leaving reason not exists
     Map<String, String> leavingReasonsExistMap = new HashMap<>();
     leavingReasonsExistMap.put(DEFAULT_LEAVING_REASON, "");
-    when(referenceServiceMock.leavingReasonsMatch(Lists.newArrayList(DEFAULT_LEAVING_REASON),
+    when(referenceServiceMock.leavingReasonsMatch(List.of(DEFAULT_LEAVING_REASON),
         true)).thenReturn(leavingReasonsExistMap);
 
     // programme membership not exists
     Map<String, Boolean> programmeMembershipsExistMap = new HashMap<>();
     programmeMembershipsExistMap.put(INVALID_PROGRAMME_MEMBERSHIP_TYPE.name(), false);
-    when(referenceServiceMock.programmeMembershipTypesExist(Lists.newArrayList(
+    when(referenceServiceMock.programmeMembershipTypesExist(List.of(
         INVALID_PROGRAMME_MEMBERSHIP_TYPE.name()), true)).thenReturn(programmeMembershipsExistMap);
 
     validator.validateForBulk(pmDto);
@@ -159,6 +159,27 @@ class ProgrammeMembershipValidatorTest {
   }
 
   @Test
+  void shouldValidateProgrammeAndCurriculumDates() {
+    ProgrammeMembershipDTO pmDto = new ProgrammeMembershipDTO();
+    pmDto.setId(PROGRAMME_MEMBERSHIP_ID);
+
+    pmDto.setProgrammeStartDate(START_DATE);
+    pmDto.setProgrammeEndDate(END_DATE);
+    CurriculumMembershipDTO cmDto = new CurriculumMembershipDTO();
+    cmDto.setCurriculumStartDate(START_DATE.minusDays(1));
+    cmDto.setCurriculumEndDate(END_DATE.plusDays(1));
+    pmDto.setCurriculumMemberships(List.of(cmDto));
+
+    validator.validateForBulk(pmDto);
+    List<String> messages = pmDto.getMessageList();
+    assertEquals(2, messages.size());
+    assertThat(messages, hasItem(containsString(
+        ProgrammeMembershipValidator.PM_START_DATE_LATER_THAN_CM_START_DATE)));
+    assertThat(messages, hasItem(containsString(
+        ProgrammeMembershipValidator.PM_END_DATE_EARLIER_THAN_CM_END_DATE)));
+  }
+
+  @Test
   void shouldAddErrorWhenMultipleRotationsFound() {
     ProgrammeMembershipDTO pmDto = new ProgrammeMembershipDTO();
     pmDto.setId(PROGRAMME_MEMBERSHIP_ID);
@@ -172,7 +193,7 @@ class ProgrammeMembershipValidatorTest {
     RotationDTO rotationDto2 = new RotationDTO();
 
     when(rotationServiceMock.getCurrentRotationsByNameAndProgrammeId(DEFAULT_ROTATION_NAME,
-        PROGRAMME_ID)).thenReturn(Lists.newArrayList(rotationDto, rotationDto2));
+        PROGRAMME_ID)).thenReturn(List.of(rotationDto, rotationDto2));
 
     validator.validateForBulk(pmDto);
     assertEquals(1, pmDto.getMessageList().size());
