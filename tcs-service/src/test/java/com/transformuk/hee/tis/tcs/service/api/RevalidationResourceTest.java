@@ -1,11 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
-import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType.*;
-import static java.util.Arrays.*;
+import static com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipType.SUBSTANTIVE;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
@@ -18,9 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionDetailDto;
+import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryDto;
 import com.transformuk.hee.tis.tcs.api.dto.ConnectionSummaryRecordDto;
-import com.transformuk.hee.tis.tcs.api.dto.ConnectionRecordDto;
 import com.transformuk.hee.tis.tcs.api.dto.RevalidationRecordDto;
 import com.transformuk.hee.tis.tcs.service.service.impl.RevalidationServiceImpl;
 import java.time.LocalDate;
@@ -48,6 +47,7 @@ public class RevalidationResourceTest {
   private static final String FORENAME = "forename";
   private static final String SURNAME = "surname";
   private static final LocalDate CURRICULUM_END_DATE = LocalDate.now();
+  private static final LocalDate PROGRAMME_END_DATE = CURRICULUM_END_DATE.plusMonths(1);
   private static final String PROGRAMME_MEMBERSHIP_TYPE = "Substantive";
   private static final String PROGRAMME_NAME = "Clinical Radiology";
   private static final String CURRENT_GRADE = "Foundation Year 2";
@@ -73,6 +73,7 @@ public class RevalidationResourceTest {
     recordDto.setForenames(FORENAME);
     recordDto.setSurname(SURNAME);
     recordDto.setCurriculumEndDate(CURRICULUM_END_DATE);
+    recordDto.setProgrammeEndDate(PROGRAMME_END_DATE);
     recordDto.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     recordDto.setProgrammeName(PROGRAMME_NAME);
     recordDto.setCurrentGrade(CURRENT_GRADE);
@@ -119,6 +120,7 @@ public class RevalidationResourceTest {
     assertThat(revalidationRecordDto.getForenames(), is(FORENAME));
     assertThat(revalidationRecordDto.getSurname(), is(SURNAME));
     assertThat(revalidationRecordDto.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
+    assertThat(revalidationRecordDto.getProgrammeEndDate(), is(PROGRAMME_END_DATE));
     assertThat(revalidationRecordDto.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE));
     assertThat(revalidationRecordDto.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(revalidationRecordDto.getCurrentGrade(), is(CURRENT_GRADE));
@@ -167,6 +169,7 @@ public class RevalidationResourceTest {
       assertThat(revalidationRecordDto.getForenames(), is(FORENAME));
       assertThat(revalidationRecordDto.getSurname(), is(SURNAME));
       assertThat(revalidationRecordDto.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
+      assertThat(revalidationRecordDto.getProgrammeEndDate(), is(PROGRAMME_END_DATE));
       assertThat(revalidationRecordDto.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE));
       assertThat(revalidationRecordDto.getProgrammeName(), is(PROGRAMME_NAME));
       assertThat(revalidationRecordDto.getCurrentGrade(), is(CURRENT_GRADE));
