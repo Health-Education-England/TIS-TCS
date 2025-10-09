@@ -16,6 +16,7 @@ public interface RevalidationRecordMapper {
   @Mapping(target = "gmcNumber", ignore = true)
   @Mapping(target = "forenames", source = "doctorFirstName")
   @Mapping(target = "surname", source = "doctorLastName")
+  @Mapping(target = "programmeEndDate", source = "programmeMembershipEndDate")
   void toRevalidationRecord(ConnectionInfoDto source,
       @MappingTarget RevalidationRecordDto target);
 }

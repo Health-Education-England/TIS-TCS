@@ -10,6 +10,7 @@ public class RevalidationRecordDto {
   private String forenames;
   private String surname;
   private LocalDate curriculumEndDate;
+  private LocalDate programmeEndDate;
   private String programmeMembershipType;
   private String programmeName;
   private String currentGrade;
