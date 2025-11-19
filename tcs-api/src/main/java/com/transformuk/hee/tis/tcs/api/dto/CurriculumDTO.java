@@ -49,6 +49,8 @@ public class CurriculumDTO implements Serializable {
       message = "doesThisCurriculumLeadToCct must not be null")
   private Boolean doesThisCurriculumLeadToCct;
 
+  private boolean eligibleForPeriodOfGrace;
+
   @DecimalMin(value = "0", groups = {Create.class, Update.class},
       message = "periodOfGrace must not be negative")
   @NotNull(groups = {Create.class, Update.class}, message = "periodOfGrace must not be null")
