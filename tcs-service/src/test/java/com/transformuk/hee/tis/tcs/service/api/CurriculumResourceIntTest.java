@@ -77,9 +77,12 @@ public class CurriculumResourceIntTest {
   private static final Boolean DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT = false;
   private static final Boolean UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT = true;
 
+  private static final Boolean DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE = false;
+  private static final Boolean UPDATED_ELIGIBLE_FOR_PERIOD_OF_GRACE = true;
   private static final Integer DEFAULT_PERIOD_OF_GRACE = 1;
   private static final Integer UPDATED_PERIOD_OF_GRACE = 2;
-  private static final long SPECIALTY_ID_DOESNT_EXIST = 222222222999999L;
+
+  private static final long SPECIALTY_ID_DOES_NOT_EXIST = 222222222999999L;
   private static final long NEGATIVE_SPECIALTY_ID = -10296268934L;
   private static final String SPECIALTY_INTREPID_ID = "XXXX_INTREPID_ID_XXXX";
   private static final String SPECIALTY_COLLEGE = "SPECIALTY_COLLEGE";
@@ -122,44 +125,40 @@ public class CurriculumResourceIntTest {
    * which requires the current entity.
    */
   public static Curriculum createCurriculumEntity() {
-    Curriculum curriculum = new Curriculum()
+    return new Curriculum()
         .name(DEFAULT_NAME)
         .intrepidId(DEFAULT_INTREPID_ID)
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .length(DEFAULT_LENGTH)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
-
-    return curriculum;
   }
 
   public static Curriculum createCurriculumEntity(String name, String intrepidId,
       CurriculumSubType curriculumSubType,
       Integer length, AssessmentType assessmentType, Boolean doesThisCurrLeadToCct,
-      Integer periodOfGrace) {
-    Curriculum curriculum = new Curriculum()
+      boolean isEligibleForPeriodOfGrace, Integer periodOfGrace) {
+    return new Curriculum()
         .name(name)
         .intrepidId(intrepidId)
         .curriculumSubType(curriculumSubType)
         .length(length)
         .assessmentType(assessmentType)
         .doesThisCurriculumLeadToCct(doesThisCurrLeadToCct)
+        .eligibleForPeriodOfGrace(isEligibleForPeriodOfGrace)
         .periodOfGrace(periodOfGrace)
         .status(Status.CURRENT);
-
-    return curriculum;
   }
 
-
   public static Specialty createSpecialtyEntity() {
-    Specialty specialty = new Specialty()
+    return new Specialty()
         .intrepidId(SPECIALTY_INTREPID_ID)
         .status(Status.CURRENT)
         .college(SPECIALTY_COLLEGE)
         .specialtyCode(NHS_SPECIALTY_CODE)
         .specialtyTypes(Sets.newHashSet(SpecialtyType.SUB_SPECIALTY));
-    return specialty;
   }
 
   @Before
@@ -178,7 +177,7 @@ public class CurriculumResourceIntTest {
     curriculum = createCurriculumEntity(DEFAULT_NAME, DEFAULT_INTREPID_ID,
         DEFAULT_CURRICULUM_SUB_TYPE, DEFAULT_LENGTH, DEFAULT_ASSESSMENT_TYPE,
         DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT,
-        DEFAULT_PERIOD_OF_GRACE);
+        DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE, DEFAULT_PERIOD_OF_GRACE);
     specialty = createSpecialtyEntity();
   }
 
@@ -191,8 +190,8 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isCreated());
 
     // Validate the Curriculum in the database
@@ -206,6 +205,8 @@ public class CurriculumResourceIntTest {
     assertThat(testCurriculum.getAssessmentType()).isEqualTo(DEFAULT_ASSESSMENT_TYPE);
     assertThat(testCurriculum.isDoesThisCurriculumLeadToCct())
         .isEqualTo(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
+    assertThat(testCurriculum.isEligibleForPeriodOfGrace())
+        .isEqualTo(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE);
     assertThat(testCurriculum.getPeriodOfGrace()).isEqualTo(DEFAULT_PERIOD_OF_GRACE);
   }
 
@@ -219,8 +220,8 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -239,8 +240,8 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -249,8 +250,8 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -269,8 +270,8 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -279,8 +280,8 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -299,8 +300,8 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -309,8 +310,8 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -330,8 +331,8 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -340,8 +341,8 @@ public class CurriculumResourceIntTest {
 
     //update
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -353,8 +354,8 @@ public class CurriculumResourceIntTest {
     curriculumDTO = linkCurriculumToSpecialty(curriculum, savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -363,8 +364,8 @@ public class CurriculumResourceIntTest {
 
     //update with negative value
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum not in the database
@@ -379,11 +380,12 @@ public class CurriculumResourceIntTest {
     int databaseSizeBeforeCreate = curriculumRepository.findAll().size();
 
     // Create the Curriculum
-    CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, SPECIALTY_ID_DOESNT_EXIST);
+    CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum,
+        SPECIALTY_ID_DOES_NOT_EXIST);
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum in the database
@@ -400,8 +402,8 @@ public class CurriculumResourceIntTest {
     CurriculumDTO curriculumDTO = linkCurriculumToSpecialty(curriculum, NEGATIVE_SPECIALTY_ID);
 
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum in the database
@@ -420,8 +422,8 @@ public class CurriculumResourceIntTest {
 
     // An entity with an existing ID cannot be created, so this API call must fail
     restCurriculumMockMvc.perform(post("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Alice in the database
@@ -448,7 +450,9 @@ public class CurriculumResourceIntTest {
         .andExpect(
             jsonPath("$.[*].assessmentType").value(hasItem(DEFAULT_ASSESSMENT_TYPE.toString())))
         .andExpect(jsonPath("$.[*].doesThisCurriculumLeadToCct")
-            .value(hasItem(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue())))
+            .value(hasItem(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)))
+        .andExpect(jsonPath("$.[*].eligibleForPeriodOfGrace")
+            .value(hasItem(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)))
         .andExpect(jsonPath("$.[*].periodOfGrace").value(hasItem(DEFAULT_PERIOD_OF_GRACE)));
   }
 
@@ -469,7 +473,9 @@ public class CurriculumResourceIntTest {
         .andExpect(jsonPath("$.length").value(DEFAULT_LENGTH))
         .andExpect(jsonPath("$.assessmentType").value(DEFAULT_ASSESSMENT_TYPE.toString()))
         .andExpect(jsonPath("$.doesThisCurriculumLeadToCct")
-            .value(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT.booleanValue()))
+            .value(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT))
+        .andExpect(jsonPath("$.eligibleForPeriodOfGrace")
+            .value(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE))
         .andExpect(jsonPath("$.periodOfGrace").value(DEFAULT_PERIOD_OF_GRACE));
   }
 
@@ -505,7 +511,7 @@ public class CurriculumResourceIntTest {
     String colFilters = new URLCodec().encode("{\"curriculumSubType\":[\"ACL\"]}");
     // Get all the curriculumList
     restCurriculumMockMvc.perform(get("/api/curricula?sort=id,desc&columnFilters=" +
-        colFilters))
+            colFilters))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].curriculumSubType").value("ACL"));
   }
@@ -568,6 +574,7 @@ public class CurriculumResourceIntTest {
         .length(UPDATED_LENGTH)
         .assessmentType(UPDATED_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(UPDATED_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(UPDATED_PERIOD_OF_GRACE);
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
@@ -575,8 +582,8 @@ public class CurriculumResourceIntTest {
         savedSpecialty.getId());
 
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isOk());
 
     // Validate the Curriculum in the database
@@ -589,6 +596,8 @@ public class CurriculumResourceIntTest {
     assertThat(testCurriculum.getAssessmentType()).isEqualTo(UPDATED_ASSESSMENT_TYPE);
     assertThat(testCurriculum.isDoesThisCurriculumLeadToCct())
         .isEqualTo(UPDATED_DOES_THIS_CURRICULUM_LEAD_TO_CCT);
+    assertThat(testCurriculum.isEligibleForPeriodOfGrace())
+        .isEqualTo(UPDATED_ELIGIBLE_FOR_PERIOD_OF_GRACE);
     assertThat(testCurriculum.getPeriodOfGrace()).isEqualTo(UPDATED_PERIOD_OF_GRACE);
   }
 
@@ -602,8 +611,8 @@ public class CurriculumResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
 
     // Validate the Curriculum in the database
@@ -620,8 +629,8 @@ public class CurriculumResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
   }
 
@@ -634,8 +643,8 @@ public class CurriculumResourceIntTest {
 
     // If the entity doesn't have an ID, it will be created instead of just being updated
     restCurriculumMockMvc.perform(put("/api/curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(curriculumDTO)))
         .andExpect(status().isBadRequest());
   }
 
@@ -648,7 +657,7 @@ public class CurriculumResourceIntTest {
 
     // Get the curriculum
     restCurriculumMockMvc.perform(delete("/api/curricula/{id}", curriculum.getId())
-        .accept(MediaType.APPLICATION_JSON))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     // Validate the database is empty
@@ -673,6 +682,7 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
 
     int databaseSizeBeforeBulkCreate = curriculumRepository.findAll().size();
@@ -685,8 +695,8 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(post("/api/bulk-curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(payload)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
 
     // Validate that both Curricula are in the database
@@ -704,6 +714,7 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
 
     //set id to make this curricula invalid for creation
@@ -718,8 +729,8 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(post("/api/bulk-curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(payload)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
 
     // Validate that both Curricula are in the database
@@ -737,6 +748,7 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
@@ -748,7 +760,7 @@ public class CurriculumResourceIntTest {
     Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
     Curriculum anotherSavedCurriculum = curriculumRepository.saveAndFlush(anotherCurriculum);
 
-    //set the ids for the Dtos
+    //set the ids for the DTOs
     curriculumDTO.setId(savedCurriculum.getId());
     curriculum2DTO.setId(anotherSavedCurriculum.getId());
 
@@ -756,8 +768,8 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(put("/api/bulk-curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(payload)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isOk());
 
     // Validate that both Curricula are still in the database
@@ -777,6 +789,7 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
@@ -788,14 +801,14 @@ public class CurriculumResourceIntTest {
     Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
     Curriculum anotherSavedCurriculum = curriculumRepository.saveAndFlush(anotherCurriculum);
 
-    //set the ids for the Dtos
+    //set the ids for the DTOs
     curriculumDTO.setId(savedCurriculum.getId());
     curriculum2DTO.setId(anotherSavedCurriculum.getId());
 
     String jsonQueryString = "{\"name\":[\"" + DEFAULT_NAME_2 + "\"]}";
-    String jsonQuerystringURLEncoded = new org.apache.commons.codec.net.URLCodec()
+    String jsonQueryStringURLEncoded = new org.apache.commons.codec.net.URLCodec()
         .encode(jsonQueryString);
-    restCurriculumMockMvc.perform(get("/api/curricula?columnFilters=" + jsonQuerystringURLEncoded))
+    restCurriculumMockMvc.perform(get("/api/curricula?columnFilters=" + jsonQueryStringURLEncoded))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.[*].name").isArray())
         .andExpect(jsonPath("$.[0].name").value(DEFAULT_NAME_2));
@@ -811,6 +824,7 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE);
 
     Specialty savedSpecialty = specialtyRepository.save(specialty);
@@ -822,7 +836,7 @@ public class CurriculumResourceIntTest {
     Curriculum savedCurriculum = curriculumRepository.saveAndFlush(this.curriculum);
     curriculumRepository.saveAndFlush(anotherCurriculum);
 
-    //set the ids for the Dtos
+    //set the ids for the DTOs
     curriculumDTO.setId(savedCurriculum.getId());
     //make this curricula invalid
     curriculum2DTO.setId(null);
@@ -831,8 +845,8 @@ public class CurriculumResourceIntTest {
 
     List<CurriculumDTO> payload = Lists.newArrayList(curriculumDTO, curriculum2DTO);
     restCurriculumMockMvc.perform(put("/api/bulk-curricula")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(payload)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
 
     // Validate that both Curricula are still in the database
@@ -861,6 +875,7 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
         .status(CURRENT_STATUS);
     curriculumRepository.saveAndFlush(curriculum_current);
@@ -871,6 +886,7 @@ public class CurriculumResourceIntTest {
         .curriculumSubType(DEFAULT_CURRICULUM_SUB_TYPE)
         .assessmentType(DEFAULT_ASSESSMENT_TYPE)
         .doesThisCurriculumLeadToCct(DEFAULT_DOES_THIS_CURRICULUM_LEAD_TO_CCT)
+        .eligibleForPeriodOfGrace(DEFAULT_ELIGIBLE_FOR_PERIOD_OF_GRACE)
         .periodOfGrace(DEFAULT_PERIOD_OF_GRACE)
         .status(INACTIVE_STATUS);
     curriculumRepository.saveAndFlush(curriculum_inactive);

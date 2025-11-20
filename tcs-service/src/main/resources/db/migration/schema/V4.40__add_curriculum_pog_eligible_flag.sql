@@ -1,0 +1,2 @@
+ALTER TABLE `Curriculum`
+ADD COLUMN `eligibleForPeriodOfGrace` BOOLEAN NOT NULL DEFAULT FALSE;

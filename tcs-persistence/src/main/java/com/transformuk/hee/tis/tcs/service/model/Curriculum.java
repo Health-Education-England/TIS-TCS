@@ -62,6 +62,9 @@ public class Curriculum implements Serializable {
   @Column(name = "doesThisCurriculumLeadToCct")
   private Boolean doesThisCurriculumLeadToCct;
 
+  @Column(name = "eligibleForPeriodOfGrace")
+  private boolean eligibleForPeriodOfGrace;
+
   @Column(name = "periodOfGrace")
   private Integer periodOfGrace;
 
@@ -118,6 +121,11 @@ public class Curriculum implements Serializable {
 
   public void setDoesThisCurriculumLeadToCct(Boolean doesThisCurriculumLeadToCct) {
     this.doesThisCurriculumLeadToCct = doesThisCurriculumLeadToCct;
+  }
+
+  public Curriculum eligibleForPeriodOfGrace(boolean eligibleForPeriodOfGrace) {
+    this.eligibleForPeriodOfGrace = eligibleForPeriodOfGrace;
+    return this;
   }
 
   public Curriculum periodOfGrace(Integer periodOfGrace) {
