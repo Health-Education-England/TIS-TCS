@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -857,6 +858,50 @@ public class SpecialtyResourceIntTest {
     // Validate that both Specialty are still in the database
     List<Specialty> specialties = specialtyRepository.findAll();
     assertThat(specialties).hasSize(expectedDatabaseSizeAfterBulkCreate);
+  }
+
+  @Test
+  @Transactional
+  public void findByIdsShouldReturnSpecialtiesForValidIds() throws Exception {
+    // Initialize the database
+    Specialty specialty2 = createEntity();
+    specialty2.setName("AnotherSpecialty");
+    specialtyRepository.saveAndFlush(specialty);
+    specialtyRepository.saveAndFlush(specialty2);
+
+    // Get specialties by valid IDs
+    restSpecialtyMockMvc.perform(get("/api/specialties/in/" + specialty.getId() + "," + specialty2.getId()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(
+            hasItems(specialty.getId().intValue(), specialty2.getId().intValue())))
+        .andExpect(jsonPath("$.[*].name").value(
+            hasItems(DEFAULT_NAME, "AnotherSpecialty")));
+  }
+
+  @Test
+  @Transactional
+  public void findByIdsShouldIgnoreMalformedIds() throws Exception {
+    // Initialize the database
+    specialtyRepository.saveAndFlush(specialty);
+
+    // Get specialties by valid and invalid IDs
+    restSpecialtyMockMvc.perform(get("/api/specialties/in/" + specialty.getId() + ",abc"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
+        .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)));
+  }
+
+  @Test
+  @Transactional
+  public void findByIdsShouldReturnEmptyListForNonExistentIds() throws Exception {
+    // Get specialties by non-existent ID
+    restSpecialtyMockMvc.perform(get("/api/specialties/in/999999"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.length()").value(0));
   }
 
   private SpecialtyDTO linkSpecialtyToSpecialtyGroup(Specialty specialty, Long specialtyGroupId) {

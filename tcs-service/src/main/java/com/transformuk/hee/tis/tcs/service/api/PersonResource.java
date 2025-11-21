@@ -249,7 +249,7 @@ public class PersonResource {
     if (!publicHealthNumbers.isEmpty()) {
       UrlDecoderUtil.decode(publicHealthNumbers);
       return new ResponseEntity<>(
-          personService.findPersonsByPublicHealthNumbersIn(publicHealthNumbers), HttpStatus.FOUND);
+          personService.findPersonsByPublicHealthNumbersIn(publicHealthNumbers), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
     }
@@ -292,7 +292,7 @@ public class PersonResource {
   public ResponseEntity<List<PersonDTO>> getPersonsIn(@PathVariable("ids") final Set<Long> ids) {
     log.debug("REST request to find several Person: {}", ids);
     if (!ids.isEmpty()) {
-      return new ResponseEntity<>(personService.findByIdIn(ids), HttpStatus.FOUND);
+      return new ResponseEntity<>(personService.findByIdIn(ids), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
     }
@@ -312,7 +312,7 @@ public class PersonResource {
       @PathVariable("ids") final Set<Long> ids) {
     log.debug("REST request to find several Person: {}", ids);
     if (!ids.isEmpty()) {
-      return new ResponseEntity<>(personService.findBasicDetailsByIdIn(ids), HttpStatus.FOUND);
+      return new ResponseEntity<>(personService.findBasicDetailsByIdIn(ids), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
     }

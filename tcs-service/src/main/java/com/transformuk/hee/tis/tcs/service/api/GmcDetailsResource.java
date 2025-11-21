@@ -136,7 +136,7 @@ public class GmcDetailsResource {
 
     if (!gmcIds.isEmpty()) {
       UrlDecoderUtil.decode(gmcIds);
-      return new ResponseEntity<>(gmcDetailsService.findByIdIn(gmcIds), HttpStatus.FOUND);
+      return new ResponseEntity<>(gmcDetailsService.findByIdIn(gmcIds), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }

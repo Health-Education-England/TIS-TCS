@@ -17,6 +17,7 @@ import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
@@ -465,5 +466,61 @@ public class GmcDetailsResourceIntTest {
         .content(TestUtil.convertObjectToJsonBytes(updatedGmcDetailsDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[0].message").value("gmcNumber should not contain any whitespaces"));
+  }
+
+  @Test
+  @Transactional
+  public void getGmcDetailsInShouldReturnMatchingDetails() throws Exception {
+    // Initialize the database with two GdcDetails
+    GmcDetails gmcDetails1 = new GmcDetails()
+        .id(100L)
+        .gmcNumber("GMC100")
+        .gmcStatus(DEFAULT_GMC_STATUS)
+        .gmcStartDate(DEFAULT_GMC_START_DATE)
+        .gmcEndDate(DEFAULT_GMC_END_DATE);
+    GmcDetails gmcDetails2 = new GmcDetails()
+        .id(101L)
+        .gmcNumber("GMC101")
+        .gmcStatus(DEFAULT_GMC_STATUS)
+        .gmcStartDate(DEFAULT_GMC_START_DATE)
+        .gmcEndDate(DEFAULT_GMC_END_DATE);
+
+    gmcDetailsRepository.saveAndFlush(gmcDetails1);
+    gmcDetailsRepository.saveAndFlush(gmcDetails2);
+
+    restGmcDetailsMockMvc.perform(get("/api/gmc-details/in/{gmcIds}", "GMC100,GMC101"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(containsInAnyOrder(100, 101)));
+  }
+
+  @Test
+  @Transactional
+  public void getGmcDetailsInShouldIgnoreMalformedIds() throws Exception {
+    // Initialize the database with one GdcDetails
+    GmcDetails gmcDetails1 = new GmcDetails()
+        .id(100L)
+        .gmcNumber("GMC100")
+        .gmcStatus(DEFAULT_GMC_STATUS)
+        .gmcStartDate(DEFAULT_GMC_START_DATE)
+        .gmcEndDate(DEFAULT_GMC_END_DATE);
+
+    gmcDetailsRepository.saveAndFlush(gmcDetails1);
+
+    // Query with one valid and one invalid ID
+    restGmcDetailsMockMvc.perform(get("/api/gdc-details/in/{gmcIds}", "GMC100,notanid"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(containsInAnyOrder(100)));
+  }
+
+  @Test
+  @Transactional
+  public void getGMcDetailsInShouldReturnEmptyListForNoIds() throws Exception {
+    restGmcDetailsMockMvc.perform(get("/api/gmc-details/in/{gmcIds}", ""))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
   }
 }

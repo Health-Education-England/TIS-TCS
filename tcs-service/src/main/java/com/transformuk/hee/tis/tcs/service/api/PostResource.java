@@ -236,7 +236,7 @@ public class PostResource {
     if (!nationalPostNumbers.isEmpty()) {
       UrlDecoderUtil.decode(nationalPostNumbers);
       return new ResponseEntity<>(postService.findAllByNationalPostNumbers(nationalPostNumbers),
-          HttpStatus.FOUND);
+          HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }

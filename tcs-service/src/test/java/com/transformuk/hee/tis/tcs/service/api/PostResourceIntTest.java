@@ -1672,4 +1672,44 @@ public class PostResourceIntTest {
     postRepository.saveAndFlush(post3);
     return npns;
   }
+
+  @Test
+  @Transactional
+  public void getPostsInShouldReturnMatchingPosts() throws Exception {
+    // Given
+    Post post1 = createEntity();
+    post1.setNationalPostNumber("NPN100");
+    postRepository.saveAndFlush(post1);
+
+    Post post2 = createEntity();
+    post2.setNationalPostNumber("NPN200");
+    postRepository.saveAndFlush(post2);
+
+    // When & Then
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", "NPN100,NPN200"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(
+            containsInAnyOrder("NPN100", "NPN200")));
+  }
+
+  @Test
+  @Transactional
+  public void getPostsInShouldReturnEmptyForNonExistingNumbers() throws Exception {
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", "NONEXIST1,NONEXIST2"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @Transactional
+  public void getPostsInShouldReturnEmptyForEmptyInput() throws Exception {
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", ""))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+  }
 }
