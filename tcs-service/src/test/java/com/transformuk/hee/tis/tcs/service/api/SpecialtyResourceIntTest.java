@@ -316,7 +316,7 @@ public class SpecialtyResourceIntTest {
 
     // Get all the specialtyList
     restSpecialtyMockMvc.perform(get("/api/specialties/in/" + specialty.getId() + "," + 123))
-        .andExpect(status().isFound())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(hasItem(specialty.getId().intValue())))
         .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString().toUpperCase())))

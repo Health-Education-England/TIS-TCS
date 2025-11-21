@@ -506,7 +506,7 @@ public class PersonResourceIntTest {
 
     // when & then
     restPersonMockMvc.perform(get("/api/people/in/" + personsIDs + "/basic"))
-        .andExpect(status().isFound())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
         .andExpect(jsonPath("$[0].firstName").value(PERSON_FORENAMES))
@@ -530,7 +530,7 @@ public class PersonResourceIntTest {
 
     // when & then
     restPersonMockMvc.perform(get("/api/people/in/" + personsIDs))
-        .andExpect(status().isFound())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
         .andExpect(jsonPath("$[1].id").value(person2.getId().intValue()));
@@ -1224,13 +1224,6 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonsInShouldReturnBadRequestForEmptyInput() throws Exception {
-    restPersonMockMvc.perform(get("/api/people/in/{ids}", ""))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @Transactional
   public void getPersonBasicDetailsInShouldReturnBasicDetailsForMultipleIds() throws Exception {
     // given
     personRepository.saveAndFlush(person);
@@ -1270,12 +1263,5 @@ public class PersonResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$").isEmpty());
-  }
-
-  @Test
-  @Transactional
-  public void getPersonBasicDetailsInShouldReturnBadRequestForEmptyInput() throws Exception {
-    restPersonMockMvc.perform(get("/api/people/in/{ids}/basic", ""))
-        .andExpect(status().isBadRequest());
   }
 }

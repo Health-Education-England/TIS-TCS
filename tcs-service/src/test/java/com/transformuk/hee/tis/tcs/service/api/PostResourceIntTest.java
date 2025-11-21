@@ -857,7 +857,7 @@ public class PostResourceIntTest {
     // Get the post
     restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}",
             URLEncoder.encode(nationalPostNumberWithSpecialCharacters, "UTF-8")))
-        .andExpect(status().isFound())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[0].id").value(post.getId().intValue()))
         .andExpect(

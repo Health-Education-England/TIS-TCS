@@ -134,9 +134,14 @@ public class GmcDetailsResource {
       @PathVariable("gmcIds") List<String> gmcIds) {
     log.debug("REST request to find several GmcDetails: {}", gmcIds);
 
-    if (!gmcIds.isEmpty()) {
-      UrlDecoderUtil.decode(gmcIds);
-      return new ResponseEntity<>(gmcDetailsService.findByIdIn(gmcIds), HttpStatus.OK);
+    // Filter out blank/empty strings
+    List<String> filteredIds = gmcIds.stream()
+        .filter(StringUtils::isNotBlank)
+        .collect(Collectors.toList());
+
+    if (!filteredIds.isEmpty()) {
+      UrlDecoderUtil.decode(filteredIds);
+      return new ResponseEntity<>(gmcDetailsService.findByIdIn(filteredIds), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }

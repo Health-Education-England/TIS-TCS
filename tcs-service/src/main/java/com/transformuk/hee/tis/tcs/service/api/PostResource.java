@@ -233,9 +233,15 @@ public class PostResource {
   public ResponseEntity<List<PostDTO>> getPostsIn(
       @PathVariable("nationalPostNumbers") List<String> nationalPostNumbers) {
     log.debug("REST request to get Posts : {}", nationalPostNumbers);
-    if (!nationalPostNumbers.isEmpty()) {
-      UrlDecoderUtil.decode(nationalPostNumbers);
-      return new ResponseEntity<>(postService.findAllByNationalPostNumbers(nationalPostNumbers),
+
+    // Filter out blank/empty strings
+    List<String> filteredNpns = nationalPostNumbers.stream()
+        .filter(StringUtils::isNotBlank)
+        .collect(Collectors.toList());
+
+    if (!filteredNpns.isEmpty()) {
+      UrlDecoderUtil.decode(filteredNpns);
+      return new ResponseEntity<>(postService.findAllByNationalPostNumbers(filteredNpns),
           HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);

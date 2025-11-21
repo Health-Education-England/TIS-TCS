@@ -246,10 +246,16 @@ public class PersonResource {
   public ResponseEntity<List<PersonDTO>> getPersonsWithPublicHealthNumbersIn(
       @PathVariable("publicHealthNumbers") final List<String> publicHealthNumbers) {
     log.debug("REST request to find several Person: {}", publicHealthNumbers);
-    if (!publicHealthNumbers.isEmpty()) {
-      UrlDecoderUtil.decode(publicHealthNumbers);
+
+    // Filter out blank/empty strings
+    List<String> filteredPhns = publicHealthNumbers.stream()
+        .filter(StringUtils::isNotBlank)
+        .collect(Collectors.toList());
+
+    if (!filteredPhns.isEmpty()) {
+      UrlDecoderUtil.decode(filteredPhns);
       return new ResponseEntity<>(
-          personService.findPersonsByPublicHealthNumbersIn(publicHealthNumbers), HttpStatus.OK);
+          personService.findPersonsByPublicHealthNumbersIn(filteredPhns), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
     }

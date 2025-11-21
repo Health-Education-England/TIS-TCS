@@ -17,7 +17,6 @@ import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
-import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.repository.GmcDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
@@ -508,7 +507,7 @@ public class GmcDetailsResourceIntTest {
     gmcDetailsRepository.saveAndFlush(gmcDetails1);
 
     // Query with one valid and one invalid ID
-    restGmcDetailsMockMvc.perform(get("/api/gdc-details/in/{gmcIds}", "GMC100,notanid"))
+    restGmcDetailsMockMvc.perform(get("/api/gmc-details/in/{gmcIds}", "GMC100,notanid"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[*].id").value(containsInAnyOrder(100)));
@@ -516,7 +515,7 @@ public class GmcDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void getGMcDetailsInShouldReturnEmptyListForNoIds() throws Exception {
+  public void getGmcDetailsInShouldReturnEmptyListForNoIds() throws Exception {
     restGmcDetailsMockMvc.perform(get("/api/gmc-details/in/{gmcIds}", ""))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
