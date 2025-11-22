@@ -151,7 +151,7 @@ public class GdcDetailsResource {
 
     if (!gdcIds.isEmpty()) {
       UrlDecoderUtil.decode(gdcIds);
-      return new ResponseEntity<>(gdcDetailsService.findByIdIn(gdcIds), HttpStatus.FOUND);
+      return new ResponseEntity<>(gdcDetailsService.findByIdIn(gdcIds), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }

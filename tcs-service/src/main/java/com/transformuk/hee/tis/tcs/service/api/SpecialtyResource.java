@@ -176,10 +176,8 @@ public class SpecialtyResource {
 
     if (!idList.isEmpty()) {
       resp = specialtyService.findByIdIn(idList);
-      return new ResponseEntity<>(resp, HttpStatus.FOUND);
-    } else {
-      return new ResponseEntity<>(resp, HttpStatus.OK);
     }
+    return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 
   /**
