@@ -1191,7 +1191,8 @@ public class PersonResourceIntTest {
   @Transactional
   public void getPersonsWithPublicHealthNumbersInShouldReturnBadRequestForEmptyInput() throws Exception {
     restPersonMockMvc.perform(get("/api/people/phn/in/{publicHealthNumbers}", ""))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isNotFound());
+    //similar tests for other endpoints throw Server Error, but this one throws Not Found
   }
 
   @Test

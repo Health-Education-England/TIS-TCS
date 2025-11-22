@@ -149,14 +149,9 @@ public class GdcDetailsResource {
       @PathVariable("gdcIds") List<String> gdcIds) {
     log.debug("REST request to find several GdcDetails: {}", gdcIds);
 
-    // Filter out blank/empty strings
-    List<String> filteredIds = gdcIds.stream()
-        .filter(StringUtils::isNotBlank)
-        .collect(Collectors.toList());
-
-    if (!filteredIds.isEmpty()) {
-      UrlDecoderUtil.decode(filteredIds);
-      return new ResponseEntity<>(gdcDetailsService.findByIdIn(filteredIds), HttpStatus.OK);
+    if (!gdcIds.isEmpty()) {
+      UrlDecoderUtil.decode(gdcIds);
+      return new ResponseEntity<>(gdcDetailsService.findByIdIn(gdcIds), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
     }

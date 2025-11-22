@@ -247,16 +247,12 @@ public class PersonResource {
       @PathVariable("publicHealthNumbers") final List<String> publicHealthNumbers) {
     log.debug("REST request to find several Person: {}", publicHealthNumbers);
 
-    // Filter out blank/empty strings
-    List<String> filteredPhns = publicHealthNumbers.stream()
-        .filter(StringUtils::isNotBlank)
-        .collect(Collectors.toList());
-
-    if (!filteredPhns.isEmpty()) {
-      UrlDecoderUtil.decode(filteredPhns);
+    if (!publicHealthNumbers.isEmpty()) {
+      UrlDecoderUtil.decode(publicHealthNumbers);
       return new ResponseEntity<>(
-          personService.findPersonsByPublicHealthNumbersIn(filteredPhns), HttpStatus.OK);
+          personService.findPersonsByPublicHealthNumbersIn(publicHealthNumbers), HttpStatus.OK);
     } else {
+      // other resources return HttpStatus.OK with empty list, but leaving it as is for now
       return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
     }
   }
