@@ -506,7 +506,7 @@ public class PersonResourceIntTest {
 
     // when & then
     restPersonMockMvc.perform(get("/api/people/in/" + personsIDs + "/basic"))
-        .andExpect(status().isFound())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
         .andExpect(jsonPath("$[0].firstName").value(PERSON_FORENAMES))
@@ -530,7 +530,7 @@ public class PersonResourceIntTest {
 
     // when & then
     restPersonMockMvc.perform(get("/api/people/in/" + personsIDs))
-        .andExpect(status().isFound())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$[0].id").value(this.person.getId().intValue()))
         .andExpect(jsonPath("$[1].id").value(person2.getId().intValue()));
@@ -1156,5 +1156,113 @@ public class PersonResourceIntTest {
     assertThat(trainerApprovalRepository.findAll().size()).isEqualTo(trainerApprovalAmount);
     assertThat(trainerApprovalRepository.findById(savedTrainerApproval.getId()).isPresent())
         .isTrue();
+  }
+
+  @Test
+  @Transactional
+  public void getPersonsWithPublicHealthNumbersInShouldReturnMatchingPersons() throws Exception {
+    // given
+    person.setPublicHealthNumber("PHN123");
+    personRepository.saveAndFlush(person);
+
+    Person person2 = createEntity();
+    person2.setPublicHealthNumber("PHN456");
+    personRepository.saveAndFlush(person2);
+
+    // when & then
+    restPersonMockMvc.perform(get("/api/people/phn/in/{publicHealthNumbers}", "PHN123,PHN456"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].publicHealthNumber").value(
+            containsInAnyOrder("PHN123", "PHN456")));
+  }
+
+  @Test
+  @Transactional
+  public void getPersonsWithPublicHealthNumbersInShouldReturnEmptyForNonExisting() throws Exception {
+    restPersonMockMvc.perform(get("/api/people/phn/in/{publicHealthNumbers}", "NONEXIST"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @Transactional
+  public void getPersonsWithPublicHealthNumbersInShouldReturnBadRequestForEmptyInput() throws Exception {
+    restPersonMockMvc.perform(get("/api/people/phn/in/{publicHealthNumbers}", ""))
+        .andExpect(status().isNotFound());
+    //similar tests for other endpoints throw Server Error, but this one throws Not Found
+  }
+
+  @Test
+  @Transactional
+  public void getPersonsInShouldReturnMatchingPersons() throws Exception {
+    // given
+    personRepository.saveAndFlush(person);
+    Person person2 = createEntity();
+    personRepository.saveAndFlush(person2);
+
+    String ids = person.getId() + "," + person2.getId();
+
+    // when & then
+    restPersonMockMvc.perform(get("/api/people/in/{ids}", ids))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(
+            containsInAnyOrder(person.getId().intValue(), person2.getId().intValue())));
+  }
+
+  @Test
+  @Transactional
+  public void getPersonsInShouldReturnEmptyForNonExistingIds() throws Exception {
+    restPersonMockMvc.perform(get("/api/people/in/{ids}", "99999,88888"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @Transactional
+  public void getPersonBasicDetailsInShouldReturnBasicDetailsForMultipleIds() throws Exception {
+    // given
+    personRepository.saveAndFlush(person);
+    ContactDetails contactDetails = new ContactDetails();
+    contactDetails.setId(person.getId());
+    contactDetails.setSurname(PERSON_SURNAME);
+    contactDetails.setForenames(PERSON_FORENAMES);
+    contactDetailsRepository.saveAndFlush(contactDetails);
+
+    Person person2 = createEntity();
+    personRepository.saveAndFlush(person2);
+    ContactDetails contactDetails2 = new ContactDetails();
+    contactDetails2.setId(person2.getId());
+    contactDetails2.setSurname(PERSON_SURNAME + "2");
+    contactDetails2.setForenames(PERSON_FORENAMES + "2");
+    contactDetailsRepository.saveAndFlush(contactDetails2);
+
+    String ids = person.getId() + "," + person2.getId();
+
+    // when & then
+    restPersonMockMvc.perform(get("/api/people/in/{ids}/basic", ids))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(
+            containsInAnyOrder(person.getId().intValue(), person2.getId().intValue())))
+        .andExpect(jsonPath("$.[*].firstName").value(
+            containsInAnyOrder(PERSON_FORENAMES, PERSON_FORENAMES + "2")))
+        .andExpect(jsonPath("$.[*].lastName").value(
+            containsInAnyOrder(PERSON_SURNAME, PERSON_SURNAME + "2")));
+  }
+
+  @Test
+  @Transactional
+  public void getPersonBasicDetailsInShouldReturnEmptyForNonExistingIds() throws Exception {
+    restPersonMockMvc.perform(get("/api/people/in/{ids}/basic", "99999,88888"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
   }
 }

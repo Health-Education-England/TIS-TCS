@@ -389,4 +389,60 @@ public class GdcDetailsResourceIntTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[0].message").value("gdcNumber should not contain any whitespaces"));
   }
+
+  @Test
+  @Transactional
+  public void getGdcDetailsInShouldReturnMatchingDetails() throws Exception {
+    // Initialize the database with two GdcDetails
+    GdcDetails gdcDetails1 = new GdcDetails()
+        .id(100L)
+        .gdcNumber("GDC100")
+        .gdcStatus(DEFAULT_GDC_STATUS)
+        .gdcStartDate(DEFAULT_GDC_START_DATE)
+        .gdcEndDate(DEFAULT_GDC_END_DATE);
+    GdcDetails gdcDetails2 = new GdcDetails()
+        .id(101L)
+        .gdcNumber("GDC101")
+        .gdcStatus(DEFAULT_GDC_STATUS)
+        .gdcStartDate(DEFAULT_GDC_START_DATE)
+        .gdcEndDate(DEFAULT_GDC_END_DATE);
+
+    gdcDetailsRepository.saveAndFlush(gdcDetails1);
+    gdcDetailsRepository.saveAndFlush(gdcDetails2);
+
+    restGdcDetailsMockMvc.perform(get("/api/gdc-details/in/{gdcIds}", "GDC100,GDC101"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(containsInAnyOrder(100, 101)));
+  }
+
+  @Test
+  @Transactional
+  public void getGdcDetailsInShouldIgnoreMalformedIds() throws Exception {
+    // Initialize the database with one GdcDetails
+    GdcDetails gdcDetails1 = new GdcDetails()
+        .id(100L)
+        .gdcNumber("GDC100")
+        .gdcStatus(DEFAULT_GDC_STATUS)
+        .gdcStartDate(DEFAULT_GDC_START_DATE)
+        .gdcEndDate(DEFAULT_GDC_END_DATE);
+
+    gdcDetailsRepository.saveAndFlush(gdcDetails1);
+
+    // Query with one valid and one invalid ID
+    restGdcDetailsMockMvc.perform(get("/api/gdc-details/in/{gdcIds}", "GDC100,notanid"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(containsInAnyOrder(100)));
+  }
+
+  @Test
+  @Transactional
+  public void getGdcDetailsInThrowsServerErrorForNoIds() throws Exception {
+    // NOTE: This endpoint returns a 500 error due to Spring's PathVariable conversion error when
+    // no IDs are provided.
+    // The API signature cannot be changed, so this test highlights the non-standard response.
+    restGdcDetailsMockMvc.perform(get("/api/gdc-details/in/{gdcIds}", ""))
+        .andExpect(status().isInternalServerError());
+  }
 }

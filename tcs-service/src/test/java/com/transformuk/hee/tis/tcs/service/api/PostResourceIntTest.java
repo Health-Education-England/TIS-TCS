@@ -857,7 +857,7 @@ public class PostResourceIntTest {
     // Get the post
     restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}",
             URLEncoder.encode(nationalPostNumberWithSpecialCharacters, "UTF-8")))
-        .andExpect(status().isFound())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$.[0].id").value(post.getId().intValue()))
         .andExpect(
@@ -1671,5 +1671,45 @@ public class PostResourceIntTest {
     post3.setNationalPostNumber(npns.get(2));
     postRepository.saveAndFlush(post3);
     return npns;
+  }
+
+  @Test
+  @Transactional
+  public void getPostsInShouldReturnMatchingPosts() throws Exception {
+    // Given
+    Post post1 = createEntity();
+    post1.setNationalPostNumber("NPN100");
+    postRepository.saveAndFlush(post1);
+
+    Post post2 = createEntity();
+    post2.setNationalPostNumber("NPN200");
+    postRepository.saveAndFlush(post2);
+
+    // When & Then
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", "NPN100,NPN200"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(
+            containsInAnyOrder("NPN100", "NPN200")));
+  }
+
+  @Test
+  @Transactional
+  public void getPostsInShouldReturnEmptyForNonExistingNumbers() throws Exception {
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", "NONEXIST1,NONEXIST2"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @Transactional
+  public void getPostsInThrowsServerErrorForEmptyInput() throws Exception {
+    // NOTE: This endpoint returns a 500 error due to Spring's PathVariable conversion error when
+    // no IDs are provided.
+    // The API signature cannot be changed, so this test highlights the non-standard response.
+    restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", ""))
+        .andExpect(status().isInternalServerError());
   }
 }

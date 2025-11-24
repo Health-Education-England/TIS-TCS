@@ -9,11 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.SpecialtySimpleDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.SpecialtyValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.service.SpecialtyService;
+import java.util.ArrayList;
 import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -181,5 +183,84 @@ public class SpecialtyResourceTest {
     ;
 
     verify(specialtyServiceMock).getSpecialtiesForProgrammeAndPerson(programmeId, personId);
+  }
+
+  @Test
+  public void findByIdsShouldReturnSpecialtiesForValidIds() throws Exception {
+    SpecialtySimpleDTO simpleDTO1 = new SpecialtySimpleDTO();
+    simpleDTO1.setId(SPECIALTY_ID);
+    simpleDTO1.setName(SPECIALTY_NAME);
+    simpleDTO1.setSpecialtyCode(SPECIALTY_CODE);
+    simpleDTO1.setStatus(Status.CURRENT);
+    simpleDTO1.setCollege(SPECIALTY_COLLEGE);
+
+    SpecialtySimpleDTO simpleDTO2 = new SpecialtySimpleDTO();
+    simpleDTO2.setId(ANOTHER_SPECIALTY_ID);
+    simpleDTO2.setName(ANOTHER_SPECIALTY_NAME);
+    simpleDTO2.setSpecialtyCode(ANOTHER_SPECIALTY_CODE);
+    simpleDTO2.setStatus(Status.INACTIVE);
+    simpleDTO2.setCollege(ANOTHER_SPECIALTY_COLLEGE);
+
+    List<SpecialtySimpleDTO> foundSpecialties = Lists.newArrayList(simpleDTO1, simpleDTO2);
+    when(specialtyServiceMock.findByIdIn(Lists.newArrayList(SPECIALTY_ID, ANOTHER_SPECIALTY_ID)))
+        .thenReturn(foundSpecialties);
+
+    mockMvc.perform(MockMvcRequestBuilders
+        .get("/api/specialties/in/{ids}", SPECIALTY_ID + "," + ANOTHER_SPECIALTY_ID)
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id")
+            .value(Matchers.hasItems(SPECIALTY_ID.intValue(), ANOTHER_SPECIALTY_ID.intValue())))
+        .andExpect(jsonPath("$.[*].name")
+            .value(Matchers.hasItems(SPECIALTY_NAME, ANOTHER_SPECIALTY_NAME)))
+        .andExpect(jsonPath("$.[*].specialtyCode")
+            .value(Matchers.hasItems(SPECIALTY_CODE, ANOTHER_SPECIALTY_CODE)))
+        .andExpect(jsonPath("$.[*].status")
+            .value(Matchers.hasItems(SPECIALTY_STATUS, ANOTHER_SPECIALTY_STATUS)))
+        .andExpect(jsonPath("$.[*].college")
+            .value(Matchers.hasItems(SPECIALTY_COLLEGE, ANOTHER_SPECIALTY_COLLEGE)));
+
+    verify(specialtyServiceMock).findByIdIn(Lists.newArrayList(SPECIALTY_ID, ANOTHER_SPECIALTY_ID));
+  }
+
+  @Test
+  public void findByIdsShouldIgnoreMalformedIds() throws Exception {
+    SpecialtySimpleDTO simpleDTO1 = new SpecialtySimpleDTO();
+    simpleDTO1.setId(SPECIALTY_ID);
+    simpleDTO1.setName(SPECIALTY_NAME);
+    simpleDTO1.setSpecialtyCode(SPECIALTY_CODE);
+    simpleDTO1.setStatus(Status.CURRENT);
+    simpleDTO1.setCollege(SPECIALTY_COLLEGE);
+
+    List<SpecialtySimpleDTO> foundSpecialties = Lists.newArrayList(simpleDTO1);
+    when(specialtyServiceMock.findByIdIn(Lists.newArrayList(SPECIALTY_ID)))
+        .thenReturn(foundSpecialties);
+
+    mockMvc.perform(MockMvcRequestBuilders
+        .get("/api/specialties/in/{ids}", SPECIALTY_ID + ",abc")
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(Matchers.hasItem(SPECIALTY_ID.intValue())))
+        .andExpect(jsonPath("$.[*].name").value(Matchers.hasItem(SPECIALTY_NAME)));
+
+    verify(specialtyServiceMock).findByIdIn(Lists.newArrayList(SPECIALTY_ID));
+  }
+
+  @Test
+  public void findByIdsShouldReturnEmptyListForNonExistentIds() throws Exception {
+    when(specialtyServiceMock.findByIdIn(Lists.newArrayList(999L)))
+        .thenReturn(new ArrayList<>());
+
+    mockMvc.perform(MockMvcRequestBuilders
+        .get("/api/specialties/in/{ids}", "999")
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.length()").value(0));
+
+    verify(specialtyServiceMock).findByIdIn(Lists.newArrayList(999L));
   }
 }
