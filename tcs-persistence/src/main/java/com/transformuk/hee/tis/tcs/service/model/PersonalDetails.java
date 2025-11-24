@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.Disability;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,8 +93,13 @@ public class PersonalDetails implements Serializable {
   }
 
   public PersonalDetails disability(String disability) {
-    this.disability = disability;
+    this.disability = Disability.normaliseOrKeepOriginal(disability);
     return this;
+  }
+
+  // Rewrite set method for disability
+  public void setDisability(String disability) {
+    this.disability = Disability.normaliseOrKeepOriginal(disability);
   }
 
   public PersonalDetails disabilityDetails(String disabilityDetails) {
