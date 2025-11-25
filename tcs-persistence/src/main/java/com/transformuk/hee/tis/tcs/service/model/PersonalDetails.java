@@ -133,8 +133,9 @@ public class PersonalDetails implements Serializable {
   }
 
   private static String normaliseOrKeepOriginal(String value) {
-    if (value == null)
+    if (value == null) {
       return null;
+    }
 
     try {
       return Disability.valueOf(value.trim().toUpperCase()).name();
