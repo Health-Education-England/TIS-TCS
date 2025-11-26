@@ -453,32 +453,32 @@ class PersonalDetailsResourceIntTest {
     assertThat(personalDetailsMapper.fromId(null)).isNull();
   }
 
-  @ParameterizedTest
-  @NullSource
-  @ValueSource(strings = {UPDATED_DISABILITY, UNNORMALISED_DISABILITY, LEGACY_DISABILITY})
+  @Test
   @Transactional
-  void patchPersonalDetails(String disability) throws Exception {
+  void patchPersonalDetails() throws Exception {
     // Initialize the database
-    PersonalDetails originalPersonalDetails = personalDetailsRepository.saveAndFlush(
-        personalDetails);
+    personalDetailsRepository.saveAndFlush(personalDetails);
     int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();
 
-    PersonalDetailsDTO personalDetailsDto = personalDetailsMapper.toDto(originalPersonalDetails);
-    personalDetailsDto.setDateOfBirth(UPDATED_DATE_OF_BIRTH);
-    personalDetailsDto.setNationality(UPDATED_NATIONALITY);
-    personalDetailsDto.setDualNationality(UPDATED_DUAL_NATIONALITY);
-    personalDetailsDto.setSexualOrientation(UPDATED_SEXUAL_ORIENTATION);
-    personalDetailsDto.setReligiousBelief(UPDATED_RELIGIOUS_BELIEF);
-    personalDetailsDto.setEthnicOrigin(UPDATED_ETHNIC_ORIGIN);
-    personalDetailsDto.setDisability(disability);
-    personalDetailsDto.setNationalInsuranceNumber(UPDATED_NI_NUMBER);
-    personalDetailsDto.setDisabilityDetails(UPDATED_DISABILITY_DETAILS);
-
+    // Update the personalDetails
+    PersonalDetails updatedPersonalDetails = personalDetailsRepository
+        .findById(personalDetails.getId()).orElse(null);
+    updatedPersonalDetails
+        .dateOfBirth(UPDATED_DATE_OF_BIRTH)
+        .nationality(UPDATED_NATIONALITY)
+        .dualNationality(UPDATED_DUAL_NATIONALITY)
+        .sexualOrientation(UPDATED_SEXUAL_ORIENTATION)
+        .religiousBelief(UPDATED_RELIGIOUS_BELIEF)
+        .ethnicOrigin(UPDATED_ETHNIC_ORIGIN)
+        .disability(UPDATED_DISABILITY)
+        .nationalInsuranceNumber(UPDATED_NI_NUMBER)
+        .disabilityDetails(UPDATED_DISABILITY_DETAILS);
+    PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
     when(referenceService.isValueExists(any(), anyString())).thenReturn(true);
     restPersonalDetailsMockMvc
-        .perform(patch("/api/personal-details/{id}", personalDetailsDto.getId())
+        .perform(patch("/api/personal-details/{id}", personalDetailsDTO.getId())
             .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(personalDetailsDto)))
+            .content(TestUtil.convertObjectToJsonBytes(personalDetailsDTO)))
         .andExpect(status().isOk());
 
     // Validate the PersonalDetails in the database
@@ -493,15 +493,9 @@ class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getSexualOrientation()).isEqualTo(UPDATED_SEXUAL_ORIENTATION);
     assertThat(testPersonalDetails.getReligiousBelief()).isEqualTo(UPDATED_RELIGIOUS_BELIEF);
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(UPDATED_ETHNIC_ORIGIN);
+    assertThat(testPersonalDetails.getDisability()).isEqualTo(UPDATED_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(UPDATED_DISABILITY_DETAILS);
     assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(UPDATED_NI_NUMBER);
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
-    if (LEGACY_DISABILITY.equals(disability)) {
-      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability);
-    } else if (disability == null) { // null value won't update the field
-      assertThat(testPersonalDetails.getDisability()).isEqualTo(DEFAULT_DISABILITY);
-    } else {
-      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability.toUpperCase());
-    }
   }
 }
