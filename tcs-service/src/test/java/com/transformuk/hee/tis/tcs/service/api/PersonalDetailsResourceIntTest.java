@@ -34,6 +34,7 @@ import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -168,13 +169,16 @@ class PersonalDetailsResourceIntTest {
     personalDetails = createEntity();
   }
 
-  @Test
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {DEFAULT_DISABILITY, UNNORMALISED_DISABILITY})
   @Transactional
-  void createPersonalDetails() throws Exception {
+  void createPersonalDetails(String disability) throws Exception {
     int databaseSizeBeforeCreate = personalDetailsRepository.findAll().size();
 
     // Create the PersonalDetails
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
+    personalDetailsDTO.setDisability(disability);
     when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(MediaType.APPLICATION_JSON)
@@ -193,10 +197,14 @@ class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getSexualOrientation()).isEqualTo(DEFAULT_SEXUAL_ORIENTATION);
     assertThat(testPersonalDetails.getReligiousBelief()).isEqualTo(DEFAULT_RELIGIOUS_BELIEF);
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(DEFAULT_ETHNIC_ORIGIN);
-    assertThat(testPersonalDetails.getDisability()).isEqualTo(DEFAULT_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(DEFAULT_DISABILITY_DETAILS);
     assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(DEFAULT_NI_NUMBER);
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
+    if (disability == null) {
+      assertThat(testPersonalDetails.getDisability()).isNull();
+    } else {
+      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability.toUpperCase());
+    }
   }
 
   @Test
@@ -315,10 +323,13 @@ class PersonalDetailsResourceIntTest {
         .andExpect(status().isNotFound());
   }
 
-  @Test
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {UPDATED_DISABILITY, UNNORMALISED_DISABILITY, LEGACY_DISABILITY})
   @Transactional
-  void updatePersonalDetails() throws Exception {
+  void updatePersonalDetails(String disability) throws Exception {
     // Initialize the database
+    personalDetails.setDisability(LEGACY_DISABILITY);
     personalDetailsRepository.saveAndFlush(personalDetails);
     int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();
 
@@ -334,7 +345,7 @@ class PersonalDetailsResourceIntTest {
         .sexualOrientation(UPDATED_SEXUAL_ORIENTATION)
         .religiousBelief(UPDATED_RELIGIOUS_BELIEF)
         .ethnicOrigin(UPDATED_ETHNIC_ORIGIN)
-        .disability(UPDATED_DISABILITY)
+        .disability(disability)
         .nationalInsuranceNumber(UPDATED_NI_NUMBER)
         .disabilityDetails(UPDATED_DISABILITY_DETAILS);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
@@ -356,10 +367,15 @@ class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getSexualOrientation()).isEqualTo(UPDATED_SEXUAL_ORIENTATION);
     assertThat(testPersonalDetails.getReligiousBelief()).isEqualTo(UPDATED_RELIGIOUS_BELIEF);
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(UPDATED_ETHNIC_ORIGIN);
-    assertThat(testPersonalDetails.getDisability()).isEqualTo(UPDATED_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(UPDATED_DISABILITY_DETAILS);
     assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(UPDATED_NI_NUMBER);
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
+    // legacy value should be kept as is during update
+    if (LEGACY_DISABILITY.equals(disability) || disability == null) {
+      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability);
+    } else {
+      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability.toUpperCase());
+    }
   }
 
   @Test
@@ -438,6 +454,7 @@ class PersonalDetailsResourceIntTest {
   }
 
   @ParameterizedTest
+  @NullSource
   @ValueSource(strings = {UPDATED_DISABILITY, UNNORMALISED_DISABILITY, LEGACY_DISABILITY})
   @Transactional
   void patchPersonalDetails(String disability) throws Exception {
@@ -481,6 +498,8 @@ class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
     if (LEGACY_DISABILITY.equals(disability)) {
       assertThat(testPersonalDetails.getDisability()).isEqualTo(disability);
+    } else if (disability == null) { // null value won't update the field
+      assertThat(testPersonalDetails.getDisability()).isEqualTo(DEFAULT_DISABILITY);
     } else {
       assertThat(testPersonalDetails.getDisability()).isEqualTo(disability.toUpperCase());
     }

@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,5 +35,17 @@ class PersonalDetailsTest {
 
     assertEquals(legacyDisability, personalDetails1.getDisability());
     assertEquals(legacyDisability, personalDetails2.getDisability());
+  }
+
+  @Test
+  void shouldReturnNullWhenNullDisability() {
+    PersonalDetails personalDetails1 = new PersonalDetails();
+    personalDetails1.setDisability(null);
+
+    PersonalDetails personalDetails2 = new PersonalDetails();
+    personalDetails2.disability(null);
+
+    assertNull(personalDetails1.getDisability());
+    assertNull(personalDetails2.getDisability());
   }
 }
