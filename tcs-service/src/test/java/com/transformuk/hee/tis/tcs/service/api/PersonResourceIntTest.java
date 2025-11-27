@@ -79,10 +79,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.net.URLCodec;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -90,12 +92,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PersonResourceIntTest {
 
@@ -140,6 +140,10 @@ public class PersonResourceIntTest {
   private static final String DEFAULT_REGULATOR = "AAAAAAAAAA";
   private static final String UPDATED_REGULATOR = "BBBBBBBBBB";
   private static final BigDecimal DEFAULT_PLACEMENT_WTE = BigDecimal.valueOf(0.6);
+
+  private static final String UPDATED_DISABILITY = "YES";
+  private static final String UNNORMALISED_DISABILITY = "No";
+  private static final String LEGACY_DISABILITY = "I prefer not to say";
 
   @Autowired
   private PersonRepository personRepository;
@@ -227,8 +231,8 @@ public class PersonResourceIntTest {
         .regulator(DEFAULT_REGULATOR);
   }
 
-  @Before
-  public void setup() {
+  @BeforeEach
+  void setup() {
     MockitoAnnotations.initMocks(this);
     personValidatorSpy = spy(personValidator);
 
@@ -280,14 +284,14 @@ public class PersonResourceIntTest {
     return person;
   }
 
-  @Before
-  public void initTest() {
+  @BeforeEach
+  void initTest() {
     person = createEntity();
   }
 
   @Test
   @Transactional
-  public void createPerson() throws Exception {
+  void createPerson() throws Exception {
     // Create the Person
     ContactDetails contactDetails = new ContactDetails();
     person.setContactDetails(contactDetails);
@@ -335,7 +339,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
     //given
     final PersonDTO personDTO = new PersonDTO();
 
@@ -351,7 +355,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
     //given
     final PersonDTO personDTO = new PersonDTO();
 
@@ -367,7 +371,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void createPersonWithExistingId() throws Exception {
+  void createPersonWithExistingId() throws Exception {
     // Create the Person with an existing ID
     person.setId(1L);
     final PersonDTO personDTO = personMapper.toDto(person);
@@ -385,7 +389,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldGetBasicDetails() throws Exception {
+  void shouldGetBasicDetails() throws Exception {
     // given
     personRepository.saveAndFlush(person);
     final GmcDetails gmcDetails = new GmcDetails();
@@ -414,7 +418,7 @@ public class PersonResourceIntTest {
    */
   @Test
   @Transactional
-  public void shouldGetPersonsByRoleCategory() throws Exception {
+  void shouldGetPersonsByRoleCategory() throws Exception {
     final Collection<RoleDTO> roles = new ArrayList<>();
     RoleDTO roleDTO = new RoleDTO();
     roleDTO.setCode("role1");
@@ -481,7 +485,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldGetMultipleBasicDetails() throws Exception {
+  void shouldGetMultipleBasicDetails() throws Exception {
     // given
     personRepository.saveAndFlush(person);
     final GmcDetails gmcDetails = new GmcDetails();
@@ -519,7 +523,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldGetMultiplePersons() throws Exception {
+  void shouldGetMultiplePersons() throws Exception {
     // given
     personRepository.saveAndFlush(person);
 
@@ -539,7 +543,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getAllPeople() throws Exception {
+  void getAllPeople() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
     final GmcDetails gmcDetails = new GmcDetails();
@@ -570,7 +574,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchBasicDetails() throws Exception {
+  void shouldTextSearchBasicDetails() throws Exception {
     final Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     final GmcDetails gmcDetails = new GmcDetails();
@@ -600,10 +604,10 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[*].lastName").value(PERSON_SURNAME));
   }
 
-  @Ignore
+  @Disabled
   @Test
   @Transactional
-  public void getPerson() throws Exception {
+  void getPerson() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
 
@@ -626,7 +630,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldGetPlacementSummaryFields() throws Exception {
+  void shouldGetPlacementSummaryFields() throws Exception {
     // Given a person with one placement
     personRepository.saveAndFlush(person);
     Placement placement = PlacementResourceIntTest.createPlacementEntity();
@@ -645,7 +649,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldGetPlacementViewFields() throws Exception {
+  void shouldGetPlacementViewFields() throws Exception {
     // Given a person with one placement
     personRepository.saveAndFlush(person);
     Placement placement = PlacementResourceIntTest.createPlacementEntity();
@@ -664,7 +668,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getNonExistingPerson() throws Exception {
+  void getNonExistingPerson() throws Exception {
     // Get the person
     restPersonMockMvc.perform(get("/api/people/{id}", Long.MAX_VALUE))
         .andExpect(status().isNotFound());
@@ -672,7 +676,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void updatePerson() throws Exception {
+  void updatePerson() throws Exception {
     // Initialize the database
     Person savedPerson = personRepository.saveAndFlush(person);
     savedPerson = createPersonBlankSubSections(savedPerson);
@@ -723,7 +727,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void updateNonExistingPerson() throws Exception {
+  void updateNonExistingPerson() throws Exception {
     // Create the Person
     final PersonDTO personDTO = personMapper.toDto(person);
 
@@ -743,7 +747,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchSurname() throws Exception {
+  void shouldTextSearchSurname() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     anotherPerson = createPersonBlankSubSections(anotherPerson);
@@ -765,7 +769,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchGmcDetails() throws Exception {
+  void shouldTextSearchGmcDetails() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     anotherPerson = createPersonBlankSubSections(anotherPerson);
@@ -785,7 +789,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchGdcDetails() throws Exception {
+  void shouldTextSearchGdcDetails() throws Exception {
     Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     anotherPerson = createPersonBlankSubSections(anotherPerson);
@@ -812,7 +816,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchPublicHealthNumber() throws Exception {
+  void shouldTextSearchPublicHealthNumber() throws Exception {
     final Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     createPersonBlankSubSections(anotherPerson);
@@ -830,7 +834,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterColumns() throws Exception {
+  void shouldFilterColumns() throws Exception {
     //given
     // Initialize the database
     personRepository.saveAndFlush(person);
@@ -850,7 +854,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchAndFilterColumns() throws Exception {
+  void shouldTextSearchAndFilterColumns() throws Exception {
     //given
     // Initialize the database
     personRepository.saveAndFlush(person);
@@ -881,7 +885,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void deletePerson() throws Exception {
+  void deletePerson() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
 
@@ -897,7 +901,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void patchPersons() throws Exception {
+  void patchPersons() throws Exception {
     // Initialize the database
     personRepository.saveAndFlush(person);
 
@@ -944,7 +948,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void equalsVerifier() throws Exception {
+  void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(Person.class);
     final Person person1 = new Person();
     person1.setId(1L);
@@ -959,7 +963,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void dtoEqualsVerifier() {
+  void dtoEqualsVerifier() {
     final PersonDTO personDTO1 = new PersonDTO();
     personDTO1.setId(1L);
     final PersonDTO personDTO2 = new PersonDTO();
@@ -974,7 +978,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateWhitespaceInPhWhenUpdatePerson() throws Exception {
+  void shouldValidateWhitespaceInPhWhenUpdatePerson() throws Exception {
     // Initialize the database
     Person savedPerson = personRepository.saveAndFlush(person);
 
@@ -1005,6 +1009,7 @@ public class PersonResourceIntTest {
 
     PersonalDetails personalDetails = new PersonalDetails();
     personalDetails.setId(savedId);
+    personalDetails.setDisability(LEGACY_DISABILITY);
     personalDetailsRepository.save(personalDetails);
 
     PersonalDetailsDTO personalDetailsDto = new PersonalDetailsDTO();
@@ -1052,7 +1057,7 @@ public class PersonResourceIntTest {
   }
 
   @Test
-  public void patchPersonShouldNotReturnErrorMessage() throws Exception {
+  void patchPersonShouldNotReturnErrorMessage() throws Exception {
     Person savedPerson = personRepository.saveAndFlush(person);
 
     PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
@@ -1071,8 +1076,34 @@ public class PersonResourceIntTest {
         .andExpect(jsonPath("$.[0].messageList").isEmpty());
   }
 
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {UPDATED_DISABILITY, UNNORMALISED_DISABILITY})
+  void patchPersonShouldHandleDisabilityField(String disability) throws Exception {
+    Person savedPerson = personRepository.saveAndFlush(person);
+
+    PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
+    updatedPersonDto.getPersonalDetails().setDisability(disability);
+
+    Map<String, String> roleToMatches = new HashMap<>();
+    roleToMatches.put(UPDATED_ROLE, UPDATED_ROLE);
+    when(referenceService.rolesMatch(any(), eq(true))).thenReturn(roleToMatches);
+
+    String expectedDisability = (disability == null) ? LEGACY_DISABILITY : disability.toUpperCase();
+
+    restPersonMockMvc.perform(patch("/api/bulk-people")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(Collections.singletonList(updatedPersonDto))))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.[*].role", hasItem(UPDATED_ROLE)))
+        .andExpect(jsonPath("$.[*].publicHealthNumber", hasItem(UPDATED_PUBLIC_HEALTH_NUMBER)))
+        .andExpect(jsonPath("$.[*].contactDetails.knownAs").value("knownAs"))
+        .andExpect(jsonPath("$.[*].personalDetails.disability", hasItem(expectedDisability)))
+        .andExpect(jsonPath("$.[0].messageList").isEmpty());
+  }
+
   @Test
-  public void patchPersonShouldDeleteExistingTrainerApprovalAndCreateNewOne() throws Exception {
+  void patchPersonShouldDeleteExistingTrainerApprovalAndCreateNewOne() throws Exception {
     Person savedPerson = personRepository.saveAndFlush(person);
     PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
 
@@ -1103,7 +1134,7 @@ public class PersonResourceIntTest {
   }
 
   @Test
-  public void patchPersonShouldDeleteExistingTrainerApproval() throws Exception {
+  void patchPersonShouldDeleteExistingTrainerApproval() throws Exception {
     Person savedPerson = personRepository.saveAndFlush(person);
     PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
 
@@ -1135,7 +1166,7 @@ public class PersonResourceIntTest {
   }
 
   @Test
-  public void patchPersonShouldNotDeleteExistingTrainerApprovalWhenNoNewRole() throws Exception {
+  void patchPersonShouldNotDeleteExistingTrainerApprovalWhenNoNewRole() throws Exception {
     Person savedPerson = personRepository.saveAndFlush(person);
     PersonDTO updatedPersonDto = initialPersonDataForBulk(savedPerson);
 
@@ -1160,7 +1191,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonsWithPublicHealthNumbersInShouldReturnMatchingPersons() throws Exception {
+  void getPersonsWithPublicHealthNumbersInShouldReturnMatchingPersons() throws Exception {
     // given
     person.setPublicHealthNumber("PHN123");
     personRepository.saveAndFlush(person);
@@ -1179,7 +1210,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonsWithPublicHealthNumbersInShouldReturnEmptyForNonExisting() throws Exception {
+  void getPersonsWithPublicHealthNumbersInShouldReturnEmptyForNonExisting() throws Exception {
     restPersonMockMvc.perform(get("/api/people/phn/in/{publicHealthNumbers}", "NONEXIST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -1189,7 +1220,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonsWithPublicHealthNumbersInShouldReturnBadRequestForEmptyInput() throws Exception {
+  void getPersonsWithPublicHealthNumbersInShouldReturnBadRequestForEmptyInput() throws Exception {
     restPersonMockMvc.perform(get("/api/people/phn/in/{publicHealthNumbers}", ""))
         .andExpect(status().isNotFound());
     //similar tests for other endpoints throw Server Error, but this one throws Not Found
@@ -1197,7 +1228,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonsInShouldReturnMatchingPersons() throws Exception {
+  void getPersonsInShouldReturnMatchingPersons() throws Exception {
     // given
     personRepository.saveAndFlush(person);
     Person person2 = createEntity();
@@ -1215,7 +1246,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonsInShouldReturnEmptyForNonExistingIds() throws Exception {
+  void getPersonsInShouldReturnEmptyForNonExistingIds() throws Exception {
     restPersonMockMvc.perform(get("/api/people/in/{ids}", "99999,88888"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -1225,7 +1256,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonBasicDetailsInShouldReturnBasicDetailsForMultipleIds() throws Exception {
+  void getPersonBasicDetailsInShouldReturnBasicDetailsForMultipleIds() throws Exception {
     // given
     personRepository.saveAndFlush(person);
     ContactDetails contactDetails = new ContactDetails();
@@ -1258,7 +1289,7 @@ public class PersonResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonBasicDetailsInShouldReturnEmptyForNonExistingIds() throws Exception {
+  void getPersonBasicDetailsInShouldReturnEmptyForNonExistingIds() throws Exception {
     restPersonMockMvc.perform(get("/api/people/in/{ids}/basic", "99999,88888"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))

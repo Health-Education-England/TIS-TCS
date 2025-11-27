@@ -37,6 +37,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.BindingResult;
@@ -75,21 +77,13 @@ class PersonalDetailsValidatorTest {
     validator = new PersonalDetailsValidator(referenceService);
   }
 
-  @Test
-  void shouldNotThrowExceptionWhenDisabilityYes() {
+  @ParameterizedTest
+  @ValueSource(strings = {"YES", "Yes", "YEs", "YeS", "yES", "yes", "yEs", "yeS",
+      "NO", "No", "no", "nO"})
+  void shouldNotThrowExceptionWhenDisabilityValid(String disability) {
     // Given.
     PersonalDetailsDTO dto = new PersonalDetailsDTO();
-    dto.setDisability("YES");
-
-    // When, then.
-    assertDoesNotThrow(() -> validator.validate(dto, null, Create.class));
-  }
-
-  @Test
-  void shouldNotThrowExceptionWhenDisabilityNo() {
-    // Given.
-    PersonalDetailsDTO dto = new PersonalDetailsDTO();
-    dto.setDisability("NO");
+    dto.setDisability(disability);
 
     // When, then.
     assertDoesNotThrow(() -> validator.validate(dto, null, Create.class));

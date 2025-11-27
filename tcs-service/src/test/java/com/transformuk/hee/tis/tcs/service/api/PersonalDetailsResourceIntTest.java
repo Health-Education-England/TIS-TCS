@@ -31,9 +31,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,9 +53,8 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @see PersonalDetailsResource
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class PersonalDetailsResourceIntTest {
+class PersonalDetailsResourceIntTest {
 
   private static final String DEFAULT_MARITAL_STATUS = "AAAAAAAAAA";
   private static final String UPDATED_MARITAL_STATUS = "BBBBBBBBBB";
@@ -82,6 +82,8 @@ public class PersonalDetailsResourceIntTest {
 
   private static final String DEFAULT_DISABILITY = "YES";
   private static final String UPDATED_DISABILITY = "NO";
+  private static final String UNNORMALISED_DISABILITY = "No";
+  private static final String LEGACY_DISABILITY = "I prefer not to say";
 
   private static final String DEFAULT_DISABILITY_DETAILS = "AAAAAAAAAA";
   private static final String UPDATED_DISABILITY_DETAILS = "BBBBBBBBBB";
@@ -131,8 +133,8 @@ public class PersonalDetailsResourceIntTest {
    * This is a static method, as tests for other entities might also need it, if they test an entity
    * which requires the current entity.
    */
-  public static PersonalDetails createEntity(EntityManager em) {
-    PersonalDetails personalDetails = new PersonalDetails()
+  public static PersonalDetails createEntity() {
+    return new PersonalDetails()
         .id(1L)
         .maritalStatus(DEFAULT_MARITAL_STATUS)
         .dateOfBirth(DEFAULT_DATE_OF_BIRTH)
@@ -145,11 +147,10 @@ public class PersonalDetailsResourceIntTest {
         .disability(DEFAULT_DISABILITY)
         .nationalInsuranceNumber(DEFAULT_NI_NUMBER)
         .disabilityDetails(DEFAULT_DISABILITY_DETAILS);
-    return personalDetails;
   }
 
-  @Before
-  public void setup() {
+  @BeforeEach
+  void setup() {
     MockitoAnnotations.initMocks(this);
     personalDetailsValidator = new PersonalDetailsValidator(referenceService);
     PersonalDetailsResource personalDetailsResource = new PersonalDetailsResource(
@@ -163,18 +164,21 @@ public class PersonalDetailsResourceIntTest {
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
   }
 
-  @Before
-  public void initTest() {
-    personalDetails = createEntity(em);
+  @BeforeEach
+  void initTest() {
+    personalDetails = createEntity();
   }
 
-  @Test
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {DEFAULT_DISABILITY, UNNORMALISED_DISABILITY})
   @Transactional
-  public void createPersonalDetails() throws Exception {
+  void createPersonalDetails(String disability) throws Exception {
     int databaseSizeBeforeCreate = personalDetailsRepository.findAll().size();
 
     // Create the PersonalDetails
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(personalDetails);
+    personalDetailsDTO.setDisability(disability);
     when(referenceService.isValueExists(any(), anyString(), anyBoolean())).thenReturn(true);
     restPersonalDetailsMockMvc.perform(post("/api/personal-details")
         .contentType(MediaType.APPLICATION_JSON)
@@ -193,15 +197,19 @@ public class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getSexualOrientation()).isEqualTo(DEFAULT_SEXUAL_ORIENTATION);
     assertThat(testPersonalDetails.getReligiousBelief()).isEqualTo(DEFAULT_RELIGIOUS_BELIEF);
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(DEFAULT_ETHNIC_ORIGIN);
-    assertThat(testPersonalDetails.getDisability()).isEqualTo(DEFAULT_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(DEFAULT_DISABILITY_DETAILS);
     assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(DEFAULT_NI_NUMBER);
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
+    if (disability == null) {
+      assertThat(testPersonalDetails.getDisability()).isNull();
+    } else {
+      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability.toUpperCase());
+    }
   }
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
     //given
     PersonalDetailsDTO personalDetailsDTO = new PersonalDetailsDTO();
 
@@ -217,7 +225,7 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
     //given
     PersonalDetailsDTO personalDetailsDTO = new PersonalDetailsDTO();
 
@@ -233,7 +241,7 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void createPersonalDetailsWithExistingId() throws Exception {
+  void createPersonalDetailsWithExistingId() throws Exception {
     int databaseSizeBeforeCreate = personalDetailsRepository.findAll().size();
 
     // Create the PersonalDetails with an existing ID
@@ -253,7 +261,7 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void getAllPersonalDetails() throws Exception {
+  void getAllPersonalDetails() throws Exception {
     // Initialize the database
     personalDetailsRepository.saveAndFlush(personalDetails);
 
@@ -284,7 +292,7 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void getPersonalDetails() throws Exception {
+  void getPersonalDetails() throws Exception {
     // Initialize the database
     personalDetailsRepository.saveAndFlush(personalDetails);
 
@@ -309,16 +317,19 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void getNonExistingPersonalDetails() throws Exception {
+  void getNonExistingPersonalDetails() throws Exception {
     // Get the personalDetails
     restPersonalDetailsMockMvc.perform(get("/api/personal-details/{id}", Long.MAX_VALUE))
         .andExpect(status().isNotFound());
   }
 
-  @Test
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {UPDATED_DISABILITY, UNNORMALISED_DISABILITY, LEGACY_DISABILITY})
   @Transactional
-  public void updatePersonalDetails() throws Exception {
+  void updatePersonalDetails(String disability) throws Exception {
     // Initialize the database
+    personalDetails.setDisability(LEGACY_DISABILITY);
     personalDetailsRepository.saveAndFlush(personalDetails);
     int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();
 
@@ -334,7 +345,7 @@ public class PersonalDetailsResourceIntTest {
         .sexualOrientation(UPDATED_SEXUAL_ORIENTATION)
         .religiousBelief(UPDATED_RELIGIOUS_BELIEF)
         .ethnicOrigin(UPDATED_ETHNIC_ORIGIN)
-        .disability(UPDATED_DISABILITY)
+        .disability(disability)
         .nationalInsuranceNumber(UPDATED_NI_NUMBER)
         .disabilityDetails(UPDATED_DISABILITY_DETAILS);
     PersonalDetailsDTO personalDetailsDTO = personalDetailsMapper.toDto(updatedPersonalDetails);
@@ -356,15 +367,20 @@ public class PersonalDetailsResourceIntTest {
     assertThat(testPersonalDetails.getSexualOrientation()).isEqualTo(UPDATED_SEXUAL_ORIENTATION);
     assertThat(testPersonalDetails.getReligiousBelief()).isEqualTo(UPDATED_RELIGIOUS_BELIEF);
     assertThat(testPersonalDetails.getEthnicOrigin()).isEqualTo(UPDATED_ETHNIC_ORIGIN);
-    assertThat(testPersonalDetails.getDisability()).isEqualTo(UPDATED_DISABILITY);
     assertThat(testPersonalDetails.getDisabilityDetails()).isEqualTo(UPDATED_DISABILITY_DETAILS);
     assertThat(testPersonalDetails.getNationalInsuranceNumber()).isEqualTo(UPDATED_NI_NUMBER);
     assertThat(testPersonalDetails.getAmendedDate()).isAfter(DEFAULT_AMENDED_DATE);
+    // legacy value should be kept as is during update
+    if (LEGACY_DISABILITY.equals(disability) || disability == null) {
+      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability);
+    } else {
+      assertThat(testPersonalDetails.getDisability()).isEqualTo(disability.toUpperCase());
+    }
   }
 
   @Test
   @Transactional
-  public void updateNonExistingPersonalDetails() throws Exception {
+  void updateNonExistingPersonalDetails() throws Exception {
     int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();
 
     // Create the PersonalDetails
@@ -384,7 +400,7 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void deletePersonalDetails() throws Exception {
+  void deletePersonalDetails() throws Exception {
     // Initialize the database
     personalDetailsRepository.saveAndFlush(personalDetails);
     int databaseSizeBeforeDelete = personalDetailsRepository.findAll().size();
@@ -401,7 +417,7 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void equalsVerifier() throws Exception {
+  void equalsVerifier() throws Exception {
     TestUtil.equalsVerifier(PersonalDetails.class);
     PersonalDetails personalDetails1 = new PersonalDetails();
     personalDetails1.setId(1L);
@@ -416,7 +432,7 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void dtoEqualsVerifier() throws Exception {
+  void dtoEqualsVerifier() throws Exception {
     TestUtil.equalsVerifier(PersonalDetailsDTO.class);
     PersonalDetailsDTO personalDetailsDTO1 = new PersonalDetailsDTO();
     personalDetailsDTO1.setId(1L);
@@ -432,14 +448,14 @@ public class PersonalDetailsResourceIntTest {
 
   @Test
   @Transactional
-  public void testEntityFromId() {
+  void testEntityFromId() {
     assertThat(personalDetailsMapper.fromId(42L).getId()).isEqualTo(42);
     assertThat(personalDetailsMapper.fromId(null)).isNull();
   }
 
   @Test
   @Transactional
-  public void patchPersonalDetails() throws Exception {
+  void patchPersonalDetails() throws Exception {
     // Initialize the database
     personalDetailsRepository.saveAndFlush(personalDetails);
     int databaseSizeBeforeUpdate = personalDetailsRepository.findAll().size();

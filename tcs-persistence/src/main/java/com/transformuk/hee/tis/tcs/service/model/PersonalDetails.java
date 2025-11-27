@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.Disability;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,8 +93,13 @@ public class PersonalDetails implements Serializable {
   }
 
   public PersonalDetails disability(String disability) {
-    this.disability = disability;
+    this.disability = normaliseOrKeepOriginal(disability);
     return this;
+  }
+
+  // Rewrite set method for disability
+  public void setDisability(String disability) {
+    this.disability = normaliseOrKeepOriginal(disability);
   }
 
   public PersonalDetails disabilityDetails(String disabilityDetails) {
@@ -124,5 +130,17 @@ public class PersonalDetails implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(getId());
+  }
+
+  private static String normaliseOrKeepOriginal(String value) {
+    if (value == null) {
+      return null;
+    }
+
+    try {
+      return Disability.valueOf(value.trim().toUpperCase()).name();
+    } catch (IllegalArgumentException e) { // There are legacy non-enumeration values in the DB.
+      return value;
+    }
   }
 }

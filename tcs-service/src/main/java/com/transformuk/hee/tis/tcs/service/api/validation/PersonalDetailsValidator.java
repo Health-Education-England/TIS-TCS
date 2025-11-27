@@ -134,7 +134,7 @@ public class PersonalDetailsValidator {
     String disability = dto.getDisability();
 
     if (disability != null && Arrays.stream(Disability.values()).map(Enum::name)
-        .noneMatch(n -> n.equals(disability))) {
+        .noneMatch(n -> n.equalsIgnoreCase(disability))) {
       FieldError fieldError = new FieldError(PERSONAL_DETAILS_DTO_NAME, FIELD_NAME_DISABILITY,
           "disability must match a reference value.");
       fieldErrors.add(fieldError);
