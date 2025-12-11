@@ -23,4 +23,7 @@ public class ConnectionSummaryRecordDto {
   private String programmeName;
   private String programmeOwner;
   private LocalDate submissionDate;
+  private String nextProgrammeName;
+  private LocalDate nextProgrammeStartDate;
+  private String nextProgrammeOwner;
 }
