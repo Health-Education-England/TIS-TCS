@@ -8,10 +8,13 @@ from (
     pm1.programmeMembershipType,
     pm1.programmeStartDate,
     pm1.programmeEndDate,
+    nextPm.programmeStartDate as nextProgrammeStartDate,
     currentGrade.currentGrades,
     latestCm.curriculumEndDate,
     currentPmCounts.programmeNames as programmeName,
-    if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner
+    if(currentPmCounts.count_num > 1, NULL, currentPmCounts.owner) as owner,
+	  nextPmCounts.programmeNames as nextProgrammeName,
+    if(nextPmCounts.count_num > 1, NULL, currentPmCounts.owner) as nextProgrammeOwner
   from
     ContactDetails cd
   inner join GmcDetails gmc on (gmc.id = cd.id)
@@ -33,6 +36,21 @@ from (
   ) currentPmCounts on cd.id = currentPmCounts.personId
   left join ProgrammeMembership pm1
     on pm1.personId = currentPmCounts.personId and currentPmCounts.count_num = 1 and (pm1.programmeStartDate <= current_date() and pm1.programmeEndDate >= current_date())
+  left join (
+    -- count future PMs with combined programme names for each person
+    select
+      pm.personId,
+      GROUP_CONCAT(prg.programmeName SEPARATOR " | ") programmeNames,
+      GROUP_CONCAT(prg.owner SEPARATOR " | ") owner,
+      count(if(pm.programmeStartDate > current_date(), true, null)) as count_num
+    from ProgrammeMembership pm
+    left join Programme prg
+      on pm.programmeId = prg.id and pm.programmeStartDate > current_date()
+    WHERECLAUSE(pm, personId)
+    group by pm.personId
+  ) nextPmCounts on cd.id = nextPmCounts.personId
+  left join ProgrammeMembership nextPm
+    on nextPm.personId = nextPmCounts.personId and nextPmCounts.count_num = 1 and (nextPm.programmeStartDate > current_date())
   left join (
     -- get max curriculumEndDate for every PM
     select
