@@ -238,6 +238,7 @@ app:
     trainee:
       queue:
         coj.signed: ${TRAINEE_RABBIT_COJ_SIGNED_QUEUE}
+        email-details.provided: ${TRAINEE_RABBIT_EMAIL_DETAILS_PROVIDED_QUEUE}
         gmc-details.provided: ${TRAINEE_RABBIT_GMC_DETAILS_PROVIDED_QUEUE}
 
 sentry:
