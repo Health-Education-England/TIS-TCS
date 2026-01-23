@@ -127,7 +127,7 @@ public class TraineeMessageListener {
     Long personId = event.getPersonId();
     LOG.info("Received email details provided event for id [{}]", personId);
 
-    ContactDetailsDTO contactDetails = contactDetailsService.findOne(event.getPersonId());
+    ContactDetailsDTO contactDetails = contactDetailsService.findOne(personId);
     if (contactDetails != null) {
       contactDetails.setEmail(event.getEmailDetails().getEmail());
     } else {
