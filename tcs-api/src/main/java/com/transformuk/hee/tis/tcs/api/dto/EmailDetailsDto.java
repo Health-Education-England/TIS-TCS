@@ -12,7 +12,7 @@ import lombok.Data;
  * A DTO for the EmailDetails entity.
  */
 @Data
-public class EmailDetailsDTO implements Serializable {
+public class EmailDetailsDto implements Serializable {
 
   @NotBlank(message = "Email is required",
       groups = {Update.class, Create.class, TraineeUpdate.class})

@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.EmailDetailsDTO;
+import com.transformuk.hee.tis.tcs.api.dto.EmailDetailsDto;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
@@ -229,7 +229,7 @@ class TraineeMessageListenerTest {
   void shouldSaveEmailDetailsWhenEventValid() throws Exception {
     Long personId = 40L;
     String email = "test@example.com";
-    EmailDetailsDTO emailDetails = new EmailDetailsDTO();
+    EmailDetailsDto emailDetails = new EmailDetailsDto();
     emailDetails.setEmail(email);
     EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
 
@@ -249,7 +249,7 @@ class TraineeMessageListenerTest {
   @Test
   void shouldNotSaveEmailWhenEventHasNoEmailDetails() {
     Long personId = 40L;
-    EmailDetailsDTO emailDetails = new EmailDetailsDTO();
+    EmailDetailsDto emailDetails = new EmailDetailsDto();
     EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
@@ -262,7 +262,7 @@ class TraineeMessageListenerTest {
   @ValueSource(strings = {"   ", "invalid-email"})
   void shouldNotSaveEmailWhenEventHasInvalidEmail(String badEmail) {
     Long personId = 40L;
-    EmailDetailsDTO emailDetails = new EmailDetailsDTO();
+    EmailDetailsDto emailDetails = new EmailDetailsDto();
     emailDetails.setEmail(badEmail);
     EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
 
@@ -275,7 +275,7 @@ class TraineeMessageListenerTest {
   void shouldNotSaveEmailWhenContactDetailsNotFound() {
     Long personId = 40L;
     String email = "test@example.com";
-    EmailDetailsDTO emailDetails = new EmailDetailsDTO();
+    EmailDetailsDto emailDetails = new EmailDetailsDto();
     emailDetails.setEmail(email);
     EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
 
@@ -290,7 +290,7 @@ class TraineeMessageListenerTest {
   void shouldNotSaveEmailWhenContactDetailsValidationFails() throws Exception {
     Long personId = 40L;
     String email = "test@example.com";
-    EmailDetailsDTO emailDetails = new EmailDetailsDTO();
+    EmailDetailsDto emailDetails = new EmailDetailsDto();
     emailDetails.setEmail(email);
     EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
 
