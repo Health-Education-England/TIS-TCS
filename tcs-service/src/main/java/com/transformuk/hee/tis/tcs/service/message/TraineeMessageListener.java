@@ -129,7 +129,7 @@ public class TraineeMessageListener {
 
     ContactDetailsDTO contactDetails = contactDetailsService.findOne(personId);
     if (contactDetails != null) {
-      contactDetails.setEmail(event.getEmailDetails().getEmail());
+      contactDetails.setEmail(event.getEmail());
     } else {
       // should not happen, but there is a chance that contact details do not exist yet
       throw new AmqpRejectAndDontRequeueException("Trainee contact details missing.");

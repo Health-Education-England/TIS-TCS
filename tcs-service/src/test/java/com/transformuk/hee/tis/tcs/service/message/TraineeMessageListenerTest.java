@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
-import com.transformuk.hee.tis.tcs.api.dto.EmailDetailsDto;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
@@ -229,9 +228,7 @@ class TraineeMessageListenerTest {
   void shouldSaveEmailDetailsWhenEventValid() throws Exception {
     Long personId = 40L;
     String email = "test@example.com";
-    EmailDetailsDto emailDetails = new EmailDetailsDto();
-    emailDetails.setEmail(email);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
+    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, email);
 
     ContactDetailsDTO contactDetails = new ContactDetailsDTO();
     when(contactDetailsService.findOne(personId)).thenReturn(contactDetails);
@@ -249,8 +246,7 @@ class TraineeMessageListenerTest {
   @Test
   void shouldNotSaveEmailWhenEventHasNoEmailDetails() {
     Long personId = 40L;
-    EmailDetailsDto emailDetails = new EmailDetailsDto();
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
+    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, null);
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveEmailDetailsProvidedMessage(event));
@@ -262,9 +258,7 @@ class TraineeMessageListenerTest {
   @ValueSource(strings = {"   ", "invalid-email"})
   void shouldNotSaveEmailWhenEventHasInvalidEmail(String badEmail) {
     Long personId = 40L;
-    EmailDetailsDto emailDetails = new EmailDetailsDto();
-    emailDetails.setEmail(badEmail);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
+    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, badEmail);
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveEmailDetailsProvidedMessage(event));
@@ -275,24 +269,20 @@ class TraineeMessageListenerTest {
   void shouldNotSaveEmailWhenContactDetailsNotFound() {
     Long personId = 40L;
     String email = "test@example.com";
-    EmailDetailsDto emailDetails = new EmailDetailsDto();
-    emailDetails.setEmail(email);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
+    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, email);
 
     when(contactDetailsService.findOne(personId)).thenReturn(null);
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveEmailDetailsProvidedMessage(event));
-    verify(contactDetailsService, never()).save((ContactDetailsDTO) any());
+    verify(contactDetailsService, never()).save(any(ContactDetailsDTO.class));
   }
 
   @Test
   void shouldNotSaveEmailWhenContactDetailsValidationFails() throws Exception {
     Long personId = 40L;
     String email = "test@example.com";
-    EmailDetailsDto emailDetails = new EmailDetailsDto();
-    emailDetails.setEmail(email);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, emailDetails);
+    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, email);
 
     ContactDetailsDTO contactDetails = new ContactDetailsDTO();
     when(contactDetailsService.findOne(personId)).thenReturn(contactDetails);
@@ -302,6 +292,6 @@ class TraineeMessageListenerTest {
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveEmailDetailsProvidedMessage(event));
-    verify(contactDetailsService, never()).save((ContactDetailsDTO) any());
+    verify(contactDetailsService, never()).save(any(ContactDetailsDTO.class));
   }
 }
