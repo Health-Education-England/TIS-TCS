@@ -133,5 +133,5 @@ app:
     trainee:
       queue:
         coj.signed: ${TRAINEE_RABBIT_COJ_SIGNED_QUEUE:trainee.queue.coj.signed.tcs}
-        email-details.provided: ${TRAINEE_RABBIT_EMAIL_DETAILS_PROVIDED_QUEUE:trainee.queue.emaildetails.provided.tcs}
+        contact-details.provided: ${TRAINEE_RABBIT_CONTACT_DETAILS_PROVIDED_QUEUE:trainee.queue.contactdetails.provided.tcs}
         gmc-details.provided: ${TRAINEE_RABBIT_GMC_DETAILS_PROVIDED_QUEUE:trainee.queue.gmcdetails.provided.tcs}

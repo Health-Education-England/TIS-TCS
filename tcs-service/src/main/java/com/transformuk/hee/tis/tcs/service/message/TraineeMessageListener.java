@@ -110,7 +110,7 @@ public class TraineeMessageListener {
    *
    * @param event The event containing trainee provided email details.
    */
-  @RabbitListener(queues = "${app.rabbit.trainee.queue.email-details.provided}", ackMode = "AUTO")
+  @RabbitListener(queues = "${app.rabbit.trainee.queue.contact-details.provided}", ackMode = "AUTO")
   public void receiveEmailDetailsProvidedMessage(EmailDetailsProvidedEvent event) {
     Set<ConstraintViolation<EmailDetailsProvidedEvent>> violations = validator.validate(event,
         TraineeUpdate.class);
@@ -129,7 +129,7 @@ public class TraineeMessageListener {
 
     ContactDetailsDTO contactDetails = contactDetailsService.findOne(personId);
     if (contactDetails != null) {
-      contactDetails.setEmail(event.getEmail());
+      contactDetails.setEmail(event.getContactDetails().getEmail());
     } else {
       // should not happen, but there is a chance that contact details do not exist yet
       throw new AmqpRejectAndDontRequeueException("Trainee contact details missing.");
