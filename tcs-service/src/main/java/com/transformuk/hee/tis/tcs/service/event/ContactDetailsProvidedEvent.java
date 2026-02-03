@@ -6,9 +6,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
- * An event triggered when a trainee provides email details.
+ * An event triggered when a trainee provides contact details.
  */
-public class EmailDetailsProvidedEvent {
+public class ContactDetailsProvidedEvent {
 
   @NotNull(groups = TraineeUpdate.class)
   private final Long personId;
@@ -17,7 +17,7 @@ public class EmailDetailsProvidedEvent {
   @Valid
   ContactDetailsDTO contactDetails;
 
-  public EmailDetailsProvidedEvent(Long personId, ContactDetailsDTO contactDetails) {
+  public ContactDetailsProvidedEvent(Long personId, ContactDetailsDTO contactDetails) {
     this.personId = personId;
     this.contactDetails = contactDetails;
   }

@@ -22,7 +22,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
 import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
-import com.transformuk.hee.tis.tcs.service.event.EmailDetailsProvidedEvent;
+import com.transformuk.hee.tis.tcs.service.event.ContactDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.event.GmcDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
@@ -230,7 +230,8 @@ class TraineeMessageListenerTest {
     String email = "test@example.com";
     ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
     contactDetailsUpdate.setEmail(email);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, contactDetailsUpdate);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
 
     ContactDetailsDTO contactDetails = new ContactDetailsDTO();
     when(contactDetailsService.findOne(personId)).thenReturn(contactDetails);
@@ -248,7 +249,7 @@ class TraineeMessageListenerTest {
   @Test
   void shouldNotSaveEmailWhenEventHasNoContactDetails() {
     Long personId = 40L;
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, null);
+    ContactDetailsProvidedEvent event = new ContactDetailsProvidedEvent(personId, null);
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveEmailDetailsProvidedMessage(event));
@@ -259,7 +260,8 @@ class TraineeMessageListenerTest {
   void shouldNotSaveEmailWhenEventHasNoEmailInContactDetails() {
     Long personId = 40L;
     ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, contactDetailsUpdate);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveEmailDetailsProvidedMessage(event));
@@ -273,7 +275,8 @@ class TraineeMessageListenerTest {
     Long personId = 40L;
     ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
     contactDetailsUpdate.setEmail(badEmail);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, contactDetailsUpdate);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
 
     assertThrows(AmqpRejectAndDontRequeueException.class,
         () -> listener.receiveEmailDetailsProvidedMessage(event));
@@ -286,7 +289,8 @@ class TraineeMessageListenerTest {
     String email = "test@example.com";
     ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
     contactDetailsUpdate.setEmail(email);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, contactDetailsUpdate);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
 
     when(contactDetailsService.findOne(personId)).thenReturn(null);
 
@@ -301,7 +305,8 @@ class TraineeMessageListenerTest {
     String email = "test@example.com";
     ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
     contactDetailsUpdate.setEmail(email);
-    EmailDetailsProvidedEvent event = new EmailDetailsProvidedEvent(personId, contactDetailsUpdate);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
 
     ContactDetailsDTO contactDetails = new ContactDetailsDTO();
     when(contactDetailsService.findOne(personId)).thenReturn(contactDetails);

@@ -7,7 +7,7 @@ import com.transformuk.hee.tis.tcs.api.dto.validation.TraineeUpdate;
 import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
-import com.transformuk.hee.tis.tcs.service.event.EmailDetailsProvidedEvent;
+import com.transformuk.hee.tis.tcs.service.event.ContactDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.event.GmcDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
@@ -111,8 +111,8 @@ public class TraineeMessageListener {
    * @param event The event containing trainee provided email details.
    */
   @RabbitListener(queues = "${app.rabbit.trainee.queue.contact-details.provided}", ackMode = "AUTO")
-  public void receiveEmailDetailsProvidedMessage(EmailDetailsProvidedEvent event) {
-    Set<ConstraintViolation<EmailDetailsProvidedEvent>> violations = validator.validate(event,
+  public void receiveEmailDetailsProvidedMessage(ContactDetailsProvidedEvent event) {
+    Set<ConstraintViolation<ContactDetailsProvidedEvent>> violations = validator.validate(event,
         TraineeUpdate.class);
 
     if (!violations.isEmpty()) {
@@ -121,11 +121,11 @@ public class TraineeMessageListener {
           .map(v -> v.getPropertyPath() + " " + v.getMessage())
           .collect(Collectors.toList());
       throw new AmqpRejectAndDontRequeueException(
-          "Invalid email details provided event: " + violationMessages);
+          "Invalid contact details provided event: " + violationMessages);
     }
 
     Long personId = event.getPersonId();
-    LOG.info("Received email details provided event for id [{}]", personId);
+    LOG.info("Received contact details provided event for id [{}]", personId);
 
     ContactDetailsDTO contactDetails = contactDetailsService.findOne(personId);
     if (contactDetails != null) {
@@ -142,7 +142,7 @@ public class TraineeMessageListener {
       throw new AmqpRejectAndDontRequeueException("Invalid email details.", e);
     }
 
-    LOG.info("Saving provided email details for id [{}]", personId);
+    LOG.info("Saving provided contact details email for id [{}]", personId);
     contactDetailsService.save(contactDetails);
   }
 }
