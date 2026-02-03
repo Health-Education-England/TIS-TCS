@@ -1,11 +1,13 @@
 package com.transformuk.hee.tis.tcs.api.dto;
 
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.dto.validation.TraineeUpdate;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.Data;
@@ -73,7 +75,9 @@ public class ContactDetailsDTO implements Serializable {
       groups = {Update.class, Create.class})
   private String mobileNumber;
 
-  @Email(message = "Valid email format required", groups = {Update.class, Create.class})
+  @NotBlank(groups = TraineeUpdate.class)
+  @Email(message = "Valid email format required",
+      groups = {Update.class, Create.class, TraineeUpdate.class})
   private String email;
 
   private String address1;

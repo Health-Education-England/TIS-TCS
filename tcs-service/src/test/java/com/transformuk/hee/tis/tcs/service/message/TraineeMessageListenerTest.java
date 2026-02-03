@@ -8,19 +8,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.ConditionsOfJoiningDto;
+import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.enumeration.GoldGuideVersion;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
+import com.transformuk.hee.tis.tcs.service.event.ContactDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.event.GmcDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
+import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -31,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,18 +49,22 @@ class TraineeMessageListenerTest {
 
   private TraineeMessageListener listener;
   private ConditionsOfJoiningService cojService;
+  private ContactDetailsService contactDetailsService;
   private GmcDetailsService gmcDetailsService;
+  private ContactDetailsValidator contactDetailsValidator;
   private GmcDetailsValidator gmcDetailsValidator;
   private ConditionsOfJoiningDto dto;
 
   @BeforeEach
   void setUp() {
     cojService = mock(ConditionsOfJoiningService.class);
+    contactDetailsService = mock(ContactDetailsService.class);
     gmcDetailsService = mock(GmcDetailsService.class);
+    contactDetailsValidator = mock(ContactDetailsValidator.class);
     gmcDetailsValidator = mock(GmcDetailsValidator.class);
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    listener = new TraineeMessageListener(cojService, gmcDetailsService, gmcDetailsValidator,
-        validator);
+    listener = new TraineeMessageListener(cojService, contactDetailsService, gmcDetailsService,
+        contactDetailsValidator, gmcDetailsValidator, validator);
     dto = new ConditionsOfJoiningDto();
     dto.setSignedAt(SIGNED_AT);
     dto.setVersion(GoldGuideVersion.GG9);
@@ -212,5 +222,100 @@ class TraineeMessageListenerTest {
     assertThat("Unexpected GMC start date.", savedDto.getGmcStartDate(), nullValue());
     assertThat("Unexpected GMC end date.", savedDto.getGmcEndDate(), nullValue());
     assertThat("Unexpected amended date.", savedDto.getAmendedDate(), is(now));
+  }
+
+  @Test
+  void shouldSaveEmailDetailsWhenEventValid() throws Exception {
+    Long personId = 40L;
+    String email = "test@example.com";
+    ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
+    contactDetailsUpdate.setEmail(email);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
+
+    ContactDetailsDTO contactDetails = new ContactDetailsDTO();
+    when(contactDetailsService.findOne(personId)).thenReturn(contactDetails);
+
+    listener.receiveEmailDetailsProvidedMessage(event);
+
+    ArgumentCaptor<ContactDetailsDTO> captor = ArgumentCaptor.forClass(ContactDetailsDTO.class);
+    verify(contactDetailsService).save(captor.capture());
+
+    ContactDetailsDTO savedContactDetails = captor.getValue();
+    assertThat("Unexpected email address.", savedContactDetails.getEmail(), is(email));
+    verify(contactDetailsValidator).validate(savedContactDetails, null, Create.class);
+  }
+
+  @Test
+  void shouldNotSaveEmailWhenEventHasNoContactDetails() {
+    Long personId = 40L;
+    ContactDetailsProvidedEvent event = new ContactDetailsProvidedEvent(personId, null);
+
+    assertThrows(AmqpRejectAndDontRequeueException.class,
+        () -> listener.receiveEmailDetailsProvidedMessage(event));
+    verifyNoInteractions(contactDetailsService);
+  }
+
+  @Test
+  void shouldNotSaveEmailWhenEventHasNoEmailInContactDetails() {
+    Long personId = 40L;
+    ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
+
+    assertThrows(AmqpRejectAndDontRequeueException.class,
+        () -> listener.receiveEmailDetailsProvidedMessage(event));
+    verifyNoInteractions(contactDetailsService);
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = {"   ", "invalid-email"})
+  void shouldNotSaveEmailWhenEventHasInvalidEmail(String badEmail) {
+    Long personId = 40L;
+    ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
+    contactDetailsUpdate.setEmail(badEmail);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
+
+    assertThrows(AmqpRejectAndDontRequeueException.class,
+        () -> listener.receiveEmailDetailsProvidedMessage(event));
+    verifyNoInteractions(contactDetailsService);
+  }
+
+  @Test
+  void shouldNotSaveEmailWhenContactDetailsNotFound() {
+    Long personId = 40L;
+    String email = "test@example.com";
+    ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
+    contactDetailsUpdate.setEmail(email);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
+
+    when(contactDetailsService.findOne(personId)).thenReturn(null);
+
+    assertThrows(AmqpRejectAndDontRequeueException.class,
+        () -> listener.receiveEmailDetailsProvidedMessage(event));
+    verify(contactDetailsService, never()).save(any(ContactDetailsDTO.class));
+  }
+
+  @Test
+  void shouldNotSaveEmailWhenContactDetailsValidationFails() throws Exception {
+    Long personId = 40L;
+    String email = "test@example.com";
+    ContactDetailsDTO contactDetailsUpdate = new ContactDetailsDTO();
+    contactDetailsUpdate.setEmail(email);
+    ContactDetailsProvidedEvent event
+        = new ContactDetailsProvidedEvent(personId, contactDetailsUpdate);
+
+    ContactDetailsDTO contactDetails = new ContactDetailsDTO();
+    when(contactDetailsService.findOne(personId)).thenReturn(contactDetails);
+
+    doThrow(MethodArgumentNotValidException.class)
+        .when(contactDetailsValidator).validate(contactDetails, null, Create.class);
+
+    assertThrows(AmqpRejectAndDontRequeueException.class,
+        () -> listener.receiveEmailDetailsProvidedMessage(event));
+    verify(contactDetailsService, never()).save(any(ContactDetailsDTO.class));
   }
 }

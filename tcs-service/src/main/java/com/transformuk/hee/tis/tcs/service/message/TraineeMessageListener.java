@@ -1,12 +1,16 @@
 package com.transformuk.hee.tis.tcs.service.message;
 
+import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.TraineeUpdate;
+import com.transformuk.hee.tis.tcs.service.api.validation.ContactDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.GmcDetailsValidator;
 import com.transformuk.hee.tis.tcs.service.event.ConditionsOfJoiningSignedEvent;
+import com.transformuk.hee.tis.tcs.service.event.ContactDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.event.GmcDetailsProvidedEvent;
 import com.transformuk.hee.tis.tcs.service.service.ConditionsOfJoiningService;
+import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.GmcDetailsService;
 import java.util.Comparator;
 import java.util.List;
@@ -31,15 +35,20 @@ public class TraineeMessageListener {
   private static final Logger LOG = LoggerFactory.getLogger(TraineeMessageListener.class);
 
   private final ConditionsOfJoiningService conditionsOfJoiningService;
+  private final ContactDetailsService contactDetailsService;
   private final GmcDetailsService gmcDetailsService;
+  private final ContactDetailsValidator contactDetailsValidator;
   private final GmcDetailsValidator gmcDetailsValidator;
   private final Validator validator;
 
   TraineeMessageListener(ConditionsOfJoiningService conditionsOfJoiningService,
-      GmcDetailsService gmcDetailsService, GmcDetailsValidator gmcDetailsValidator,
+      ContactDetailsService contactDetailsService, GmcDetailsService gmcDetailsService,
+      ContactDetailsValidator contactDetailsValidator, GmcDetailsValidator gmcDetailsValidator,
       Validator validator) {
     this.conditionsOfJoiningService = conditionsOfJoiningService;
+    this.contactDetailsService = contactDetailsService;
     this.gmcDetailsService = gmcDetailsService;
+    this.contactDetailsValidator = contactDetailsValidator;
     this.gmcDetailsValidator = gmcDetailsValidator;
     this.validator = validator;
   }
@@ -94,5 +103,46 @@ public class TraineeMessageListener {
 
     LOG.info("Saving provided GMC details for id [{}]", personId);
     gmcDetailsService.save(gmcDetails);
+  }
+
+  /**
+   * A listener for email details being provided by a trainee.
+   *
+   * @param event The event containing trainee provided email details.
+   */
+  @RabbitListener(queues = "${app.rabbit.trainee.queue.contact-details.provided}", ackMode = "AUTO")
+  public void receiveEmailDetailsProvidedMessage(ContactDetailsProvidedEvent event) {
+    Set<ConstraintViolation<ContactDetailsProvidedEvent>> violations = validator.validate(event,
+        TraineeUpdate.class);
+
+    if (!violations.isEmpty()) {
+      List<String> violationMessages = violations.stream()
+          .sorted(Comparator.comparing(v -> v.getPropertyPath().toString()))
+          .map(v -> v.getPropertyPath() + " " + v.getMessage())
+          .collect(Collectors.toList());
+      throw new AmqpRejectAndDontRequeueException(
+          "Invalid contact details provided event: " + violationMessages);
+    }
+
+    Long personId = event.getPersonId();
+    LOG.info("Received contact details provided event for id [{}]", personId);
+
+    ContactDetailsDTO contactDetails = contactDetailsService.findOne(personId);
+    if (contactDetails != null) {
+      contactDetails.setEmail(event.getContactDetails().getEmail());
+    } else {
+      // should not happen, but there is a chance that contact details do not exist yet
+      throw new AmqpRejectAndDontRequeueException("Trainee contact details missing.");
+    }
+
+    try {
+      // Keep the validation as what it is, so use Create mode here
+      contactDetailsValidator.validate(contactDetails, null, Create.class);
+    } catch (MethodArgumentNotValidException | NoSuchMethodException e) {
+      throw new AmqpRejectAndDontRequeueException("Invalid email details.", e);
+    }
+
+    LOG.info("Saving provided contact details email for id [{}]", personId);
+    contactDetailsService.save(contactDetails);
   }
 }
