@@ -38,6 +38,9 @@ public class PostFunding implements Serializable {
   @Column(name = "fundingType")
   private String fundingType;
 
+  @Column(name = "fundingTypeId")
+  private Long fundingTypeId;
+
   @Type(type = "org.hibernate.type.UUIDCharType")
   @Column(name = "fundingSubTypeId")
   private UUID fundingSubTypeId;
@@ -70,6 +73,7 @@ public class PostFunding implements Serializable {
     return Objects.equals(id, that.id) &&
         Objects.equals(intrepidId, that.intrepidId) &&
         Objects.equals(fundingType, that.fundingType) &&
+        Objects.equals(fundingTypeId, that.fundingTypeId) &&
         Objects.equals(info, that.info) &&
         Objects.equals(startDate, that.startDate) &&
         Objects.equals(endDate, that.endDate) &&
@@ -79,7 +83,7 @@ public class PostFunding implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId,
-        fundingReasonId);
+    return Objects.hash(id, intrepidId, fundingType, fundingTypeId, info, startDate, endDate,
+        fundingBodyId, fundingReasonId);
   }
 }
