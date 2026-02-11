@@ -21,6 +21,8 @@ public class PostFundingDTO implements Serializable {
 
   private String fundingType;
 
+  private Long fundingTypeId;
+
   private UUID fundingSubTypeId;
 
   private String info;
@@ -50,6 +52,7 @@ public class PostFundingDTO implements Serializable {
     return Objects.equals(id, that.id) &&
         Objects.equals(intrepidId, that.intrepidId) &&
         Objects.equals(fundingType, that.fundingType) &&
+        Objects.equals(fundingTypeId, that.fundingTypeId) &&
         Objects.equals(fundingSubTypeId, that.fundingSubTypeId) &&
         Objects.equals(info, that.info) &&
         Objects.equals(startDate, that.startDate) &&
@@ -62,7 +65,7 @@ public class PostFundingDTO implements Serializable {
   @Override
   public int hashCode() {
     return Objects
-        .hash(id, intrepidId, fundingType, fundingSubTypeId, info, startDate, endDate,
-            fundingBodyId, messageList, fundingReasonId);
+        .hash(id, intrepidId, fundingType, fundingTypeId, fundingSubTypeId, info, startDate,
+            endDate, fundingBodyId, messageList, fundingReasonId);
   }
 }
