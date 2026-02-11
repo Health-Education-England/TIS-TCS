@@ -165,6 +165,7 @@ public class PostMapper {
       result = new PostFundingDTO();
       result.setId(postFunding.getId());
       result.setFundingType(postFunding.getFundingType());
+      result.setFundingTypeId(postFunding.getFundingTypeId());
       result.setInfo(postFunding.getInfo());
       result.setStartDate(postFunding.getStartDate());
       result.setEndDate(postFunding.getEndDate());
