@@ -425,7 +425,6 @@ public class PersonServiceImplTest {
     personalDetails.setSexualOrientation("Heterosexual");
     personalDetails.ethnicOrigin("Not Stated");
 
-    Person person = new Person();
     person.setId(id);
     person.setPersonalDetails(personalDetails);
 
@@ -464,7 +463,6 @@ public class PersonServiceImplTest {
     personalDetails.setSexualOrientation("Heterosexual");
     personalDetails.ethnicOrigin("Not Stated");
 
-    Person person = new Person();
     person.setId(id);
     person.setPersonalDetails(personalDetails);
 
