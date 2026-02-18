@@ -731,6 +731,7 @@ public class PersonServiceImpl implements PersonService {
     personalDetails.setDisabilityDetails(null);
     personalDetails.setReligiousBelief(null);
     personalDetails.setSexualOrientation(null);
+    personalDetails.setEthnicOrigin(null);
   }
 
   private void clearSensitiveData(final PersonalDetailsDTO personalDetailsDTO) {

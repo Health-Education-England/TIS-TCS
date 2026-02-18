@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -18,7 +20,6 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
-import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -255,7 +256,7 @@ public class PersonServiceImplTest {
         pmList.get(0).getProgrammeStartDate().isAfter(pmList.get(1).getProgrammeStartDate()));
     Assert.assertTrue(
         pmList.get(1).getProgrammeStartDate().isAfter(pmList.get(2).getProgrammeStartDate()));
-    Assert.assertNull(pmList.get(3).getProgrammeStartDate());
+    assertNull(pmList.get(3).getProgrammeStartDate());
   }
 
   @Test
@@ -267,10 +268,10 @@ public class PersonServiceImplTest {
     PersonV2DTO result = testObj.findPersonV2WithProgrammeMembershipsSorted(PERSON_ID);
 
     PersonDTO capturedPersonDTO = personDTOArgumentCaptor.getValue();
-    Assert.assertEquals(capturedPersonDTO, personDTO);
+    assertEquals(capturedPersonDTO, personDTO);
 
     PersonV2DTO capturedPersonV2DTO = personV2DTOArgumentCaptor.getValue();
-    Assert.assertEquals(capturedPersonV2DTO, result);
+    assertEquals(capturedPersonV2DTO, result);
   }
 
   @Test
@@ -285,7 +286,7 @@ public class PersonServiceImplTest {
 
     PersonDTO result = testObj.save(unsavedPersonDTOMock);
 
-    Assert.assertEquals(savedPersonDTOMock, result);
+    assertEquals(savedPersonDTOMock, result);
 
     verify(personRepositoryMock, never()).findById(anyLong());
     verify(unsavedPersonDTOMock, never()).getPersonalDetails();
@@ -317,7 +318,7 @@ public class PersonServiceImplTest {
 
     PersonDTO result = testObj.save(unsavedPersonDTOMock);
 
-    Assert.assertEquals(savedPersonDTOMock, result);
+    assertEquals(savedPersonDTOMock, result);
 
     verify(personRepositoryMock).findById(PERSON_ID);
     verify(unsavedPersonDTOMock).getPersonalDetails();
@@ -361,19 +362,19 @@ public class PersonServiceImplTest {
     Assert.assertSame(savedPersonDTOMock, result);
 
     GdcDetails gdcDetailsValue = gdcDetailsArgumentCaptor.getValue();
-    Assert.assertEquals(PERSON_ID, gdcDetailsValue.getId());
+    assertEquals(PERSON_ID, gdcDetailsValue.getId());
 
     GmcDetails gmcDetailsValue = gmcDetailsArgumentCaptor.getValue();
-    Assert.assertEquals(PERSON_ID, gmcDetailsValue.getId());
+    assertEquals(PERSON_ID, gmcDetailsValue.getId());
 
     ContactDetails contactDetailsValue = contactDetailsArgumentCaptor.getValue();
-    Assert.assertEquals(PERSON_ID, contactDetailsValue.getId());
+    assertEquals(PERSON_ID, contactDetailsValue.getId());
 
     PersonalDetails personalDetailsValue = personalDetailsArgumentCaptor.getValue();
-    Assert.assertEquals(PERSON_ID, personalDetailsValue.getId());
+    assertEquals(PERSON_ID, personalDetailsValue.getId());
 
     RightToWork rightToWorkValue = rightToWorkArgumentCaptor.getValue();
-    Assert.assertEquals(PERSON_ID, rightToWorkValue.getId());
+    assertEquals(PERSON_ID, rightToWorkValue.getId());
 
     verify(savedPersonMock).setGdcDetails(gdcDetailsMock);
     verify(savedPersonMock).setGmcDetails(gmcDetailsMock);
@@ -408,7 +409,82 @@ public class PersonServiceImplTest {
     verify(gdcDetailsServiceMock).save(personDto.getGdcDetails());
     verify(rightToWorkServiceMock).save(personDto.getRightToWork());
 
-    Assert.assertEquals(1, returnedPersonDtoList.size());
-    Assert.assertEquals(0, returnedPersonDtoList.get(0).getMessageList().size());
+    assertEquals(1, returnedPersonDtoList.size());
+    assertEquals(0, returnedPersonDtoList.get(0).getMessageList().size());
+  }
+
+  @Test
+  public void shouldClearSensitiveDataWhenUserCannotViewSensitiveData() {
+    // given
+    Long id = 1L;
+
+    PersonalDetails personalDetails = new PersonalDetails();
+    personalDetails.setDisability("YES");
+    personalDetails.setDisabilityDetails("Test Details");
+    personalDetails.setReligiousBelief("Test Religion");
+    personalDetails.setSexualOrientation("Heterosexual");
+    personalDetails.ethnicOrigin("Not Stated");
+
+    Person person = new Person();
+    person.setId(id);
+    person.setPersonalDetails(personalDetails);
+
+    PersonDTO expectedDto = new PersonDTO();
+
+    when(personRepositoryMock.findById(id)).thenReturn(Optional.of(person));
+    when(permissionServiceMock.canViewSensitiveData()).thenReturn(false);
+    when(personMapperMock.toDto(person)).thenReturn(expectedDto);
+
+    // when
+    PersonDTO result = testObj.findOne(id);
+
+    // then
+    assertNull(personalDetails.getDisability());
+    assertNull(personalDetails.getDisabilityDetails());
+    assertNull(personalDetails.getReligiousBelief());
+    assertNull(personalDetails.getSexualOrientation());
+    assertNull(personalDetails.getEthnicOrigin());
+
+    verify(personRepositoryMock).findById(id);
+    verify(permissionServiceMock).canViewSensitiveData();
+    verify(personMapperMock).toDto(person);
+
+    assertEquals(expectedDto, result);
+  }
+
+  @Test
+  public void shouldNotClearSensitiveDataWhenUserCanViewSensitiveData() {
+    // given
+    Long id = 1L;
+
+    PersonalDetails personalDetails = new PersonalDetails();
+    personalDetails.setDisability("YES");
+    personalDetails.setDisabilityDetails("Test Details");
+    personalDetails.setReligiousBelief("Test Religion");
+    personalDetails.setSexualOrientation("Heterosexual");
+    personalDetails.ethnicOrigin("Not Stated");
+
+    Person person = new Person();
+    person.setId(id);
+    person.setPersonalDetails(personalDetails);
+
+    PersonDTO expectedDto = new PersonDTO();
+
+    when(personRepositoryMock.findById(id)).thenReturn(Optional.of(person));
+    when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
+    when(personMapperMock.toDto(person)).thenReturn(expectedDto);
+
+    // when
+    PersonDTO result = testObj.findOne(id);
+
+    // then
+    assertEquals("YES", personalDetails.getDisability());
+    assertEquals("Test Details", personalDetails.getDisabilityDetails());
+    assertEquals("Test Religion", personalDetails.getReligiousBelief());
+    assertEquals("Heterosexual", personalDetails.getSexualOrientation());
+    assertEquals("Not Stated", personalDetails.getEthnicOrigin());
+
+    verify(personMapperMock).toDto(person);
+    assertEquals(expectedDto, result);
   }
 }
