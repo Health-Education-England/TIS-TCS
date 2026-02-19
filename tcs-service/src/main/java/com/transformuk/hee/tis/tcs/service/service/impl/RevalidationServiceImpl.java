@@ -67,6 +67,9 @@ public class RevalidationServiceImpl implements RevalidationService {
   private static final String PROGRAMME_START_DATE_FIELD = "programmeStartDate";
   private static final String SURNAME_FIELD = "surname";
   private static final String PLACEMENT_GRADE_FIELD = "currentGrades";
+  private static final String NEXT_PROGRAMME_NAME_FIELD = "nextProgrammeName";
+  private static final String NEXT_PROGRAMME_START_DATE_FIELD = "nextProgrammeStartDate";
+  private static final String NEXT_PROGRAMME_OWNER_FIELD = "nextProgrammeOwner";
   /**
    * This RegEx matches strings in format of WHERECLAUSE(p, id).
    * Whitespaces are allowed in the brackets.
@@ -314,6 +317,12 @@ public class RevalidationServiceImpl implements RevalidationService {
         .programmeName(conn.get(PROGRAMME_NAME_FIELD) == null
             ? null : conn.get(PROGRAMME_NAME_FIELD).toString())
         .programmeOwner(owner)
+        .nextProgrammeName(conn.get(NEXT_PROGRAMME_NAME_FIELD) == null
+            ? null : conn.get(NEXT_PROGRAMME_NAME_FIELD).toString())
+        .nextProgrammeStartDate(conn.get(NEXT_PROGRAMME_START_DATE_FIELD) == null
+            ? null : LocalDate.parse(conn.get(NEXT_PROGRAMME_START_DATE_FIELD).toString()))
+        .nextProgrammeOwner(conn.get(NEXT_PROGRAMME_OWNER_FIELD) == null
+            ? null : conn.get(NEXT_PROGRAMME_OWNER_FIELD).toString())
         .build();
   }
 
@@ -403,15 +412,18 @@ public class RevalidationServiceImpl implements RevalidationService {
       LocalDate start;
       LocalDate end;
       LocalDate curriculumEnd;
+      LocalDate nextStart;
       try {
         start = rs.getDate(PROGRAMME_START_DATE_FIELD).toLocalDate();
         end = rs.getDate(PROGRAMME_END_DATE_FIELD).toLocalDate();
         curriculumEnd = rs.getDate(CURRICULUM_END_DATE_FIELD).toLocalDate();
+        nextStart = rs.getDate(NEXT_PROGRAMME_START_DATE_FIELD).toLocalDate();
 
       } catch (Exception e) {
         start = null;
         end = null;
         curriculumEnd = null;
+        nextStart = null;
       }
       return ConnectionInfoDto.builder()
           .tcsPersonId(rs.getLong(PERSON_ID_FIELD))
@@ -426,6 +438,9 @@ public class RevalidationServiceImpl implements RevalidationService {
           .programmeMembershipEndDate(end)
           .curriculumEndDate(curriculumEnd)
           .placementGrade(rs.getString(PLACEMENT_GRADE_FIELD))
+          .nextProgrammeName(rs.getString(NEXT_PROGRAMME_NAME_FIELD))
+          .nextProgrammeOwner(rs.getString(NEXT_PROGRAMME_OWNER_FIELD))
+          .nextProgrammeStartDate(nextStart)
           .dataSource("TCS")
           .build();
     }
