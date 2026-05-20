@@ -13,6 +13,7 @@ public class RevalidationRecordDto {
   private LocalDate programmeEndDate;
   private String programmeMembershipType;
   private String programmeName;
+  private String programmeOwner;
   private String currentGrade;
   private Long tisPersonId;
 }
