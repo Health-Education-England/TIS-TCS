@@ -220,6 +220,7 @@ public class RevalidationServiceImplTest {
         .gmcReferenceNumber(GMC_NUMBER)
         .curriculumEndDate(CURRICULUM_END_DATE)
         .programmeMembershipType(PROGRAMME_MEMBERSHIP_TYPE.toString())
+        .tcsDesignatedBody(DESIGNATED_BODY_CODE)
         .programmeName(PROGRAMME_NAME)
         .build();
 
@@ -242,6 +243,7 @@ public class RevalidationServiceImplTest {
     assertThat(result.getProgrammeMembershipType(), is(PROGRAMME_MEMBERSHIP_TYPE.toString()));
     assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
     assertThat(result.getCurrentGrade(), is(CURRENT_GRADE));
+    assertThat(result.getTcsDesignatedBody(), is(DESIGNATED_BODY_CODE));
   }
 
   @Test
