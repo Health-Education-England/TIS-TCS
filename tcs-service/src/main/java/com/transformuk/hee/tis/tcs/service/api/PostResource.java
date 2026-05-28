@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.PlacementView;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -42,6 +43,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -83,13 +85,17 @@ public class PostResource {
   private final PlacementViewMapper placementViewMapper;
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
+  private final PostElasticSearchService postElasticSearchService;
+  @Value("${enable.es.search}")
+  private boolean enableEsSearch;
 
   public PostResource(PostService postService, PostValidator postValidator,
       PlacementViewRepository placementViewRepository,
       PlacementViewDecorator placementViewDecorator,
       PlacementViewMapper placementViewMapper,
       PlacementService placementService,
-      PlacementSummaryDecorator placementSummaryDecorator) {
+      PlacementSummaryDecorator placementSummaryDecorator,
+      PostElasticSearchService postElasticSearchService) {
     this.postService = postService;
     this.postValidator = postValidator;
     this.placementViewRepository = placementViewRepository;
@@ -97,6 +103,7 @@ public class PostResource {
     this.placementViewMapper = placementViewMapper;
     this.placementService = placementService;
     this.placementSummaryDecorator = placementSummaryDecorator;
+    this.postElasticSearchService = postElasticSearchService;
   }
 
   /**
@@ -163,19 +170,27 @@ public class PostResource {
   public ResponseEntity<List<PostViewDTO>> getAllPosts(
       Pageable pageable,
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @RequestParam(value = "columnFilters", required = false) String columnFilterJson)
+      @RequestParam(value = "columnFilters", required = false) String columnFilterJson,
+      @RequestParam(required = false, defaultValue = "false") boolean enableES)
       throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
+    String searchQueryES = getConverter(searchQuery).fromJson().decodeUrl().escapeForElasticSearch()
+        .toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class,
         PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
     Page<PostViewDTO> page;
-    if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-      page = postService.findAll(pageable);
+    if (enableEsSearch || enableES) {
+      page = postElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
     } else {
-      page = postService.advancedSearch(searchQuery, columnFilters, pageable);
+      if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
+        page = postService.findAll(pageable);
+      } else {
+        page = postService.advancedSearch(searchQuery, columnFilters, pageable);
+      }
+      log.debug("REST request to get a page of Posts completed successfully");
     }
     HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/posts");
     return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
