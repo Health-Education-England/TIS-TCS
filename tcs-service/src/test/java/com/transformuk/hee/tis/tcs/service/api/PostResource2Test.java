@@ -38,6 +38,7 @@ import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import java.lang.reflect.Method;
@@ -98,6 +99,8 @@ public class PostResource2Test {
   @MockBean
   private PlacementService placementService;
   @MockBean
+  private PostElasticSearchService postElasticSearchService;
+  @MockBean
   private PlacementSummaryDecorator placementSummaryDecorator;
   private MockMvc restPostMockMvc;
   @Autowired
@@ -121,7 +124,7 @@ public class PostResource2Test {
   public void setup() {
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator);
+        placementViewMapper, placementService, placementSummaryDecorator, postElasticSearchService);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
