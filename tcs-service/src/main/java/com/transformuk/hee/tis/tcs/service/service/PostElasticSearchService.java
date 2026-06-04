@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2026 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -231,11 +231,11 @@ public class PostElasticSearchService {
 
       } else if ("nationalPostNumber".equals(order.getProperty())) {
         if (order.isAscending()) {
-          sortOrders.add(Sort.Order.asc("nationalPostNumber.keyword"));
+          sortOrders.add(Sort.Order.asc("nationalPostNumber"));
         } else if (order.isDescending()) {
-          sortOrders.add(Sort.Order.desc("nationalPostNumber.keyword"));
+          sortOrders.add(Sort.Order.desc("nationalPostNumber"));
         } else {
-          sortOrders.add(Sort.Order.asc("nationalPostNumber.keyword"));
+          sortOrders.add(Sort.Order.asc("nationalPostNumber"));
         }
 
       } else {
