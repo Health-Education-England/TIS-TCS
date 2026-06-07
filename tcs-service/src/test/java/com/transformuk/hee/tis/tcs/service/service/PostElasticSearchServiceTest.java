@@ -203,7 +203,7 @@ class PostElasticSearchServiceTest {
     )
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("unsupportedFilter")
-        .hasMessageContaining("not a valid argument");
+        .hasMessageContaining("not a valid field name.");
   }
 
   @Test
