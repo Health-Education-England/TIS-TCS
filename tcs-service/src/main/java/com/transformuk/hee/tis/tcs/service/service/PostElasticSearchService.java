@@ -59,7 +59,7 @@ public class PostElasticSearchService {
   @Autowired
   private PostViewDecorator postViewDecorator;
 
-  private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(   //Sets.newHashSet
+  private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
       "status",
       "owner",
       "currentTraineeSurname",
