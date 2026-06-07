@@ -22,6 +22,7 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
@@ -29,11 +30,13 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.PostElasticSearchRepository;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.slf4j.Logger;
@@ -56,6 +59,24 @@ public class PostElasticSearchService {
   @Autowired
   private PostViewDecorator postViewDecorator;
 
+  private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(   //Sets.newHashSet
+      "status",
+      "owner",
+      "currentTraineeSurname",
+      "currentTraineeForenames",
+      "primarySpecialtyCode",
+      "primarySpecialtyName",
+      "programmeNames",
+      "nationalPostNumber",
+      "fundingType"
+  );
+
+  private static final Set<String> TERM_QUERY_FIELDS = Sets.newHashSet(
+      "primarySpecialtyId",
+      "primarySiteId",
+      "approvedGradeId"
+  );
+
   public Page<PostViewDTO> searchForPage(String searchQuery,
       List<ColumnFilter> columnFilters, Pageable pageable) {
 
@@ -76,87 +97,10 @@ public class PostElasticSearchService {
             String filterName = columnFilter.getName();
             String filterValue = value.toString();
 
-            switch (filterName) {
-
-              case "status":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("status", filterValue)
-                );
-                break;
-
-              case "owner":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("owner", filterValue)
-                );
-                break;
-
-              case "currentTraineeSurname":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("currentTraineeSurname", filterValue)
-                );
-                break;
-
-              case "currentTraineeForenames":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("currentTraineeForenames", filterValue)
-                );
-                break;
-
-              case "primarySpecialtyId":
-                shouldBetweenSameColumnFilter.should(
-                    new TermQueryBuilder("primarySpecialtyId", filterValue)
-                );
-                break;
-
-              case "primarySpecialtyCode":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("primarySpecialtyCode", filterValue)
-                );
-                break;
-
-              case "primarySpecialtyName":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("primarySpecialtyName", filterValue)
-                );
-                break;
-
-              case "programmeNames":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("programmeNames", filterValue)
-                );
-                break;
-
-              case "nationalPostNumber":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("nationalPostNumber", filterValue)
-                );
-                break;
-
-              case "primarySiteId":
-                shouldBetweenSameColumnFilter.should(
-                    new TermQueryBuilder("primarySiteId", filterValue)
-                );
-                break;
-
-              case "approvedGradeId":
-                shouldBetweenSameColumnFilter.should(
-                    new TermQueryBuilder("approvedGradeId", filterValue)
-                );
-                break;
-
-              case "fundingType":
-                shouldBetweenSameColumnFilter.should(
-                    new MatchQueryBuilder("fundingType", filterValue)
-                );
-                break;
-
-              default:
-                throw new IllegalArgumentException(
-                    "Filter: [" + filterName + "] is not a valid argument"
-                );
-            }
+            shouldBetweenSameColumnFilter.should(
+                createColumnFilterQuery(filterName, filterValue)
+            );
           }
-
           mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
         }
       }
@@ -181,6 +125,20 @@ public class PostElasticSearchService {
       LOG.error("An exception occurred while attempting to do a Post ElasticSearch", re);
       throw re;
     }
+  }
+
+  private QueryBuilder createColumnFilterQuery(String fieldName, String filterValue) {
+    if (MATCH_QUERY_FIELDS.contains(fieldName)) {
+      return new MatchQueryBuilder(fieldName, filterValue);
+    }
+
+    if (TERM_QUERY_FIELDS.contains(fieldName)) {
+      return new TermQueryBuilder(fieldName, filterValue);
+    }
+
+    throw new IllegalArgumentException(
+        "Filter: [" + fieldName + "] is not a valid field name."
+    );
   }
 
   private BoolQueryBuilder applyTextBasedSearchQuery(String searchQuery) {
@@ -242,7 +200,6 @@ public class PostElasticSearchService {
         sortOrders.add(order);
       }
     }
-
     return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(sortOrders));
   }
 
