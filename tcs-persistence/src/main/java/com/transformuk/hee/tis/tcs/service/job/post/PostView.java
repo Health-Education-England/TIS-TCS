@@ -28,6 +28,9 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+/**
+ * Elasticsearch document representation of a Post used for Post list searching.
+ */
 @Document(indexName = "posts")
 @Data
 public class PostView {

@@ -25,6 +25,9 @@ import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Elasticsearch repository representation of list of posts searching.
+ */
 @Repository
 public interface PostElasticSearchRepository extends ElasticsearchRepository<PostView, String> {
 

@@ -132,7 +132,7 @@ class PostElasticSearchServiceTest {
 
     Pageable actualPageable = pageableCaptor.getValue();
 
-    assertThat(actualPageable.getPageNumber()).isEqualTo(0);
+    assertThat(actualPageable.getPageNumber()).isZero();
     assertThat(actualPageable.getPageSize()).isEqualTo(100);
 
     List<Sort.Order> orders = Lists.newArrayList(actualPageable.getSort().iterator());
@@ -159,15 +159,17 @@ class PostElasticSearchServiceTest {
 
     String queryAsString = queryCaptor.getValue().toString();
 
-    assertThat(queryAsString).contains("nationalPostNumber");
-    assertThat(queryAsString).contains("programmeNames");
-    assertThat(queryAsString).contains("currentTraineeSurname");
-    assertThat(queryAsString).contains("currentTraineeForenames");
-    assertThat(queryAsString).contains("primarySpecialtyName");
-    assertThat(queryAsString).contains("primarySpecialtyCode");
-    assertThat(queryAsString).contains("owner");
-    assertThat(queryAsString).contains("fundingType");
-    assertThat(queryAsString).contains("Smith");
+    assertThat(queryAsString).contains(
+        "nationalPostNumber",
+        "programmeNames",
+        "currentTraineeSurname",
+        "currentTraineeForenames",
+        "primarySpecialtyName",
+        "primarySpecialtyCode",
+        "owner",
+        "fundingType",
+        "Smith"
+    );
   }
 
   @Test
@@ -184,10 +186,12 @@ class PostElasticSearchServiceTest {
 
     String queryAsString = queryCaptor.getValue().toString();
 
-    assertThat(queryAsString).contains("id");
-    assertThat(queryAsString).contains("primarySiteId");
-    assertThat(queryAsString).contains("approvedGradeId");
-    assertThat(queryAsString).contains("primarySpecialtyId");
+    assertThat(queryAsString).contains(
+        "id",
+        "primarySiteId",
+        "approvedGradeId",
+        "primarySpecialtyId"
+    );
   }
 
   @Test
@@ -201,9 +205,9 @@ class PostElasticSearchServiceTest {
     assertThatThrownBy(() ->
         postElasticSearchService.searchForPage(null, filters, pageable)
     )
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("unsupportedFilter")
-        .hasMessageContaining("not a valid field name.");
+        .hasMessageContaining("Failed to search posts in Elasticsearch.");
   }
 
   @Test
@@ -225,6 +229,27 @@ class PostElasticSearchServiceTest {
     String queryAsString = queryCaptor.getValue().toString();
 
     assertThat(queryAsString).contains("East of England");
+  }
+
+  @Test
+  void shouldUseEnumNameForEnumColumnFilterValues() {
+    List<ColumnFilter> filters = Collections.singletonList(
+        columnFilter("status", Status.CURRENT)
+    );
+
+    Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
+
+    when(postElasticSearchRepository.search(any(QueryBuilder.class), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.singletonList(postView), pageable, 1));
+
+    postElasticSearchService.searchForPage(null, filters, pageable);
+
+    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
+    verify(postElasticSearchRepository).search(queryCaptor.capture(), any(Pageable.class));
+
+    String queryAsString = queryCaptor.getValue().toString();
+
+    assertThat(queryAsString).contains("status", "CURRENT");
   }
 
   private ColumnFilter columnFilter(String name, Object... values) {
