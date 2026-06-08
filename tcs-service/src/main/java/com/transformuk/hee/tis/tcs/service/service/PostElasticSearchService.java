@@ -41,7 +41,6 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,34 +48,66 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+/**
+ * Elasticsearch service class for searching, sorting and filtering list of posts.
+ */
 @Component
 public class PostElasticSearchService {
 
   private static final Logger LOG = LoggerFactory.getLogger(PostElasticSearchService.class);
 
-  @Autowired
   private PostElasticSearchRepository postElasticSearchRepository;
-  @Autowired
   private PostViewDecorator postViewDecorator;
+  private static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
+  private static final String STATUS = "status";
+  private static final String OWNER = "owner";
+  private static final String CURRENT_TRAINEE_SURNAME = "currentTraineeSurname";
+  private static final String CURRENT_TRAINEE_FORENAMES = "currentTraineeForenames";
+  private static final String PRIMARY_SPECIALTY_CODE = "primarySpecialtyCode";
+  private static final String PRIMARY_SPECIALTY_NAME = "primarySpecialtyName";
+  private static final String PROGRAMME_NAMES = "programmeNames";
+  private static final String FUNDING_TYPE = "fundingType";
+  private static final String PRIMARY_SPECIALTY_ID = "primarySpecialtyId";
+  private static final String PRIMARY_SITE_ID = "primarySiteId";
+  private static final String APPROVED_GRADE_ID = "approvedGradeId";
+  private static final String ID = "id";
 
   private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
-      "status",
-      "owner",
-      "currentTraineeSurname",
-      "currentTraineeForenames",
-      "primarySpecialtyCode",
-      "primarySpecialtyName",
-      "programmeNames",
-      "nationalPostNumber",
-      "fundingType"
+      CURRENT_TRAINEE_SURNAME,
+      CURRENT_TRAINEE_FORENAMES,
+      PRIMARY_SPECIALTY_NAME,
+      PROGRAMME_NAMES
   );
 
   private static final Set<String> TERM_QUERY_FIELDS = Sets.newHashSet(
-      "primarySpecialtyId",
-      "primarySiteId",
-      "approvedGradeId"
+      STATUS,
+      OWNER,
+      NATIONAL_POST_NUMBER,
+      PRIMARY_SPECIALTY_CODE,
+      FUNDING_TYPE,
+      PRIMARY_SPECIALTY_ID,
+      PRIMARY_SITE_ID,
+      APPROVED_GRADE_ID
   );
 
+  /**
+   * Constructor for Elasticsearch service class.
+   */
+  public PostElasticSearchService(PostElasticSearchRepository postElasticSearchRepository,
+      PostViewDecorator postViewDecorator) {
+    this.postElasticSearchRepository = postElasticSearchRepository;
+    this.postViewDecorator = postViewDecorator;
+  }
+
+  /**
+   * Searches the posts Elasticsearch index using optional free-text search, column filters,
+   * pagination and sorting.
+   *
+   * @param searchQuery   the optional free-text search value entered by the user
+   * @param columnFilters the optional list of column filters selected in the UI
+   * @param pageable      pagination and sorting information from the request
+   * @return a page of PostViewDTO results matching the supplied search criteria
+   */
   public Page<PostViewDTO> searchForPage(String searchQuery,
       List<ColumnFilter> columnFilters, Pageable pageable) {
 
@@ -95,13 +126,17 @@ public class PostElasticSearchService {
             }
 
             String filterName = columnFilter.getName();
-            String filterValue = value.toString();
+            String filterValue = getFilterValue(value);
 
             shouldBetweenSameColumnFilter.should(
                 createColumnFilterQuery(filterName, filterValue)
             );
           }
-          mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
+
+          if (shouldBetweenSameColumnFilter.hasClauses()) {
+            shouldBetweenSameColumnFilter.minimumShouldMatch(1);
+            mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
+          }
         }
       }
 
@@ -109,22 +144,34 @@ public class PostElasticSearchService {
 
       BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
 
+      LOG.debug("Post ES query is: {}", fullQuery);
       pageable = replaceSortById(pageable);
-
-      LOG.debug("Post ES query is: {}", fullQuery.toString());
 
       Page<PostView> result = postElasticSearchRepository.search(fullQuery, pageable);
 
-      List<PostViewDTO> postViewDTOs = convertPostViewToDTO(result.getContent());
+      List<PostViewDTO> postViewDtos = convertPostViewToDto(result.getContent());
 
-      postViewDecorator.decorate(postViewDTOs);
+      postViewDecorator.decorate(postViewDtos);
 
-      return new PageImpl<>(postViewDTOs, pageable, result.getTotalElements());
+      return new PageImpl<>(postViewDtos, pageable, result.getTotalElements());
 
     } catch (RuntimeException re) {
       LOG.error("An exception occurred while attempting to do a Post ElasticSearch", re);
-      throw re;
+      throw new IllegalStateException(
+          String.format(
+              "Failed to search posts in Elasticsearch. searchQuery=[%s], filters=[%s], page=[%s]",
+              searchQuery, columnFilters, pageable),
+          re
+      );
     }
+  }
+
+  private String getFilterValue(Object value) {
+    if (value instanceof Enum) {
+      return ((Enum<?>) value).name();
+    }
+
+    return value.toString().trim();
   }
 
   private QueryBuilder createColumnFilterQuery(String fieldName, String filterValue) {
@@ -148,24 +195,23 @@ public class PostElasticSearchService {
       searchQuery = StringUtils.remove(searchQuery, '"');
 
       shouldQuery
-          .should(new MatchQueryBuilder("nationalPostNumber", searchQuery))
-          .should(new MatchQueryBuilder("programmeNames", searchQuery))
-          .should(new WildcardQueryBuilder("currentTraineeSurname", "*" + searchQuery + "*"))
-          .should(new WildcardQueryBuilder("currentTraineeForenames", "*" + searchQuery + "*"))
-          .should(new MatchQueryBuilder("primarySpecialtyName", searchQuery))
-          .should(new MatchQueryBuilder("primarySpecialtyCode", searchQuery))
-          .should(new MatchQueryBuilder("owner", searchQuery))
-          .should(new MatchQueryBuilder("fundingType", searchQuery));
+          .should(new MatchQueryBuilder(NATIONAL_POST_NUMBER, searchQuery))
+          .should(new MatchQueryBuilder(PROGRAMME_NAMES, searchQuery))
+          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAME, "*" + searchQuery + "*"))
+          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, "*" + searchQuery + "*"))
+          .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_NAME, searchQuery))
+          .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_CODE, searchQuery))
+          .should(new MatchQueryBuilder(OWNER, searchQuery))
+          .should(new MatchQueryBuilder(FUNDING_TYPE, searchQuery));
 
       if (StringUtils.isNumeric(searchQuery)) {
         shouldQuery
-            .should(new TermQueryBuilder("id", searchQuery))
-            .should(new TermQueryBuilder("primarySiteId", searchQuery))
-            .should(new TermQueryBuilder("approvedGradeId", searchQuery))
-            .should(new TermQueryBuilder("primarySpecialtyId", searchQuery));
+            .should(new TermQueryBuilder(ID, searchQuery))
+            .should(new TermQueryBuilder(PRIMARY_SITE_ID, searchQuery))
+            .should(new TermQueryBuilder(APPROVED_GRADE_ID, searchQuery))
+            .should(new TermQueryBuilder(PRIMARY_SPECIALTY_ID, searchQuery));
       }
     }
-    LOG.debug("Post search query is: {}", shouldQuery);
     return shouldQuery;
   }
 
@@ -178,24 +224,22 @@ public class PostElasticSearchService {
     while (sortIterator.hasNext()) {
       Sort.Order order = sortIterator.next();
 
-      if ("id".equals(order.getProperty())) {
+      if (ID.equals(order.getProperty())) {
         if (order.isAscending()) {
-          sortOrders.add(Sort.Order.asc("id"));
+          sortOrders.add(Sort.Order.asc(ID));
         } else if (order.isDescending()) {
-          sortOrders.add(Sort.Order.desc("id"));
+          sortOrders.add(Sort.Order.desc(ID));
         } else {
-          sortOrders.add(Sort.Order.asc("id"));
+          sortOrders.add(Sort.Order.asc(ID));
         }
-
-      } else if ("nationalPostNumber".equals(order.getProperty())) {
+      } else if (NATIONAL_POST_NUMBER.equals(order.getProperty())) {
         if (order.isAscending()) {
-          sortOrders.add(Sort.Order.asc("nationalPostNumber"));
+          sortOrders.add(Sort.Order.asc(NATIONAL_POST_NUMBER));
         } else if (order.isDescending()) {
-          sortOrders.add(Sort.Order.desc("nationalPostNumber"));
+          sortOrders.add(Sort.Order.desc(NATIONAL_POST_NUMBER));
         } else {
-          sortOrders.add(Sort.Order.asc("nationalPostNumber"));
+          sortOrders.add(Sort.Order.asc(NATIONAL_POST_NUMBER));
         }
-
       } else {
         sortOrders.add(order);
       }
@@ -203,7 +247,7 @@ public class PostElasticSearchService {
     return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(sortOrders));
   }
 
-  private List<PostViewDTO> convertPostViewToDTO(List<PostView> content) {
+  private List<PostViewDTO> convertPostViewToDto(List<PostView> content) {
     return content.stream().map(pv -> {
       PostViewDTO dto = new PostViewDTO();
 
