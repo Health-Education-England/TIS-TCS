@@ -46,6 +46,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,6 +63,7 @@ public class PostElasticSearchService {
 
   private PostElasticSearchRepository postElasticSearchRepository;
   private PostViewDecorator postViewDecorator;
+  private final ElasticsearchOperations elasticsearchOperations;
   private static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   private static final String STATUS = "status";
   private static final String OWNER = "owner";
@@ -94,9 +100,11 @@ public class PostElasticSearchService {
    * Constructor for Elasticsearch service class.
    */
   public PostElasticSearchService(PostElasticSearchRepository postElasticSearchRepository,
-      PostViewDecorator postViewDecorator) {
+      PostViewDecorator postViewDecorator,
+      ElasticsearchOperations elasticsearchOperations) {
     this.postElasticSearchRepository = postElasticSearchRepository;
     this.postViewDecorator = postViewDecorator;
+    this.elasticsearchOperations = elasticsearchOperations;
   }
 
   /**
@@ -147,13 +155,23 @@ public class PostElasticSearchService {
       LOG.debug("Post ES query is: {}", fullQuery);
       pageable = replaceSortById(pageable);
 
-      Page<PostView> result = postElasticSearchRepository.search(fullQuery, pageable);
+      NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
+          .withQuery(fullQuery)
+          .withPageable(pageable)
+          .build();
 
-      List<PostViewDTO> postViewDtos = convertPostViewToDto(result.getContent());
+      SearchHits<PostView> searchHits =
+          elasticsearchOperations.search(nativeSearchQuery, PostView.class);
+
+      List<PostView> postViews = searchHits.getSearchHits().stream()
+          .map(SearchHit::getContent)
+          .collect(Collectors.toList());
+
+      List<PostViewDTO> postViewDtos = convertPostViewToDto(postViews);
 
       postViewDecorator.decorate(postViewDtos);
 
-      return new PageImpl<>(postViewDtos, pageable, result.getTotalElements());
+      return new PageImpl<>(postViewDtos, pageable, searchHits.getTotalHits());
 
     } catch (RuntimeException re) {
       LOG.error("An exception occurred while attempting to do a Post ElasticSearch", re);

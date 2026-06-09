@@ -24,6 +24,8 @@ package com.transformuk.hee.tis.tcs.service.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,11 +35,10 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.repository.PostElasticSearchRepository;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.elasticsearch.index.query.QueryBuilder;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,16 +47,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 
 @ExtendWith(MockitoExtension.class)
 class PostElasticSearchServiceTest {
 
   @Mock
-  private PostElasticSearchRepository postElasticSearchRepository;
+  private ElasticsearchOperations elasticsearchOperations;
   @Mock
   private PostViewDecorator postViewDecorator;
   @InjectMocks
@@ -85,7 +89,7 @@ class PostElasticSearchServiceTest {
   void shouldEsSearchReturnCorrectPostViewDtosUsingColumnFilters() {
     List<ColumnFilter> filters = Lists.newArrayList(
         columnFilter("status", Status.CURRENT),
-        columnFilter("owner", Lists.newArrayList("East of England", "Wessex"))
+        columnFilter("owner", "East of England", "Wessex")
     );
 
     Pageable pageable = PageRequest.of(
@@ -93,9 +97,10 @@ class PostElasticSearchServiceTest {
         100,
         Sort.by(Sort.Order.asc("nationalPostNumber"), Sort.Order.asc("id"))
     );
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
 
-    when(postElasticSearchRepository.search(any(QueryBuilder.class), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.singletonList(postView), pageable, 1));
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
 
     Page<PostViewDTO> result = postElasticSearchService.searchForPage(null, filters, pageable);
 
@@ -115,22 +120,26 @@ class PostElasticSearchServiceTest {
   }
 
   @Test
-  void shouldUseNationalPostNumber_ForSorting() {
+  void shouldUseNationalPostNumberDirectlyForSorting() {
     Pageable pageable = PageRequest.of(
         0,
         100,
         Sort.by(Sort.Order.asc("nationalPostNumber"), Sort.Order.desc("id"))
     );
 
-    when(postElasticSearchRepository.search(any(QueryBuilder.class), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.singletonList(postView), pageable, 1));
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
 
     postElasticSearchService.searchForPage(null, Collections.emptyList(), pageable);
 
-    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(postElasticSearchRepository).search(any(QueryBuilder.class), pageableCaptor.capture());
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
 
-    Pageable actualPageable = pageableCaptor.getValue();
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    Pageable actualPageable = queryCaptor.getValue().getPageable();
 
     assertThat(actualPageable.getPageNumber()).isZero();
     assertThat(actualPageable.getPageSize()).isEqualTo(100);
@@ -149,15 +158,19 @@ class PostElasticSearchServiceTest {
   void shouldBuildTextSearchQueryForStringSearchTerm() {
     Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
 
-    when(postElasticSearchRepository.search(any(QueryBuilder.class), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.singletonList(postView), pageable, 1));
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
 
     postElasticSearchService.searchForPage("Smith", Collections.emptyList(), pageable);
 
-    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
-    verify(postElasticSearchRepository).search(queryCaptor.capture(), any(Pageable.class));
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
 
-    String queryAsString = queryCaptor.getValue().toString();
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
 
     assertThat(queryAsString).contains(
         "nationalPostNumber",
@@ -176,15 +189,19 @@ class PostElasticSearchServiceTest {
   void shouldBuildNumericTextSearchQueryWithIdFields() {
     Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
 
-    when(postElasticSearchRepository.search(any(QueryBuilder.class), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.singletonList(postView), pageable, 1));
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
 
     postElasticSearchService.searchForPage("100", Collections.emptyList(), pageable);
 
-    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
-    verify(postElasticSearchRepository).search(queryCaptor.capture(), any(Pageable.class));
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
 
-    String queryAsString = queryCaptor.getValue().toString();
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
 
     assertThat(queryAsString).contains(
         "id",
@@ -213,20 +230,24 @@ class PostElasticSearchServiceTest {
   @Test
   void shouldSkipNullColumnFilterValues() {
     List<ColumnFilter> filters = Collections.singletonList(
-        columnFilter("owner", null, List.of("East of England"))
+        columnFilter("owner", null, "East of England")
     );
 
     Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
 
-    when(postElasticSearchRepository.search(any(QueryBuilder.class), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.singletonList(postView), pageable, 1));
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
 
     postElasticSearchService.searchForPage(null, filters, pageable);
 
-    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
-    verify(postElasticSearchRepository).search(queryCaptor.capture(), any(Pageable.class));
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
 
-    String queryAsString = queryCaptor.getValue().toString();
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
 
     assertThat(queryAsString).contains("East of England");
   }
@@ -239,17 +260,39 @@ class PostElasticSearchServiceTest {
 
     Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
 
-    when(postElasticSearchRepository.search(any(QueryBuilder.class), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.singletonList(postView), pageable, 1));
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
 
     postElasticSearchService.searchForPage(null, filters, pageable);
 
-    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
-    verify(postElasticSearchRepository).search(queryCaptor.capture(), any(Pageable.class));
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
 
-    String queryAsString = queryCaptor.getValue().toString();
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
 
     assertThat(queryAsString).contains("status", "CURRENT");
+  }
+
+  @SuppressWarnings("unchecked")
+  private SearchHits<PostView> searchHits(PostView... postViews) {
+    SearchHits<PostView> searchHits = mock(SearchHits.class);
+
+    List<SearchHit<PostView>> hits = Arrays.stream(postViews)
+        .map(postView -> {
+          SearchHit<PostView> searchHit = mock(SearchHit.class);
+          when(searchHit.getContent()).thenReturn(postView);
+          return searchHit;
+        })
+        .collect(Collectors.toList());
+
+    when(searchHits.getSearchHits()).thenReturn(hits);
+    when(searchHits.getTotalHits()).thenReturn((long) postViews.length);
+
+    return searchHits;
   }
 
   private ColumnFilter columnFilter(String name, Object... values) {
