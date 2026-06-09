@@ -49,7 +49,6 @@ app:
       exchange: ${REVAL_RABBIT_EXCHANGE:reval.exchange}
       queue:
         connection:
-          update: ${REVAL_RABBIT_QUEUE:reval.queue.connection.update}
           syncstart: ${REVAL_RABBIT_SYNC_START_QUEUE:reval.queue.connection.syncstart}
           syncdata: ${REVAL_RABBIT_SYNC_DATA_QUEUE:reval.queue.connection.syncdata}
         trainee.update.tcs: ${REVAL_RABBIT_TRAINEE_UPDATE_TCS:reval.queue.trainee.update.tcs}
