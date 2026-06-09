@@ -226,7 +226,6 @@ app:
       exchange: ${REVAL_RABBIT_EXCHANGE}
       queue:
         connection:
-          update: ${REVAL_RABBIT_QUEUE}
           syncstart: ${REVAL_RABBIT_SYNC_START_QUEUE}
           syncdata: ${REVAL_RABBIT_SYNC_DATA_QUEUE}
         trainee.update.tcs: ${REVAL_RABBIT_TRAINEE_UPDATE_TCS}
