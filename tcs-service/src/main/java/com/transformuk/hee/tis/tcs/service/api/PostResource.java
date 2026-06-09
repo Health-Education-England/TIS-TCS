@@ -171,19 +171,19 @@ public class PostResource {
       Pageable pageable,
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson,
-      @RequestParam(required = false, defaultValue = "false") boolean enableES)
+      @RequestParam(required = false, defaultValue = "false") boolean enableEs)
       throws IOException {
     log.debug("REST request to get a page of Posts");
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
-    String searchQueryES = getConverter(searchQuery).fromJson().decodeUrl().escapeForElasticSearch()
+    String searchQueryEs = getConverter(searchQuery).fromJson().decodeUrl().escapeForElasticSearch()
         .toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class,
         PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
     Page<PostViewDTO> page;
-    if (enableEsSearch || enableES) {
-      page = postElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
+    if (enableEsSearch || enableEs) {
+      page = postElasticSearchService.searchForPage(searchQueryEs, columnFilters, pageable);
     } else {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = postService.findAll(pageable);
