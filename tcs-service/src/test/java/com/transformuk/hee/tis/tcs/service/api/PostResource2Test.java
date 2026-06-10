@@ -388,7 +388,7 @@ public class PostResource2Test {
             .param("size", "100")
             .param("sort", "nationalPostNumber,asc")
             .param("sort", "id")
-            .param("enableES", "true")
+            .param("enableEs", "true")
             .param("columnFilters", columnFilters)
             .with(user("test-user").authorities(() -> "post:view")))
         .andExpect(status().isOk())
