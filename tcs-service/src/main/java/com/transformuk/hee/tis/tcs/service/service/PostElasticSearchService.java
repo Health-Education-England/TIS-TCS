@@ -27,7 +27,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
-import com.transformuk.hee.tis.tcs.service.repository.PostElasticSearchRepository;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -60,8 +59,6 @@ import org.springframework.stereotype.Component;
 public class PostElasticSearchService {
 
   private static final Logger LOG = LoggerFactory.getLogger(PostElasticSearchService.class);
-
-  private PostElasticSearchRepository postElasticSearchRepository;
   private PostViewDecorator postViewDecorator;
   private final ElasticsearchOperations elasticsearchOperations;
   private static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
@@ -99,10 +96,8 @@ public class PostElasticSearchService {
   /**
    * Constructor for Elasticsearch service class.
    */
-  public PostElasticSearchService(PostElasticSearchRepository postElasticSearchRepository,
-      PostViewDecorator postViewDecorator,
+  public PostElasticSearchService(PostViewDecorator postViewDecorator,
       ElasticsearchOperations elasticsearchOperations) {
-    this.postElasticSearchRepository = postElasticSearchRepository;
     this.postViewDecorator = postViewDecorator;
     this.elasticsearchOperations = elasticsearchOperations;
   }

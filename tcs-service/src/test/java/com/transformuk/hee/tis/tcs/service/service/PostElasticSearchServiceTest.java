@@ -282,9 +282,9 @@ class PostElasticSearchServiceTest {
     SearchHits<PostView> searchHits = mock(SearchHits.class);
 
     List<SearchHit<PostView>> hits = Arrays.stream(postViews)
-        .map(postView -> {
+        .map(pView -> {
           SearchHit<PostView> searchHit = mock(SearchHit.class);
-          when(searchHit.getContent()).thenReturn(postView);
+          when(searchHit.getContent()).thenReturn(pView);
           return searchHit;
         })
         .collect(Collectors.toList());

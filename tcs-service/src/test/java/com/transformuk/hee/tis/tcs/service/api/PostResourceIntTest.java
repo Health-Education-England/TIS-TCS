@@ -298,9 +298,9 @@ public class PostResourceIntTest {
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
     TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7", "1-1RUZV1D");
+    initTest();
   }
 
-  @Before
   public void initTest() {
     post = createEntity();
     post.setOwner(OWNER);
