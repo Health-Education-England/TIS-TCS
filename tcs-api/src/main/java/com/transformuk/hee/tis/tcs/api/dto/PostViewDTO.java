@@ -17,7 +17,6 @@ public class PostViewDTO implements Serializable {
 
   private Long currentTraineeId;
 
-  @Deprecated
   private String currentTraineeGmcNumber;
 
   private String currentTraineeSurname;
