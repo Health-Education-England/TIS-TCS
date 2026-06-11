@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -28,7 +28,7 @@ public class GmcDetailsDTO implements Serializable {
   @Pattern(regexp = "\\d{7}", message = "must be 7 digits", groups = TraineeUpdate.class)
   private String gmcNumber;
 
-  @NotEmpty(groups = TraineeUpdate.class)
+  @Null(groups = TraineeUpdate.class, message = "must be null for Trainee update requests")
   private String gmcStatus;
 
   private LocalDate gmcStartDate;

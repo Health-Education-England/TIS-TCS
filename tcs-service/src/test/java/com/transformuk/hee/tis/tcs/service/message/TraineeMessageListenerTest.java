@@ -141,8 +141,8 @@ class TraineeMessageListenerTest {
   }
 
   @ParameterizedTest
-  @NullAndEmptySource
-  void shouldNotSaveProvidedGmcDetailsWhenNoGmcStatus(String gmcStatus) {
+  @ValueSource(strings = {"", " ", "Registered"})
+  void shouldNotSaveProvidedGmcDetailsWhenGmcStatusProvided(String gmcStatus) {
     GmcDetailsDTO gmcDetails = new GmcDetailsDTO();
     gmcDetails.setGmcNumber("1234567");
     gmcDetails.setGmcStatus(gmcStatus);
@@ -159,7 +159,6 @@ class TraineeMessageListenerTest {
   void shouldNotSaveProvidedGmcDetailsWhenInvalid() throws MethodArgumentNotValidException {
     GmcDetailsDTO gmcDetails = new GmcDetailsDTO();
     gmcDetails.setGmcNumber("1234567");
-    gmcDetails.setGmcStatus("Registered");
 
     GmcDetailsProvidedEvent event = new GmcDetailsProvidedEvent(40L, gmcDetails);
 
@@ -177,7 +176,6 @@ class TraineeMessageListenerTest {
   void shouldSaveProvidedGmcDetailsWhenNoExistingGmcDetails() {
     GmcDetailsDTO gmcDetails = new GmcDetailsDTO();
     gmcDetails.setGmcNumber("1234567");
-    gmcDetails.setGmcStatus("Registered");
 
     GmcDetailsProvidedEvent event = new GmcDetailsProvidedEvent(40L, gmcDetails);
 
@@ -190,7 +188,7 @@ class TraineeMessageListenerTest {
 
     assertThat("Unexpected person ID.", savedDto.getId(), is(40L));
     assertThat("Unexpected GMC number.", savedDto.getGmcNumber(), is("1234567"));
-    assertThat("Unexpected GMC status.", savedDto.getGmcStatus(), is("Registered"));
+    assertThat("Unexpected GMC status.", savedDto.getGmcStatus(), nullValue());
     assertThat("Unexpected GMC start date.", savedDto.getGmcStartDate(), nullValue());
     assertThat("Unexpected GMC end date.", savedDto.getGmcEndDate(), nullValue());
     assertThat("Unexpected amended date.", savedDto.getAmendedDate(), nullValue());
@@ -200,12 +198,12 @@ class TraineeMessageListenerTest {
   void shouldSaveProvidedGmcDetailsWhenExistingGmcDetails() {
     GmcDetailsDTO gmcDetails = new GmcDetailsDTO();
     gmcDetails.setGmcNumber("1234567");
-    gmcDetails.setGmcStatus("Registered");
 
     GmcDetailsProvidedEvent event = new GmcDetailsProvidedEvent(40L, gmcDetails);
 
     LocalDateTime now = LocalDateTime.now();
     GmcDetailsDTO existingGmcDetails = new GmcDetailsDTO();
+    existingGmcDetails.setGmcStatus("Registered");
     existingGmcDetails.setAmendedDate(now);
     when(gmcDetailsService.findOne(40L)).thenReturn(existingGmcDetails);
 
@@ -218,7 +216,7 @@ class TraineeMessageListenerTest {
 
     assertThat("Unexpected person ID.", savedDto.getId(), is(40L));
     assertThat("Unexpected GMC number.", savedDto.getGmcNumber(), is("1234567"));
-    assertThat("Unexpected GMC status.", savedDto.getGmcStatus(), is("Registered"));
+    assertThat("Unexpected GMC status.", savedDto.getGmcStatus(), is(nullValue()));
     assertThat("Unexpected GMC start date.", savedDto.getGmcStartDate(), nullValue());
     assertThat("Unexpected GMC end date.", savedDto.getGmcEndDate(), nullValue());
     assertThat("Unexpected amended date.", savedDto.getAmendedDate(), is(now));
