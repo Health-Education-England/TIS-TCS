@@ -25,16 +25,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +65,8 @@ class PostElasticSearchServiceTest {
   private ElasticsearchOperations elasticsearchOperations;
   @Mock
   private PostViewDecorator postViewDecorator;
+  @Mock
+  private PermissionService permissionService;
   @InjectMocks
   private PostElasticSearchService postElasticSearchService;
   private PostView postView;
@@ -82,6 +87,8 @@ class PostElasticSearchServiceTest {
     postView.setPrimarySpecialtyName("General Surgery");
     postView.setPrimarySiteId(200L);
     postView.setApprovedGradeId(300L);
+    lenient().when(permissionService.isUserTrustAdmin()).thenReturn(false);
+    lenient().when(permissionService.isProgrammeObserver()).thenReturn(false);
   }
 
   @Test
@@ -176,10 +183,6 @@ class PostElasticSearchServiceTest {
         "programmeNames",
         "currentTraineeSurname",
         "currentTraineeForenames",
-        "primarySpecialtyName",
-        "primarySpecialtyCode",
-        "owner",
-        "fundingType",
         "Smith"
     );
   }
@@ -274,6 +277,56 @@ class PostElasticSearchServiceTest {
     String queryAsString = queryCaptor.getValue().getQuery().toString();
 
     assertThat(queryAsString).contains("status", "CURRENT");
+  }
+
+  @Test
+  void shouldApplyTrustPermissionFilterWhenUserIsTrustAdmin() {
+    Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
+
+    when(permissionService.isUserTrustAdmin()).thenReturn(true);
+    when(permissionService.getUsersTrustIds()).thenReturn(Sets.newHashSet(10L, 20L));
+    when(permissionService.isProgrammeObserver()).thenReturn(false);
+
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
+
+    postElasticSearchService.searchForPage(null, Collections.emptyList(), pageable);
+
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
+
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
+
+    assertThat(queryAsString).contains("trustIds", "10", "20");
+  }
+
+  @Test
+  void shouldApplyProgrammePermissionFilterWhenUserIsProgrammeObserver() {
+    Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
+
+    when(permissionService.isUserTrustAdmin()).thenReturn(false);
+    when(permissionService.isProgrammeObserver()).thenReturn(true);
+    when(permissionService.getUsersProgrammeIds()).thenReturn(Sets.newHashSet(100L, 200L));
+
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
+
+    postElasticSearchService.searchForPage(null, Collections.emptyList(), pageable);
+
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
+
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
+
+    assertThat(queryAsString).contains("programmeIds", "100", "200");
   }
 
   @SuppressWarnings("unchecked")

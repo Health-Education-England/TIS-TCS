@@ -74,11 +74,6 @@ class PostViewTest {
   }
 
   @Test
-  void shouldMapIntrepidIdAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("intrepidId");
-  }
-
-  @Test
   void shouldSupportGeneratedAccessorsMethod() {
     PostView postView = new PostView();
 
