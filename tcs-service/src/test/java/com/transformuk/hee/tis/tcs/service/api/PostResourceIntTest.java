@@ -61,6 +61,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PostServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
@@ -165,6 +166,8 @@ public class PostResourceIntTest {
   private PlacementViewMapper placementViewMapper;
   @Autowired
   private PlacementService placementService;
+  @Autowired
+  private PostElasticSearchService postElasticSearchService;
   @Autowired
   private PlacementSummaryDecorator placementSummaryDecorator;
   @Autowired
@@ -289,15 +292,15 @@ public class PostResourceIntTest {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator, placementViewMapper, placementService,
-        placementSummaryDecorator);
+        placementSummaryDecorator, postElasticSearchService);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
     TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7", "1-1RUZV1D");
+    initTest();
   }
 
-  @Before
   public void initTest() {
     post = createEntity();
     post.setOwner(OWNER);
