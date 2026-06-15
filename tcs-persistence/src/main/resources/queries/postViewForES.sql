@@ -9,9 +9,10 @@ GROUP_CONCAT(distinct fundingType SEPARATOR ', ') fundingType,
 nationalPostNumber,
 fundingStatus,
 owner,
-intrepidId,
 GROUP_CONCAT(surnames SEPARATOR ', ') surnames,
 GROUP_CONCAT(forenames SEPARATOR ', ') forenames
+GROUP_CONCAT(DISTINCT trustId SEPARATOR ',') trustIds,
+GROUP_CONCAT(DISTINCT programmeId SEPARATOR ',') programmeIds
  from (SELECT p.`id`,
     pg.`gradeId` as `approvedGradeId`,
     ps.`specialtyId` as `primarySpecialtyId`,
@@ -23,8 +24,9 @@ GROUP_CONCAT(forenames SEPARATOR ', ') forenames
     p.`nationalPostNumber`,
     p.`fundingStatus`,
     p.`owner`,
-    p.`intrepidId`,
-    c.surname surnames, c.forenames forenames
+    c.surname surnames, c.forenames forenames,
+    pt.`trustId` as `trustId`,
+    pp.`programmeId` as `programmeId`
     FROM `Post` p
     LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'
     LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'
@@ -35,10 +37,11 @@ GROUP_CONCAT(forenames SEPARATOR ', ') forenames
     LEFT JOIN `ContactDetails` c on pl.traineeId = c.id
     LEFT JOIN `ProgrammePost` pp on pp.postId = p.id
     LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`
+    LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id`
  TRUST_JOIN
  WHERECLAUSE
 ) as ot
-group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,fundingStatus,owner,intrepidId
+group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,fundingStatus,owner
  ORDERBYCLAUSE
  LIMITCLAUSE
 ;

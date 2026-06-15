@@ -15,10 +15,6 @@ public class PostViewDTO implements Serializable {
 
   private Long id;
 
-  private Long currentTraineeId;
-
-  private String currentTraineeGmcNumber;
-
   private String currentTraineeSurname;
 
   private String currentTraineeForenames;
@@ -53,8 +49,6 @@ public class PostViewDTO implements Serializable {
 
   private String owner;
 
-  private String intrepidId;
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -67,14 +61,6 @@ public class PostViewDTO implements Serializable {
     PostViewDTO that = (PostViewDTO) o;
 
     if (!id.equals(that.id)) {
-      return false;
-    }
-    if (currentTraineeId != null ? !currentTraineeId.equals(that.currentTraineeId)
-        : that.currentTraineeId != null) {
-      return false;
-    }
-    if (currentTraineeGmcNumber != null ? !currentTraineeGmcNumber
-        .equals(that.currentTraineeGmcNumber) : that.currentTraineeGmcNumber != null) {
       return false;
     }
     if (currentTraineeSurname != null ? !currentTraineeSurname.equals(that.currentTraineeSurname)
@@ -128,21 +114,18 @@ public class PostViewDTO implements Serializable {
     if (status != that.status) {
       return false;
     }
-    if (fundingType != that.fundingType) {
+    if (fundingType != null ? !fundingType.equals(that.fundingType) : that.fundingType != null) {
       return false;
     }
     if (owner != null ? !owner.equals(that.owner) : that.owner != null) {
       return false;
     }
-    return intrepidId != null ? intrepidId.equals(that.intrepidId) : that.intrepidId == null;
+    return true;
   }
 
   @Override
   public int hashCode() {
     int result = id.hashCode();
-    result = 31 * result + (currentTraineeId != null ? currentTraineeId.hashCode() : 0);
-    result =
-        31 * result + (currentTraineeGmcNumber != null ? currentTraineeGmcNumber.hashCode() : 0);
     result = 31 * result + (currentTraineeSurname != null ? currentTraineeSurname.hashCode() : 0);
     result =
         31 * result + (currentTraineeForenames != null ? currentTraineeForenames.hashCode() : 0);
@@ -159,8 +142,6 @@ public class PostViewDTO implements Serializable {
     result = 31 * result + status.hashCode();
     result = 31 * result + (fundingType != null ? fundingType.hashCode() : 0);
     result = 31 * result + (owner != null ? owner.hashCode() : 0);
-    result = 31 * result + (intrepidId != null ? intrepidId.hashCode() : 0);
     return result;
   }
 }
-

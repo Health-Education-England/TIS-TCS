@@ -27,6 +27,8 @@ import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.slf4j.Logger;
@@ -61,6 +64,7 @@ public class PostElasticSearchService {
   private static final Logger LOG = LoggerFactory.getLogger(PostElasticSearchService.class);
   private PostViewDecorator postViewDecorator;
   private final ElasticsearchOperations elasticsearchOperations;
+  private static final String TRUST_IDS = "trustIds";
   private static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   private static final String STATUS = "status";
   private static final String OWNER = "owner";
@@ -74,6 +78,8 @@ public class PostElasticSearchService {
   private static final String PRIMARY_SITE_ID = "primarySiteId";
   private static final String APPROVED_GRADE_ID = "approvedGradeId";
   private static final String ID = "id";
+  private static final String PROGRAMME_IDS = "programmeIds";
+  private final PermissionService permissionService;
 
   private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
       CURRENT_TRAINEE_SURNAME,
@@ -97,9 +103,11 @@ public class PostElasticSearchService {
    * Constructor for Elasticsearch service class.
    */
   public PostElasticSearchService(PostViewDecorator postViewDecorator,
-      ElasticsearchOperations elasticsearchOperations) {
+      ElasticsearchOperations elasticsearchOperations,
+      PermissionService permissionService) {
     this.postViewDecorator = postViewDecorator;
     this.elasticsearchOperations = elasticsearchOperations;
+    this.permissionService = permissionService;
   }
 
   /**
@@ -115,39 +123,19 @@ public class PostElasticSearchService {
       List<ColumnFilter> columnFilters, Pageable pageable) {
 
     try {
-      BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+      BoolQueryBuilder fullQuery = buildColumnFilterQuery(columnFilters);
 
-      if (CollectionUtils.isNotEmpty(columnFilters)) {
-        for (ColumnFilter columnFilter : columnFilters) {
+      BoolQueryBuilder textSearchQuery = applyTextBasedSearchQuery(searchQuery);
 
-          BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
-
-          for (Object value : columnFilter.getValues()) {
-
-            if (value == null) {
-              continue;
-            }
-
-            String filterName = columnFilter.getName();
-            String filterValue = getFilterValue(value);
-
-            shouldBetweenSameColumnFilter.should(
-                createColumnFilterQuery(filterName, filterValue)
-            );
-          }
-
-          if (shouldBetweenSameColumnFilter.hasClauses()) {
-            shouldBetweenSameColumnFilter.minimumShouldMatch(1);
-            mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
-          }
-        }
+      if (textSearchQuery.hasClauses()) {
+        textSearchQuery.minimumShouldMatch(1);
+        fullQuery.must(textSearchQuery);
       }
 
-      BoolQueryBuilder shouldQuery = applyTextBasedSearchQuery(searchQuery);
-
-      BoolQueryBuilder fullQuery = mustBetweenDifferentColumnFilters.must(shouldQuery);
+      applyPermissionFilters(fullQuery);
 
       LOG.debug("Post ES query is: {}", fullQuery);
+
       pageable = replaceSortById(pageable);
 
       NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
@@ -208,14 +196,10 @@ public class PostElasticSearchService {
       searchQuery = StringUtils.remove(searchQuery, '"');
 
       shouldQuery
-          .should(new MatchQueryBuilder(NATIONAL_POST_NUMBER, searchQuery))
+          .should(new TermQueryBuilder(NATIONAL_POST_NUMBER, searchQuery))
           .should(new MatchQueryBuilder(PROGRAMME_NAMES, searchQuery))
           .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAME, "*" + searchQuery + "*"))
-          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, "*" + searchQuery + "*"))
-          .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_NAME, searchQuery))
-          .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_CODE, searchQuery))
-          .should(new MatchQueryBuilder(OWNER, searchQuery))
-          .should(new MatchQueryBuilder(FUNDING_TYPE, searchQuery));
+          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, "*" + searchQuery + "*"));
 
       if (StringUtils.isNumeric(searchQuery)) {
         shouldQuery
@@ -265,16 +249,13 @@ public class PostElasticSearchService {
       PostViewDTO dto = new PostViewDTO();
 
       dto.setId(pv.getId());
-      dto.setCurrentTraineeId(pv.getCurrentTraineeId());
-      dto.setCurrentTraineeGmcNumber(pv.getCurrentTraineeGmcNumber());
+
       dto.setCurrentTraineeSurname(pv.getCurrentTraineeSurname());
       dto.setCurrentTraineeForenames(pv.getCurrentTraineeForenames());
 
       dto.setNationalPostNumber(pv.getNationalPostNumber());
 
       dto.setPrimarySiteId(pv.getPrimarySiteId());
-      dto.setPrimarySiteCode(pv.getPrimarySiteCode());
-      dto.setPrimarySiteName(pv.getPrimarySiteName());
       dto.setPrimarySiteKnownAs(pv.getPrimarySiteKnownAs());
 
       dto.setApprovedGradeId(pv.getApprovedGradeId());
@@ -289,9 +270,62 @@ public class PostElasticSearchService {
       dto.setStatus(pv.getStatus());
       dto.setFundingType(pv.getFundingType());
       dto.setOwner(pv.getOwner());
-      dto.setIntrepidId(pv.getIntrepidId());
 
       return dto;
     }).collect(Collectors.toList());
+  }
+
+  private void applyPermissionFilters(BoolQueryBuilder query) {
+    if (permissionService.isUserTrustAdmin()) {
+      Collection<Long> usersTrustIds = permissionService.getUsersTrustIds();
+
+      if (CollectionUtils.isEmpty(usersTrustIds)) {
+        query.must(QueryBuilders.termQuery("_id", "_NO_MATCH_"));
+      } else {
+        query.must(QueryBuilders.termsQuery(TRUST_IDS, usersTrustIds));
+      }
+    }
+
+    if (permissionService.isProgrammeObserver()) {
+      Collection<Long> usersProgrammeIds = permissionService.getUsersProgrammeIds();
+
+      if (CollectionUtils.isEmpty(usersProgrammeIds)) {
+        query.must(QueryBuilders.termQuery("_id", "_NO_MATCH_"));
+      } else {
+        query.must(QueryBuilders.termsQuery(PROGRAMME_IDS, usersProgrammeIds));
+      }
+    }
+  }
+
+  private BoolQueryBuilder buildColumnFilterQuery(List<ColumnFilter> columnFilters) {
+    BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+
+    if (CollectionUtils.isEmpty(columnFilters)) {
+      return mustBetweenDifferentColumnFilters;
+    }
+
+    for (ColumnFilter columnFilter : columnFilters) {
+      BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
+
+      for (Object value : columnFilter.getValues()) {
+        if (value == null) {
+          continue;
+        }
+
+        String filterName = columnFilter.getName();
+        String filterValue = getFilterValue(value);
+
+        shouldBetweenSameColumnFilter.should(
+            createColumnFilterQuery(filterName, filterValue)
+        );
+      }
+
+      if (shouldBetweenSameColumnFilter.hasClauses()) {
+        shouldBetweenSameColumnFilter.minimumShouldMatch(1);
+        mustBetweenDifferentColumnFilters.must(shouldBetweenSameColumnFilter);
+      }
+    }
+
+    return mustBetweenDifferentColumnFilters;
   }
 }

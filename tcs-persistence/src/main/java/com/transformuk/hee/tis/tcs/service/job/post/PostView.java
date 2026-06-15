@@ -22,6 +22,7 @@
 package com.transformuk.hee.tis.tcs.service.job.post;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import java.util.List;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -38,21 +39,13 @@ public class PostView {
   @Id
   private Long id;
 
-  private Long currentTraineeId;
-
-  private String currentTraineeGmcNumber;
-
   private String currentTraineeSurname;
-
   private String currentTraineeForenames;
+
   @Field(type = FieldType.Keyword)
   private String nationalPostNumber;
 
   private Long primarySiteId;
-
-  private String primarySiteCode;
-
-  private String primarySiteName;
 
   private String primarySiteKnownAs;
 
@@ -75,10 +68,14 @@ public class PostView {
   private String fundingType;
   @Field(type = FieldType.Keyword)
   private String owner;
-  @Field(type = FieldType.Keyword)
-  private String intrepidId;
 
   private Long trustId;
 
   private Long programmeId;
+
+  @Field(type = FieldType.Long)
+  private List<Long> trustIds;
+
+  @Field(type = FieldType.Long)
+  private List<Long> programmeIds;
 }

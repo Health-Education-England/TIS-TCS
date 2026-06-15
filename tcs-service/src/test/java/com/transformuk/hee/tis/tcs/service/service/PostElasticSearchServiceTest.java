@@ -82,7 +82,6 @@ class PostElasticSearchServiceTest {
     postView.setPrimarySpecialtyName("General Surgery");
     postView.setPrimarySiteId(200L);
     postView.setApprovedGradeId(300L);
-    postView.setIntrepidId("128357847");
   }
 
   @Test
