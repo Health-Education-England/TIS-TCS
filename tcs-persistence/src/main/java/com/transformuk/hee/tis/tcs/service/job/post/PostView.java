@@ -39,14 +39,16 @@ public class PostView {
   @Id
   private Long id;
 
-  private String currentTraineeSurname;
+  private String currentTraineeSurnames;
   private String currentTraineeForenames;
 
   @Field(type = FieldType.Keyword)
   private String nationalPostNumber;
 
+  @Field(type = FieldType.Long)
   private Long primarySiteId;
 
+  @Field(type = FieldType.Long)
   private Long approvedGradeId;
 
   private Long primarySpecialtyId;
@@ -54,16 +56,17 @@ public class PostView {
   private String primarySpecialtyCode;
   private String primarySpecialtyName;
 
-  private String programmeNames;
+  @Field(type = FieldType.Keyword)
+  private List<String> programmeNames;
 
   @Field(type = FieldType.Keyword)
   private Status status;
 
   @Field(type = FieldType.Keyword)
-  private String fundingType;
+  private List<String> fundingTypes;
 
   @Field(type = FieldType.Keyword)
-  private String owner;
+  private List<String> owners;
 
   @Field(type = FieldType.Long)
   private List<Long> trustIds;

@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.lang.reflect.Field;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -65,12 +66,12 @@ class PostViewTest {
 
   @Test
   void shouldMapFundingTypeAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("fundingType");
+    assertKeywordField("fundingTypes");
   }
 
   @Test
   void shouldMapOwnerAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("owner");
+    assertKeywordField("owners");
   }
 
   @Test
@@ -80,12 +81,12 @@ class PostViewTest {
     postView.setId(243906L);
     postView.setNationalPostNumber("NWN/RM317/018/HT/002");
     postView.setStatus(Status.CURRENT);
-    postView.setOwner("North West");
+    postView.setOwners(List.of("North West"));
 
     assertThat(postView.getId()).isEqualTo(243906L);
     assertThat(postView.getNationalPostNumber()).isEqualTo("NWN/RM317/018/HT/002");
     assertThat(postView.getStatus()).isEqualTo(Status.CURRENT);
-    assertThat(postView.getOwner()).isEqualTo("North West");
+    assertThat(postView.getOwners().get(0)).isEqualTo("North West");
   }
 
   private void assertKeywordField(String fieldName) throws NoSuchFieldException {
