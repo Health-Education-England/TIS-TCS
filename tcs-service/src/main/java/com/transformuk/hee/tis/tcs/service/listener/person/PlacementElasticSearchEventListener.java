@@ -1,10 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
+import java.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +35,17 @@ public class PlacementElasticSearchEventListener {
    */
   @EventListener
   public void handlePlacementSavedEvent(PlacementSavedEvent event) {
-    LOG.info("Received PlacementSavedEvent for id [{}]", event.getPlacementDTO().getId());
-    personElasticSearchService.updatePersonDocument(event.getPlacementDTO().getTraineeId());
+    PlacementDTO placementDto = event.getPlacementDTO();
+    LOG.info("Received PlacementSavedEvent for id [{}]", placementDto.getId());
+    personElasticSearchService.updatePersonDocument(placementDto.getTraineeId());
     revalidationRabbitService.updateReval(
-        revalidationService.buildTcsConnectionInfo(event.getPlacementDTO().getTraineeId())
+        revalidationService.buildTcsConnectionInfo(placementDto.getTraineeId())
     );
+
+    if (isCurrentPlacement(placementDto)) {
+      Long postId = placementDto.getPostId();
+      // TODO send postId to PostElasticSearchService for post updates
+    }
   }
 
   /**
@@ -47,10 +55,27 @@ public class PlacementElasticSearchEventListener {
    */
   @EventListener
   public void handlePlacementDeletedEvent(PlacementDeletedEvent event) {
-    LOG.info("Received PlacementDeleteEvent for placement id [{}]", event.getPlacementId());
-    personElasticSearchService.updatePersonDocument(event.getPersonId());
+    PlacementDTO placementDto = event.getPlacementDto();
+    Long personId = placementDto.getTraineeId();
+    LOG.info("Received PlacementDeleteEvent for placement id [{}]", placementDto.getId());
+    personElasticSearchService.updatePersonDocument(personId);
     revalidationRabbitService.updateReval(
-        revalidationService.buildTcsConnectionInfo(event.getPersonId())
+        revalidationService.buildTcsConnectionInfo(personId)
     );
+    if (isCurrentPlacement(placementDto)) {
+      Long postId = placementDto.getPostId();
+      // TODO send postId to PostElasticSearchService for post updates
+    }
+  }
+
+  private boolean isCurrentPlacement(PlacementDTO placementDto) {
+    LocalDate dateFrom = placementDto.getDateFrom();
+    LocalDate dateTo = placementDto.getDateTo();
+    if (dateFrom == null || dateTo == null) {
+      return false;
+    }
+
+    LocalDate currentDate = LocalDate.now();
+    return !currentDate.isBefore(dateFrom) && !currentDate.isAfter(dateTo);
   }
 }

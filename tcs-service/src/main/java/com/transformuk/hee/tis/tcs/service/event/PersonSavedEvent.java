@@ -4,18 +4,29 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class PersonSavedEvent extends ApplicationEvent {
 
-  private PersonDTO personDTO;
+  private final PersonDTO personDTO;
+  private final PersonDTO previousPersonDTO;
 
   public PersonSavedEvent(@NonNull PersonDTO source) {
-    super(source);
-    this.personDTO = source;
+    this(null, source);
   }
 
-  public PersonDTO getPersonDTO() {
+  public PersonSavedEvent(@Nullable PersonDTO previousPersonDTO, @NonNull PersonDTO source) {
+    super(source);
+    this.personDTO = source;
+    this.previousPersonDTO = previousPersonDTO;
+  }
+
+  public PersonDTO getPersonDto() {
     return personDTO;
+  }
+
+  public PersonDTO getPreviousPersonDto() {
+    return previousPersonDTO;
   }
 
   @Override
@@ -27,11 +38,12 @@ public class PersonSavedEvent extends ApplicationEvent {
       return false;
     }
     PersonSavedEvent that = (PersonSavedEvent) o;
-    return Objects.equals(personDTO, that.personDTO);
+    return Objects.equals(personDTO, that.personDTO)
+        && Objects.equals(previousPersonDTO, that.previousPersonDTO);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(personDTO);
+    return Objects.hash(previousPersonDTO, personDTO);
   }
 }

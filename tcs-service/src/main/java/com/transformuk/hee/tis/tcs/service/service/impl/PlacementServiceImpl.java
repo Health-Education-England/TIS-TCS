@@ -4,6 +4,7 @@ import static com.transformuk.hee.tis.security.util.TisSecurityHelper.getProfile
 import static com.transformuk.hee.tis.tcs.service.api.util.DateUtil.getLocalDateFromString;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.in;
 import static com.transformuk.hee.tis.tcs.service.service.impl.SpecificationFactory.isBetween;
+import static java.time.LocalDate.now;
 import static uk.nhs.tis.StringConverter.getConverter;
 
 import com.google.common.collect.Lists;
@@ -319,13 +320,13 @@ public class PlacementServiceImpl implements PlacementService {
         log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
             placementDetailsDTO.getId());
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
-            .isBefore(LocalDate.now().plusDays(1));
+            .isBefore(now().plusDays(1));
         handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate,
             currentPlacementEdit);
       } else if (eligibleForEsrNewPlacementNotificationWhenUpdateWte) {
         log.info("Handling ESR Notification for whole time equivalent edit: placement id {}",
             placementDetailsDTO.getId());
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate tomorrow = now().plusDays(1);
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
             .isBefore(tomorrow);
         handleChangeOfWholeTimeEquivalentEsrNotification(placementDetailsDTO, placementBeforeUpdate,
@@ -359,7 +360,7 @@ public class PlacementServiceImpl implements PlacementService {
       latestComment.setPlacement(placementDetails);
       latestComment.setAuthor(getProfileFromContext().getFullName());
       latestComment.setSource(comment.getSource());
-      latestComment.setAmendedDate(LocalDate.now(clock));
+      latestComment.setAmendedDate(now(clock));
       commentsToPersist.add(latestComment);
     }
     placementDetails.setComments(commentsToPersist);
@@ -586,7 +587,8 @@ public class PlacementServiceImpl implements PlacementService {
     PlacementDetails placementDetails = placementToPlacementDetails(placement);
     placementLogService.placementLog(placementDetails, PlacementLogType.DELETE);
 
-    PlacementDeletedEvent event = new PlacementDeletedEvent(id, placement.getTrainee().getId());
+    PlacementDeletedEvent event = new PlacementDeletedEvent(
+        placementMapper.placementToPlacementDTO(placement, null));
 
     placementRepository.delete(placement);
 
@@ -629,7 +631,7 @@ public class PlacementServiceImpl implements PlacementService {
 
     // Only future placements can be deleted.
     if (placementToDelete != null && placementToDelete.getDateFrom() != null && placementToDelete
-        .getDateFrom().isBefore(LocalDate.now(clock).plusWeeks(13))) {
+        .getDateFrom().isBefore(now(clock).plusWeeks(13))) {
       final List<EsrNotification> esrNotifications = esrNotificationService
           .loadPlacementDeleteNotification(placementToDelete, allEsrNotifications);
       log.debug("Placement Delete: PERSISTING: {} EsrNotifications for post {} being deleted",
@@ -766,7 +768,7 @@ public class PlacementServiceImpl implements PlacementService {
   public PlacementDTO closePlacement(final Long placementId) {
     Placement placement = placementRepository.findById(placementId).orElse(null);
     if (placement != null) {
-      placement.setDateTo(LocalDate.now(clock).minusDays(1));
+      placement.setDateTo(now(clock).minusDays(1));
       placement = placementRepository.saveAndFlush(placement);
     }
     return convertPlacementWithSupervisors(placement);
@@ -998,10 +1000,10 @@ public class PlacementServiceImpl implements PlacementService {
             (currentDateTo != null && !currentDateTo
                 .equals(updatedPlacementDetails.getDateTo()))) &&
             ((currentDateFrom != null && currentDateFrom
-                .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
+                .isBefore(now(clock).plusWeeks(13))) ||
                 (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
                     .getDateFrom()
-                    .isBefore(LocalDate.now(clock).plusWeeks(13))));
+                    .isBefore(now(clock).plusWeeks(13))));
   }
 
   public boolean isEligibleForCurrentTraineeWteChangeNotification(final Placement currentPlacement,
@@ -1015,10 +1017,10 @@ public class PlacementServiceImpl implements PlacementService {
                 || updatedPlacementDetails.getWholeTimeEquivalent()
                 .compareTo(currentPlacement.getPlacementWholeTimeEquivalent()) != 0))
             && ((currentDateFrom != null && currentDateFrom
-                .isBefore(LocalDate.now(clock).plusWeeks(13))) ||
+                .isBefore(now(clock).plusWeeks(13))) ||
                 (updatedPlacementDetails.getDateFrom() != null && updatedPlacementDetails
                     .getDateFrom()
-                    .isBefore(LocalDate.now(clock).plusWeeks(13))));
+                    .isBefore(now(clock).plusWeeks(13))));
   }
 
   private void handleEsrNewPlacementNotification(final PlacementDetailsDTO placementDetailsDTO,
@@ -1034,7 +1036,7 @@ public class PlacementServiceImpl implements PlacementService {
       final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
           .orElse(null);
       if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+          .isBefore(now(clock).plusWeeks(13))) {
         log.debug("Creating ESR notification for new placement creation for deanery number {}",
             savedPlacement.getPost().getNationalPostNumber());
         final List<EsrNotification> esrNotifications = esrNotificationService
@@ -1143,4 +1145,9 @@ public class PlacementServiceImpl implements PlacementService {
     return draftPlacements;
   }
 
+  @Override
+  public List<PlacementDTO> getCurrentPlacementsForPersonId(Long personId) {
+    List<Placement> placements = placementRepository.findAllCurrentPlacementsForTrainee(personId, now());
+    return placementMapper.placementsToPlacementDTOs(placements, null);
+  }
 }

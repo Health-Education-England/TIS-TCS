@@ -193,8 +193,17 @@ public class PersonServiceImpl implements PersonService {
     Person person = personMapper.toEntity(personDTO);
 
     final Long personDtoId = personDTO.getId();
+    Person originalPerson = null;
+    PersonDTO originalPersonDto = null;
+
+    if (personDtoId != null) {
+      originalPerson = personRepository.findById(personDtoId).orElse(null);
+      if (originalPerson != null) {
+        originalPersonDto = personMapper.toDto(originalPerson);
+      }
+    }
+
     if (!permissionService.canEditSensitiveData() && personDtoId != null) {
-      final Person originalPerson = personRepository.findById(personDtoId).orElse(null);
       if (originalPerson == null) { //this shouldn't happen
         throw new IllegalArgumentException(
             "The person record for id " + personDtoId + " could not be found");
@@ -214,7 +223,7 @@ public class PersonServiceImpl implements PersonService {
       clearSensitiveData(personDTO1.getPersonalDetails());
     }
 
-    applicationEventPublisher.publishEvent(new PersonSavedEvent(personDTO));
+    applicationEventPublisher.publishEvent(new PersonSavedEvent(originalPersonDto, personDTO));
 
     return personDTO1;
   }

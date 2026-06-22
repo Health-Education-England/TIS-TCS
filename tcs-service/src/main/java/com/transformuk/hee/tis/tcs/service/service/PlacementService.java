@@ -124,6 +124,8 @@ public interface PlacementService {
    */
   List<PlacementSummaryDTO> getPlacementForTrainee(Long traineeId, String traineeRole);
 
+  List<PlacementDTO> getCurrentPlacementsForPersonId(Long personId);
+
   /**
    * Get all placements by post id
    *
