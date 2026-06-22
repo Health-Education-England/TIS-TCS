@@ -1,4 +1,4 @@
-package com.transformuk.hee.tis.tcs.service.listener.person;
+package com.transformuk.hee.tis.tcs.service.listener;
 
 import static org.mockito.Mockito.verify;
 
