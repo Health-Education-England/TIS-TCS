@@ -15,10 +15,10 @@ public class PersonSavedEvent extends ApplicationEvent {
     this(null, source);
   }
 
-  public PersonSavedEvent(@Nullable PersonDTO previousPersonDTO, @NonNull PersonDTO source) {
+  public PersonSavedEvent(@Nullable PersonDTO previousPersonDto, @NonNull PersonDTO source) {
     super(source);
     this.personDTO = source;
-    this.previousPersonDTO = previousPersonDTO;
+    this.previousPersonDTO = previousPersonDto;
   }
 
   public PersonDTO getPersonDto() {

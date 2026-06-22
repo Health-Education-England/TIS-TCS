@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
+import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
@@ -38,17 +39,25 @@ public class ProgrammeElasticSearchEventListener {
    */
   @EventListener
   public void handleProgrammeSavedEvent(ProgrammeSavedEvent event) {
-    final Long programmeId = event.getProgrammeDTO().getId();
+    ProgrammeDTO programmeDto = event.getProgrammeDTO();
+    final Long programmeId = programmeDto.getId();
     LOG.info("Received ProgrammeSavedEvent for Programme id [{}]", programmeId);
 
     // Update related trainees' programme info in Reval
     List<ProgrammeMembershipDTO> programmeMembershipDTOS =
         programmeMembershipService.findProgrammeMembershipsByProgramme(programmeId);
-    programmeMembershipDTOS.stream().forEach(programmeMembershipDTO -> {
+    programmeMembershipDTOS.forEach(programmeMembershipDTO ->
       revalidationRabbitService.updateReval(
-          revalidationService.buildTcsConnectionInfo(programmeMembershipDTO.getPerson().getId()));
-    });
+          revalidationService.buildTcsConnectionInfo(programmeMembershipDTO.getPerson().getId()))
+    );
 
     personElasticSearchService.updatePersonDocumentForProgramme(programmeId);
+
+    ProgrammeDTO previousProgrammeDto = event.getPreviousProgrammeDto();
+    if (previousProgrammeDto != null) { // when it's an update
+      programmeDto.getPosts().forEach(postDto -> {
+        // TODO send postId to PostElasticSearchService for post updates
+      });
+    }
   }
 }

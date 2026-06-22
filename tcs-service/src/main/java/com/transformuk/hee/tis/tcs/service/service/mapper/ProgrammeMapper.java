@@ -14,7 +14,7 @@ import org.mapstruct.MappingTarget;
  * Mapper for the entity Programme and its DTO ProgrammeDTO.
  */
 @Mapper(componentModel = "spring", uses = {ProgrammeCurriculumMapper.class,
-    TrainingNumberMapper.class})
+    TrainingNumberMapper.class, PostMapper.class})
 public interface ProgrammeMapper {
 
   ProgrammeDTO programmeToProgrammeDTO(Programme programme);

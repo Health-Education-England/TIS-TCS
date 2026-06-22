@@ -1,9 +1,12 @@
 package com.transformuk.hee.tis.tcs.service.listener;
 
+import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostFundingSavedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +17,12 @@ import org.springframework.stereotype.Component;
 public class PostFundingEventListener {
 
   PostService postService;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-  public PostFundingEventListener(PostService postService) {
+  public PostFundingEventListener(PostService postService,
+      ApplicationEventPublisher applicationEventPublisher) {
     this.postService = postService;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -38,7 +44,8 @@ public class PostFundingEventListener {
   @EventListener
   public void handlePostFundingCreatedEvent(PostFundingCreatedEvent event) {
     long postId = event.getPostFundingDto().getPostId();
-    updatePostFundingStatus(postId);
+    PostDTO savedPostDto = updatePostFundingStatus(postId);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
   }
 
   /**
@@ -49,10 +56,11 @@ public class PostFundingEventListener {
   @EventListener
   public void handlePostFundingDeletedEvent(PostFundingDeletedEvent event) {
     long postId = event.getPostFundingDto().getPostId();
-    updatePostFundingStatus(postId);
+    PostDTO savedPostDto = updatePostFundingStatus(postId);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
   }
 
-  private void updatePostFundingStatus(Long postId) {
-    postService.updateFundingStatus(postId);
+  private PostDTO updatePostFundingStatus(Long postId) {
+    return postService.updateFundingStatus(postId);
   }
 }

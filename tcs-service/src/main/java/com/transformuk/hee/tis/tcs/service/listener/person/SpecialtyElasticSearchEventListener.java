@@ -21,5 +21,6 @@ public class SpecialtyElasticSearchEventListener {
   public void handleSpecialtySavedEvent(SpecialtySavedEvent event) {
     LOG.info("Received SpecialtySavedEvent with id: [{}]", event.getSpecialtyDTO().getId());
     personElasticSearchService.updatePersonDocumentForSpecialty(event.getSpecialtyDTO().getId());
+    // TODO send postId to PostElasticSearchService for post updates
   }
 }

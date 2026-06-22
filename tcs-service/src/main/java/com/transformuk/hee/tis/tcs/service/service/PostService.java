@@ -97,7 +97,7 @@ public interface PostService {
    *
    * @param postId        the id of the post to update
    */
-  void updateFundingStatus(long postId);
+  PostDTO updateFundingStatus(long postId);
 
   /**
    * Get all the post by dbcs

@@ -17,8 +17,11 @@ import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,12 +83,16 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public ProgrammeDTO update(ProgrammeDTO programmeDTO) {
     log.debug("Request to update Programme : {}", programmeDTO);
 
+    Programme existingProgramme = programmeRepository.getOne(programmeDTO.getId());
+    ProgrammeDTO previousProgrammeDto = programmeMapper.programmeToProgrammeDTO(existingProgramme);
+
     Programme programme = programmeMapper.programmeDTOToProgramme(programmeDTO);
     programme = programmeRepository.save(programme);
 
-    ProgrammeDTO programmeDTO1 = programmeMapper.programmeToProgrammeDTO(programme);
-    applicationEventPublisher.publishEvent(new ProgrammeSavedEvent(programmeDTO1));
-    return programmeDTO1;
+    ProgrammeDTO programmeDto = programmeMapper.programmeToProgrammeDTO(programme);
+    applicationEventPublisher.publishEvent(
+        new ProgrammeSavedEvent(previousProgrammeDto, programmeDto));
+    return programmeDto;
   }
 
   /**
@@ -97,12 +104,27 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   @Override
   public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDtos) {
     log.debug("Request to save {} programmes.", programmeDtos.size());
-    List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDtos);
 
+    HashMap<Long, ProgrammeDTO> existingProgrammes = programmeRepository.findByIdIn(
+            programmeDtos.stream().map(ProgrammeDTO::getId).filter(Objects::nonNull)
+                .collect(Collectors.toSet())).stream()
+        .collect(Collectors.toMap(Programme::getId, programmeMapper::programmeToProgrammeDTO,
+            (existing, replacement) -> existing, HashMap::new));
+
+    List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDtos);
     programmes = programmeRepository.saveAll(programmes);
     List<ProgrammeDTO> programmeDTOs = programmeMapper.programmesToProgrammeDTOs(programmes);
-    programmeDTOs.stream().distinct().map(ProgrammeSavedEvent::new)
-        .forEach(applicationEventPublisher::publishEvent);
+
+    programmeDTOs.stream().distinct().forEach(programmeDto -> {
+      if (existingProgrammes.containsKey(programmeDto.getId())) {
+        ProgrammeDTO previousProgrammeDto = existingProgrammes.get(programmeDto.getId());
+        applicationEventPublisher.publishEvent(
+            new ProgrammeSavedEvent(previousProgrammeDto, programmeDto));
+      } else {
+        applicationEventPublisher.publishEvent(new ProgrammeCreatedEvent(programmeDto));
+      }
+    });
+
     return programmeDTOs;
   }
 

@@ -421,9 +421,10 @@ public class PostServiceImpl implements PostService {
    * @param postId the id of the post to update
    */
   @Override
-  public void updateFundingStatus(long postId) {
+  public PostDTO updateFundingStatus(long postId) {
     Post currentInDbPost = postRepository.findById(postId).orElse(null);
-    updateFundingStatus(currentInDbPost);
+    Post savedPost = updateFundingStatus(currentInDbPost);
+    return  postMapper.postToPostDTO(savedPost);
   }
 
   /**
@@ -431,12 +432,13 @@ public class PostServiceImpl implements PostService {
    *
    * @param post the post entity to update
    */
-  protected void updateFundingStatus(Post post) {
+  protected Post updateFundingStatus(Post post) {
     if (post != null) {
       Status fundingStatus = getFundingStatusForPost(post);
       post.setFundingStatus(fundingStatus);
-      postRepository.save(post);
+      return postRepository.save(post);
     }
+    return null;
   }
 
   /**
