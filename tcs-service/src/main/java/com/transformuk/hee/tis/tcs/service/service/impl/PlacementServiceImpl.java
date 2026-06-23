@@ -583,12 +583,12 @@ public class PlacementServiceImpl implements PlacementService {
 
     placementSupervisorRepository.deleteAllByIdPlacementId(id);
     Placement placement = placementRepository.getOne(id);
+    PlacementDTO oldPlacementDto = placementMapper.placementToPlacementDTO(placement, null);
 
     PlacementDetails placementDetails = placementToPlacementDetails(placement);
     placementLogService.placementLog(placementDetails, PlacementLogType.DELETE);
 
-    PlacementDeletedEvent event = new PlacementDeletedEvent(
-        placementMapper.placementToPlacementDTO(placement, null));
+    PlacementDeletedEvent event = new PlacementDeletedEvent(oldPlacementDto);
 
     placementRepository.delete(placement);
 

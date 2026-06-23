@@ -1,19 +1,23 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
+import com.transformuk.hee.tis.tcs.service.event.ContactDetailsSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 /**
  * Service Implementation for managing ContactDetails.
@@ -28,10 +32,14 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
 
   private final ContactDetailsMapper contactDetailsMapper;
 
+  private final ApplicationEventPublisher applicationEventPublisher;
+
   public ContactDetailsServiceImpl(ContactDetailsRepository contactDetailsRepository,
-      ContactDetailsMapper contactDetailsMapper) {
+      ContactDetailsMapper contactDetailsMapper,
+      ApplicationEventPublisher applicationEventPublisher) {
     this.contactDetailsRepository = contactDetailsRepository;
     this.contactDetailsMapper = contactDetailsMapper;
+    this.applicationEventPublisher = applicationEventPublisher;
   }
 
   /**
@@ -43,23 +51,47 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
   @Override
   public ContactDetailsDTO save(ContactDetailsDTO contactDetailsDTO) {
     log.debug("Request to save ContactDetails : {}", contactDetailsDTO);
+    ContactDetails existingContactDetails = contactDetailsRepository
+        .getOne(contactDetailsDTO.getId());
+    ContactDetailsDTO existingContactDetailsDto = contactDetailsMapper.toDto(
+        existingContactDetails);
+
     ContactDetails contactDetails = contactDetailsMapper.toEntity(contactDetailsDTO);
     contactDetails = contactDetailsRepository.saveAndFlush(contactDetails);
-    return contactDetailsMapper.toDto(contactDetails);
+    ContactDetailsDTO updatedContactDetailsDto = contactDetailsMapper.toDto(contactDetails);
+
+    applicationEventPublisher.publishEvent(
+        new ContactDetailsSavedEvent(existingContactDetailsDto, updatedContactDetailsDto));
+    return updatedContactDetailsDto;
   }
 
   /**
    * Save list of contactDetails.
    *
-   * @param contactDetailsDTOs the list of entity to save
+   * @param contactDetailsDtos the list of entity to save
    * @return the persisted list of entity
    */
   @Override
-  public List<ContactDetailsDTO> save(List<ContactDetailsDTO> contactDetailsDTOs) {
-    log.debug("Request to save ContactDetails : {}", contactDetailsDTOs);
-    List<ContactDetails> contactDetails = contactDetailsMapper.toEntity(contactDetailsDTOs);
+  public List<ContactDetailsDTO> save(List<ContactDetailsDTO> contactDetailsDtos) {
+    log.debug("Request to save ContactDetails : {}", contactDetailsDtos);
+
+    Map<Long, ContactDetailsDTO> existingContactDetailDtos = contactDetailsRepository.findAllById(
+            contactDetailsDtos.stream().map(ContactDetailsDTO::getId).collect(Collectors.toSet()))
+        .stream()
+        .collect(Collectors.toMap(ContactDetails::getId, contactDetailsMapper::toDto,
+            (existing, replacement) -> existing, HashMap::new));
+
+    List<ContactDetails> contactDetails = contactDetailsMapper.toEntity(contactDetailsDtos);
     contactDetails = contactDetailsRepository.saveAll(contactDetails);
-    return contactDetailsMapper.toDto(contactDetails);
+
+    List<ContactDetailsDTO> updatedContactDetailsDtos = contactDetailsMapper.toDto(contactDetails);
+
+    updatedContactDetailsDtos.stream().distinct().forEach(contactDetailsDto -> {
+      ContactDetailsDTO previousContactDetailsDto = existingContactDetailDtos.get(contactDetailsDto.getId());
+      applicationEventPublisher.publishEvent(
+          new ContactDetailsSavedEvent(previousContactDetailsDto, contactDetailsDto));
+    });
+    return updatedContactDetailsDtos;
   }
 
   /**

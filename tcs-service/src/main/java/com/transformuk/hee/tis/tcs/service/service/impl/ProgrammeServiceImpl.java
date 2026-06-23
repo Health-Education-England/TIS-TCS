@@ -19,7 +19,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.ProgrammeMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -105,27 +105,23 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDtos) {
     log.debug("Request to save {} programmes.", programmeDtos.size());
 
-    HashMap<Long, ProgrammeDTO> existingProgrammes = programmeRepository.findByIdIn(
-            programmeDtos.stream().map(ProgrammeDTO::getId).filter(Objects::nonNull)
-                .collect(Collectors.toSet())).stream()
+    Map<Long, ProgrammeDTO> existingProgrammeDtos = programmeRepository.findByIdIn(
+            programmeDtos.stream().map(ProgrammeDTO::getId).collect(Collectors.toSet()))
+        .stream()
         .collect(Collectors.toMap(Programme::getId, programmeMapper::programmeToProgrammeDTO,
             (existing, replacement) -> existing, HashMap::new));
 
     List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDtos);
     programmes = programmeRepository.saveAll(programmes);
-    List<ProgrammeDTO> programmeDTOs = programmeMapper.programmesToProgrammeDTOs(programmes);
+    List<ProgrammeDTO> updatedProgrammeDtos = programmeMapper.programmesToProgrammeDTOs(programmes);
 
-    programmeDTOs.stream().distinct().forEach(programmeDto -> {
-      if (existingProgrammes.containsKey(programmeDto.getId())) {
-        ProgrammeDTO previousProgrammeDto = existingProgrammes.get(programmeDto.getId());
-        applicationEventPublisher.publishEvent(
-            new ProgrammeSavedEvent(previousProgrammeDto, programmeDto));
-      } else {
-        applicationEventPublisher.publishEvent(new ProgrammeCreatedEvent(programmeDto));
-      }
+    updatedProgrammeDtos.stream().distinct().forEach(programmeDto -> {
+      ProgrammeDTO previousProgrammeDto = existingProgrammeDtos.get(programmeDto.getId());
+      applicationEventPublisher.publishEvent(
+          new ProgrammeSavedEvent(previousProgrammeDto, programmeDto));
     });
 
-    return programmeDTOs;
+    return updatedProgrammeDtos;
   }
 
   /**
