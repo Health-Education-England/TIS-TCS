@@ -759,7 +759,7 @@ public class PostServiceImpl implements PostService {
       columnFilters.forEach(cf -> {
         switch (cf.getName()) {
           case "currentTraineeSurname":
-            whereClause.append(" AND surname in (:surnameList)");
+            whereClause.append(" AND surnames in (:surnameList)");
             break;
           case "currentTraineeForenames":
             whereClause.append(" AND forenames in (:forenamesList)");
@@ -803,7 +803,7 @@ public class PostServiceImpl implements PostService {
     if (StringUtils.isNotEmpty(searchString)) {
       whereClause.append(" AND (nationalPostNumber LIKE :searchString " +
           "OR programmeName LIKE :searchString " +
-          "OR surname LIKE :searchString " +
+          "OR surnames LIKE :searchString " +
           "OR forenames LIKE :searchString ) ");
     }
     return whereClause.toString();
