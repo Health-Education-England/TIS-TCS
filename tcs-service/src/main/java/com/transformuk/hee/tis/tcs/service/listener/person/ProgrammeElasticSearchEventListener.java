@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.service.event.ProgrammeSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
@@ -32,6 +33,9 @@ public class ProgrammeElasticSearchEventListener {
   @Autowired
   private RevalidationService revalidationService;
 
+  @Autowired
+  private PostElasticSearchService postElasticSearchService;
+
   /**
    * handle Programme saved event.
    *
@@ -59,7 +63,7 @@ public class ProgrammeElasticSearchEventListener {
         && !previousProgrammeDto.getProgrammeName().equals(programmeDto.getProgrammeName())) {
       previousProgrammeDto.getPostIds().forEach(postId -> {
         if (!previousProgrammeDto.getPostIds().contains(postId)) {
-          // TODO send postId to PostElasticSearchService for post updates
+          postElasticSearchService.updatePostDocument(postId);
         }
       });
     }

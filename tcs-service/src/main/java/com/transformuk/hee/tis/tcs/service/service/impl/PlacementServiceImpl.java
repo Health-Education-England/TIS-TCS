@@ -623,30 +623,6 @@ public class PlacementServiceImpl implements PlacementService {
     return placementDetails;
   }
 
-//  private PlacementDTO placementDetailsDtoToPlacementDto(PlacementDetailsDTO placementDetailsDto) {
-//    PlacementDTO placementDto = new PlacementDTO();
-//    placementDto.setId(placementDetailsDto.getId());
-//    placementDto.setLifecycleState(placementDetailsDto.getLifecycleState());
-//    placementDto.setDateFrom(placementDetailsDto.getDateFrom());
-//    placementDto.setDateTo(placementDetailsDto.getDateTo());
-//    placementDto.setPostId(placementDetailsDto.getPostId());
-//    placementDto.setTraineeId(placementDetailsDto.getTraineeId());
-//    placementDto.setLocalPostNumber(placementDetailsDto.getLocalPostNumber());
-//    placementDto.setSiteCode(placementDetailsDto.getSiteCode());
-//    placementDto.setPlacementType(placementDetailsDto.getPlacementType());
-//    placementDto.setPlacementWholeTimeEquivalent(placementDetailsDto.getWholeTimeEquivalent());
-//    placementDto.setGradeAbbreviation(placementDetailsDto.getGradeAbbreviation());
-//    placementDto.setTrainingDescription(placementDetailsDto.getTrainingDescription());
-//    placementDto.setGradeId(placementDetailsDto.getGradeId());
-//    placementDto.setSiteId(placementDetailsDto.getSiteId());
-//    placementDto.setIntrepidId(placementDetailsDto.getIntrepidId());
-//    placementDto.setComments(placementDetailsDto.getComments());
-//    placementDto.setSupervisors(placementDetailsDto.getSupervisors());
-//    placementDto.setSpecialties(placementDetailsDto.getSpecialties());
-//    placementDto.setStatus(placementDetailsDto.getStatus());
-//    return placementDto;
-//  }
-
   private void handleEsrNotificationForPlacementDelete(final Long id) {
     final List<EsrNotification> allEsrNotifications = new ArrayList<>();
 

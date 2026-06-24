@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
+import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.time.LocalDate;
@@ -28,6 +29,9 @@ public class PlacementElasticSearchEventListener {
   @Autowired
   private RevalidationRabbitService revalidationRabbitService;
 
+  @Autowired
+  private PostElasticSearchService postElasticSearchService;
+
   /**
    * handle Placement saved event.
    *
@@ -44,7 +48,7 @@ public class PlacementElasticSearchEventListener {
 
     if (isCurrentPlacement(placementDto)) {
       Long postId = placementDto.getPostId();
-      // TODO send postId to PostElasticSearchService for post updates
+      postElasticSearchService.updatePostDocument(postId);
     }
   }
 
@@ -64,7 +68,7 @@ public class PlacementElasticSearchEventListener {
     );
     if (isCurrentPlacement(placementDto)) {
       Long postId = placementDto.getPostId();
-      // TODO send postId to PostElasticSearchService for post updates
+      postElasticSearchService.updatePostDocument(postId);
     }
   }
 

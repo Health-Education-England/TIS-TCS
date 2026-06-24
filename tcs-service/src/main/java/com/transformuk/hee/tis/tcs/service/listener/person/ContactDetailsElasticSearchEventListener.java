@@ -4,6 +4,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.service.event.ContactDetailsSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,12 @@ public class ContactDetailsElasticSearchEventListener {
 
   private final PlacementService placementService;
 
-  public ContactDetailsElasticSearchEventListener(PlacementService placementService) {
+  private final PostElasticSearchService postElasticSearchService;
+
+  public ContactDetailsElasticSearchEventListener(PlacementService placementService,
+      PostElasticSearchService postElasticSearchService) {
     this.placementService = placementService;
+    this.postElasticSearchService = postElasticSearchService;
   }
 
   @EventListener
@@ -40,7 +45,7 @@ public class ContactDetailsElasticSearchEventListener {
       List<PlacementDTO> placements = placementService.getCurrentPlacementsForPersonId(personId);
       placements.forEach(pl -> {
         Long postId = pl.getPostId();
-        // TODO send postId to PostElasticSearchService for post updates
+        postElasticSearchService.updatePostDocument(postId);
       });
     }
   }
