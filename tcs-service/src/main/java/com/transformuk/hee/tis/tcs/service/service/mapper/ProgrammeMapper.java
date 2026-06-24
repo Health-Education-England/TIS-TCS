@@ -2,21 +2,24 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
+import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.Programme;
 import com.transformuk.hee.tis.tcs.service.model.ProgrammeCurriculum;
 import java.util.List;
 import java.util.Set;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
  * Mapper for the entity Programme and its DTO ProgrammeDTO.
  */
 @Mapper(componentModel = "spring", uses = {ProgrammeCurriculumMapper.class,
-    TrainingNumberMapper.class, PostMapper.class})
+    TrainingNumberMapper.class})
 public interface ProgrammeMapper {
 
+  @Mapping(target = "postIds", source = "posts")
   ProgrammeDTO programmeToProgrammeDTO(Programme programme);
 
   List<ProgrammeDTO> programmesToProgrammeDTOs(List<Programme> programmes);
@@ -28,6 +31,10 @@ public interface ProgrammeMapper {
   Programme fromId(Long id);
 
   Curriculum corriculumFromId(Long id);
+
+  default Long postToLong(Post post) {
+    return post == null ? null : post.getId();
+  }
 
   @AfterMapping
   default void addProgrammeToCurricula(ProgrammeDTO source, @MappingTarget Programme target) {

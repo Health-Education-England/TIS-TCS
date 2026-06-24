@@ -33,7 +33,8 @@ public class PostFundingEventListener {
   @EventListener
   public void handlePostFundingSavedEvent(PostFundingSavedEvent event) {
     long postId = event.getPostFundingDto().getPostId();
-    updatePostFundingStatus(postId);
+    PostDTO savedPostDto = updatePostFundingStatus(postId);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
   }
 
   /**

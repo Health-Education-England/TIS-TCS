@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service.mapper;
 
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import java.util.List;
@@ -20,4 +21,6 @@ public interface PlacementDetailsMapper {
 
   List<PlacementDetails> placementDetailsDTOsToPlacementDetailss(
       List<PlacementDetailsDTO> placementDetailsDTOs);
+
+  PlacementDTO placementDetailsDtoToPlacementDto(PlacementDetailsDTO placementDetails);
 }

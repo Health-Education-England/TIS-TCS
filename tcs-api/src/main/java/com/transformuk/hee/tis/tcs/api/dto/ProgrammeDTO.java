@@ -40,7 +40,7 @@ public class ProgrammeDTO implements Serializable {
 
   private Set<ProgrammeCurriculumDTO> curricula;
 
-  private Set<PostDTO> posts;
+  private Set<Long> postIds;
 
   @Override
   public boolean equals(Object o) {
