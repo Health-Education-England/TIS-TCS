@@ -66,7 +66,7 @@ public class PostView {
   private List<String> fundingTypes;
 
   @Field(type = FieldType.Keyword)
-  private List<String> owners;
+  private String owner;
 
   @Field(type = FieldType.Long)
   private List<Long> trustIds;
