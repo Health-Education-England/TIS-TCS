@@ -39,7 +39,9 @@ public class PostView {
   @Id
   private Long id;
 
+  @Field(type = FieldType.Keyword)
   private String currentTraineeSurnames;
+  @Field(type = FieldType.Keyword)
   private String currentTraineeForenames;
 
   @Field(type = FieldType.Keyword)
