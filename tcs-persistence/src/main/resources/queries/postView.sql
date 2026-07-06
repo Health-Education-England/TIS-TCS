@@ -1,3 +1,24 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright 2026 Crown Copyright (NHS England)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 select distinct id,
 approvedGradeId,
 primarySpecialtyId,
@@ -11,7 +32,9 @@ fundingStatus,
 owner,
 intrepidId,
 surnames,
-forenames
+forenames,
+GROUP_CONCAT(distinct trustId SEPARATOR ',') trustIds,
+GROUP_CONCAT(distinct programmeId SEPARATOR ',') programmeIds
 from (SELECT p.`id`,
         pg.`gradeId` as `approvedGradeId`,
         ps.`specialtyId` as `primarySpecialtyId`,
@@ -25,7 +48,9 @@ from (SELECT p.`id`,
         p.`owner`,
         p.`intrepidId`,
         trainees.`surnames`,
-        trainees.`forenames`
+        trainees.`forenames`,
+        pt.`trustId` as `trustId`,
+        pp.`programmeId` as `programmeId`
     FROM `Post` p
     LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'
     LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'
@@ -46,7 +71,7 @@ from (SELECT p.`id`,
     ) trainees on trainees.`postId` = p.`id`
     LEFT JOIN `ProgrammePost` pp on pp.`postId` = p.`id`
     LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`
-TRUST_JOIN
+    LEFT JOIN `PostTrust` pt on pt.`postId` = p.`id`
 WHERECLAUSE
 ) as ot
 group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,surnames,forenames
