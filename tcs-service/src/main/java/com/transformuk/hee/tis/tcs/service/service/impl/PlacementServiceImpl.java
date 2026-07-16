@@ -1153,7 +1153,8 @@ public class PlacementServiceImpl implements PlacementService {
 
   @Override
   public List<PlacementDTO> getCurrentPlacementsForPersonId(Long personId) {
-    List<Placement> placements = placementRepository.findAllCurrentPlacementsForTrainee(personId, now());
+    List<Placement> placements = placementRepository
+        .findAllCurrentPlacementsForTrainee(personId, LocalDate.now(clock));
     return placementMapper.placementsToPlacementDTOs(placements, null);
   }
 }

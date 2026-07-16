@@ -42,4 +42,9 @@ public class ContactDetailsSavedEvent extends ApplicationEvent {
     return Objects.equals(contactDetailsDto, that.contactDetailsDto)
         && Objects.equals(previousContactDetailsDto, that.previousContactDetailsDto);
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(contactDetailsDto, previousContactDetailsDto);
+  }
 }

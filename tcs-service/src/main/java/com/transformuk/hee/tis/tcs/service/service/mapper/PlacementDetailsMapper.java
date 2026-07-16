@@ -22,5 +22,10 @@ public interface PlacementDetailsMapper {
   List<PlacementDetails> placementDetailsDTOsToPlacementDetailss(
       List<PlacementDetailsDTO> placementDetailsDTOs);
 
+  /**
+   * Map PlacementDetailsDto to PlacementDTO
+   * @param placementDetails the PlacementDetailsDTO to map
+   * @return the mapped PlacementDTO
+   */
   PlacementDTO placementDetailsDtoToPlacementDto(PlacementDetailsDTO placementDetails);
 }

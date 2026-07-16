@@ -1,21 +1,28 @@
 package com.transformuk.hee.tis.tcs.service.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.transformuk.hee.tis.tcs.service.TestConfig;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestConfig.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class PlacementRepositoryTest {
+class PlacementRepositoryTest {
 
   @Autowired
   private PlacementRepository testObj;
@@ -24,7 +31,7 @@ public class PlacementRepositoryTest {
   @Test
   @Sql(scripts = "/scripts/placementProgrammeSpecialty.sql")
   @Sql(scripts = "/scripts/deletePlacementProgrammeSpecialty.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-  public void findPlacementsByPostIdsShouldFindPlacementsLinkedToSpecialtyAndProgramme() {
+  void findPlacementsByPostIdsShouldFindPlacementsLinkedToSpecialtyAndProgramme() {
     Long placementId1 = 3L, placementId2 = 30L;
     Long programmeId = 5L;
     Long specialtyId = 1L;
@@ -36,24 +43,57 @@ public class PlacementRepositoryTest {
 
     Set<Placement> results = testObj.findPlacementsByPostIds(postIds);
 
-    Assert.assertNotNull(results);
-    Assert.assertEquals(2, results.size());
+    assertNotNull(results);
+    assertEquals(2, results.size());
 
     for (Placement placement : results) {
-      Assert.assertTrue(
+      assertTrue(
           placementId1.equals(placement.getId()) || placementId2.equals(placement.getId()));
-      Assert.assertEquals(specialtyId,
+      assertEquals(specialtyId,
           placement.getSpecialties().iterator().next().getSpecialty().getId());
-      Assert
-          .assertEquals(programmeId, placement.getPost().getProgrammes().iterator().next().getId());
+      assertEquals(programmeId, placement.getPost().getProgrammes().iterator().next().getId());
 
-      Assert.assertTrue(traineeId1.equals(placement.getTrainee().getId()) || traineeId2
+      assertTrue(traineeId1.equals(placement.getTrainee().getId()) || traineeId2
           .equals(placement.getTrainee().getId()));
-      Assert.assertTrue(
+      assertTrue(
           traineeForename1.equals(placement.getTrainee().getContactDetails().getForenames())
               || traineeForename2
               .equals(placement.getTrainee().getContactDetails().getForenames()));
     }
 
+  }
+
+  @Transactional
+  @Test
+  @Sql(scripts = "/scripts/person.sql")
+  @Sql(scripts = "/scripts/deletePerson.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  void findByTraineeIdAndDateFromLessThanEqualAndDateToGreaterThanEqualShouldReturnCurrentPlacements() {
+    Long traineeId = 1L;
+    LocalDate currentDate = LocalDate.of(2099, Month.AUGUST, 1);
+
+    List<Placement> results = testObj
+        .findByTraineeIdAndDateFromLessThanEqualAndDateToGreaterThanEqual(traineeId, currentDate,
+            currentDate);
+
+    assertNotNull(results);
+    assertEquals(2, results.size());
+    Set<Long> placementIds = results.stream().map(Placement::getId).collect(Collectors.toSet());
+    assertTrue(placementIds.contains(1L));
+    assertTrue(placementIds.contains(2L));
+  }
+
+  @Transactional
+  @Test
+  @Sql(scripts = "/scripts/person.sql")
+  @Sql(scripts = "/scripts/deletePerson.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  void findAllCurrentPlacementsForTraineeShouldUseCurrentDateForBothBounds() {
+    Long traineeId = 1L;
+    LocalDate currentDate = LocalDate.of(2022, Month.SEPTEMBER, 8);
+
+    List<Placement> results = testObj.findAllCurrentPlacementsForTrainee(traineeId, currentDate);
+
+    assertNotNull(results);
+    assertEquals(1, results.size());
+    assertEquals(Long.valueOf(3L), results.get(0).getId());
   }
 }

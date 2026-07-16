@@ -7,30 +7,48 @@ import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
+import java.time.Clock;
 import java.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listens for PlacementSavedEvent and PlacementDeletedEvent.
+ */
 @Component
 public class PlacementElasticSearchEventListener {
 
   private static final Logger LOG = LoggerFactory
       .getLogger(PlacementElasticSearchEventListener.class);
 
-  @Autowired
-  private PersonElasticSearchService personElasticSearchService;
+  private final PersonElasticSearchService personElasticSearchService;
+  private final RevalidationService revalidationService;
+  private final RevalidationRabbitService revalidationRabbitService;
+  private final PostElasticSearchService postElasticSearchService;
+  private final Clock clock;
 
-  @Autowired
-  private RevalidationService revalidationService;
-
-  @Autowired
-  private RevalidationRabbitService revalidationRabbitService;
-
-  @Autowired
-  private PostElasticSearchService postElasticSearchService;
+  /**
+   * Constructor for PlacementElasticSearchEventListener.
+   * @param personElasticSearchService the service to update person documents in Elasticsearch
+   * @param revalidationService the service to handle revalidation logic
+   * @param revalidationRabbitService the service to send revalidation updates to RabbitMQ
+   * @param postElasticSearchService the service to update post documents in Elasticsearch
+   * @param clock the clock to get the current date for placement validation
+   */
+  public PlacementElasticSearchEventListener(
+      PersonElasticSearchService personElasticSearchService,
+      RevalidationService revalidationService,
+      RevalidationRabbitService revalidationRabbitService,
+      PostElasticSearchService postElasticSearchService,
+      Clock clock) {
+    this.personElasticSearchService = personElasticSearchService;
+    this.revalidationService = revalidationService;
+    this.revalidationRabbitService = revalidationRabbitService;
+    this.postElasticSearchService = postElasticSearchService;
+    this.clock = clock;
+  }
 
   /**
    * handle Placement saved event.
@@ -79,7 +97,7 @@ public class PlacementElasticSearchEventListener {
       return false;
     }
 
-    LocalDate currentDate = LocalDate.now();
+    LocalDate currentDate = LocalDate.now(clock);
     return !currentDate.isBefore(dateFrom) && !currentDate.isAfter(dateTo);
   }
 }

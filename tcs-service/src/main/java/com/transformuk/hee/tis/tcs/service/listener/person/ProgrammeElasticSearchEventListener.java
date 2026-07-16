@@ -9,32 +9,39 @@ import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listens for ProgrammeSavedEvent.
+ */
 @Component
 public class ProgrammeElasticSearchEventListener {
 
   private static final Logger LOG = LoggerFactory
       .getLogger(ProgrammeElasticSearchEventListener.class);
 
-  @Autowired
-  private PersonElasticSearchService personElasticSearchService;
+  private final PersonElasticSearchService personElasticSearchService;
+  private final RevalidationRabbitService revalidationRabbitService;
+  private final ProgrammeMembershipService programmeMembershipService;
+  private final RevalidationService revalidationService;
+  private final PostElasticSearchService postElasticSearchService;
 
-  @Autowired
-  private RevalidationRabbitService revalidationRabbitService;
-
-  @Autowired
-  private ProgrammeMembershipService programmeMembershipService;
-
-  @Autowired
-  private RevalidationService revalidationService;
-
-  @Autowired
-  private PostElasticSearchService postElasticSearchService;
+  public ProgrammeElasticSearchEventListener(
+      PersonElasticSearchService personElasticSearchService,
+      RevalidationRabbitService revalidationRabbitService,
+      ProgrammeMembershipService programmeMembershipService,
+      RevalidationService revalidationService,
+      PostElasticSearchService postElasticSearchService) {
+    this.personElasticSearchService = personElasticSearchService;
+    this.revalidationRabbitService = revalidationRabbitService;
+    this.programmeMembershipService = programmeMembershipService;
+    this.revalidationService = revalidationService;
+    this.postElasticSearchService = postElasticSearchService;
+  }
 
   /**
    * handle Programme saved event.
@@ -60,12 +67,8 @@ public class ProgrammeElasticSearchEventListener {
     ProgrammeDTO previousProgrammeDto = event.getPreviousProgrammeDto();
     // When it's a name update
     if (previousProgrammeDto != null && previousProgrammeDto.getPostIds() != null
-        && !previousProgrammeDto.getProgrammeName().equals(programmeDto.getProgrammeName())) {
-      previousProgrammeDto.getPostIds().forEach(postId -> {
-        if (!previousProgrammeDto.getPostIds().contains(postId)) {
-          postElasticSearchService.updatePostDocument(postId);
-        }
-      });
+        && !Objects.equals(previousProgrammeDto.getProgrammeName(), programmeDto.getProgrammeName())) {
+      previousProgrammeDto.getPostIds().forEach(postElasticSearchService::updatePostDocument);
     }
   }
 }
