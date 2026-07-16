@@ -13,8 +13,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -36,6 +37,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
+import com.transformuk.hee.tis.tcs.service.event.PostDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -76,6 +79,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -191,6 +195,12 @@ class PostServiceImplTest {
   private PostViewDecorator postViewDecoratorMock;
   @Mock
   private PostFundingValidator postFundingValidatorMock;
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisherMock;
+  @Captor
+  private ArgumentCaptor<PostSavedEvent> postSavedEventCaptor;
+  @Captor
+  private ArgumentCaptor<PostDeletedEvent> postDeletedEventCaptor;
 
   @Test
   void saveShouldSavePost() {
@@ -198,11 +208,15 @@ class PostServiceImplTest {
     when(postRepositoryMock.save(postMock1)).thenReturn(postSaveMock1);
     when(postDTOMock1.getId()).thenReturn(1L);
     when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
+
     PostDTO result = testObj.save(postDTOMock1);
+
     assertEquals(postMappedDTOMock1, result);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
     verify(postRepositoryMock).save(postMock1);
     verify(postMapperMock).postToPostDTO(postSaveMock1);
+    verify(applicationEventPublisherMock).publishEvent(postSavedEventCaptor.capture());
+    assertEquals(postMappedDTOMock1, postSavedEventCaptor.getValue().getPostDto());
   }
 
   @Test
@@ -214,11 +228,18 @@ class PostServiceImplTest {
     when(postMapperMock.postDTOsToPosts(postDTOsList)).thenReturn(postList);
     when(postRepositoryMock.saveAll(postList)).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(savedPostDTOs);
+
     List<PostDTO> results = testObj.save(postDTOsList);
+
     assertSame(savedPostDTOs, results);
     verify(postMapperMock).postDTOsToPosts(postDTOsList);
     verify(postRepositoryMock).saveAll(postList);
     verify(postMapperMock).postsToPostDTOs(savedPosts);
+    verify(applicationEventPublisherMock, times(2)).publishEvent(postSavedEventCaptor.capture());
+    List<PostSavedEvent> events = postSavedEventCaptor.getAllValues();
+    assertEquals(2, events.size());
+    assertEquals(postMappedDTOMock1, events.get(0).getPostDto());
+    assertEquals(postMappedDTOMock2, events.get(1).getPostDto());
   }
 
   @Test
@@ -238,19 +259,14 @@ class PostServiceImplTest {
     Set<PostFunding> fundingsInDatabase = Sets.newHashSet(postFunding1, postFunding2, postFunding3);
 
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(postInDBMock));
-
     when(postDTOMock1.getId()).thenReturn(1L);
     when(postInDBMock.getGrades()).thenReturn(grades);
     when(postInDBMock.getSites()).thenReturn(sites);
     when(postInDBMock.getSpecialties()).thenReturn(specialties);
-
     when(postMapperMock.postDTOToPost(postDTOMock1)).thenReturn(payloadPostMock);
-
     when(payloadPostMock.getFundings()).thenReturn(fundingsOnPayload);
-
     when(postInDBMock.getFundings()).thenReturn(fundingsInDatabase);
     doNothing().when(postFundingRepositoryMock).deleteAll(postFundingCaptor.capture());
-
     when(postRepositoryMock.save(payloadPostMock)).thenReturn(postSaveMock1);
     when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
 
@@ -264,33 +280,43 @@ class PostServiceImplTest {
     verify(postGradeRepositoryMock).deleteAll(grades);
     verify(postSiteRepositoryMock).deleteAll(sites);
     verify(postSpecialtyRepositoryMock).deleteAll(specialties);
-
     Set<PostFunding> capturedPostFundings = postFundingCaptor.getValue();
     assertTrue(capturedPostFundings.size() < fundingsInDatabase.size());
+    verify(applicationEventPublisherMock).publishEvent(postSavedEventCaptor.capture());
+    assertEquals(postMappedDTOMock1, postSavedEventCaptor.getValue().getPostDto());
   }
 
   @Test
   void updateFundingStatusShouldSetFundingStatus() {
     Post testPost = new Post();
     testPost.setId(1L);
+    PostDTO expectedDto = new PostDTO();
+    expectedDto.setId(1L);
     PostFunding postFunding = new PostFunding();
     postFunding.setStartDate(LocalDate.now().minusDays(1));
     postFunding.setEndDate(LocalDate.now().plusDays(1));
     testPost.setFundings(Sets.newHashSet(postFunding));
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.of(testPost));
-    testObj.updateFundingStatus(1L);
+    when(postRepositoryMock.save(any(Post.class))).thenReturn(testPost);
+    when(postMapperMock.postToPostDTO(testPost)).thenReturn(expectedDto);
+
+    PostDTO resultDto = testObj.updateFundingStatus(1L);
+
     verify(postRepositoryMock).save(postArgumentCaptor.capture());
     Post result = postArgumentCaptor.getValue();
     assertEquals(Status.CURRENT, result.getFundingStatus());
+    assertEquals(expectedDto, resultDto);
   }
 
   @Test
   void updateFundingStatusShouldNotSetFundingStatusIfNullPost() {
-    Post testPost = new Post();
-    testPost.setId(1L);
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.empty());
-    testObj.updateFundingStatus(1L);
-    verify(postRepositoryMock, never()).save(testPost);
+
+    PostDTO resultDto = testObj.updateFundingStatus(1L);
+
+    assertNull(resultDto);
+    verify(postRepositoryMock, never()).save(any(Post.class));
+    verify(postMapperMock).postToPostDTO(null);
   }
 
   @Test
@@ -439,8 +465,11 @@ class PostServiceImplTest {
         Collections.singleton("1-1RUZV6H"));
 
     testObj.delete(1L);
+
     verify(postRepositoryMock).clearPostReferences(1L);
     verify(postRepositoryMock).deleteById(1L);
+    verify(applicationEventPublisherMock).publishEvent(postDeletedEventCaptor.capture());
+    assertEquals(1L, postDeletedEventCaptor.getValue().getPostId());
   }
 
   @Test
@@ -830,8 +859,8 @@ class PostServiceImplTest {
   void findPostsForProgrammeIdAndNpnShouldThrowExceptionWhenProgrammeIdIsNull() {
     assertThrows(NullPointerException.class, () ->
         testObj.findPostsForProgrammeIdAndNpn(null, "DUMMY TEXT"));
-    verifyZeroInteractions(postRepositoryMock);
-    verifyZeroInteractions(postMapperMock);
+    verifyNoInteractions(postRepositoryMock);
+    verifyNoInteractions(postMapperMock);
   }
 
   @Test

@@ -51,8 +51,8 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
   @Override
   public ContactDetailsDTO save(ContactDetailsDTO contactDetailsDTO) {
     log.debug("Request to save ContactDetails : {}", contactDetailsDTO);
-    ContactDetails existingContactDetails = contactDetailsRepository
-        .getOne(contactDetailsDTO.getId());
+    ContactDetails existingContactDetails =
+        contactDetailsRepository.findById(contactDetailsDTO.getId()).orElse(null);
     ContactDetailsDTO existingContactDetailsDto = contactDetailsMapper.toDto(
         existingContactDetails);
 

@@ -209,7 +209,7 @@ public class PostServiceImpl implements PostService {
     List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
     savedPostDtos.forEach(
         postDto -> applicationEventPublisher.publishEvent(new PostSavedEvent(postDto)));
-    return postMapper.postsToPostDTOs(posts);
+    return savedPostDtos;
   }
 
   /**
