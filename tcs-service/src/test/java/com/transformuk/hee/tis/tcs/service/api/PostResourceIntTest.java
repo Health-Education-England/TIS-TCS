@@ -327,7 +327,7 @@ public class PostResourceIntTest {
                 + colFilters)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER))
-        .andExpect(jsonPath("$.[*].fundingType").value(contains("TRUST, TARIFF")));
+        .andExpect(jsonPath("$.[*].fundingType").value(contains("TRUST; TARIFF")));
   }
 
   @Test
