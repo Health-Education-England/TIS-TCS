@@ -439,6 +439,7 @@ public class PlacementServiceImpl implements PlacementService {
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
+    PlacementDTO existingPlacementDto = placementMapper.placementToPlacementDTO(placement, null);
 
     // deal with the log for existing placements which doesn't exist in PlacmentLog table
     PlacementDetails exsitingPlacementDetails = placementToPlacementDetails(placement);
@@ -460,7 +461,7 @@ public class PlacementServiceImpl implements PlacementService {
     convertPlacementWithSupervisors(savedPlacement);
 
     PlacementDetailsDTO updatedPlacementDetailsDto = createDetails(placementDetailsDTO, placement);
-    applicationEventPublisher.publishEvent(new PlacementSavedEvent(
+    applicationEventPublisher.publishEvent(new PlacementSavedEvent(existingPlacementDto,
             placementDetailsMapper.placementDetailsDtoToPlacementDto(updatedPlacementDetailsDto)));
     return updatedPlacementDetailsDto;
   }
@@ -490,7 +491,7 @@ public class PlacementServiceImpl implements PlacementService {
       // This method will be called by both Placement Create and Placement Update,
       // but Placement Update cannot publish the event here
       if (placementDetailsDTO.getId() == null) {
-        applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+        applicationEventPublisher.publishEvent(new PlacementSavedEvent(null, placementDTO));
       }
     }
     return placementSpecialties;
@@ -510,7 +511,7 @@ public class PlacementServiceImpl implements PlacementService {
     List<PlacementDTO> placementDTOS = convertPlacements(placements);
 
     placementDtos.stream()
-        .map(PlacementSavedEvent::new)
+        .map(dto -> new PlacementSavedEvent(null, dto))
         .forEach(applicationEventPublisher::publishEvent);
 
     return placementDTOS;

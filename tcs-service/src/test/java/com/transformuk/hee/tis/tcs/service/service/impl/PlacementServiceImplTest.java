@@ -971,7 +971,11 @@ class PlacementServiceImplTest {
     PlacementDTO resultDTO = new PlacementDTO();
     resultDTO.setId(PLACEMENT_ID);
 
+    PlacementDTO existingPlacementDto = new PlacementDTO();
+    existingPlacementDto.setId(PLACEMENT_ID);
+
     when(placementRepositoryMock.findById(PLACEMENT_ID)).thenReturn(Optional.of(placement));
+    when(placementMapperMock.placementToPlacementDTO(placement, null)).thenReturn(existingPlacementDto);
     when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDTO))
         .thenReturn(placementDetails);
     when(placementRepositoryMock.saveAndFlush(placement)).thenReturn(placement);
@@ -987,6 +991,7 @@ class PlacementServiceImplTest {
     PlacementSavedEvent event = placementSavedEventCaptor.getValue();
     assertNotNull(event);
     assertEquals(resultDTO, event.getPlacementDTO());
+    assertEquals(existingPlacementDto, event.getPreviousPlacementDto());
   }
 
   @Test
@@ -1020,7 +1025,9 @@ class PlacementServiceImplTest {
     List<PlacementSavedEvent> events = placementSavedEventCaptor.getAllValues();
     assertEquals(2, events.size());
     assertEquals(placementDTO1, events.get(0).getPlacementDTO());
+    assertNull(events.get(0).getPreviousPlacementDto());
     assertEquals(placementDTO2, events.get(1).getPlacementDTO());
+    assertNull(events.get(1).getPreviousPlacementDto());
   }
 
   @Test
@@ -1048,6 +1055,7 @@ class PlacementServiceImplTest {
     PlacementSavedEvent event = placementSavedEventCaptor.getValue();
     assertNotNull(event);
     assertEquals(resultDTO, event.getPlacementDTO());
+    assertNull(event.getPreviousPlacementDto());
   }
 
   @Test

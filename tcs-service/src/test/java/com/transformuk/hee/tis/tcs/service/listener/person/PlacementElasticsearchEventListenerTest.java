@@ -50,7 +50,7 @@ class PlacementElasticsearchEventListenerTest {
   @Test
   void shouldHandlePlacementSavedEventAndUpdatePostDocumentForCurrentPlacement() {
     setupClock();
-    PlacementSavedEvent event = new PlacementSavedEvent(
+    PlacementSavedEvent event = new PlacementSavedEvent(null,
         buildPlacement(LocalDate.of(2026, Month.JULY, 1), LocalDate.of(2026, Month.AUGUST, 1)));
 
     testObj.handlePlacementSavedEvent(event);
@@ -64,7 +64,7 @@ class PlacementElasticsearchEventListenerTest {
   @Test
   void shouldHandlePlacementSavedEventAndNotUpdatePostDocumentForNonCurrentPlacement() {
     setupClock();
-    PlacementSavedEvent event = new PlacementSavedEvent(
+    PlacementSavedEvent event = new PlacementSavedEvent(null,
         buildPlacement(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JUNE, 30)));
 
     testObj.handlePlacementSavedEvent(event);
@@ -77,12 +77,28 @@ class PlacementElasticsearchEventListenerTest {
 
   @Test
   void shouldHandlePlacementSavedEventAndNotUpdatePostDocumentWhenDatesAreNull() {
-    PlacementSavedEvent event = new PlacementSavedEvent(buildPlacement(null, null));
+    PlacementSavedEvent event = new PlacementSavedEvent(null, buildPlacement(null, null));
 
     testObj.handlePlacementSavedEvent(event);
 
     verify(personElasticSearchService).updatePersonDocument(PERSON_ID);
     verify(postElasticSearchService, never()).updatePostDocument(POST_ID);
+  }
+
+  @Test
+  void shouldHandlePlacementSavedEventAndUpdatePostFromPreviousCurrentPlacement() {
+    setupClock();
+    PlacementSavedEvent event = new PlacementSavedEvent(
+        buildPlacement(LocalDate.of(2026, Month.JULY, 1), LocalDate.of(2026, Month.AUGUST, 1)),
+        buildPlacement(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JUNE, 30))
+    );
+
+    testObj.handlePlacementSavedEvent(event);
+
+    verify(personElasticSearchService).updatePersonDocument(PERSON_ID);
+    verify(revalidationRabbitService).updateReval(
+        revalidationService.buildTcsConnectionInfo(PERSON_ID));
+    verify(postElasticSearchService).updatePostDocument(POST_ID);
   }
 
   @Test

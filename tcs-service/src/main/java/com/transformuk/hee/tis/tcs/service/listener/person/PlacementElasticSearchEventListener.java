@@ -64,8 +64,12 @@ public class PlacementElasticSearchEventListener {
         revalidationService.buildTcsConnectionInfo(placementDto.getTraineeId())
     );
 
+    PlacementDTO previousPlacementDto = event.getPreviousPlacementDto();
     if (isCurrentPlacement(placementDto)) {
       Long postId = placementDto.getPostId();
+      postElasticSearchService.updatePostDocument(postId);
+    } else if (previousPlacementDto != null && isCurrentPlacement(previousPlacementDto)) {
+      Long postId = previousPlacementDto.getPostId();
       postElasticSearchService.updatePostDocument(postId);
     }
   }
