@@ -31,6 +31,7 @@ public class PlacementElasticSearchEventListener {
 
   /**
    * Constructor for PlacementElasticSearchEventListener.
+   *
    * @param personElasticSearchService the service to update person documents in Elasticsearch
    * @param revalidationService the service to handle revalidation logic
    * @param revalidationRabbitService the service to send revalidation updates to RabbitMQ

@@ -27,15 +27,30 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+/**
+ * An event triggered when a trainee's contact details are saved.
+ */
 public class ContactDetailsSavedEvent extends ApplicationEvent {
 
   private final ContactDetailsDTO contactDetailsDto;
   private final ContactDetailsDTO previousContactDetailsDto;
 
+  /**
+   * Constructor for ContactDetailsSavedEvent with only the source contact details.
+   *
+   * @param source the current contact details that were saved
+   */
   public ContactDetailsSavedEvent(@NonNull ContactDetailsDTO source) {
     this(null, source);
   }
 
+  /**
+   * Constructor for ContactDetailsSavedEvent with both the previous and current contact details.
+   *
+   * @param previousContactDetails the previous contact details before the save operation,
+   *                               can be null if not applicable
+   * @param contactDetails the current contact details that were saved, must not be null
+   */
   public ContactDetailsSavedEvent(@Nullable ContactDetailsDTO previousContactDetails,
       @NonNull ContactDetailsDTO contactDetails) {
     super(contactDetails);

@@ -103,7 +103,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
   List<Placement> findByTraineeIdAndDateFromLessThanEqualAndDateToGreaterThanEqual(
       Long traineeId, LocalDate currentDateFrom, LocalDate currentDateTo);
 
-  default List<Placement> findAllCurrentPlacementsForTrainee(Long traineeId, LocalDate currentDate) {
+  default List<Placement> findAllCurrentPlacementsForTrainee(
+      Long traineeId, LocalDate currentDate) {
     return findByTraineeIdAndDateFromLessThanEqualAndDateToGreaterThanEqual(
         traineeId, currentDate, currentDate);
   }

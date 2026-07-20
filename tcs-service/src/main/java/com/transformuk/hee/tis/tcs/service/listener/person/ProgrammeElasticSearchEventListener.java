@@ -30,6 +30,16 @@ public class ProgrammeElasticSearchEventListener {
   private final RevalidationService revalidationService;
   private final PostElasticSearchService postElasticSearchService;
 
+  /**
+   * Constructor for ProgrammeElasticSearchEventListener.
+   *
+   * @param personElasticSearchService the service to update person documents in Elasticsearch
+   * @param revalidationRabbitService the service to send revalidation updates to RabbitMQ
+   * @param programmeMembershipService the service to retrieve programme memberships for a given
+   *                                   programme
+   * @param revalidationService the service to handle revalidation logic
+   * @param postElasticSearchService the service to update post documents in Elasticsearch
+   */
   public ProgrammeElasticSearchEventListener(
       PersonElasticSearchService personElasticSearchService,
       RevalidationRabbitService revalidationRabbitService,
@@ -58,8 +68,8 @@ public class ProgrammeElasticSearchEventListener {
     List<ProgrammeMembershipDTO> programmeMembershipDTOS =
         programmeMembershipService.findProgrammeMembershipsByProgramme(programmeId);
     programmeMembershipDTOS.forEach(programmeMembershipDTO ->
-      revalidationRabbitService.updateReval(
-          revalidationService.buildTcsConnectionInfo(programmeMembershipDTO.getPerson().getId()))
+        revalidationRabbitService.updateReval(
+            revalidationService.buildTcsConnectionInfo(programmeMembershipDTO.getPerson().getId()))
     );
 
     personElasticSearchService.updatePersonDocumentForProgramme(programmeId);
@@ -67,7 +77,8 @@ public class ProgrammeElasticSearchEventListener {
     ProgrammeDTO previousProgrammeDto = event.getPreviousProgrammeDto();
     // When it's a name update
     if (previousProgrammeDto != null && previousProgrammeDto.getPostIds() != null
-        && !Objects.equals(previousProgrammeDto.getProgrammeName(), programmeDto.getProgrammeName())) {
+        && !Objects.equals(previousProgrammeDto.getProgrammeName(),
+        programmeDto.getProgrammeName())) {
       previousProgrammeDto.getPostIds().forEach(postElasticSearchService::updatePostDocument);
     }
   }

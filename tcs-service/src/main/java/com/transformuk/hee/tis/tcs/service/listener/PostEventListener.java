@@ -29,17 +29,31 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listens for PostSavedEvent and PostDeletedEvent and updates the corresponding PostView document
+ * in Elasticsearch.
+ */
 @Component
 public class PostEventListener {
   private static final Logger LOG = LoggerFactory.getLogger(PostEventListener.class);
 
   PostElasticSearchService postElasticSearchService;
 
+  /**
+   * Constructor for PostEventListener.
+   *
+   * @param postElasticSearchService the service used to update PostView documents in Elasticsearch
+   */
   public PostEventListener(
       PostElasticSearchService postElasticSearchService) {
     this.postElasticSearchService = postElasticSearchService;
   }
 
+  /**
+   * Handles the PostSavedEvent by updating the corresponding PostView document in Elasticsearch.
+   *
+   * @param event the PostSavedEvent containing the post ID to update
+   */
   @EventListener
   public void handlePostSavedEvent(PostSavedEvent event) {
     Long postId = event.getPostDto().getId();
@@ -47,6 +61,11 @@ public class PostEventListener {
     postElasticSearchService.updatePostDocument(postId);
   }
 
+  /**
+   * Handles the PostDeletedEvent by updating the corresponding PostView document in Elasticsearch.
+   *
+   * @param event the PostDeletedEvent containing the post ID to update
+   */
   @EventListener
   public void handlePostDeletedEvent(PostDeletedEvent event) {
     Long postId = event.getPostId();

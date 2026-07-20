@@ -32,6 +32,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listens for ContactDetailsSavedEvent and updates the corresponding PostView documents in
+ * Elasticsearch
+ */
 @Component
 public class ContactDetailsElasticSearchEventListener {
 
@@ -42,12 +46,26 @@ public class ContactDetailsElasticSearchEventListener {
 
   private final PostElasticSearchService postElasticSearchService;
 
+  /**
+   * Constructor for ContactDetailsElasticSearchEventListener.
+   *
+   * @param placementService the PlacementService to retrieve current placements for a person
+   * @param postElasticSearchService the PostElasticSearchService to update PostView documents in
+   *                                 Elasticsearch
+   */
   public ContactDetailsElasticSearchEventListener(PlacementService placementService,
       PostElasticSearchService postElasticSearchService) {
     this.placementService = placementService;
     this.postElasticSearchService = postElasticSearchService;
   }
 
+  /**
+   * Handles the ContactDetailsSavedEvent by checking for name changes and updating the corresponding
+   * PostView documents in Elasticsearch for the person's current placements.
+   *
+   * @param event the ContactDetailsSavedEvent containing the new and previous contact details
+   *              for the person
+   */
   @EventListener
   public void contactDetailsSavedEventListener(ContactDetailsSavedEvent event) {
     ContactDetailsDTO newContactDetailsDto = event.getContactDetailsDto();
@@ -58,8 +76,8 @@ public class ContactDetailsElasticSearchEventListener {
     // When there's name change, get the person's current placements,
     // and send the postId to PostElasticSearchService for post updates
     ContactDetailsDTO oldContactDetailsDto = event.getPreviousContactDetailsDto();
-    if (oldContactDetailsDto != null &&
-        (!oldContactDetailsDto.getForenames().equals(newContactDetailsDto.getForenames())
+    if (oldContactDetailsDto != null
+        && (!oldContactDetailsDto.getForenames().equals(newContactDetailsDto.getForenames())
             || !oldContactDetailsDto.getSurname().equals(newContactDetailsDto.getSurname()))) {
 
       LOG.info("Name change detected for ContactDetails id [{}]", newContactDetailsDto.getId());

@@ -5,11 +5,21 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.Nullable;
 
+/**
+ * An event triggered when a placement is saved.
+ */
 public class PlacementSavedEvent extends ApplicationEvent {
 
   private PlacementDTO placementDTO;
   private PlacementDTO previousPlacementDto;
 
+  /**
+   * Constructor for PlacementSavedEvent.
+   *
+   * @param previousPlacementDto the previous placement DTO, can be null if there was no previous
+   *                             placement
+   * @param source the current placement DTO that was saved
+   */
   public PlacementSavedEvent(@Nullable PlacementDTO previousPlacementDto, PlacementDTO source) {
     super(source);
     this.placementDTO = source;

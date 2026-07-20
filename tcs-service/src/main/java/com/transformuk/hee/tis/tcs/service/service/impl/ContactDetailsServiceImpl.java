@@ -34,6 +34,14 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
+  /**
+   * Constructor for ContactDetailsServiceImpl.
+   *
+   * @param contactDetailsRepository the repository for ContactDetails
+   * @param contactDetailsMapper the mapper for converting between ContactDetails and
+   *                             ContactDetailsDTO
+   * @param applicationEventPublisher the event publisher for publishing ContactDetailsSavedEvent
+   */
   public ContactDetailsServiceImpl(ContactDetailsRepository contactDetailsRepository,
       ContactDetailsMapper contactDetailsMapper,
       ApplicationEventPublisher applicationEventPublisher) {
@@ -87,7 +95,8 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
     List<ContactDetailsDTO> updatedContactDetailsDtos = contactDetailsMapper.toDto(contactDetails);
 
     updatedContactDetailsDtos.stream().distinct().forEach(contactDetailsDto -> {
-      ContactDetailsDTO previousContactDetailsDto = existingContactDetailDtos.get(contactDetailsDto.getId());
+      ContactDetailsDTO previousContactDetailsDto =
+          existingContactDetailDtos.get(contactDetailsDto.getId());
       applicationEventPublisher.publishEvent(
           new ContactDetailsSavedEvent(previousContactDetailsDto, contactDetailsDto));
     });

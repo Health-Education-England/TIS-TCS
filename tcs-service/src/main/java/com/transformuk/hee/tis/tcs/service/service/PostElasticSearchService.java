@@ -34,6 +34,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Service for updating PostView documents in Elasticsearch based on changes in the database.
+ */
 @Component
 public class PostElasticSearchService {
   private static final Logger LOG = LoggerFactory.getLogger(PostElasticSearchService.class);
@@ -44,6 +47,13 @@ public class PostElasticSearchService {
 
   private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+  /**
+   * Constructor for PostElasticSearchService.
+   *
+   * @param elasticsearchOperations the elasticsearch operations to use for indexing and deleting documents
+   * @param sqlQuerySupplier the supplier to use for getting the SQL query for retrieving post view data
+   * @param namedParameterJdbcTemplate the jdbc template to use for running queries against the database
+   */
   public PostElasticSearchService(ElasticsearchOperations elasticsearchOperations,
       SqlQuerySupplier sqlQuerySupplier, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
     this.elasticsearchOperations = elasticsearchOperations;
@@ -57,6 +67,12 @@ public class PostElasticSearchService {
         .replace("LIMITCLAUSE", "");
   }
 
+  /**
+   * Updates the PostView document in Elasticsearch for the given postId.
+   * If the post does not exist in the database, it will be deleted from Elasticsearch.
+   *
+   * @param postId the id of the post to update
+   */
   public synchronized void updatePostDocument(Long postId) {
     Preconditions.checkNotNull(postId, "Person Id cannot be null");
 
@@ -70,6 +86,7 @@ public class PostElasticSearchService {
     String query = getQuery()
         .replace("WHERECLAUSE", "WHERE p.id=:id");
 
+    LOG.debug("Getting updated PostView document for postId: {} with query: {}", postId, query);
     List<PostView> queryResult = runQuery(query, postId);
 
     if (CollectionUtils.isNotEmpty(queryResult)) {
@@ -81,6 +98,11 @@ public class PostElasticSearchService {
     elasticsearchOperations.indexOps(PostView.class).refresh();
   }
 
+  /**
+   * Updates the PostView documents in Elasticsearch for all posts associated with the given specialtyId.
+   *
+   * @param specialtyId the id of the specialty to update posts for
+   */
   public void updatePostDocumentsForSpecialty(Long specialtyId) {
     Preconditions.checkNotNull(specialtyId, "Specialty Id cannot be null");
     String query = getQuery()
