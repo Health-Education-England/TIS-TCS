@@ -5,11 +5,13 @@ import com.transformuk.hee.tis.tcs.service.event.ContactDetailsSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.helper.AfterCommitEventPublisher;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +70,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
     contactDetails = contactDetailsRepository.saveAndFlush(contactDetails);
     ContactDetailsDTO updatedContactDetailsDto = contactDetailsMapper.toDto(contactDetails);
 
-    applicationEventPublisher.publishEvent(
+    AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher,
         new ContactDetailsSavedEvent(existingContactDetailsDto, updatedContactDetailsDto));
     return updatedContactDetailsDto;
   }
@@ -83,11 +85,17 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
   public List<ContactDetailsDTO> save(List<ContactDetailsDTO> contactDetailsDtos) {
     log.debug("Request to save ContactDetails : {}", contactDetailsDtos);
 
-    Map<Long, ContactDetailsDTO> existingContactDetailDtos = contactDetailsRepository.findAllById(
-            contactDetailsDtos.stream().map(ContactDetailsDTO::getId).collect(Collectors.toSet()))
-        .stream()
-        .collect(Collectors.toMap(ContactDetails::getId, contactDetailsMapper::toDto,
-            (existing, replacement) -> existing, HashMap::new));
+    Set<Long> contactDetailIds = contactDetailsDtos.stream()
+        .map(ContactDetailsDTO::getId)
+        .filter(java.util.Objects::nonNull)
+        .collect(Collectors.toSet());
+
+    Map<Long, ContactDetailsDTO> existingContactDetailDtos = contactDetailIds.isEmpty()
+        ? java.util.Collections.emptyMap()
+        : contactDetailsRepository.findAllById(contactDetailIds)
+            .stream()
+            .collect(Collectors.toMap(ContactDetails::getId, contactDetailsMapper::toDto,
+                (existing, replacement) -> existing, HashMap::new));
 
     List<ContactDetails> contactDetails = contactDetailsMapper.toEntity(contactDetailsDtos);
     contactDetails = contactDetailsRepository.saveAll(contactDetails);
@@ -97,7 +105,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
     updatedContactDetailsDtos.stream().distinct().forEach(contactDetailsDto -> {
       ContactDetailsDTO previousContactDetailsDto =
           existingContactDetailDtos.get(contactDetailsDto.getId());
-      applicationEventPublisher.publishEvent(
+      AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher,
           new ContactDetailsSavedEvent(previousContactDetailsDto, contactDetailsDto));
     });
     return updatedContactDetailsDtos;

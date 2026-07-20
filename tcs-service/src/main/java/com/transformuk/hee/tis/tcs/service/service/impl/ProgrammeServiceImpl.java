@@ -105,11 +105,17 @@ public class ProgrammeServiceImpl implements ProgrammeService {
   public List<ProgrammeDTO> save(List<ProgrammeDTO> programmeDtos) {
     log.debug("Request to save {} programmes.", programmeDtos.size());
 
-    Map<Long, ProgrammeDTO> existingProgrammeDtos = programmeRepository.findByIdIn(
-            programmeDtos.stream().map(ProgrammeDTO::getId).collect(Collectors.toSet()))
-        .stream()
-        .collect(Collectors.toMap(Programme::getId, programmeMapper::programmeToProgrammeDTO,
-            (existing, replacement) -> existing, HashMap::new));
+    Set<Long> programmeIds = programmeDtos.stream()
+        .map(ProgrammeDTO::getId)
+        .filter(java.util.Objects::nonNull)
+        .collect(Collectors.toSet());
+
+    Map<Long, ProgrammeDTO> existingProgrammeDtos = programmeIds.isEmpty()
+        ? java.util.Collections.emptyMap()
+        : programmeRepository.findByIdIn(programmeIds)
+            .stream()
+            .collect(Collectors.toMap(Programme::getId, programmeMapper::programmeToProgrammeDTO,
+                (existing, replacement) -> existing, HashMap::new));
 
     List<Programme> programmes = programmeMapper.programmeDTOsToProgrammes(programmeDtos);
     programmes = programmeRepository.saveAll(programmes);

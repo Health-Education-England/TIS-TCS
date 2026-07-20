@@ -98,11 +98,13 @@ public class PlacementElasticSearchEventListener {
   private boolean isCurrentPlacement(PlacementDTO placementDto) {
     LocalDate dateFrom = placementDto.getDateFrom();
     LocalDate dateTo = placementDto.getDateTo();
-    if (dateFrom == null || dateTo == null) {
+    if (dateFrom == null) {
       return false;
     }
 
     LocalDate currentDate = LocalDate.now(clock);
-    return !currentDate.isBefore(dateFrom) && !currentDate.isAfter(dateTo);
+    boolean startsOnOrBeforeToday = !currentDate.isBefore(dateFrom);
+    boolean endsOnOrAfterToday = dateTo == null || !currentDate.isAfter(dateTo);
+    return startsOnOrBeforeToday && endsOnOrAfterToday;
   }
 }

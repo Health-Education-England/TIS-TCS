@@ -77,7 +77,7 @@ public class PostElasticSearchService {
    * @param postId the id of the post to update
    */
   public synchronized void updatePostDocument(Long postId) {
-    Preconditions.checkNotNull(postId, "Person Id cannot be null");
+    Preconditions.checkNotNull(postId, "Post Id cannot be null");
 
     String query = getQuery()
         .replace("WHERECLAUSE", "WHERE p.id=:id");

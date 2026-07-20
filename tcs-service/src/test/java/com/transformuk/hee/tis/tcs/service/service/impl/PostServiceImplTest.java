@@ -1,5 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.service.service.helper.TransactionSynchronizationTestUtil.clearTransactionSynchronization;
+import static com.transformuk.hee.tis.tcs.service.service.helper.TransactionSynchronizationTestUtil.startTransactionSynchronization;
+import static com.transformuk.hee.tis.tcs.service.service.helper.TransactionSynchronizationTestUtil.triggerAfterCommit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -89,8 +92,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
@@ -931,22 +932,8 @@ class PostServiceImplTest {
     verify(postEsrEventRepositoryMock).save(postEsrEvent);
   }
 
-  private void startTransactionSynchronization() {
-    TransactionSynchronizationManager.setActualTransactionActive(true);
-    TransactionSynchronizationManager.initSynchronization();
-  }
-
-  private void triggerAfterCommit() {
-    List<TransactionSynchronization> synchronizations =
-        new ArrayList<>(TransactionSynchronizationManager.getSynchronizations());
-    synchronizations.forEach(TransactionSynchronization::afterCommit);
-  }
-
   @AfterEach
-  void clearTransactionSynchronization() {
-    if (TransactionSynchronizationManager.isSynchronizationActive()) {
-      TransactionSynchronizationManager.clearSynchronization();
-    }
-    TransactionSynchronizationManager.setActualTransactionActive(false);
+  void clearTransactionSynchronizationAfterEachTest() {
+    clearTransactionSynchronization();
   }
 }

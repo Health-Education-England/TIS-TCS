@@ -67,25 +67,6 @@ class PlacementRepositoryTest {
   @Test
   @Sql(scripts = "/scripts/person.sql")
   @Sql(scripts = "/scripts/deletePerson.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-  void findByTraineeIdAndDateFromLessThanEqualAndDateToGreaterThanEqualShouldReturnCurrentPlacements() {
-    Long traineeId = 1L;
-    LocalDate currentDate = LocalDate.of(2099, Month.AUGUST, 1);
-
-    List<Placement> results = testObj
-        .findByTraineeIdAndDateFromLessThanEqualAndDateToGreaterThanEqual(traineeId, currentDate,
-            currentDate);
-
-    assertNotNull(results);
-    assertEquals(2, results.size());
-    Set<Long> placementIds = results.stream().map(Placement::getId).collect(Collectors.toSet());
-    assertTrue(placementIds.contains(1L));
-    assertTrue(placementIds.contains(2L));
-  }
-
-  @Transactional
-  @Test
-  @Sql(scripts = "/scripts/person.sql")
-  @Sql(scripts = "/scripts/deletePerson.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
   void findAllCurrentPlacementsForTraineeShouldUseCurrentDateForBothBounds() {
     Long traineeId = 1L;
     LocalDate currentDate = LocalDate.of(2022, Month.SEPTEMBER, 8);
@@ -93,7 +74,25 @@ class PlacementRepositoryTest {
     List<Placement> results = testObj.findAllCurrentPlacementsForTrainee(traineeId, currentDate);
 
     assertNotNull(results);
-    assertEquals(1, results.size());
+    assertEquals(2, results.size());
     assertEquals(Long.valueOf(3L), results.get(0).getId());
+    assertEquals(Long.valueOf(6L), results.get(1).getId());
+  }
+
+  @Transactional
+  @Test
+  @Sql(scripts = "/scripts/person.sql")
+  @Sql(scripts = "/scripts/deletePerson.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+  void findAllCurrentPlacementsForTraineeShouldIncludePlacementsWithNullEndDate() {
+    Long traineeId = 1L;
+    LocalDate currentDate = LocalDate.of(2022, Month.SEPTEMBER, 8);
+
+    List<Placement> results = testObj.findAllCurrentPlacementsForTrainee(traineeId, currentDate);
+
+    assertNotNull(results);
+    assertEquals(2, results.size());
+    Set<Long> placementIds = results.stream().map(Placement::getId).collect(Collectors.toSet());
+    assertTrue(placementIds.contains(3L));
+    assertTrue(placementIds.contains(6L));
   }
 }

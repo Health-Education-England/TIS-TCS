@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.service.event.ContactDetailsSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -76,9 +77,10 @@ public class ContactDetailsElasticSearchEventListener {
     // When there's name change, get the person's current placements,
     // and send the postId to PostElasticSearchService for post updates
     ContactDetailsDTO oldContactDetailsDto = event.getPreviousContactDetailsDto();
-    if (oldContactDetailsDto != null
-        && (!oldContactDetailsDto.getForenames().equals(newContactDetailsDto.getForenames())
-            || !oldContactDetailsDto.getSurname().equals(newContactDetailsDto.getSurname()))) {
+    if (oldContactDetailsDto != null && (
+        !Objects.equals(oldContactDetailsDto.getForenames(), newContactDetailsDto.getForenames())
+            || !Objects.equals(oldContactDetailsDto.getSurname(),
+            newContactDetailsDto.getSurname()))) {
 
       LOG.info("Name change detected for ContactDetails id [{}]", newContactDetailsDto.getId());
       List<PlacementDTO> placements = placementService.getCurrentPlacementsForPersonId(personId);

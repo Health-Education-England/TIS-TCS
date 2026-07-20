@@ -1,5 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static com.transformuk.hee.tis.tcs.service.service.helper.TransactionSynchronizationTestUtil.clearTransactionSynchronization;
+import static com.transformuk.hee.tis.tcs.service.service.helper.TransactionSynchronizationTestUtil.startTransactionSynchronization;
+import static com.transformuk.hee.tis.tcs.service.service.helper.TransactionSynchronizationTestUtil.triggerAfterCommit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -14,6 +17,8 @@ import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +54,7 @@ class ContactDetailsServiceImplTest {
   private ContactDetailsServiceImpl service;
 
   @Captor
-  private ArgumentCaptor<ContactDetailsSavedEvent> eventCaptor;
+  private ArgumentCaptor<Object> eventCaptor;
 
   private ContactDetailsDTO inputDto;
   private ContactDetails existingEntity;
@@ -99,15 +104,18 @@ class ContactDetailsServiceImplTest {
     when(contactDetailsRepository.saveAndFlush(existingMappedEntity)).thenReturn(savedEntity);
     when(contactDetailsMapper.toDto(savedEntity)).thenReturn(updatedDto);
 
+    startTransactionSynchronization();
     ContactDetailsDTO result = service.save(inputDto);
 
     assertSame(updatedDto, result);
     verify(contactDetailsRepository).findById(CONTACT_DETAILS_ID_1);
     verify(contactDetailsMapper).toEntity(inputDto);
     verify(contactDetailsRepository).saveAndFlush(existingMappedEntity);
+
+    triggerAfterCommit();
     verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
 
-    ContactDetailsSavedEvent publishedEvent = eventCaptor.getValue();
+    ContactDetailsSavedEvent publishedEvent = (ContactDetailsSavedEvent) eventCaptor.getValue();
     assertEquals(existingDto, publishedEvent.getPreviousContactDetailsDto());
     assertEquals(updatedDto, publishedEvent.getContactDetailsDto());
   }
@@ -152,6 +160,7 @@ class ContactDetailsServiceImplTest {
     when(contactDetailsRepository.saveAll(mappedEntities)).thenReturn(mappedEntities);
     when(contactDetailsMapper.toDto(mappedEntities)).thenReturn(updatedDtos);
 
+    startTransactionSynchronization();
     List<ContactDetailsDTO> result = service.save(inputDtos);
 
     assertSame(updatedDtos, result);
@@ -159,13 +168,20 @@ class ContactDetailsServiceImplTest {
         CONTACT_DETAILS_ID_1, CONTACT_DETAILS_ID_2))));
     verify(contactDetailsMapper).toEntity(inputDtos);
     verify(contactDetailsRepository).saveAll(mappedEntities);
+
+    triggerAfterCommit();
     verify(applicationEventPublisher, times(2)).publishEvent(eventCaptor.capture());
 
-    List<ContactDetailsSavedEvent> publishedEvents = eventCaptor.getAllValues();
+    List<ContactDetailsSavedEvent> publishedEvents = eventCaptor.getAllValues().stream()
+        .map(e -> (ContactDetailsSavedEvent) e).collect(Collectors.toList());
     assertEquals(existingDto, publishedEvents.get(0).getPreviousContactDetailsDto());
     assertEquals(updatedDto, publishedEvents.get(0).getContactDetailsDto());
     assertEquals(secondExistingDto, publishedEvents.get(1).getPreviousContactDetailsDto());
     assertEquals(secondUpdatedDto, publishedEvents.get(1).getContactDetailsDto());
   }
-}
 
+  @AfterEach
+  void clearTransactionSynchronizationAfterEachTest() {
+    clearTransactionSynchronization();
+  }
+}

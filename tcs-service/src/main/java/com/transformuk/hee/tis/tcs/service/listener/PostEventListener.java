@@ -57,7 +57,7 @@ public class PostEventListener {
   @EventListener
   public void handlePostSavedEvent(PostSavedEvent event) {
     Long postId = event.getPostDto().getId();
-    LOG.info("Received PlacementSavedEvent for id [{}]", postId);
+    LOG.info("Received PostSavedEvent for id [{}]", postId);
     postElasticSearchService.updatePostDocument(postId);
   }
 
@@ -69,7 +69,7 @@ public class PostEventListener {
   @EventListener
   public void handlePostDeletedEvent(PostDeletedEvent event) {
     Long postId = event.getPostId();
-    LOG.info("Received PlacementDeleteEvent for placement id [{}]", postId);
+    LOG.info("Received PostDeletedEvent for placement id [{}]", postId);
     postElasticSearchService.updatePostDocument(postId);
   }
 }

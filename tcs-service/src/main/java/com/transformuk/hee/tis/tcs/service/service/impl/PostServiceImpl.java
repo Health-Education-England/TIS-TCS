@@ -65,6 +65,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.helper.AfterCommitEventPublisher;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
@@ -101,8 +102,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StopWatch;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -718,18 +717,7 @@ public class PostServiceImpl implements PostService {
   }
 
   private void publishEventAfterCommit(Object event) {
-    if (TransactionSynchronizationManager.isSynchronizationActive()
-        && TransactionSynchronizationManager.isActualTransactionActive()) {
-      TransactionSynchronizationManager.registerSynchronization(
-          new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-              applicationEventPublisher.publishEvent(event);
-            }
-          });
-    } else {
-      applicationEventPublisher.publishEvent(event);
-    }
+    AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher, event);
   }
 
   /**
