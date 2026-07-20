@@ -131,7 +131,7 @@ class ProgrammeServiceImplTest {
     verify(applicationEventPublisherMock).publishEvent(programmeSavedEventCaptor.capture());
     ProgrammeSavedEvent event = programmeSavedEventCaptor.getValue();
     assertEquals(previousDto, event.getPreviousProgrammeDto());
-    assertEquals(currentDto, event.getProgrammeDTO());
+    assertEquals(currentDto, event.getProgrammeDto());
   }
 
   @Test()
@@ -180,11 +180,11 @@ class ProgrammeServiceImplTest {
 
     Map<Long, ProgrammeSavedEvent> eventByProgrammeId = programmeSavedEventCaptor.getAllValues()
         .stream().collect(java.util.stream.Collectors.toMap(
-            event -> event.getProgrammeDTO().getId(), event -> event));
+            event -> event.getProgrammeDto().getId(), event -> event));
     assertEquals(previousDto1, eventByProgrammeId.get(1L).getPreviousProgrammeDto());
-    assertEquals(updatedDto1, eventByProgrammeId.get(1L).getProgrammeDTO());
+    assertEquals(updatedDto1, eventByProgrammeId.get(1L).getProgrammeDto());
     assertEquals(previousDto2, eventByProgrammeId.get(2L).getPreviousProgrammeDto());
-    assertEquals(updatedDto2, eventByProgrammeId.get(2L).getProgrammeDTO());
+    assertEquals(updatedDto2, eventByProgrammeId.get(2L).getProgrammeDto());
   }
 
   @Test()

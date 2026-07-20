@@ -49,7 +49,7 @@ class ProgrammeSavedEventTest {
   void shouldCreateEventWithCurrentProgrammeOnly() {
     ProgrammeSavedEvent event = new ProgrammeSavedEvent(currentProgramme);
 
-    assertSame(currentProgramme, event.getProgrammeDTO());
+    assertSame(currentProgramme, event.getProgrammeDto());
     assertNull(event.getPreviousProgrammeDto());
     assertSame(currentProgramme, event.getSource());
   }
@@ -58,7 +58,7 @@ class ProgrammeSavedEventTest {
   void shouldCreateEventWithPreviousAndCurrentProgramme() {
     ProgrammeSavedEvent event = new ProgrammeSavedEvent(previousProgramme, currentProgramme);
 
-    assertSame(currentProgramme, event.getProgrammeDTO());
+    assertSame(currentProgramme, event.getProgrammeDto());
     assertSame(previousProgramme, event.getPreviousProgrammeDto());
     assertSame(currentProgramme, event.getSource());
   }

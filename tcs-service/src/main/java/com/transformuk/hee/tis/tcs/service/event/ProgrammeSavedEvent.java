@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class ProgrammeSavedEvent extends ApplicationEvent {
 
-  private final ProgrammeDTO programmeDTO;
+  private final ProgrammeDTO programmeDto;
 
   private final ProgrammeDTO previousProgrammeDto;
 
@@ -30,12 +30,12 @@ public class ProgrammeSavedEvent extends ApplicationEvent {
    */
   public ProgrammeSavedEvent(ProgrammeDTO previousProgrammeDto, ProgrammeDTO source) {
     super(source);
-    this.programmeDTO = source;
+    this.programmeDto = source;
     this.previousProgrammeDto = previousProgrammeDto;
   }
 
-  public ProgrammeDTO getProgrammeDTO() {
-    return programmeDTO;
+  public ProgrammeDTO getProgrammeDto() {
+    return programmeDto;
   }
 
   public ProgrammeDTO getPreviousProgrammeDto() {
@@ -51,12 +51,12 @@ public class ProgrammeSavedEvent extends ApplicationEvent {
       return false;
     }
     ProgrammeSavedEvent that = (ProgrammeSavedEvent) o;
-    return Objects.equals(programmeDTO, that.programmeDTO)
+    return Objects.equals(programmeDto, that.programmeDto)
         && Objects.equals(previousProgrammeDto, that.previousProgrammeDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(programmeDTO,  previousProgrammeDto);
+    return Objects.hash(programmeDto,  previousProgrammeDto);
   }
 }

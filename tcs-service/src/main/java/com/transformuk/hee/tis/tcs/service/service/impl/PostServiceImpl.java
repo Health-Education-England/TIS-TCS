@@ -431,9 +431,9 @@ public class PostServiceImpl implements PostService {
     postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
     updateFundingStatus(currentInDbPost);
-    PostDTO updatedPostDTO = postMapper.postToPostDTO(currentInDbPost);
-    applicationEventPublisher.publishEvent(new PostSavedEvent(updatedPostDTO));
-    return updatedPostDTO;
+    PostDTO updatedPostDto = postMapper.postToPostDTO(currentInDbPost);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(updatedPostDto));
+    return updatedPostDto;
   }
 
   /**

@@ -23,8 +23,8 @@ public class SpecialtyElasticSearchEventListener {
   /**
    * Constructor for SpecialtyElasticSearchEventListener.
    *
-   * @param personElasticSearchService
-   * @param postElasticSearchService
+   * @param personElasticSearchService the service to update person documents in Elasticsearch
+   * @param postElasticSearchService the service to update post documents in Elasticsearch
    */
   public SpecialtyElasticSearchEventListener(
       PersonElasticSearchService personElasticSearchService,

@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Listens for ContactDetailsSavedEvent and updates the corresponding PostView documents in
- * Elasticsearch
+ * Elasticsearch.
  */
 @Component
 public class ContactDetailsElasticSearchEventListener {
@@ -60,8 +60,8 @@ public class ContactDetailsElasticSearchEventListener {
   }
 
   /**
-   * Handles the ContactDetailsSavedEvent by checking for name changes and updating the corresponding
-   * PostView documents in Elasticsearch for the person's current placements.
+   * Handles the ContactDetailsSavedEvent by checking for name changes and updating the
+   * corresponding PostView documents in Elasticsearch for the person's current placements.
    *
    * @param event the ContactDetailsSavedEvent containing the new and previous contact details
    *              for the person

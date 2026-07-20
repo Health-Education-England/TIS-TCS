@@ -60,7 +60,7 @@ public class ProgrammeElasticSearchEventListener {
    */
   @EventListener
   public void handleProgrammeSavedEvent(ProgrammeSavedEvent event) {
-    ProgrammeDTO programmeDto = event.getProgrammeDTO();
+    ProgrammeDTO programmeDto = event.getProgrammeDto();
     final Long programmeId = programmeDto.getId();
     LOG.info("Received ProgrammeSavedEvent for Programme id [{}]", programmeId);
 

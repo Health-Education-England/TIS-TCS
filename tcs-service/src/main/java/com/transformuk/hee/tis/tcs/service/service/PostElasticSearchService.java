@@ -32,12 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for updating PostView documents in Elasticsearch based on changes in the database.
  */
-@Component
+@Service
 public class PostElasticSearchService {
   private static final Logger LOG = LoggerFactory.getLogger(PostElasticSearchService.class);
 
@@ -50,9 +50,12 @@ public class PostElasticSearchService {
   /**
    * Constructor for PostElasticSearchService.
    *
-   * @param elasticsearchOperations the elasticsearch operations to use for indexing and deleting documents
-   * @param sqlQuerySupplier the supplier to use for getting the SQL query for retrieving post view data
-   * @param namedParameterJdbcTemplate the jdbc template to use for running queries against the database
+   * @param elasticsearchOperations the elasticsearch operations to use for indexing and deleting
+   *                                documents
+   * @param sqlQuerySupplier the supplier to use for getting the SQL query for retrieving post view
+   *                         data
+   * @param namedParameterJdbcTemplate the jdbc template to use for running queries against the
+   *                                   database
    */
   public PostElasticSearchService(ElasticsearchOperations elasticsearchOperations,
       SqlQuerySupplier sqlQuerySupplier, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -99,7 +102,8 @@ public class PostElasticSearchService {
   }
 
   /**
-   * Updates the PostView documents in Elasticsearch for all posts associated with the given specialtyId.
+   * Updates the PostView documents in Elasticsearch for all posts associated with the given
+   * specialtyId.
    *
    * @param specialtyId the id of the specialty to update posts for
    */
