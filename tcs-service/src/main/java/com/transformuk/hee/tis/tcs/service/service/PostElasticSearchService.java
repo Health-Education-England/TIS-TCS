@@ -21,15 +21,15 @@
 
 package com.transformuk.hee.tis.tcs.service.service;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +67,7 @@ public class PostElasticSearchService {
   private static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   private static final String STATUS = "status";
   private static final String OWNER = "owner";
-  private static final String CURRENT_TRAINEE_SURNAME = "currentTraineeSurnames";
+  private static final String CURRENT_TRAINEE_SURNAMES = "currentTraineeSurnames";
   private static final String CURRENT_TRAINEE_FORENAMES = "currentTraineeForenames";
   private static final String PRIMARY_SPECIALTY_CODE = "primarySpecialtyCode";
   private static final String PRIMARY_SPECIALTY_NAME = "primarySpecialtyName";
@@ -79,7 +79,7 @@ public class PostElasticSearchService {
   private static final String ID = "id";
   private static final String PROGRAMME_IDS = "programmeIds";
   private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
-      CURRENT_TRAINEE_SURNAME,
+      CURRENT_TRAINEE_SURNAMES,
       CURRENT_TRAINEE_FORENAMES,
       PRIMARY_SPECIALTY_NAME,
       PROGRAMME_NAMES
@@ -96,22 +96,25 @@ public class PostElasticSearchService {
   );
 
   private static final Map<String, String> FIELD_MAPPINGS = Map.of(
-      "currentTraineeSurname", CURRENT_TRAINEE_SURNAME
+      "currentTraineeSurname", CURRENT_TRAINEE_SURNAMES
   );
 
   private final ElasticsearchOperations elasticsearchOperations;
   private final PermissionService permissionService;
   private final PostViewDecorator postViewDecorator;
+  private final PostViewMapper postViewMapper;
 
   /**
    * Constructor for Elasticsearch service class.
    */
   public PostElasticSearchService(PostViewDecorator postViewDecorator,
       ElasticsearchOperations elasticsearchOperations,
-      PermissionService permissionService) {
+      PermissionService permissionService,
+      PostViewMapper postViewMapper) {
     this.postViewDecorator = postViewDecorator;
     this.elasticsearchOperations = elasticsearchOperations;
     this.permissionService = permissionService;
+    this.postViewMapper = postViewMapper;
   }
 
   /**
@@ -127,7 +130,7 @@ public class PostElasticSearchService {
       List<ColumnFilter> columnFilters, Pageable pageable) {
 
     try {
-      BoolQueryBuilder fullQuery = buildColumnFilterQuery(columnFilters);
+      BoolQueryBuilder fullQuery = buildColumnFiltersQuery(columnFilters);
 
       BoolQueryBuilder textSearchQuery = applyTextBasedSearchQuery(searchQuery);
 
@@ -155,7 +158,7 @@ public class PostElasticSearchService {
           .map(SearchHit::getContent)
           .collect(Collectors.toList());
 
-      List<PostViewDTO> postViewDtos = convertPostViewToDto(postViews);
+      List<PostViewDTO> postViewDtos = postViewMapper.toDtos(postViews);
 
       postViewDecorator.decorate(postViewDtos);
 
@@ -209,7 +212,7 @@ public class PostElasticSearchService {
           .should(new MatchQueryBuilder(PROGRAMME_NAMES, searchQuery))
           .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_NAME, searchQuery))
           .should(new WildcardQueryBuilder(OWNER, wildcard))
-          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAME, wildcard))
+          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAMES, wildcard))
           .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, wildcard));
 
       if (StringUtils.isNumeric(searchQuery)) {
@@ -224,63 +227,21 @@ public class PostElasticSearchService {
   }
 
   private Pageable replaceSortById(Pageable pageable) {
-    Sort sort = pageable.getSort();
+    List<Sort.Order> sortOrders = new ArrayList<>();
 
-    Iterator<Sort.Order> sortIterator = sort.iterator();
-    List<Sort.Order> sortOrders = Lists.newArrayList();
+    pageable.getSort().forEach(order -> {
+      String property = order.getProperty();
 
-    while (sortIterator.hasNext()) {
-      Sort.Order order = sortIterator.next();
-
-      if (ID.equals(order.getProperty())) {
-        if (order.isAscending()) {
-          sortOrders.add(Sort.Order.asc(ID));
-        } else if (order.isDescending()) {
-          sortOrders.add(Sort.Order.desc(ID));
-        } else {
-          sortOrders.add(Sort.Order.asc(ID));
-        }
-      } else if (NATIONAL_POST_NUMBER.equals(order.getProperty())) {
-        if (order.isAscending()) {
-          sortOrders.add(Sort.Order.asc(NATIONAL_POST_NUMBER));
-        } else if (order.isDescending()) {
-          sortOrders.add(Sort.Order.desc(NATIONAL_POST_NUMBER));
-        } else {
-          sortOrders.add(Sort.Order.asc(NATIONAL_POST_NUMBER));
-        }
+      if (ID.equals(property) || NATIONAL_POST_NUMBER.equals(property)) {
+        sortOrders.add(
+            order.isDescending()
+                ? Sort.Order.desc(property)
+                : Sort.Order.asc(property));
       } else {
         sortOrders.add(order);
       }
-    }
+    });
     return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(sortOrders));
-  }
-
-  private List<PostViewDTO> convertPostViewToDto(List<PostView> content) {
-    return content.stream().map(pv -> {
-      PostViewDTO dto = new PostViewDTO();
-
-      dto.setId(pv.getId());
-
-      dto.setCurrentTraineeSurname(pv.getCurrentTraineeSurnames());
-      dto.setCurrentTraineeForenames(pv.getCurrentTraineeForenames());
-
-      dto.setNationalPostNumber(pv.getNationalPostNumber());
-
-      dto.setPrimarySiteId(pv.getPrimarySiteId());
-
-      dto.setApprovedGradeId(pv.getApprovedGradeId());
-
-      dto.setPrimarySpecialtyId(pv.getPrimarySpecialtyId());
-      dto.setPrimarySpecialtyCode(pv.getPrimarySpecialtyCode());
-      dto.setPrimarySpecialtyName(pv.getPrimarySpecialtyName());
-
-      dto.setProgrammeNames(String.join("; ", pv.getProgrammeNames()));
-      dto.setStatus(pv.getStatus());
-      dto.setFundingType(String.join("; ", pv.getFundingTypes()));
-      dto.setOwner(pv.getOwner());
-
-      return dto;
-    }).collect(Collectors.toList());
   }
 
   private void applyPermissionFilters(BoolQueryBuilder query) {
@@ -305,7 +266,7 @@ public class PostElasticSearchService {
     }
   }
 
-  private BoolQueryBuilder buildColumnFilterQuery(List<ColumnFilter> columnFilters) {
+  private BoolQueryBuilder buildColumnFiltersQuery(List<ColumnFilter> columnFilters) {
     BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
     if (CollectionUtils.isEmpty(columnFilters)) {

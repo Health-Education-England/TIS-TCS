@@ -24,6 +24,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -67,9 +69,13 @@ class PostElasticSearchServiceTest {
   private PostViewDecorator postViewDecorator;
   @Mock
   private PermissionService permissionService;
+  @Mock
+  private PostViewMapper postViewMapper;
+
   @InjectMocks
   private PostElasticSearchService postElasticSearchService;
   private PostView postView;
+  private PostViewDTO postViewDto;
 
   @BeforeEach
   void setUp() {
@@ -87,6 +93,22 @@ class PostElasticSearchServiceTest {
     postView.setPrimarySpecialtyName("General Surgery");
     postView.setPrimarySiteId(200L);
     postView.setApprovedGradeId(300L);
+
+    postViewDto = new PostViewDTO();
+    postViewDto.setId(1000L);
+    postViewDto.setNationalPostNumber("EOE/123/ABC/001");
+    postViewDto.setStatus(Status.CURRENT);
+    postViewDto.setOwner("East of England");
+    postViewDto.setProgrammeNames("General Surgery");
+    postViewDto.setFundingType("Tariff");
+    postViewDto.setCurrentTraineeSurname("Smith");
+    postViewDto.setCurrentTraineeForenames("John");
+    postViewDto.setPrimarySpecialtyId(100L);
+    postViewDto.setPrimarySpecialtyCode("GPE");
+    postViewDto.setPrimarySpecialtyName("General Surgery");
+    postViewDto.setPrimarySiteId(200L);
+    postViewDto.setApprovedGradeId(300L);
+
     lenient().when(permissionService.isUserTrustAdmin()).thenReturn(false);
     lenient().when(permissionService.isProgrammeObserver()).thenReturn(false);
   }
@@ -104,6 +126,8 @@ class PostElasticSearchServiceTest {
         Sort.by(Sort.Order.asc("nationalPostNumber"), Sort.Order.asc("id"))
     );
     SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(postViewMapper.toDtos(anyList())).thenReturn(List.of(postViewDto));
 
     when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
         .thenReturn(mockedSearchHits);
