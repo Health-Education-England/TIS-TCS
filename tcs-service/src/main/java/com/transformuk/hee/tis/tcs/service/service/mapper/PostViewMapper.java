@@ -36,12 +36,16 @@ import org.mapstruct.Named;
 public interface PostViewMapper {
 
   @Mapping(source = "currentTraineeSurnames", target = "currentTraineeSurname")
-  @Mapping(source = "programmeNames", target = "programmeNames", qualifiedByName = "joinWithSemicolon")
+  @Mapping(source = "programmeNames", target = "programmeNames",
+      qualifiedByName = "joinWithSemicolon")
   @Mapping(source = "fundingTypes", target = "fundingType", qualifiedByName = "joinWithSemicolon")
   PostViewDTO toDto(PostView postView);
 
   List<PostViewDTO> toDtos(List<PostView> postViews);
 
+  /**
+   * Customised method for semicolon delimiter.
+   */
   @Named("joinWithSemicolon")
   default String joinWithSemicolon(List<String> values) {
     if (CollectionUtils.isEmpty(values)) {
