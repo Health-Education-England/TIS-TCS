@@ -439,7 +439,8 @@ public class PlacementServiceImpl implements PlacementService {
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
-    PlacementDTO existingPlacementDto = placementMapper.placementToPlacementDTO(placement, null);
+    final PlacementDTO existingPlacementDto =
+        placementMapper.placementToPlacementDTO(placement, null);
 
     // deal with the log for existing placements which doesn't exist in PlacmentLog table
     PlacementDetails exsitingPlacementDetails = placementToPlacementDetails(placement);
@@ -1041,8 +1042,9 @@ public class PlacementServiceImpl implements PlacementService {
     try {
       final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
           .orElse(null);
-      if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+      if (savedPlacement != null && savedPlacement.getDateFrom() != null
+          && savedPlacement.getDateFrom().isBefore(LocalDate.now(clock)
+          .plusWeeks(13))) {
         log.debug("Creating ESR notification for new placement creation for deanery number {}",
             savedPlacement.getPost().getNationalPostNumber());
         final List<EsrNotification> esrNotifications = esrNotificationService
