@@ -101,6 +101,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StopWatch;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -172,7 +174,7 @@ public class PostServiceImpl implements PostService {
     updateFundingStatus(post);
     PostDTO savedPostDto = postMapper.postToPostDTO(post);
     handleNewPostEsrNotification(postDTO);
-    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
+    publishPostSavedEventAfterCommit(savedPostDto);
     return savedPostDto;
   }
 
@@ -207,8 +209,7 @@ public class PostServiceImpl implements PostService {
     posts = postRepository.saveAll(posts);
     posts.forEach(this::updateFundingStatus);
     List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
-    savedPostDtos.forEach(
-        postDto -> applicationEventPublisher.publishEvent(new PostSavedEvent(postDto)));
+    savedPostDtos.forEach(this::publishPostSavedEventAfterCommit);
     return savedPostDtos;
   }
 
@@ -432,7 +433,7 @@ public class PostServiceImpl implements PostService {
     currentInDbPost = postRepository.save(payloadPost);
     updateFundingStatus(currentInDbPost);
     PostDTO updatedPostDto = postMapper.postToPostDTO(currentInDbPost);
-    applicationEventPublisher.publishEvent(new PostSavedEvent(updatedPostDto));
+    publishPostSavedEventAfterCommit(updatedPostDto);
     return updatedPostDto;
   }
 
@@ -701,10 +702,33 @@ public class PostServiceImpl implements PostService {
       if (attachedPlacements.isEmpty()) {
         postRepository.clearPostReferences(id);
         postRepository.deleteById(id);
-        applicationEventPublisher.publishEvent(new PostDeletedEvent(id));
+        publishPostDeletedEventAfterCommit(id);
       } else {
         throw new IllegalStateException("Cannot delete post as it has associated placements.");
       }
+    }
+  }
+
+  private void publishPostSavedEventAfterCommit(PostDTO postDto) {
+    publishEventAfterCommit(new PostSavedEvent(postDto));
+  }
+
+  private void publishPostDeletedEventAfterCommit(Long postId) {
+    publishEventAfterCommit(new PostDeletedEvent(postId));
+  }
+
+  private void publishEventAfterCommit(Object event) {
+    if (TransactionSynchronizationManager.isSynchronizationActive()
+        && TransactionSynchronizationManager.isActualTransactionActive()) {
+      TransactionSynchronizationManager.registerSynchronization(
+          new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+              applicationEventPublisher.publishEvent(event);
+            }
+          });
+    } else {
+      applicationEventPublisher.publishEvent(event);
     }
   }
 

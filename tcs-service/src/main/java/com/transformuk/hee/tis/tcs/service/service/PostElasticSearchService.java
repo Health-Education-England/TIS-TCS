@@ -79,13 +79,6 @@ public class PostElasticSearchService {
   public synchronized void updatePostDocument(Long postId) {
     Preconditions.checkNotNull(postId, "Person Id cannot be null");
 
-    //horrible hack! Race condition: saving post to DB takes longer than listener event firing
-    try {
-      Thread.sleep(500L);
-    } catch (InterruptedException e) {
-
-    }
-
     String query = getQuery()
         .replace("WHERECLAUSE", "WHERE p.id=:id");
 

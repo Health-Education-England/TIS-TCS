@@ -70,7 +70,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -87,6 +89,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
@@ -198,9 +202,7 @@ class PostServiceImplTest {
   @Mock
   private ApplicationEventPublisher applicationEventPublisherMock;
   @Captor
-  private ArgumentCaptor<PostSavedEvent> postSavedEventCaptor;
-  @Captor
-  private ArgumentCaptor<PostDeletedEvent> postDeletedEventCaptor;
+  private ArgumentCaptor<Object> postEventCaptor;
 
   @Test
   void saveShouldSavePost() {
@@ -209,14 +211,17 @@ class PostServiceImplTest {
     when(postDTOMock1.getId()).thenReturn(1L);
     when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
 
+    startTransactionSynchronization();
     PostDTO result = testObj.save(postDTOMock1);
 
     assertEquals(postMappedDTOMock1, result);
     verify(postMapperMock).postDTOToPost(postDTOMock1);
     verify(postRepositoryMock).save(postMock1);
     verify(postMapperMock).postToPostDTO(postSaveMock1);
-    verify(applicationEventPublisherMock).publishEvent(postSavedEventCaptor.capture());
-    assertEquals(postMappedDTOMock1, postSavedEventCaptor.getValue().getPostDto());
+    triggerAfterCommit();
+    verify(applicationEventPublisherMock).publishEvent(postEventCaptor.capture());
+    PostSavedEvent event = (PostSavedEvent) postEventCaptor.getValue();
+    assertEquals(postMappedDTOMock1, event.getPostDto());
   }
 
   @Test
@@ -229,14 +234,17 @@ class PostServiceImplTest {
     when(postRepositoryMock.saveAll(postList)).thenReturn(savedPosts);
     when(postMapperMock.postsToPostDTOs(savedPosts)).thenReturn(savedPostDTOs);
 
+    startTransactionSynchronization();
     List<PostDTO> results = testObj.save(postDTOsList);
 
     assertSame(savedPostDTOs, results);
     verify(postMapperMock).postDTOsToPosts(postDTOsList);
     verify(postRepositoryMock).saveAll(postList);
     verify(postMapperMock).postsToPostDTOs(savedPosts);
-    verify(applicationEventPublisherMock, times(2)).publishEvent(postSavedEventCaptor.capture());
-    List<PostSavedEvent> events = postSavedEventCaptor.getAllValues();
+    triggerAfterCommit();
+    verify(applicationEventPublisherMock, times(2)).publishEvent(postEventCaptor.capture());
+    List<PostSavedEvent> events = postEventCaptor.getAllValues().stream()
+        .map(e -> (PostSavedEvent) e).collect(Collectors.toList());
     assertEquals(2, events.size());
     assertEquals(postMappedDTOMock1, events.get(0).getPostDto());
     assertEquals(postMappedDTOMock2, events.get(1).getPostDto());
@@ -270,6 +278,7 @@ class PostServiceImplTest {
     when(postRepositoryMock.save(payloadPostMock)).thenReturn(postSaveMock1);
     when(postMapperMock.postToPostDTO(postSaveMock1)).thenReturn(postMappedDTOMock1);
 
+    startTransactionSynchronization();
     PostDTO result = testObj.update(postDTOMock1);
 
     assertEquals(postMappedDTOMock1, result);
@@ -282,8 +291,9 @@ class PostServiceImplTest {
     verify(postSpecialtyRepositoryMock).deleteAll(specialties);
     Set<PostFunding> capturedPostFundings = postFundingCaptor.getValue();
     assertTrue(capturedPostFundings.size() < fundingsInDatabase.size());
-    verify(applicationEventPublisherMock).publishEvent(postSavedEventCaptor.capture());
-    assertEquals(postMappedDTOMock1, postSavedEventCaptor.getValue().getPostDto());
+    triggerAfterCommit();
+    verify(applicationEventPublisherMock).publishEvent(postEventCaptor.capture());
+    assertEquals(postMappedDTOMock1, ((PostSavedEvent) postEventCaptor.getValue()).getPostDto());
   }
 
   @Test
@@ -464,12 +474,16 @@ class PostServiceImplTest {
     when(permissionServiceMock.getUserProfileDesignatedBodies()).thenReturn(
         Collections.singleton("1-1RUZV6H"));
 
+    startTransactionSynchronization();
     testObj.delete(1L);
 
     verify(postRepositoryMock).clearPostReferences(1L);
     verify(postRepositoryMock).deleteById(1L);
-    verify(applicationEventPublisherMock).publishEvent(postDeletedEventCaptor.capture());
-    assertEquals(1L, postDeletedEventCaptor.getValue().getPostId());
+    triggerAfterCommit();
+    verify(applicationEventPublisherMock).publishEvent(postEventCaptor.capture());
+
+    PostDeletedEvent event = (PostDeletedEvent) postEventCaptor.getValue();
+    assertEquals(1L, event.getPostId());
   }
 
   @Test
@@ -915,5 +929,24 @@ class PostServiceImplTest {
 
     //then
     verify(postEsrEventRepositoryMock).save(postEsrEvent);
+  }
+
+  private void startTransactionSynchronization() {
+    TransactionSynchronizationManager.setActualTransactionActive(true);
+    TransactionSynchronizationManager.initSynchronization();
+  }
+
+  private void triggerAfterCommit() {
+    List<TransactionSynchronization> synchronizations =
+        new ArrayList<>(TransactionSynchronizationManager.getSynchronizations());
+    synchronizations.forEach(TransactionSynchronization::afterCommit);
+  }
+
+  @AfterEach
+  void clearTransactionSynchronization() {
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.clearSynchronization();
+    }
+    TransactionSynchronizationManager.setActualTransactionActive(false);
   }
 }
