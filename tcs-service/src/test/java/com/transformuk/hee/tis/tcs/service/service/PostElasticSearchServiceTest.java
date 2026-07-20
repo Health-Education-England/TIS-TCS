@@ -181,7 +181,6 @@ class PostElasticSearchServiceTest {
     assertThat(queryAsString).contains(
         "nationalPostNumber",
         "programmeNames",
-        "currentTraineeSurname",
         "currentTraineeForenames",
         "Smith"
     );

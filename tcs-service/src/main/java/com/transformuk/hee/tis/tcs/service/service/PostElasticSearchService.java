@@ -95,7 +95,7 @@ public class PostElasticSearchService {
       APPROVED_GRADE_ID
   );
 
-  private static final Map<String, String> SORT_FIELD_MAPPINGS = Map.of(
+  private static final Map<String, String> FIELD_MAPPINGS = Map.of(
       "currentTraineeSurname", CURRENT_TRAINEE_SURNAME
   );
 
@@ -181,12 +181,14 @@ public class PostElasticSearchService {
   }
 
   private QueryBuilder createColumnFilterQuery(String fieldName, String filterValue) {
-    if (MATCH_QUERY_FIELDS.contains(fieldName)) {
-      return new MatchQueryBuilder(fieldName, filterValue);
+    String mappedFieldName = mapFieldName(fieldName);
+
+    if (MATCH_QUERY_FIELDS.contains(mappedFieldName)) {
+      return new MatchQueryBuilder(mappedFieldName, filterValue);
     }
 
-    if (TERM_QUERY_FIELDS.contains(fieldName)) {
-      return new TermQueryBuilder(fieldName, filterValue);
+    if (TERM_QUERY_FIELDS.contains(mappedFieldName)) {
+      return new TermQueryBuilder(mappedFieldName, filterValue);
     }
 
     throw new IllegalArgumentException(
@@ -200,11 +202,15 @@ public class PostElasticSearchService {
     if (StringUtils.isNotEmpty(searchQuery)) {
       searchQuery = StringUtils.remove(searchQuery, '"');
 
+      String wildcard = "*" + searchQuery + "*";
+
       shouldQuery
-          .should(new WildcardQueryBuilder(NATIONAL_POST_NUMBER, "*" + searchQuery + "*"))
+          .should(new WildcardQueryBuilder(NATIONAL_POST_NUMBER, wildcard))
           .should(new MatchQueryBuilder(PROGRAMME_NAMES, searchQuery))
-          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAME, "*" + searchQuery + "*"))
-          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, "*" + searchQuery + "*"));
+          .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_NAME, searchQuery))
+          .should(new WildcardQueryBuilder(OWNER, wildcard))
+          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAME, wildcard))
+          .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, wildcard));
 
       if (StringUtils.isNumeric(searchQuery)) {
         shouldQuery
@@ -338,7 +344,7 @@ public class PostElasticSearchService {
 
     List<Sort.Order> mappedOrders = pageable.getSort().stream()
         .map(order -> {
-          String mappedProperty = SORT_FIELD_MAPPINGS.getOrDefault(
+          String mappedProperty = FIELD_MAPPINGS.getOrDefault(
               order.getProperty(),
               order.getProperty()
           );
@@ -352,5 +358,9 @@ public class PostElasticSearchService {
         pageable.getPageSize(),
         Sort.by(mappedOrders)
     );
+  }
+
+  private String mapFieldName(String fieldName) {
+    return FIELD_MAPPINGS.getOrDefault(fieldName, fieldName);
   }
 }
