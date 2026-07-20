@@ -80,6 +80,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class PlacementServiceImplTest {
@@ -158,6 +159,7 @@ class PlacementServiceImplTest {
 
   @BeforeEach
   void setup() {
+    ReflectionTestUtils.setField(testObj, "self", testObj);
     lenient().when(clock.instant()).thenReturn(Instant.now());
     lenient().when(clock.getZone()).thenReturn(ZoneId.systemDefault());
   }

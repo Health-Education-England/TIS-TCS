@@ -89,6 +89,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -159,6 +160,9 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementEsrEventDtoMapper placementEsrEventDtoMapper;
 
+  @Lazy
+  @Autowired
+  private PlacementServiceImpl self;
 
   /**
    * Save a placement.
@@ -461,7 +465,8 @@ public class PlacementServiceImpl implements PlacementService {
     Placement savedPlacement = placementRepository.saveAndFlush(placement);
     convertPlacementWithSupervisors(savedPlacement);
 
-    PlacementDetailsDTO updatedPlacementDetailsDto = createDetails(placementDetailsDTO, placement);
+    PlacementDetailsDTO updatedPlacementDetailsDto =
+        self.createDetails(placementDetailsDTO, placement);
     applicationEventPublisher.publishEvent(new PlacementSavedEvent(existingPlacementDto,
             placementDetailsMapper.placementDetailsDtoToPlacementDto(updatedPlacementDetailsDto)));
     return updatedPlacementDetailsDto;
