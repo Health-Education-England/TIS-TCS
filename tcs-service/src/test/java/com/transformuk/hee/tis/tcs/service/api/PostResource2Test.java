@@ -367,7 +367,7 @@ public class PostResource2Test {
   }
 
   @Test
-  public void shouldCallElasticSearchServiceWhenEnableEsIsTrue() throws Exception {
+  public void shouldCallElasticSearchServiceWhenEnableEsSearchIsTrue() throws Exception {
     PostViewDTO postViewDTO = new PostViewDTO();
     postViewDTO.setId(243906L);
     postViewDTO.setNationalPostNumber("NWN/RM317/018/HT/002");
@@ -391,7 +391,6 @@ public class PostResource2Test {
             .param("size", "100")
             .param("sort", "nationalPostNumber,asc")
             .param("sort", "id")
-            .param("enableEs", "true")
             .param("columnFilters", columnFilters)
             .with(user("test-user").authorities(() -> "post:view")))
         .andExpect(status().isOk())

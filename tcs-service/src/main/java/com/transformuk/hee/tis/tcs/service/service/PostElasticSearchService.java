@@ -98,7 +98,8 @@ public class PostElasticSearchService {
 
   private static final Map<String, String> FIELD_MAPPINGS = Map.of(
       "currentTraineeSurname", CURRENT_TRAINEE_SURNAMES,
-      "fundingType", FUNDING_TYPES
+      "fundingType", FUNDING_TYPES,
+      "programmeName", PROGRAMME_NAMES
   );
 
   private final ElasticsearchOperations elasticsearchOperations;
@@ -209,13 +210,13 @@ public class PostElasticSearchService {
 
     if (StringUtils.isNotEmpty(searchQuery)) {
       searchQuery = StringUtils.remove(searchQuery, '"');
-
       String wildcard = "*" + searchQuery + "*";
 
       shouldQuery
           .should(new WildcardQueryBuilder(NATIONAL_POST_NUMBER, wildcard))
-          .should(new MatchQueryBuilder(PROGRAMME_NAMES, searchQuery))
+          .should(new WildcardQueryBuilder(PROGRAMME_NAMES, wildcard))
           .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_NAME, searchQuery))
+          .should(new WildcardQueryBuilder(FUNDING_TYPES, wildcard))
           .should(new WildcardQueryBuilder(OWNER, wildcard))
           .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAMES, wildcard))
           .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, wildcard));
@@ -290,15 +291,7 @@ public class PostElasticSearchService {
           continue;
         }
 
-        String filterName = columnFilter.getName();
-        if ("currentTraineeSurname".equals(filterName)) {
-          filterName = CURRENT_TRAINEE_SURNAMES;
-        } else if ("programmeName".equals(filterName)) {
-          filterName = PROGRAMME_NAMES;
-        } else if ("fundingType".equals(filterName)) {
-          filterName = FUNDING_TYPES;
-        }
-
+        String filterName = mapFieldName(columnFilter.getName());
         String filterValue = getFilterValue(value);
 
         shouldBetweenSameColumnFilter.should(
