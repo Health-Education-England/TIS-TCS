@@ -30,6 +30,7 @@ import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,6 +145,8 @@ public class PostElasticSearchService {
 
       LOG.debug("Post ES query is: {}", fullQuery);
 
+      pageable = pageable == null ? PageRequest.of(0, 20) : pageable;
+
       pageable = replaceSortById(pageable);
       pageable = mapSortFields(pageable);
 
@@ -160,6 +163,7 @@ public class PostElasticSearchService {
           .collect(Collectors.toList());
 
       List<PostViewDTO> postViewDtos = postViewMapper.toDtos(postViews);
+      postViewDtos = postViewDtos == null ? Collections.emptyList() : postViewDtos;
 
       postViewDecorator.decorate(postViewDtos);
 
@@ -228,7 +232,7 @@ public class PostElasticSearchService {
   }
 
   private Pageable replaceSortById(Pageable pageable) {
-    if (pageable == null || pageable.getSort().isUnsorted()) {
+    if (pageable.getSort().isUnsorted()) {
       return pageable;
     }
 
@@ -312,7 +316,7 @@ public class PostElasticSearchService {
   }
 
   private Pageable mapSortFields(Pageable pageable) {
-    if (pageable == null || pageable.getSort().isUnsorted()) {
+    if (pageable.getSort().isUnsorted()) {
       return pageable;
     }
 
