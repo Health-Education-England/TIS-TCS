@@ -79,6 +79,7 @@ public class PostElasticSearchService {
   private static final String APPROVED_GRADE_ID = "approvedGradeId";
   private static final String ID = "id";
   private static final String PROGRAMME_IDS = "programmeIds";
+  private static final Long NO_MATCH_ID = -1L;
   private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
       CURRENT_TRAINEE_SURNAMES,
       CURRENT_TRAINEE_FORENAMES,
@@ -98,8 +99,7 @@ public class PostElasticSearchService {
 
   private static final Map<String, String> FIELD_MAPPINGS = Map.of(
       "currentTraineeSurname", CURRENT_TRAINEE_SURNAMES,
-      "fundingType", FUNDING_TYPES,
-      "programmeName", PROGRAMME_NAMES
+      "fundingType", FUNDING_TYPES
   );
 
   private final ElasticsearchOperations elasticsearchOperations;
@@ -259,7 +259,7 @@ public class PostElasticSearchService {
       Collection<Long> usersTrustIds = permissionService.getUsersTrustIds();
 
       if (CollectionUtils.isEmpty(usersTrustIds)) {
-        query.must(QueryBuilders.termQuery("_id", "_NO_MATCH_"));
+        query.must(QueryBuilders.termQuery(TRUST_IDS, Collections.singleton(NO_MATCH_ID)));
       } else {
         query.must(QueryBuilders.termsQuery(TRUST_IDS, usersTrustIds));
       }
@@ -269,7 +269,7 @@ public class PostElasticSearchService {
       Collection<Long> usersProgrammeIds = permissionService.getUsersProgrammeIds();
 
       if (CollectionUtils.isEmpty(usersProgrammeIds)) {
-        query.must(QueryBuilders.termQuery("_id", "_NO_MATCH_"));
+        query.must(QueryBuilders.termQuery(PROGRAMME_IDS, Collections.singleton(NO_MATCH_ID)));
       } else {
         query.must(QueryBuilders.termsQuery(PROGRAMME_IDS, usersProgrammeIds));
       }
@@ -314,14 +314,7 @@ public class PostElasticSearchService {
     }
 
     List<Sort.Order> mappedOrders = pageable.getSort().stream()
-        .map(order -> {
-          String mappedProperty = FIELD_MAPPINGS.getOrDefault(
-              order.getProperty(),
-              order.getProperty()
-          );
-
-          return new Sort.Order(order.getDirection(), mappedProperty);
-        })
+        .map(order -> order.withProperty(mapFieldName(order.getProperty())))
         .collect(Collectors.toList());
 
     return PageRequest.of(

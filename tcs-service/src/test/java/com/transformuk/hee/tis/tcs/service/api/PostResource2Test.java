@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -127,10 +128,10 @@ public class PostResource2Test {
   @Captor
   private ArgumentCaptor<PostSavedEvent> postSavedEventArgumentCaptor;
   private PostEsrEventDto postEsrReconciledDto;
-
+  private PostResource postResource;
   @Before
   public void setup() {
-    PostResource postResource = new PostResource(postService, postValidator,
+    postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator,
         placementViewMapper, placementService, placementSummaryDecorator,
         postElasticSearchService);
@@ -367,7 +368,8 @@ public class PostResource2Test {
   }
 
   @Test
-  public void shouldCallElasticSearchServiceWhenEnableEsSearchIsTrue() throws Exception {
+  public void shouldUseElasticSearchServiceWhenEnableEsSearchIsEnabled() throws Exception {
+    ReflectionTestUtils.setField(postResource, "enableEsSearch", true);
     PostViewDTO postViewDTO = new PostViewDTO();
     postViewDTO.setId(243906L);
     postViewDTO.setNationalPostNumber("NWN/RM317/018/HT/002");
@@ -400,6 +402,8 @@ public class PostResource2Test {
         .andExpect(jsonPath("$[0].status").value("CURRENT"))
         .andExpect(jsonPath("$[0].owner").value("North West"));
 
+    Boolean enableEsSearch = (Boolean) ReflectionTestUtils.getField(postResource, "enableEsSearch");
+    assertThat(enableEsSearch).isTrue();
     verify(postElasticSearchService).searchForPage(
         any(),
         anyList(),
