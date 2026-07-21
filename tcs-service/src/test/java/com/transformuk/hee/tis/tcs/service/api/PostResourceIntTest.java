@@ -150,6 +150,8 @@ public class PostResourceIntTest {
   private PostMapper postMapper;
   @Mock
   private ReferenceServiceImpl referenceService;
+  @Mock
+  private PostElasticSearchService postElasticSearchService;
   @Autowired
   @InjectMocks
   private PostFundingValidator postFundingValidator;
@@ -166,8 +168,6 @@ public class PostResourceIntTest {
   private PlacementViewMapper placementViewMapper;
   @Autowired
   private PlacementService placementService;
-  @Autowired
-  private PostElasticSearchService postElasticSearchService;
   @Autowired
   private PlacementSummaryDecorator placementSummaryDecorator;
   @Autowired
@@ -292,7 +292,7 @@ public class PostResourceIntTest {
     MockitoAnnotations.initMocks(this);
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator, placementViewMapper, placementService,
-        placementSummaryDecorator);
+        placementSummaryDecorator, postElasticSearchService);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)

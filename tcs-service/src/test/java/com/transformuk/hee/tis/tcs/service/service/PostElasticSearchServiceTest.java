@@ -109,6 +109,8 @@ class PostElasticSearchServiceTest {
     postViewDto.setPrimarySiteId(200L);
     postViewDto.setApprovedGradeId(300L);
 
+    lenient().when(postViewMapper.toDtos(anyList())).thenReturn(List.of(postViewDto));
+
     lenient().when(permissionService.isUserTrustAdmin()).thenReturn(false);
     lenient().when(permissionService.isProgrammeObserver()).thenReturn(false);
   }

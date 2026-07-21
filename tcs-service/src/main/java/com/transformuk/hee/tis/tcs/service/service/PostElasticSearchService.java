@@ -72,7 +72,7 @@ public class PostElasticSearchService {
   private static final String PRIMARY_SPECIALTY_CODE = "primarySpecialtyCode";
   private static final String PRIMARY_SPECIALTY_NAME = "primarySpecialtyName";
   private static final String PROGRAMME_NAMES = "programmeNames";
-  private static final String FUNDING_TYPE = "fundingType";
+  private static final String FUNDING_TYPES = "fundingTypes";
   private static final String PRIMARY_SPECIALTY_ID = "primarySpecialtyId";
   private static final String PRIMARY_SITE_ID = "primarySiteId";
   private static final String APPROVED_GRADE_ID = "approvedGradeId";
@@ -89,14 +89,15 @@ public class PostElasticSearchService {
       OWNER,
       NATIONAL_POST_NUMBER,
       PRIMARY_SPECIALTY_CODE,
-      FUNDING_TYPE,
+      FUNDING_TYPES,
       PRIMARY_SPECIALTY_ID,
       PRIMARY_SITE_ID,
       APPROVED_GRADE_ID
   );
 
   private static final Map<String, String> FIELD_MAPPINGS = Map.of(
-      "currentTraineeSurname", CURRENT_TRAINEE_SURNAMES
+      "currentTraineeSurname", CURRENT_TRAINEE_SURNAMES,
+      "fundingType", FUNDING_TYPES
   );
 
   private final ElasticsearchOperations elasticsearchOperations;
@@ -227,6 +228,10 @@ public class PostElasticSearchService {
   }
 
   private Pageable replaceSortById(Pageable pageable) {
+    if (pageable == null || pageable.getSort().isUnsorted()) {
+      return pageable;
+    }
+
     List<Sort.Order> sortOrders = new ArrayList<>();
 
     pageable.getSort().forEach(order -> {
@@ -282,6 +287,14 @@ public class PostElasticSearchService {
         }
 
         String filterName = columnFilter.getName();
+        if ("currentTraineeSurname".equals(filterName)) {
+          filterName = CURRENT_TRAINEE_SURNAMES;
+        } else if ("programmeName".equals(filterName)) {
+          filterName = PROGRAMME_NAMES;
+        } else if ("fundingType".equals(filterName)) {
+          filterName = FUNDING_TYPES;
+        }
+
         String filterValue = getFilterValue(value);
 
         shouldBetweenSameColumnFilter.should(

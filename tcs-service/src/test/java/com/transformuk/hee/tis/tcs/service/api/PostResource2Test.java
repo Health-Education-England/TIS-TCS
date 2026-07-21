@@ -132,12 +132,12 @@ public class PostResource2Test {
   public void setup() {
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator);
+        placementViewMapper, placementService, placementSummaryDecorator,
+        postElasticSearchService);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    postResource.setPostElasticSearchService(postElasticSearchService);
     ReflectionTestUtils.setField(postResource, "enableEsSearch", true);
     TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7");
 
