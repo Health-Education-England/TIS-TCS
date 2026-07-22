@@ -52,8 +52,6 @@ class ProgrammeElasticSearchEventListenerTest {
   private List<ProgrammeMembershipDTO> programmeMembershipDTOs;
   private static final Long PERSONID = 11111111L;
   private static final Long PROGRAMME_ID = 33333333L;
-  private static final Long FIRST_POST_ID = 44444444L;
-  private static final Long SECOND_POST_ID = 55555555L;
 
   @Mock
   RevalidationRabbitService revalidationRabbitService;

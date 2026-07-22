@@ -85,6 +85,7 @@ public class PostElasticSearchService {
   private static final String APPROVED_GRADE_ID = "approvedGradeId";
   private static final String ID = "id";
   private static final String PROGRAMME_IDS = "programmeIds";
+  private static final String WHERE_CLAUSE_PLACEHOLDER = "WHERECLAUSE";
   private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
       CURRENT_TRAINEE_SURNAMES,
       CURRENT_TRAINEE_FORENAMES,
@@ -355,7 +356,7 @@ public class PostElasticSearchService {
     Preconditions.checkNotNull(postId, "Post Id cannot be null");
 
     String query = getQuery()
-        .replace("WHERECLAUSE", "WHERE p.id=:id");
+        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE p.id=:id");
 
     LOG.debug("Getting updated PostView document for postId: {} with query: {}", postId, query);
     List<PostView> queryResult = runQuery(query, postId);
@@ -378,7 +379,7 @@ public class PostElasticSearchService {
   public void updatePostDocumentsForSpecialty(Long specialtyId) {
     Preconditions.checkNotNull(specialtyId, "Specialty Id cannot be null");
     String query = getQuery()
-        .replace("WHERECLAUSE", "WHERE sp.id=:id");
+        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE sp.id=:id");
 
     List<PostView> postViews = runQuery(query, specialtyId);
     saveDocuments(postViews);
@@ -393,7 +394,7 @@ public class PostElasticSearchService {
   public void updatePostDocumentsForProgramme(Long programmeId) {
     Preconditions.checkNotNull(programmeId, "Programme Id cannot be null");
     String query = getQuery()
-        .replace("WHERECLAUSE", "WHERE prg.id=:id");
+        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE prg.id=:id");
 
     List<PostView> postViews = runQuery(query, programmeId);
     saveDocuments(postViews);
