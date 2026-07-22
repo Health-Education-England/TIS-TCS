@@ -63,7 +63,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for updating PostView documents in Elasticsearch based on changes in the database.
+ * Elasticsearch service class for searching, sorting and filtering list of posts,
+ * and updating PostView documents.
  */
 @Service
 public class PostElasticSearchService {
