@@ -79,7 +79,6 @@ public class PostElasticSearchService {
   private static final String APPROVED_GRADE_ID = "approvedGradeId";
   private static final String ID = "id";
   private static final String PROGRAMME_IDS = "programmeIds";
-  private static final Long NO_MATCH_ID = -1L;
   private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
       CURRENT_TRAINEE_SURNAMES,
       CURRENT_TRAINEE_FORENAMES,
@@ -257,22 +256,12 @@ public class PostElasticSearchService {
   private void applyPermissionFilters(BoolQueryBuilder query) {
     if (permissionService.isUserTrustAdmin()) {
       Collection<Long> usersTrustIds = permissionService.getUsersTrustIds();
-
-      if (CollectionUtils.isEmpty(usersTrustIds)) {
-        query.must(QueryBuilders.termQuery(TRUST_IDS, Collections.singleton(NO_MATCH_ID)));
-      } else {
-        query.must(QueryBuilders.termsQuery(TRUST_IDS, usersTrustIds));
-      }
+      query.must(QueryBuilders.termsQuery(TRUST_IDS, usersTrustIds));
     }
 
     if (permissionService.isProgrammeObserver()) {
       Collection<Long> usersProgrammeIds = permissionService.getUsersProgrammeIds();
-
-      if (CollectionUtils.isEmpty(usersProgrammeIds)) {
-        query.must(QueryBuilders.termQuery(PROGRAMME_IDS, Collections.singleton(NO_MATCH_ID)));
-      } else {
-        query.must(QueryBuilders.termsQuery(PROGRAMME_IDS, usersProgrammeIds));
-      }
+      query.must(QueryBuilders.termsQuery(PROGRAMME_IDS, usersProgrammeIds));
     }
   }
 
