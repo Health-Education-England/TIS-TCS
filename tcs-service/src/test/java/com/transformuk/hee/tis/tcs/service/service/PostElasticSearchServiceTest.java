@@ -507,7 +507,7 @@ class PostElasticSearchServiceTest {
     postElasticSearchService.updatePostDocumentsForProgramme(PROGRAMME_ID);
 
     verify(namedParameterJdbcTemplate).query(
-        eq("SELECT * FROM post_view WHERE pr.id=:id ORDER BY id DESC "),
+        eq("SELECT * FROM post_view WHERE prg.id=:id ORDER BY id DESC "),
         paramSourceCaptor.capture(),
         any(PostViewRowMapper.class));
     assertEquals(PROGRAMME_ID, paramSourceCaptor.getValue().getValue("id"));
@@ -518,7 +518,7 @@ class PostElasticSearchServiceTest {
   }
 
   @Test
-  void updatePostDocumentsForProgrammeShouldSkipSaveWhenResultIsEmpty() {
+  void  updatePostDocumentsForProgrammeShouldSkipSaveWhenResultIsEmpty() {
     when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(QUERY_TEMPLATE);
     when(namedParameterJdbcTemplate.query(any(String.class), any(MapSqlParameterSource.class),
         any(PostViewRowMapper.class))).thenReturn(Collections.emptyList());
@@ -526,7 +526,7 @@ class PostElasticSearchServiceTest {
     postElasticSearchService.updatePostDocumentsForProgramme(PROGRAMME_ID);
 
     verify(namedParameterJdbcTemplate).query(
-        eq("SELECT * FROM post_view WHERE pr.id=:id ORDER BY id DESC "),
+        eq("SELECT * FROM post_view WHERE prg.id=:id ORDER BY id DESC "),
         paramSourceCaptor.capture(),
         any(PostViewRowMapper.class));
     assertEquals(PROGRAMME_ID, paramSourceCaptor.getValue().getValue("id"));
