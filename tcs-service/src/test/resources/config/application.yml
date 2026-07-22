@@ -83,6 +83,11 @@ spring:
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        auto-startup: false
+      direct:
+        auto-startup: false
 
 server:
   port: 10344
