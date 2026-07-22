@@ -1,6 +1,9 @@
 package com.transformuk.hee.tis.tcs.service.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -8,6 +11,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,6 +29,7 @@ import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostEsrEventDto;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSpecialtyType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
@@ -38,6 +43,7 @@ import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
 import com.transformuk.hee.tis.tcs.service.repository.PlacementViewRepository;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
+import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import java.lang.reflect.Method;
@@ -59,10 +65,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.MethodParameter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -98,6 +108,8 @@ public class PostResource2Test {
   @MockBean
   private PlacementService placementService;
   @MockBean
+  private PostElasticSearchService postElasticSearchService;
+  @MockBean
   private PlacementSummaryDecorator placementSummaryDecorator;
   private MockMvc restPostMockMvc;
   @Autowired
@@ -116,16 +128,18 @@ public class PostResource2Test {
   @Captor
   private ArgumentCaptor<PostSavedEvent> postSavedEventArgumentCaptor;
   private PostEsrEventDto postEsrReconciledDto;
-
+  private PostResource postResource;
   @Before
   public void setup() {
-    PostResource postResource = new PostResource(postService, postValidator,
+    postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator,
-        placementViewMapper, placementService, placementSummaryDecorator);
+        placementViewMapper, placementService, placementSummaryDecorator,
+        postElasticSearchService);
     this.restPostMockMvc = MockMvcBuilders.standaloneSetup(postResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
+    ReflectionTestUtils.setField(postResource, "enableEsSearch", true);
     TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7");
 
     PostFundingDTO postFundingDTO = new PostFundingDTO();
@@ -351,6 +365,52 @@ public class PostResource2Test {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"))
         .andExpect(jsonPath("$.fieldErrors[0].message").value(StringContains.
             containsString("Only one Specialty of type PRIMARY allowed")));
+  }
+
+  @Test
+  public void shouldUseElasticSearchServiceWhenEnableEsSearchIsEnabled() throws Exception {
+    ReflectionTestUtils.setField(postResource, "enableEsSearch", true);
+    PostViewDTO postViewDTO = new PostViewDTO();
+    postViewDTO.setId(243906L);
+    postViewDTO.setNationalPostNumber("NWN/RM317/018/HT/002");
+    postViewDTO.setStatus(Status.CURRENT);
+    postViewDTO.setOwner("North West");
+    postViewDTO.setPrimarySpecialtyName("Gastroenterology");
+    postViewDTO.setProgrammeNames("Gastroenterology");
+    postViewDTO.setFundingType("Funded - Tariff");
+
+    Page<PostViewDTO> page = new PageImpl<>(
+        Collections.singletonList(postViewDTO)
+    );
+
+    when(postElasticSearchService.searchForPage(any(), anyList(), any(Pageable.class)))
+        .thenReturn(page);
+
+    String columnFilters = "{\"status\":[\"CURRENT\"],\"owner\":[\"North West\"]}";
+
+    restPostMockMvc.perform(get("/api/posts")
+            .param("page", "0")
+            .param("size", "100")
+            .param("sort", "nationalPostNumber,asc")
+            .param("sort", "id")
+            .param("columnFilters", columnFilters)
+            .with(user("test-user").authorities(() -> "post:view")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].id").value(243906))
+        .andExpect(jsonPath("$[0].nationalPostNumber").value("NWN/RM317/018/HT/002"))
+        .andExpect(jsonPath("$[0].status").value("CURRENT"))
+        .andExpect(jsonPath("$[0].owner").value("North West"));
+
+    Boolean enableEsSearch = (Boolean) ReflectionTestUtils.getField(postResource, "enableEsSearch");
+    assertThat(enableEsSearch).isTrue();
+    verify(postElasticSearchService).searchForPage(
+        any(),
+        anyList(),
+        any(Pageable.class)
+    );
+    verify(postService, never()).findAll(any(Pageable.class));
+    verify(postService, never()).advancedSearch(any(), anyList(), any(Pageable.class));
   }
 
   @Test
