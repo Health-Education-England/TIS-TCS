@@ -84,6 +84,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import javax.persistence.EntityNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -443,9 +444,10 @@ public class PostServiceImpl implements PostService {
    */
   @Override
   public PostDTO updateFundingStatus(long postId) {
-    Post currentInDbPost = postRepository.findById(postId).orElse(null);
+    Post currentInDbPost = postRepository.findById(postId)
+        .orElseThrow(() -> new EntityNotFoundException("Post not found for id: " + postId));
     Post savedPost = updateFundingStatus(currentInDbPost);
-    return  postMapper.postToPostDTO(savedPost);
+    return postMapper.postToPostDTO(savedPost);
   }
 
   /**
@@ -453,13 +455,10 @@ public class PostServiceImpl implements PostService {
    *
    * @param post the post entity to update
    */
-  protected Post updateFundingStatus(Post post) {
-    if (post != null) {
-      Status fundingStatus = getFundingStatusForPost(post);
-      post.setFundingStatus(fundingStatus);
-      return postRepository.save(post);
-    }
-    return null;
+  protected Post updateFundingStatus(@NonNull Post post) {
+    Status fundingStatus = getFundingStatusForPost(post);
+    post.setFundingStatus(fundingStatus);
+    return postRepository.save(post);
   }
 
   /**

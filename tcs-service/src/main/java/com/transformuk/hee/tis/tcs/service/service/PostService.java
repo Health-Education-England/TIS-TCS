@@ -96,6 +96,7 @@ public interface PostService {
    * Update post funding status.
    *
    * @param postId        the id of the post to update
+   * @return the updated PostDTO
    */
   PostDTO updateFundingStatus(long postId);
 

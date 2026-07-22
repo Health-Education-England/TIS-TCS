@@ -1,4 +1,4 @@
-package com.transformuk.hee.tis.tcs.service.listener.person;
+package com.transformuk.hee.tis.tcs.service.listener;
 
 import com.transformuk.hee.tis.tcs.service.event.SpecialtySavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PersonElasticSearchService;

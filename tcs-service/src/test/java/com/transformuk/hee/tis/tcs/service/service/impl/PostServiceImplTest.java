@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.persistence.EntityNotFoundException;
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -323,11 +324,12 @@ class PostServiceImplTest {
   void updateFundingStatusShouldNotSetFundingStatusIfNullPost() {
     when(postRepositoryMock.findById(1L)).thenReturn(Optional.empty());
 
-    PostDTO resultDto = testObj.updateFundingStatus(1L);
+    EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        () -> testObj.updateFundingStatus(1L));
 
-    assertNull(resultDto);
+    assertEquals("Post not found for id: 1", exception.getMessage());
     verify(postRepositoryMock, never()).save(any(Post.class));
-    verify(postMapperMock).postToPostDTO(null);
+    verify(postMapperMock, never()).postToPostDTO(any());
   }
 
   @Test

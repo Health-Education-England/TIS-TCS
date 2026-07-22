@@ -1,8 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.listener.person;
 
+import static java.time.ZoneOffset.UTC;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
@@ -14,10 +14,9 @@ import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.ZoneOffset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -28,6 +27,7 @@ class PlacementElasticsearchEventListenerTest {
   private static final Long PLACEMENT_ID = 2222222L;
   private static final Long POST_ID = 3333333L;
   private static final LocalDate CURRENT_DATE = LocalDate.of(2026, Month.JULY, 1);
+  private static final Clock CLOCK = Clock.fixed(CURRENT_DATE.atStartOfDay(UTC).toInstant(), UTC);
 
   @Mock
   RevalidationRabbitService revalidationRabbitService;
@@ -41,15 +41,16 @@ class PlacementElasticsearchEventListenerTest {
   @Mock
   PostElasticSearchService postElasticSearchService;
 
-  @Mock
-  Clock clock;
-
-  @InjectMocks
   PlacementElasticSearchEventListener testObj;
+
+  @BeforeEach
+  void setUp() {
+    testObj = new PlacementElasticSearchEventListener(personElasticSearchService,
+        revalidationService, revalidationRabbitService, postElasticSearchService, CLOCK);
+  }
 
   @Test
   void shouldHandlePlacementSavedEventAndUpdatePostDocumentForCurrentPlacement() {
-    setupClock();
     PlacementSavedEvent event = new PlacementSavedEvent(null,
         buildPlacement(LocalDate.of(2026, Month.JULY, 1), LocalDate.of(2026, Month.AUGUST, 1)));
 
@@ -63,7 +64,6 @@ class PlacementElasticsearchEventListenerTest {
 
   @Test
   void shouldHandlePlacementSavedEventAndNotUpdatePostDocumentForNonCurrentPlacement() {
-    setupClock();
     PlacementSavedEvent event = new PlacementSavedEvent(null,
         buildPlacement(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JUNE, 30)));
 
@@ -87,7 +87,6 @@ class PlacementElasticsearchEventListenerTest {
 
   @Test
   void shouldHandlePlacementSavedEventAndUpdatePostFromPreviousCurrentPlacement() {
-    setupClock();
     PlacementSavedEvent event = new PlacementSavedEvent(
         buildPlacement(LocalDate.of(2026, Month.JULY, 1), LocalDate.of(2026, Month.AUGUST, 1)),
         buildPlacement(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JUNE, 30))
@@ -103,7 +102,6 @@ class PlacementElasticsearchEventListenerTest {
 
   @Test
   void shouldHandlePlacementDeletedEventAndUpdatePostDocumentForCurrentPlacement() {
-    setupClock();
     PlacementDeletedEvent event = new PlacementDeletedEvent(
         buildPlacement(LocalDate.of(2026, Month.JULY, 1), LocalDate.of(2026, Month.AUGUST, 1)));
 
@@ -117,7 +115,6 @@ class PlacementElasticsearchEventListenerTest {
 
   @Test
   void shouldHandlePlacementDeletedEventAndNotUpdatePostDocumentForNonCurrentPlacement() {
-    setupClock();
     PlacementDeletedEvent event = new PlacementDeletedEvent(
         buildPlacement(LocalDate.of(2026, Month.JANUARY, 1), LocalDate.of(2026, Month.JUNE, 30)));
 
@@ -130,8 +127,9 @@ class PlacementElasticsearchEventListenerTest {
   }
 
   @Test
-  void shouldHandlePlacementDeletedEventAndNotUpdatePostDocumentWhenDatesAreNull() {
-    PlacementDeletedEvent event = new PlacementDeletedEvent(buildPlacement(null, null));
+  void shouldHandlePlacementDeletedEventAndNotUpdatePostDocumentWhenDateFromIsNull() {
+    PlacementDeletedEvent event = new PlacementDeletedEvent(
+        buildPlacement(null, LocalDate.of(2026, Month.AUGUST, 1)));
 
     testObj.handlePlacementDeletedEvent(event);
 
@@ -139,9 +137,15 @@ class PlacementElasticsearchEventListenerTest {
     verify(postElasticSearchService, never()).updatePostDocument(POST_ID);
   }
 
-  private void setupClock() {
-    when(clock.instant()).thenReturn(CURRENT_DATE.atStartOfDay(ZoneOffset.UTC).toInstant());
-    when(clock.getZone()).thenReturn(ZoneOffset.UTC);
+  @Test
+  void shouldHandlePlacementDeletedEventAndNotUpdatePostDocumentWhenDateToIsNull() {
+    PlacementDeletedEvent event = new PlacementDeletedEvent(
+        buildPlacement(LocalDate.of(2026, Month.JANUARY, 1), null));
+
+    testObj.handlePlacementDeletedEvent(event);
+
+    verify(personElasticSearchService).updatePersonDocument(PERSON_ID);
+    verify(postElasticSearchService, never()).updatePostDocument(POST_ID);
   }
 
   private PlacementDTO buildPlacement(LocalDate dateFrom, LocalDate dateTo) {

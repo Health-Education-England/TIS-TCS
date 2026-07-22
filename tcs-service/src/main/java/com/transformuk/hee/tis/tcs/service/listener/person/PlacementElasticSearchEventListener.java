@@ -66,11 +66,9 @@ public class PlacementElasticSearchEventListener {
     );
 
     PlacementDTO previousPlacementDto = event.getPreviousPlacementDto();
-    if (isCurrentPlacement(placementDto)) {
-      Long postId = placementDto.getPostId();
-      postElasticSearchService.updatePostDocument(postId);
-    } else if (previousPlacementDto != null && isCurrentPlacement(previousPlacementDto)) {
-      Long postId = previousPlacementDto.getPostId();
+    Long postId = placementDto.getPostId();
+    if (isCurrentPlacement(placementDto)
+        || (previousPlacementDto != null && isCurrentPlacement(previousPlacementDto))) {
       postElasticSearchService.updatePostDocument(postId);
     }
   }
@@ -98,13 +96,11 @@ public class PlacementElasticSearchEventListener {
   private boolean isCurrentPlacement(PlacementDTO placementDto) {
     LocalDate dateFrom = placementDto.getDateFrom();
     LocalDate dateTo = placementDto.getDateTo();
-    if (dateFrom == null) {
+    if (dateFrom == null || dateTo == null) {
       return false;
     }
 
     LocalDate currentDate = LocalDate.now(clock);
-    boolean startsOnOrBeforeToday = !currentDate.isBefore(dateFrom);
-    boolean endsOnOrAfterToday = dateTo == null || !currentDate.isAfter(dateTo);
-    return startsOnOrBeforeToday && endsOnOrAfterToday;
+    return !currentDate.isBefore(dateFrom) && !currentDate.isAfter(dateTo);
   }
 }

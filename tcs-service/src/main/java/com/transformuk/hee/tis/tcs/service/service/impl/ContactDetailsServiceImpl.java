@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
+import static java.util.Collections.emptyMap;
+
 import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.service.event.ContactDetailsSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
@@ -7,7 +9,6 @@ import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
 import com.transformuk.hee.tis.tcs.service.service.helper.AfterCommitEventPublisher;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,11 +92,10 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
         .collect(Collectors.toSet());
 
     Map<Long, ContactDetailsDTO> existingContactDetailDtos = contactDetailIds.isEmpty()
-        ? java.util.Collections.emptyMap()
+        ? emptyMap()
         : contactDetailsRepository.findAllById(contactDetailIds)
             .stream()
-            .collect(Collectors.toMap(ContactDetails::getId, contactDetailsMapper::toDto,
-                (existing, replacement) -> existing, HashMap::new));
+            .collect(Collectors.toMap(ContactDetails::getId, contactDetailsMapper::toDto));
 
     List<ContactDetails> contactDetails = contactDetailsMapper.toEntity(contactDetailsDtos);
     contactDetails = contactDetailsRepository.saveAll(contactDetails);
