@@ -102,7 +102,7 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
 
   @Query(value =
       "select pl.* from Placement pl where traineeId = :traineeId and dateFrom <= :currentDate "
-          + "and (dateTo is null or dateTo >= :currentDate)", nativeQuery = true)
+          + "and dateTo >= :currentDate", nativeQuery = true)
   List<Placement> findAllCurrentPlacementsForTrainee(
       @Param("traineeId") Long traineeId,
       @Param("currentDate") LocalDate currentDate);

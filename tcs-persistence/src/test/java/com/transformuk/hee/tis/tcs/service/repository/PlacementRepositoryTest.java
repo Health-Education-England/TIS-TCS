@@ -74,25 +74,23 @@ class PlacementRepositoryTest {
     List<Placement> results = testObj.findAllCurrentPlacementsForTrainee(traineeId, currentDate);
 
     assertNotNull(results);
-    assertEquals(2, results.size());
+    assertEquals(1, results.size());
     assertEquals(Long.valueOf(3L), results.get(0).getId());
-    assertEquals(Long.valueOf(6L), results.get(1).getId());
   }
 
   @Transactional
   @Test
   @Sql(scripts = "/scripts/person.sql")
   @Sql(scripts = "/scripts/deletePerson.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-  void findAllCurrentPlacementsForTraineeShouldIncludePlacementsWithNullEndDate() {
+  void findAllCurrentPlacementsForTraineeShouldNotIncludePlacementsWithNullEndDate() {
     Long traineeId = 1L;
     LocalDate currentDate = LocalDate.of(2022, Month.SEPTEMBER, 8);
 
     List<Placement> results = testObj.findAllCurrentPlacementsForTrainee(traineeId, currentDate);
 
     assertNotNull(results);
-    assertEquals(2, results.size());
+    assertEquals(1, results.size());
     Set<Long> placementIds = results.stream().map(Placement::getId).collect(Collectors.toSet());
     assertTrue(placementIds.contains(3L));
-    assertTrue(placementIds.contains(6L));
   }
 }

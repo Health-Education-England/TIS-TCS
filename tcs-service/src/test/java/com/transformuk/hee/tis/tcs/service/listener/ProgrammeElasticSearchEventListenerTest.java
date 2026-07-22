@@ -35,9 +35,7 @@ import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationRabbitService;
 import com.transformuk.hee.tis.tcs.service.service.RevalidationService;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,7 +107,6 @@ class ProgrammeElasticSearchEventListenerTest {
     ProgrammeDTO previousProgramme = new ProgrammeDTO();
     previousProgramme.setId(PROGRAMME_ID);
     previousProgramme.setProgrammeName(PREVIOUS_PROGRAMME_NAME);
-    previousProgramme.setPostIds(buildPostIds());
 
     ProgrammeDTO currentProgramme = new ProgrammeDTO();
     currentProgramme.setId(PROGRAMME_ID);
@@ -123,8 +120,7 @@ class ProgrammeElasticSearchEventListenerTest {
 
     testObj.handleProgrammeSavedEvent(nameChangedEvent);
 
-    verify(postElasticSearchService).updatePostDocument(FIRST_POST_ID);
-    verify(postElasticSearchService).updatePostDocument(SECOND_POST_ID);
+    verify(postElasticSearchService).updatePostDocumentsForProgramme(PROGRAMME_ID);
   }
 
   @Test
@@ -132,7 +128,6 @@ class ProgrammeElasticSearchEventListenerTest {
     ProgrammeDTO previousProgramme = new ProgrammeDTO();
     previousProgramme.setId(PROGRAMME_ID);
     previousProgramme.setProgrammeName(CURRENT_PROGRAMME_NAME);
-    previousProgramme.setPostIds(buildPostIds());
 
     ProgrammeDTO currentProgramme = new ProgrammeDTO();
     currentProgramme.setId(PROGRAMME_ID);
@@ -150,16 +145,12 @@ class ProgrammeElasticSearchEventListenerTest {
   }
 
   @Test
-  void shouldNotUpdatePostDocumentsWhenPreviousProgrammePostIdsAreNull() {
-    ProgrammeDTO previousProgramme = new ProgrammeDTO();
-    previousProgramme.setId(PROGRAMME_ID);
-    previousProgramme.setProgrammeName(PREVIOUS_PROGRAMME_NAME);
-
+  void shouldNotUpdatePostDocumentsWhenPreviousProgrammeIsNull() {
     ProgrammeDTO currentProgramme = new ProgrammeDTO();
     currentProgramme.setId(PROGRAMME_ID);
     currentProgramme.setProgrammeName(CURRENT_PROGRAMME_NAME);
 
-    ProgrammeSavedEvent eventWithoutPostIds = new ProgrammeSavedEvent(previousProgramme,
+    ProgrammeSavedEvent eventWithoutPostIds = new ProgrammeSavedEvent(null,
         currentProgramme);
 
     when(programmeMembershipService.findProgrammeMembershipsByProgramme(PROGRAMME_ID))
@@ -168,12 +159,5 @@ class ProgrammeElasticSearchEventListenerTest {
     testObj.handleProgrammeSavedEvent(eventWithoutPostIds);
 
     verifyNoInteractions(postElasticSearchService);
-  }
-
-  private Set<Long> buildPostIds() {
-    Set<Long> postIds = new LinkedHashSet<>();
-    postIds.add(FIRST_POST_ID);
-    postIds.add(SECOND_POST_ID);
-    return postIds;
   }
 }

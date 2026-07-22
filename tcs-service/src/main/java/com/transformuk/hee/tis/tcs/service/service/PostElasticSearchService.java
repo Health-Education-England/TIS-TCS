@@ -384,6 +384,21 @@ public class PostElasticSearchService {
     saveDocuments(postViews);
   }
 
+  /**
+   * Updates the PostView documents in Elasticsearch for all posts associated with the given
+   * programmeId.
+   *
+   * @param programmeId the id of the programme to update posts for
+   */
+  public void updatePostDocumentsForProgramme(Long programmeId) {
+    Preconditions.checkNotNull(programmeId, "Programme Id cannot be null");
+    String query = getQuery()
+        .replace("WHERECLAUSE", "WHERE prg.id=:id");
+
+    List<PostView> postViews = runQuery(query, programmeId);
+    saveDocuments(postViews);
+  }
+
   private List<PostView> runQuery(String query, Long id) {
     MapSqlParameterSource paramSource = new MapSqlParameterSource();
     paramSource.addValue("id", id);

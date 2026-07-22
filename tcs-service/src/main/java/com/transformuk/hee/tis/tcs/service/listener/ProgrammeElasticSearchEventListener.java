@@ -76,10 +76,9 @@ public class ProgrammeElasticSearchEventListener {
 
     ProgrammeDTO previousProgrammeDto = event.getPreviousProgrammeDto();
     // When it's a name update
-    if (previousProgrammeDto != null && previousProgrammeDto.getPostIds() != null
-        && !Objects.equals(previousProgrammeDto.getProgrammeName(),
+    if (previousProgrammeDto != null && !Objects.equals(previousProgrammeDto.getProgrammeName(),
         programmeDto.getProgrammeName())) {
-      previousProgrammeDto.getPostIds().forEach(postElasticSearchService::updatePostDocument);
+      postElasticSearchService.updatePostDocumentsForProgramme(programmeId);
     }
   }
 }
