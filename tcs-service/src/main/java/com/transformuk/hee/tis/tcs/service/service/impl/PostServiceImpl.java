@@ -65,7 +65,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
-import com.transformuk.hee.tis.tcs.service.service.helper.AfterCommitEventPublisher;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
