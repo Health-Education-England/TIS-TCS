@@ -174,7 +174,7 @@ public class PostServiceImpl implements PostService {
     updateFundingStatus(post);
     PostDTO savedPostDto = postMapper.postToPostDTO(post);
     handleNewPostEsrNotification(postDTO);
-    publishPostSavedEventAfterCommit(savedPostDto);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
     return savedPostDto;
   }
 
@@ -209,7 +209,8 @@ public class PostServiceImpl implements PostService {
     posts = postRepository.saveAll(posts);
     posts.forEach(this::updateFundingStatus);
     List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
-    savedPostDtos.forEach(this::publishPostSavedEventAfterCommit);
+    savedPostDtos.forEach(
+        postDto -> applicationEventPublisher.publishEvent(new PostSavedEvent(postDto)));
     return savedPostDtos;
   }
 
@@ -433,7 +434,7 @@ public class PostServiceImpl implements PostService {
     currentInDbPost = postRepository.save(payloadPost);
     updateFundingStatus(currentInDbPost);
     PostDTO updatedPostDto = postMapper.postToPostDTO(currentInDbPost);
-    publishPostSavedEventAfterCommit(updatedPostDto);
+    applicationEventPublisher.publishEvent(new PostSavedEvent(updatedPostDto));
     return updatedPostDto;
   }
 
@@ -700,23 +701,11 @@ public class PostServiceImpl implements PostService {
       if (attachedPlacements.isEmpty()) {
         postRepository.clearPostReferences(id);
         postRepository.deleteById(id);
-        publishPostDeletedEventAfterCommit(id);
+        applicationEventPublisher.publishEvent(new PostDeletedEvent(id));
       } else {
         throw new IllegalStateException("Cannot delete post as it has associated placements.");
       }
     }
-  }
-
-  private void publishPostSavedEventAfterCommit(PostDTO postDto) {
-    publishEventAfterCommit(new PostSavedEvent(postDto));
-  }
-
-  private void publishPostDeletedEventAfterCommit(Long postId) {
-    publishEventAfterCommit(new PostDeletedEvent(postId));
-  }
-
-  private void publishEventAfterCommit(Object event) {
-    AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher, event);
   }
 
   /**

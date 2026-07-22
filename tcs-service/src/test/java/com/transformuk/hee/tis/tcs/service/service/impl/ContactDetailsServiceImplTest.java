@@ -17,7 +17,6 @@ import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,7 @@ class ContactDetailsServiceImplTest {
   private ContactDetailsServiceImpl service;
 
   @Captor
-  private ArgumentCaptor<Object> eventCaptor;
+  private ArgumentCaptor<ContactDetailsSavedEvent> eventCaptor;
 
   private ContactDetailsDTO inputDto;
   private ContactDetails existingEntity;
@@ -115,7 +114,7 @@ class ContactDetailsServiceImplTest {
     triggerAfterCommit();
     verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
 
-    ContactDetailsSavedEvent publishedEvent = (ContactDetailsSavedEvent) eventCaptor.getValue();
+    ContactDetailsSavedEvent publishedEvent = eventCaptor.getValue();
     assertEquals(existingDto, publishedEvent.getPreviousContactDetailsDto());
     assertEquals(updatedDto, publishedEvent.getContactDetailsDto());
   }
@@ -172,8 +171,7 @@ class ContactDetailsServiceImplTest {
     triggerAfterCommit();
     verify(applicationEventPublisher, times(2)).publishEvent(eventCaptor.capture());
 
-    List<ContactDetailsSavedEvent> publishedEvents = eventCaptor.getAllValues().stream()
-        .map(e -> (ContactDetailsSavedEvent) e).collect(Collectors.toList());
+    List<ContactDetailsSavedEvent> publishedEvents = eventCaptor.getAllValues();
     assertEquals(existingDto, publishedEvents.get(0).getPreviousContactDetailsDto());
     assertEquals(updatedDto, publishedEvents.get(0).getContactDetailsDto());
     assertEquals(secondExistingDto, publishedEvents.get(1).getPreviousContactDetailsDto());

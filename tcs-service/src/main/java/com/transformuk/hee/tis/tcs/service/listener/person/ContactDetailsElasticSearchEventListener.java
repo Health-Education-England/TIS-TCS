@@ -30,8 +30,9 @@ import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Listens for ContactDetailsSavedEvent and updates the corresponding PostView documents in
@@ -67,7 +68,7 @@ public class ContactDetailsElasticSearchEventListener {
    * @param event the ContactDetailsSavedEvent containing the new and previous contact details
    *              for the person
    */
-  @EventListener
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void contactDetailsSavedEventListener(ContactDetailsSavedEvent event) {
     ContactDetailsDTO newContactDetailsDto = event.getContactDetailsDto();
     Long personId = newContactDetailsDto.getId();

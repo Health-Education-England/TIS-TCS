@@ -204,7 +204,9 @@ class PostServiceImplTest {
   @Mock
   private ApplicationEventPublisher applicationEventPublisherMock;
   @Captor
-  private ArgumentCaptor<Object> postEventCaptor;
+  private ArgumentCaptor<PostSavedEvent> postSavedEventCaptor;
+  @Captor
+  private ArgumentCaptor<PostDeletedEvent> postDeletedEventCaptor;
 
   @Test
   void saveShouldSavePost() {
@@ -221,8 +223,8 @@ class PostServiceImplTest {
     verify(postRepositoryMock).save(postMock1);
     verify(postMapperMock).postToPostDTO(postSaveMock1);
     triggerAfterCommit();
-    verify(applicationEventPublisherMock).publishEvent(postEventCaptor.capture());
-    PostSavedEvent event = (PostSavedEvent) postEventCaptor.getValue();
+    verify(applicationEventPublisherMock).publishEvent(postSavedEventCaptor.capture());
+    PostSavedEvent event = postSavedEventCaptor.getValue();
     assertEquals(postMappedDTOMock1, event.getPostDto());
   }
 
@@ -244,9 +246,8 @@ class PostServiceImplTest {
     verify(postRepositoryMock).saveAll(postList);
     verify(postMapperMock).postsToPostDTOs(savedPosts);
     triggerAfterCommit();
-    verify(applicationEventPublisherMock, times(2)).publishEvent(postEventCaptor.capture());
-    List<PostSavedEvent> events = postEventCaptor.getAllValues().stream()
-        .map(e -> (PostSavedEvent) e).collect(Collectors.toList());
+    verify(applicationEventPublisherMock, times(2)).publishEvent(postSavedEventCaptor.capture());
+    List<PostSavedEvent> events = postSavedEventCaptor.getAllValues();
     assertEquals(2, events.size());
     assertEquals(postMappedDTOMock1, events.get(0).getPostDto());
     assertEquals(postMappedDTOMock2, events.get(1).getPostDto());
@@ -294,8 +295,8 @@ class PostServiceImplTest {
     Set<PostFunding> capturedPostFundings = postFundingCaptor.getValue();
     assertTrue(capturedPostFundings.size() < fundingsInDatabase.size());
     triggerAfterCommit();
-    verify(applicationEventPublisherMock).publishEvent(postEventCaptor.capture());
-    assertEquals(postMappedDTOMock1, ((PostSavedEvent) postEventCaptor.getValue()).getPostDto());
+    verify(applicationEventPublisherMock).publishEvent(postSavedEventCaptor.capture());
+    assertEquals(postMappedDTOMock1, (postSavedEventCaptor.getValue()).getPostDto());
   }
 
   @Test
@@ -483,9 +484,9 @@ class PostServiceImplTest {
     verify(postRepositoryMock).clearPostReferences(1L);
     verify(postRepositoryMock).deleteById(1L);
     triggerAfterCommit();
-    verify(applicationEventPublisherMock).publishEvent(postEventCaptor.capture());
+    verify(applicationEventPublisherMock).publishEvent(postDeletedEventCaptor.capture());
 
-    PostDeletedEvent event = (PostDeletedEvent) postEventCaptor.getValue();
+    PostDeletedEvent event = postDeletedEventCaptor.getValue();
     assertEquals(1L, event.getPostId());
   }
 
