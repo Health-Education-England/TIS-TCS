@@ -38,6 +38,8 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
+import com.transformuk.hee.tis.tcs.service.event.PostDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
@@ -63,6 +65,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.helper.AfterCommitEventPublisher;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
@@ -81,12 +84,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import javax.persistence.EntityNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -143,6 +149,8 @@ public class PostServiceImpl implements PostService {
   private PostEsrEventDtoMapper postEsrEventDtoMapper;
   @Autowired
   private PostEsrLatestEventViewRepository postEsrLatestEventViewRepository;
+  @Autowired
+  private ApplicationEventPublisher applicationEventPublisher;
 
   /**
    * Save a post.
@@ -167,6 +175,7 @@ public class PostServiceImpl implements PostService {
     updateFundingStatus(post);
     PostDTO savedPostDto = postMapper.postToPostDTO(post);
     handleNewPostEsrNotification(postDTO);
+    publishPostSavedEventAfterCommit(savedPostDto);
     return savedPostDto;
   }
 
@@ -200,7 +209,9 @@ public class PostServiceImpl implements PostService {
     postSpecialtyRepository.deleteAll(allPostSpecialties);
     posts = postRepository.saveAll(posts);
     posts.forEach(this::updateFundingStatus);
-    return postMapper.postsToPostDTOs(posts);
+    List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
+    savedPostDtos.forEach(this::publishPostSavedEventAfterCommit);
+    return savedPostDtos;
   }
 
   /**
@@ -422,7 +433,9 @@ public class PostServiceImpl implements PostService {
     postFundingRepository.deleteAll(postFundingsToRemove);
     currentInDbPost = postRepository.save(payloadPost);
     updateFundingStatus(currentInDbPost);
-    return postMapper.postToPostDTO(currentInDbPost);
+    PostDTO updatedPostDto = postMapper.postToPostDTO(currentInDbPost);
+    publishPostSavedEventAfterCommit(updatedPostDto);
+    return updatedPostDto;
   }
 
   /**
@@ -431,9 +444,11 @@ public class PostServiceImpl implements PostService {
    * @param postId the id of the post to update
    */
   @Override
-  public void updateFundingStatus(long postId) {
-    Post currentInDbPost = postRepository.findById(postId).orElse(null);
-    updateFundingStatus(currentInDbPost);
+  public PostDTO updateFundingStatus(long postId) {
+    Post currentInDbPost = postRepository.findById(postId)
+        .orElseThrow(() -> new EntityNotFoundException("Post not found for id: " + postId));
+    Post savedPost = updateFundingStatus(currentInDbPost);
+    return postMapper.postToPostDTO(savedPost);
   }
 
   /**
@@ -441,12 +456,10 @@ public class PostServiceImpl implements PostService {
    *
    * @param post the post entity to update
    */
-  protected void updateFundingStatus(Post post) {
-    if (post != null) {
-      Status fundingStatus = getFundingStatusForPost(post);
-      post.setFundingStatus(fundingStatus);
-      postRepository.save(post);
-    }
+  protected Post updateFundingStatus(@NonNull Post post) {
+    Status fundingStatus = getFundingStatusForPost(post);
+    post.setFundingStatus(fundingStatus);
+    return postRepository.save(post);
   }
 
   /**
@@ -688,10 +701,23 @@ public class PostServiceImpl implements PostService {
       if (attachedPlacements.isEmpty()) {
         postRepository.clearPostReferences(id);
         postRepository.deleteById(id);
+        publishPostDeletedEventAfterCommit(id);
       } else {
         throw new IllegalStateException("Cannot delete post as it has associated placements.");
       }
     }
+  }
+
+  private void publishPostSavedEventAfterCommit(PostDTO postDto) {
+    publishEventAfterCommit(new PostSavedEvent(postDto));
+  }
+
+  private void publishPostDeletedEventAfterCommit(Long postId) {
+    publishEventAfterCommit(new PostDeletedEvent(postId));
+  }
+
+  private void publishEventAfterCommit(ApplicationEvent event) {
+    AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher, event);
   }
 
   /**

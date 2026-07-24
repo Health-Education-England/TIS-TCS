@@ -89,6 +89,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -159,6 +160,9 @@ public class PlacementServiceImpl implements PlacementService {
   @Autowired
   private PlacementEsrEventDtoMapper placementEsrEventDtoMapper;
 
+  @Lazy
+  @Autowired
+  private PlacementServiceImpl self;
 
   /**
    * Save a placement.
@@ -319,13 +323,13 @@ public class PlacementServiceImpl implements PlacementService {
         log.info("Handling ESR Notification for date changes in placement edit: placement id {}",
             placementDetailsDTO.getId());
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
-            .isBefore(LocalDate.now().plusDays(1));
+            .isBefore(LocalDate.now(clock).plusDays(1));
         handleChangeOfPlacementDatesEsrNotification(placementDetailsDTO, placementBeforeUpdate,
             currentPlacementEdit);
       } else if (eligibleForEsrNewPlacementNotificationWhenUpdateWte) {
         log.info("Handling ESR Notification for whole time equivalent edit: placement id {}",
             placementDetailsDTO.getId());
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate tomorrow = LocalDate.now(clock).plusDays(1);
         boolean currentPlacementEdit = placementBeforeUpdate.getDateFrom()
             .isBefore(tomorrow);
         handleChangeOfWholeTimeEquivalentEsrNotification(placementDetailsDTO, placementBeforeUpdate,
@@ -439,6 +443,8 @@ public class PlacementServiceImpl implements PlacementService {
     //clear any linked specialties before trying to save the placement
     final Placement placement = placementRepository.findById(placementDetailsDTO.getId())
         .orElse(null);
+    final PlacementDTO existingPlacementDto =
+        placementMapper.placementToPlacementDTO(placement, null);
 
     // deal with the log for existing placements which doesn't exist in PlacmentLog table
     PlacementDetails exsitingPlacementDetails = placementToPlacementDetails(placement);
@@ -457,10 +463,13 @@ public class PlacementServiceImpl implements PlacementService {
     placement.setSpecialties(new HashSet<>());
 
     Placement savedPlacement = placementRepository.saveAndFlush(placement);
-    PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
-    applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+    convertPlacementWithSupervisors(savedPlacement);
 
-    return createDetails(placementDetailsDTO, placement);
+    PlacementDetailsDTO updatedPlacementDetailsDto =
+        self.createDetails(placementDetailsDTO, placement);
+    applicationEventPublisher.publishEvent(new PlacementSavedEvent(existingPlacementDto,
+            placementDetailsMapper.placementDetailsDtoToPlacementDto(updatedPlacementDetailsDto)));
+    return updatedPlacementDetailsDto;
   }
 
   @Transactional
@@ -485,7 +494,11 @@ public class PlacementServiceImpl implements PlacementService {
       placement.setSpecialties(Sets.newHashSet(placementSpecialties));
       Placement savedPlacement = placementRepository.save(placement);
       PlacementDTO placementDTO = convertPlacementWithSupervisors(savedPlacement);
-      applicationEventPublisher.publishEvent(new PlacementSavedEvent(placementDTO));
+      // This method will be called by both Placement Create and Placement Update,
+      // but Placement Update cannot publish the event here
+      if (placementDetailsDTO.getId() == null) {
+        applicationEventPublisher.publishEvent(new PlacementSavedEvent(null, placementDTO));
+      }
     }
     return placementSpecialties;
   }
@@ -504,7 +517,7 @@ public class PlacementServiceImpl implements PlacementService {
     List<PlacementDTO> placementDTOS = convertPlacements(placements);
 
     placementDtos.stream()
-        .map(PlacementSavedEvent::new)
+        .map(dto -> new PlacementSavedEvent(null, dto))
         .forEach(applicationEventPublisher::publishEvent);
 
     return placementDTOS;
@@ -582,11 +595,12 @@ public class PlacementServiceImpl implements PlacementService {
 
     placementSupervisorRepository.deleteAllByIdPlacementId(id);
     Placement placement = placementRepository.getOne(id);
+    PlacementDTO oldPlacementDto = placementMapper.placementToPlacementDTO(placement, null);
 
     PlacementDetails placementDetails = placementToPlacementDetails(placement);
     placementLogService.placementLog(placementDetails, PlacementLogType.DELETE);
 
-    PlacementDeletedEvent event = new PlacementDeletedEvent(id, placement.getTrainee().getId());
+    PlacementDeletedEvent event = new PlacementDeletedEvent(oldPlacementDto);
 
     placementRepository.delete(placement);
 
@@ -1033,8 +1047,9 @@ public class PlacementServiceImpl implements PlacementService {
     try {
       final Placement savedPlacement = placementRepository.findById(placementDetails.getId())
           .orElse(null);
-      if (savedPlacement.getDateFrom() != null && savedPlacement.getDateFrom()
-          .isBefore(LocalDate.now(clock).plusWeeks(13))) {
+      if (savedPlacement != null && savedPlacement.getDateFrom() != null
+          && savedPlacement.getDateFrom().isBefore(LocalDate.now(clock)
+          .plusWeeks(13))) {
         log.debug("Creating ESR notification for new placement creation for deanery number {}",
             savedPlacement.getPost().getNationalPostNumber());
         final List<EsrNotification> esrNotifications = esrNotificationService
@@ -1143,4 +1158,10 @@ public class PlacementServiceImpl implements PlacementService {
     return draftPlacements;
   }
 
+  @Override
+  public List<PlacementDTO> getCurrentPlacementsForPersonId(Long personId) {
+    List<Placement> placements = placementRepository
+        .findAllCurrentPlacementsForTrainee(personId, LocalDate.now(clock));
+    return placementMapper.placementsToPlacementDTOs(placements, null);
+  }
 }

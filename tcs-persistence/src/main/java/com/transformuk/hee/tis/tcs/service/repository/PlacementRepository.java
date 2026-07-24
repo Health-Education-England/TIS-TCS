@@ -101,6 +101,13 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
       @Param("placementTypes") List<String> placementTypes);
 
   @Query(value =
+      "select pl.* from Placement pl where traineeId = :traineeId and dateFrom <= :currentDate "
+          + "and dateTo >= :currentDate", nativeQuery = true)
+  List<Placement> findAllCurrentPlacementsForTrainee(
+      @Param("traineeId") Long traineeId,
+      @Param("currentDate") LocalDate currentDate);
+
+  @Query(value =
       "select pl.* from Placement pl where traineeId = :traineeId and pl.placementType IN (:placementTypes) "
           +
           "and dateFrom >= :startDateFrom and dateFrom <= :startDateTo", nativeQuery = true)

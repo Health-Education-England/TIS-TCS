@@ -1,9 +1,9 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
-INSERT INTO `Specialty` (`id`, `status`, `college`, `specialtyCode`,  `name`)
+INSERT INTO `Specialty` (`id`, `status`, `college`, `specialtyCode`,  `name`, `blockIndemnity`)
 VALUES
-	(1, 'CURRENT', 'Faculty Of Dental Surgery', 'I10', 'GP Substance Misuse'),
-	(10, 'CURRENT', 'Faculty Of Dental Surgery', 'I10', 'GP Substance Misuse');
+	(1, 'CURRENT', 'Faculty Of Dental Surgery', 'I10', 'GP Substance Misuse', 0),
+	(10, 'CURRENT', 'Faculty Of Dental Surgery', 'I10', 'GP Substance Misuse', 0);
 
 INSERT INTO `Post` (`id`, `nationalPostNumber`, `status`, `employingBodyId`, `trainingBodyId`, `oldPostId`, `newPostId`, `suffix`, `owner`, `postFamily`, `localPostNumber`, `trainingDescription`, `legacy`, `bypassNPNGeneration`)
 VALUES

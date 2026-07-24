@@ -21,13 +21,16 @@
 
 package com.transformuk.hee.tis.tcs.service.service;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewRowMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,10 +58,13 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * Elasticsearch service class for searching, sorting and filtering list of posts.
+ * Elasticsearch service class for searching, sorting and filtering list of posts,
+ * and updating PostView documents.
  */
 @Service
 public class PostElasticSearchService {
@@ -79,6 +85,7 @@ public class PostElasticSearchService {
   private static final String APPROVED_GRADE_ID = "approvedGradeId";
   private static final String ID = "id";
   private static final String PROGRAMME_IDS = "programmeIds";
+  private static final String WHERE_CLAUSE_PLACEHOLDER = "WHERECLAUSE";
   private static final Set<String> MATCH_QUERY_FIELDS = Sets.newHashSet(
       CURRENT_TRAINEE_SURNAMES,
       CURRENT_TRAINEE_FORENAMES,
@@ -105,18 +112,34 @@ public class PostElasticSearchService {
   private final PermissionService permissionService;
   private final PostViewDecorator postViewDecorator;
   private final PostViewMapper postViewMapper;
+  private final SqlQuerySupplier sqlQuerySupplier;
+  private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   /**
-   * Constructor for Elasticsearch service class.
+   * Constructor for PostElasticSearchService.
+   *
+   * @param postViewDecorator the decorator to use for decorating PostViewDTOs
+   * @param elasticsearchOperations the elasticsearch operations to use for indexing and deleting
+   *                                documents
+   * @param permissionService the permission service to use for applying permission filters
+   * @param postViewMapper the mapper to use for mapping PostView entities to PostViewDTOs
+   * @param sqlQuerySupplier the supplier to use for getting the SQL query for retrieving post view
+   *                         data
+   * @param namedParameterJdbcTemplate the jdbc template to use for running queries against the
+   *                                   database
    */
   public PostElasticSearchService(PostViewDecorator postViewDecorator,
       ElasticsearchOperations elasticsearchOperations,
       PermissionService permissionService,
-      PostViewMapper postViewMapper) {
+      PostViewMapper postViewMapper,
+      SqlQuerySupplier sqlQuerySupplier,
+      NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
     this.postViewDecorator = postViewDecorator;
     this.elasticsearchOperations = elasticsearchOperations;
     this.permissionService = permissionService;
     this.postViewMapper = postViewMapper;
+    this.sqlQuerySupplier = sqlQuerySupplier;
+    this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
   }
 
   /**
@@ -315,5 +338,83 @@ public class PostElasticSearchService {
 
   private String mapFieldName(String fieldName) {
     return FIELD_MAPPINGS.getOrDefault(fieldName, fieldName);
+  }
+
+  private String getQuery() {
+    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
+    return query.replace("ORDERBYCLAUSE", "ORDER BY id DESC")
+        .replace("LIMITCLAUSE", "");
+  }
+
+  /**
+   * Updates the PostView document in Elasticsearch for the given postId.
+   * If the post does not exist in the database, it will be deleted from Elasticsearch.
+   *
+   * @param postId the id of the post to update
+   */
+  public synchronized void updatePostDocument(Long postId) {
+    Preconditions.checkNotNull(postId, "Post Id cannot be null");
+
+    String query = getQuery()
+        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE p.id=:id");
+
+    LOG.debug("Getting updated PostView document for postId: {} with query: {}", postId, query);
+    List<PostView> queryResult = runQuery(query, postId);
+
+    if (CollectionUtils.isNotEmpty(queryResult)) {
+      deletePostDocument(postId);
+      saveDocuments(queryResult);
+    } else {
+      deletePostDocument(postId);
+    }
+    elasticsearchOperations.indexOps(PostView.class).refresh();
+  }
+
+  /**
+   * Updates the PostView documents in Elasticsearch for all posts associated with the given
+   * specialtyId.
+   *
+   * @param specialtyId the id of the specialty to update posts for
+   */
+  public void updatePostDocumentsForSpecialty(Long specialtyId) {
+    Preconditions.checkNotNull(specialtyId, "Specialty Id cannot be null");
+    String query = getQuery()
+        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE sp.id=:id");
+
+    List<PostView> postViews = runQuery(query, specialtyId);
+    saveDocuments(postViews);
+  }
+
+  /**
+   * Updates the PostView documents in Elasticsearch for all posts associated with the given
+   * programmeId.
+   *
+   * @param programmeId the id of the programme to update posts for
+   */
+  public void updatePostDocumentsForProgramme(Long programmeId) {
+    Preconditions.checkNotNull(programmeId, "Programme Id cannot be null");
+    String query = getQuery()
+        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE prg.id=:id");
+
+    List<PostView> postViews = runQuery(query, programmeId);
+    saveDocuments(postViews);
+  }
+
+  private List<PostView> runQuery(String query, Long id) {
+    MapSqlParameterSource paramSource = new MapSqlParameterSource();
+    paramSource.addValue("id", id);
+    return namedParameterJdbcTemplate.query(query, paramSource, new PostViewRowMapper());
+  }
+
+  private void saveDocuments(List<PostView> queryResult) {
+    if (CollectionUtils.isNotEmpty(queryResult)) {
+      elasticsearchOperations.save(queryResult);
+    }
+  }
+
+  private void deletePostDocument(Long postId) {
+    Preconditions.checkNotNull(postId, "Post id cannot be null");
+    // postId is the document id in the PostView index, so we can delete it directly
+    elasticsearchOperations.delete(String.valueOf(postId), PostView.class);
   }
 }

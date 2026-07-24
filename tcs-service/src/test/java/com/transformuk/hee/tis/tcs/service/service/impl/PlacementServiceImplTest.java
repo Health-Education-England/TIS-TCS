@@ -1,14 +1,23 @@
 package com.transformuk.hee.tis.tcs.service.service.impl;
 
 import static com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState.APPROVED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -22,6 +31,9 @@ import com.transformuk.hee.tis.tcs.api.enumeration.LifecycleState;
 import com.transformuk.hee.tis.tcs.api.enumeration.PlacementSiteType;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementDetailsDecorator;
+import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
+import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
+import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.PlacementDetails;
 import com.transformuk.hee.tis.tcs.service.model.PlacementEsrEvent;
@@ -57,21 +69,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PlacementServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class PlacementServiceImplTest {
 
   public static final Long POSITION_NUMBER = 1111L;
   public static final Long POSITION_ID = 2222L;
@@ -79,6 +91,8 @@ public class PlacementServiceImplTest {
   private static final Long PLACEMENT_ID = 1L, PLACEMENT2_ID = 2L;
   private static final Long number = 1L;
   private static final String string = "fooo";
+  private static final Long PERSON_ID = 1L;
+  private static final Long POST_ID = 2L;
   @Spy
   @InjectMocks
   private PlacementServiceImpl testObj;
@@ -120,6 +134,8 @@ public class PlacementServiceImplTest {
   private PlacementEsrEventRepository placementEsrEventRepositoryMock;
   @Mock
   private PlacementEsrEventDtoMapper placementEsrExportedDtoMapper;
+  @Mock
+  private ApplicationEventPublisher applicationEventPublisher;
   @Captor
   private ArgumentCaptor<LocalDate> toDateCaptor;
   @Captor
@@ -130,21 +146,26 @@ public class PlacementServiceImplTest {
   private ArgumentCaptor<Long> longArgumentCaptor;
   @Captor
   private ArgumentCaptor<PlacementEsrEvent> placementEsrEventArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<PlacementDeletedEvent> placementDeletedEventCaptor;
+  @Captor
+  private ArgumentCaptor<PlacementSavedEvent> placementSavedEventCaptor;
 
-  public static PlacementSummaryDTO createPlacementSummaryDTO() {
+  static PlacementSummaryDTO createPlacementSummaryDTO() {
     return new PlacementSummaryDTO(null, null, number, string, "Elbows", number, string, "In Post",
         "CURRENT", "Joe", "Bloggs", "Joe", "Bloggs", number, "emailId", "F1", number, string, null,
         null, number, null, new HashSet<>());
   }
 
-  @Before
-  public void setup() {
-    when(clock.instant()).thenReturn(Instant.now());
-    when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+  @BeforeEach
+  void setup() {
+    ReflectionTestUtils.setField(testObj, "self", testObj);
+    lenient().when(clock.instant()).thenReturn(Instant.now());
+    lenient().when(clock.getZone()).thenReturn(ZoneId.systemDefault());
   }
 
   @Test
-  public void closePlacementShouldClosePlacementBySettingToDate() {
+  void closePlacementShouldClosePlacementBySettingToDate() {
     when(placementRepositoryMock.findById(PLACEMENT_ID)).thenReturn(Optional.of(placementMock));
     doNothing().when(placementMock).setDateTo(toDateCaptor.capture());
     when(placementRepositoryMock.saveAndFlush(placementMock)).thenReturn(placementMock);
@@ -153,14 +174,14 @@ public class PlacementServiceImplTest {
 
     PlacementDTO result = testObj.closePlacement(PLACEMENT_ID);
 
-    Assert.assertEquals(placementDTOMock, result);
+    assertEquals(placementDTOMock, result);
 
     LocalDate toDateCapture = toDateCaptor.getValue();
-    Assert.assertEquals(LocalDate.now().minusDays(1), toDateCapture);
+    assertEquals(LocalDate.now().minusDays(1), toDateCapture);
   }
 
   @Test
-  public void shouldReturnPlacementsForATraineeInOrder() throws Exception {
+  void shouldReturnPlacementsForATraineeInOrder() throws Exception {
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/mm/dd");
     Date latest_date = simpleDateFormat.parse("2090/12/01");
@@ -213,21 +234,21 @@ public class PlacementServiceImplTest {
     List<PlacementSummaryDTO> result = testObj.getPlacementForTrainee(traineeId, "Dr in Training");
 
     int sizeOfResult = result.size();
-    Assert.assertEquals(wte, result.get(0).getPlacementWholeTimeEquivalent());
-    Assert.assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));
-    Assert.assertTrue(result.get(1).getDateTo().after(result.get(2).getDateTo()));
-    Assert.assertNull(result.get(sizeOfResult - 2).getDateTo());
-    Assert.assertNull(result.get(sizeOfResult - 1).getDateTo());
+    assertEquals(wte, result.get(0).getPlacementWholeTimeEquivalent());
+    assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));
+    assertTrue(result.get(1).getDateTo().after(result.get(2).getDateTo()));
+    assertNull(result.get(sizeOfResult - 2).getDateTo());
+    assertNull(result.get(sizeOfResult - 1).getDateTo());
 
     Map<String, Object> capturedParams = mapArgumentCaptor.getValue();
-    Assert.assertTrue(capturedParams.containsKey("traineeId"));
+    assertTrue(capturedParams.containsKey("traineeId"));
 
     PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
-    Assert.assertNotNull(capturedRowMapper);
+    assertNotNull(capturedRowMapper);
   }
 
   @Test
-  public void populateEsrEventsShouldFindEventsForPlacementDetails() {
+  void populateEsrEventsShouldFindEventsForPlacementDetails() {
     PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
     placementDetailsDto.setId(PLACEMENT_ID);
 
@@ -249,13 +270,13 @@ public class PlacementServiceImplTest {
     testObj.populateEsrEventsForPlacementDetail(placementDetailsDto);
 
     Set<PlacementEsrEventDto> esrEventDtos = placementDetailsDto.getEsrEvents();
-    Assert.assertNotNull(esrEventDtos);
-    Assert.assertTrue(esrEventDtos.contains(placementEsrEventDto1));
-    Assert.assertTrue(esrEventDtos.contains(placementEsrEventDto2));
+    assertNotNull(esrEventDtos);
+    assertTrue(esrEventDtos.contains(placementEsrEventDto1));
+    assertTrue(esrEventDtos.contains(placementEsrEventDto2));
   }
 
   @Test
-  public void populateEsrEventsShouldFindEventsForThePlacementsAndAddToList() {
+  void populateEsrEventsShouldFindEventsForThePlacementsAndAddToList() {
     PlacementSummaryDTO placement1 = new PlacementSummaryDTO(), placement2 = new PlacementSummaryDTO();
     placement1.setPlacementId(PLACEMENT_ID);
     placement2.setPlacementId(PLACEMENT2_ID);
@@ -286,14 +307,14 @@ public class PlacementServiceImplTest {
     testObj.populateEsrEventsForPlacementSummary(placements);
 
     for (PlacementSummaryDTO placement : placements) {
-      Assert.assertNotNull(placement.getEsrEvents());
-      Assert.assertTrue(placement.getEsrEvents().contains(placementEsrEventDto1)
+      assertNotNull(placement.getEsrEvents());
+      assertTrue(placement.getEsrEvents().contains(placementEsrEventDto1)
           || placement.getEsrEvents().contains(placementEsrEventDto2));
     }
   }
 
   @Test
-  public void shouldReturnPlacementsForAPostInOrder() throws Exception {
+  void shouldReturnPlacementsForAPostInOrder() throws Exception {
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/mm/dd");
     Date latest_date = simpleDateFormat.parse("2090/12/01");
@@ -344,20 +365,20 @@ public class PlacementServiceImplTest {
     List<PlacementSummaryDTO> result = testObj.getPlacementForPost(postId);
 
     int sizeOfResult = result.size();
-    Assert.assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));
-    Assert.assertTrue(result.get(1).getDateTo().after(result.get(2).getDateTo()));
-    Assert.assertNull(result.get(sizeOfResult - 2).getDateTo());
-    Assert.assertNull(result.get(sizeOfResult - 1).getDateTo());
+    assertTrue(result.get(0).getDateTo().after(result.get(1).getDateTo()));
+    assertTrue(result.get(1).getDateTo().after(result.get(2).getDateTo()));
+    assertNull(result.get(sizeOfResult - 2).getDateTo());
+    assertNull(result.get(sizeOfResult - 1).getDateTo());
 
     Map<String, Object> capturedParams = mapArgumentCaptor.getValue();
-    Assert.assertTrue(capturedParams.containsKey("postId"));
+    assertTrue(capturedParams.containsKey("postId"));
 
     PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
-    Assert.assertNotNull(capturedRowMapper);
+    assertNotNull(capturedRowMapper);
   }
 
   @Test
-  public void placementForPostShouldLimitPostsIfMoreThan1k() {
+  void placementForPostShouldLimitPostsIfMoreThan1k() {
     long postId = 1L;
     String sqlQueryMock = "SELECT * FROM PLACEMENT WHERE p.postId = :postId";
     List<PlacementSummaryDTO> queryResult = Lists.newArrayList();
@@ -373,11 +394,11 @@ public class PlacementServiceImplTest {
 
     List<PlacementSummaryDTO> result = testObj.getPlacementForPost(postId);
 
-    Assert.assertTrue(result.size() <= 1000);
+    assertTrue(result.size() <= 1000);
   }
 
   @Test
-  public void isEligibleForChangedDatesNotificationShouldReturnTrueWhenUpdatedPlacementIsEligibleForNotification() {
+  void isEligibleForChangedDatesNotificationShouldReturnTrueWhenUpdatedPlacementIsEligibleForNotification() {
     LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
     LocalDate dateOneMonthsAgo = LocalDate.now().minusMonths(1);
     Long existingPlacementId = 1L;
@@ -408,14 +429,14 @@ public class PlacementServiceImplTest {
     boolean result = testObj
         .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
 
-    Assert.assertTrue(result);
+    assertTrue(result);
 
     Long capturedPlacementId = longArgumentCaptor.getValue();
-    Assert.assertEquals(existingPlacementId, capturedPlacementId);
+    assertEquals(existingPlacementId, capturedPlacementId);
   }
 
   @Test
-  public void isEligibleForChangedDatesNotificationShouldReturnFalseWhenCurrentAndUpdatedPlacementFromDatesAreTheSame() {
+  void isEligibleForChangedDatesNotificationShouldReturnFalseWhenCurrentAndUpdatedPlacementFromDatesAreTheSame() {
     LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
     Long existingPlacementId = 1L;
 
@@ -430,9 +451,9 @@ public class PlacementServiceImplTest {
     boolean result = testObj
         .isEligibleForChangedDatesNotification(updatedPlacementDetails, currentPlacement);
 
-    Assert.assertFalse(result);
+    assertFalse(result);
 
-    verifyZeroInteractions(postRepositoryMock);
+    verifyNoInteractions(postRepositoryMock);
   }
 
   /**
@@ -440,7 +461,7 @@ public class PlacementServiceImplTest {
    * placement ID is null.
    */
   @Test
-  public void testCreateDetails_placementIdNull_addedDatePopulatedAmendedDateNotPopulated() {
+  void testCreateDetails_placementIdNull_addedDatePopulatedAmendedDateNotPopulated() {
     // Set up test data.
     PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
     PlacementDetails placementDetails = new PlacementDetails();
@@ -462,10 +483,8 @@ public class PlacementServiceImplTest {
     testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
-    Assert.assertThat("The placement's added date did not match the expected value.",
-        placementDetails.getAddedDate(), CoreMatchers.is(LocalDateTime.now(clock)));
-    Assert.assertThat("The placement's amended date did not match the expected value.",
-        placementDetails.getAmendedDate(), CoreMatchers.nullValue());
+    assertEquals(LocalDateTime.now(clock), placementDetails.getAddedDate());
+    assertNull(placementDetails.getAmendedDate());
   }
 
   /**
@@ -473,7 +492,7 @@ public class PlacementServiceImplTest {
    * placement ID is not null.
    */
   @Test
-  public void testCreateDetails_placementIdNotNull_addedDateNotPopulatedAmendedDatePopulated() {
+  void testCreateDetails_placementIdNotNull_addedDateNotPopulatedAmendedDatePopulated() {
     // Set up test data.
     PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
     placementDetailsDto.setId(1L);
@@ -499,17 +518,15 @@ public class PlacementServiceImplTest {
     testObj.createDetails(placementDetailsDto, null);
 
     // Perform assertions.
-    Assert.assertThat("The placement's added date did not match the expected value.",
-        placementDetails.getAddedDate(), CoreMatchers.nullValue());
-    Assert.assertThat("The placement's amended date did not match the expected value.",
-        placementDetails.getAmendedDate(), CoreMatchers.is(LocalDateTime.now(clock)));
+    assertNull(placementDetails.getAddedDate());
+    assertEquals(LocalDateTime.now(clock), placementDetails.getAmendedDate());
   }
 
   /**
    * Test that no sites are contained in the DTO when no sites are given.
    */
   @Test
-  public void testCreateDetails_noSites_noSites() {
+  void testCreateDetails_noSites_noSites() {
     // Set up test data.
     PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
     PlacementDetails placementDetails = new PlacementDetails();
@@ -534,17 +551,14 @@ public class PlacementServiceImplTest {
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
-    Assert
-        .assertThat("The placement's number of sites did not match the expected value.",
-            sites.size(),
-            CoreMatchers.is(0));
+    assertEquals(0, sites.size());
   }
 
   /**
    * Test that sites are contained in the DTO when sites are given.
    */
   @Test
-  public void testCreateDetails_hasSites_hasSites() {
+  void testCreateDetails_hasSites_hasSites() {
     // Set up test data.
     PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
 
@@ -598,20 +612,16 @@ public class PlacementServiceImplTest {
 
     // Perform assertions.
     Set<PlacementSiteDTO> sites = updatedPlacementDetailsDto.getSites();
-    Assert
-        .assertThat("The number of placement sites did not match the expected value.", sites.size(),
-            CoreMatchers.is(2));
+    assertEquals(2,  sites.size());
 
     for (PlacementSiteDTO site : sites) {
-      Assert.assertThat("The placement site's type did not match the expected value.",
-          site.getPlacementSiteType(), CoreMatchers.is(PlacementSiteType.OTHER));
-      Assert.assertThat("The placement site's placement ID did not match the expected value.",
-          site.getPlacementId(), CoreMatchers.is(1L));
+      assertEquals(PlacementSiteType.OTHER, site.getPlacementSiteType());
+      assertEquals(1L, site.getPlacementId());
     }
   }
 
   @Test
-  public void validateReturnTrueWhenOverlappingPlacementsExist() {
+  void validateReturnTrueWhenOverlappingPlacementsExist() {
     // prepare mocked data
     String npn = "YHD/RWA01/IMT/LT/003";
     Post mockedPost = new Post();
@@ -644,18 +654,14 @@ public class PlacementServiceImplTest {
         LocalDate.of(2019, 6, 6),
         LocalDate.of(2019, 9, 4), null);
 
-    Assert.assertThat("When there's one day overlapping - case 1, should return true",
-        result1, CoreMatchers.is(true));
-    Assert.assertThat("When there's one day overlapping - case 2, should return true",
-        result2, CoreMatchers.is(true));
-    Assert.assertThat("When the mocked data are fully overlapped, should return true",
-        result3, CoreMatchers.is(true));
-    Assert.assertThat("When the testing data are fully overlapped, should return true",
-        result4, CoreMatchers.is(true));
+    assertTrue(result1);
+    assertTrue(result2);
+    assertTrue(result3);
+    assertTrue(result4);
   }
 
   @Test
-  public void validateReturnFalseWhenNoOverlappingPlacements() {
+  void validateReturnFalseWhenNoOverlappingPlacements() {
     // prepare mocked data
     String npn = "YHD/RWA01/IMT/LT/003";
     Post mockedPost = new Post();
@@ -682,16 +688,12 @@ public class PlacementServiceImplTest {
         LocalDate.of(2019, 9, 6),
         LocalDate.of(2019, 10, 10), null);
 
-    Assert.assertThat(
-        "When the endDate of testing data is ahead of the mocked data, should return false",
-        result1, CoreMatchers.is(false));
-    Assert.assertThat(
-        "When the startDate of testing data is after the mocked data, should return false",
-        result2, CoreMatchers.is(false));
+    assertFalse(result1);
+    assertFalse(result2);
   }
 
   @Test
-  public void validateReturnFalseWhenNoPlacementsFound() {
+  void validateReturnFalseWhenNoPlacementsFound() {
     String npn = "YHD/RWA01/IMT/LT/003";
     Post mockedPost = new Post();
     mockedPost.setId(1L);
@@ -708,12 +710,11 @@ public class PlacementServiceImplTest {
         LocalDate.of(2019, 5, 1),
         LocalDate.of(2019, 6, 4), null);
 
-    Assert.assertThat("When there's no placements found, should return false",
-        result, CoreMatchers.is(false));
+    assertFalse(result);
   }
 
   @Test
-  public void isEligibleForChangedDatesNotificationReturnFalseWhenDraftIsNotApproved() {
+  void isEligibleForChangedDatesNotificationReturnFalseWhenDraftIsNotApproved() {
     PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
     placementDetailsDto.setId(1L);
     placementDetailsDto.setLifecycleState(LifecycleState.DRAFT);
@@ -722,13 +723,12 @@ public class PlacementServiceImplTest {
     placement.setId(1L);
     boolean returnValue = testObj
         .isEligibleForChangedDatesNotification(placementDetailsDto, placement);
-    Assert.assertThat(
-        "When draft placement is not approved, it is not elegible for ChangedDatesNotification",
-        returnValue, CoreMatchers.is(false));
+
+    assertFalse(returnValue);
   }
 
   @Test
-  public void isEligibleForChangedDatesNotificationReturnFalseWhenApprovedPlacementGoesBackToDraft() {
+  void isEligibleForChangedDatesNotificationReturnFalseWhenApprovedPlacementGoesBackToDraft() {
     PlacementDetailsDTO placementDetailsDto = new PlacementDetailsDTO();
     placementDetailsDto.setId(1L);
     placementDetailsDto.setLifecycleState(LifecycleState.DRAFT);
@@ -738,13 +738,12 @@ public class PlacementServiceImplTest {
     placement.setLifecycleState(APPROVED);
     boolean returnValue = testObj
         .isEligibleForChangedDatesNotification(placementDetailsDto, placement);
-    Assert.assertThat(
-        "When approved placement goes back to draft, it is not elegible for ChangedDatesNotification",
-        returnValue, CoreMatchers.is(false));
+
+    assertFalse(returnValue);
   }
 
   @Test
-  public void testGetListOfAllDraftPlacementForProgrammeId() {
+  void testGetListOfAllDraftPlacementForProgrammeId() {
     Placement placement1 = new Placement();
     placement1.setId(1L);
     placement1.setLifecycleState(LifecycleState.DRAFT);
@@ -777,12 +776,12 @@ public class PlacementServiceImplTest {
     when(placementDetailsDecorator.decorate(placementDetailsDto)).thenReturn(placementDetailsDto);
     List<PlacementDetailsDTO> draftPlacements = testObj
         .getListOfDraftPlacementsByProgrammeId(any());
-    Assert.assertThat("Should get the list of all draft placement for the programme id",
-        draftPlacements.size(), CoreMatchers.is(2));
+
+    assertEquals(2, draftPlacements.size());
   }
 
   @Test
-  public void isEligibleForChangedWholeTimeEquivalentShouldReturnTrueWhenUpdatedPlacementIsEligibleForNotification() {
+  void isEligibleForChangedWholeTimeEquivalentShouldReturnTrueWhenUpdatedPlacementIsEligibleForNotification() {
     LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
     Long existingPlacementId = 1L;
     BigDecimal existingWholeTimeEquivalent = new BigDecimal(1.0);
@@ -812,11 +811,11 @@ public class PlacementServiceImplTest {
         .isEligibleForCurrentTraineeWteChangeNotification(currentPlacement, updatedPlacementDetails,
             placementLog);
 
-    Assert.assertTrue(eligibleForCurrentTraineeWteChangeNotification);
+    assertTrue(eligibleForCurrentTraineeWteChangeNotification);
   }
 
   @Test
-  public void isEligibleForChangedWholeTimeEquivalentShouldDealWithNullCurrentWte() {
+  void isEligibleForChangedWholeTimeEquivalentShouldDealWithNullCurrentWte() {
     LocalDate dateFiveMonthsAgo = LocalDate.now().minusMonths(5);
     Long existingPlacementId = 1L;
     BigDecimal updatedWholeTimeEquivalent = new BigDecimal(0.5);
@@ -845,11 +844,11 @@ public class PlacementServiceImplTest {
         .isEligibleForCurrentTraineeWteChangeNotification(currentPlacement, updatedPlacementDetails,
             placementLog);
 
-    Assert.assertTrue(eligibleForCurrentTraineeWteChangeNotification);
+    assertTrue(eligibleForCurrentTraineeWteChangeNotification);
   }
 
   @Test
-  public void markPlacementAsEsrExportedShouldFindPlacementAndCreateNewEventAgainstIt() {
+  void markPlacementAsEsrExportedShouldFindPlacementAndCreateNewEventAgainstIt() {
     PlacementEsrEvent placementEsrEventMock = mock(PlacementEsrEvent.class);
     PlacementEsrEventDto placementEsrExportedDtoMock = mock(PlacementEsrEventDto.class);
     when(placementRepositoryMock.findPlacementById(PLACEMENT_ID))
@@ -863,15 +862,15 @@ public class PlacementServiceImplTest {
     Optional<PlacementEsrEvent> result = testObj
         .markPlacementAsEsrExported(PLACEMENT_ID, placementEsrExportedDtoMock);
 
-    Assert.assertTrue(result.isPresent());
-    Assert.assertEquals(placementEsrEventMock, result.get());
+    assertTrue(result.isPresent());
+    assertEquals(placementEsrEventMock, result.get());
 
     PlacementEsrEvent capturedPlacementEvent = placementEsrEventArgumentCaptor.getValue();
-    Assert.assertSame(placementEsrEventMock, capturedPlacementEvent);
+    assertSame(placementEsrEventMock, capturedPlacementEvent);
   }
 
   @Test
-  public void markPlacementAsEsrExportedShouldReturnEmptyOptionalWhenPlacementCannotBeFound() {
+  void markPlacementAsEsrExportedShouldReturnEmptyOptionalWhenPlacementCannotBeFound() {
     when(placementRepositoryMock.findPlacementById(PLACEMENT_ID)).thenReturn(Optional.empty());
     PlacementEsrEventDto placementEsrExportedDto = new PlacementEsrEventDto();
     placementEsrExportedDto.setPositionNumber(POSITION_NUMBER);
@@ -883,7 +882,199 @@ public class PlacementServiceImplTest {
     Optional<PlacementEsrEvent> result = testObj
         .markPlacementAsEsrExported(PLACEMENT_ID, placementEsrExportedDto);
 
-    Assert.assertFalse(result.isPresent());
+    assertFalse(result.isPresent());
     verifyNoMoreInteractions(placementEsrEventRepositoryMock);
+  }
+
+  @Test
+  void shouldGetCurrentPlacementsForPersonId() {
+    Long personId = PERSON_ID;
+    when(clock.instant()).thenReturn(Instant.parse("2026-07-16T00:00:00Z"));
+    when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
+    LocalDate currentDate = LocalDate.now(clock);
+
+    Placement placement1 = new Placement();
+    placement1.setId(PLACEMENT_ID);
+    Placement placement2 = new Placement();
+    placement2.setId(PLACEMENT2_ID);
+    List<Placement> placements = Lists.newArrayList(placement1, placement2);
+
+    PlacementDTO placementDto1 = new PlacementDTO();
+    placementDto1.setId(PLACEMENT_ID);
+    PlacementDTO placementDto2 = new PlacementDTO();
+    placementDto2.setId(PLACEMENT2_ID);
+    List<PlacementDTO> expectedDtos = Lists.newArrayList(placementDto1, placementDto2);
+
+    when(placementRepositoryMock.findAllCurrentPlacementsForTrainee(personId, currentDate))
+        .thenReturn(placements);
+    when(placementMapperMock.placementsToPlacementDTOs(placements, null)).thenReturn(expectedDtos);
+
+    List<PlacementDTO> result = testObj.getCurrentPlacementsForPersonId(personId);
+
+    assertEquals(expectedDtos, result);
+    verify(placementRepositoryMock).findAllCurrentPlacementsForTrainee(personId, currentDate);
+    verify(placementMapperMock).placementsToPlacementDTOs(placements, null);
+  }
+
+  @Test
+  void deleteShouldPublishPlacementDeletedEvent() {
+    Placement placement = new Placement();
+    placement.setId(PLACEMENT_ID);
+    placement.setLifecycleState(LifecycleState.DRAFT);
+    Post post = new Post();
+    post.setId(10L);
+    placement.setPost(post);
+    com.transformuk.hee.tis.tcs.service.model.Person trainee =
+        new com.transformuk.hee.tis.tcs.service.model.Person();
+    trainee.setId(20L);
+    placement.setTrainee(trainee);
+
+    PlacementDTO oldPlacementDto = new PlacementDTO();
+    oldPlacementDto.setId(PLACEMENT_ID);
+
+    when(placementLogServiceImplMock.getLatestLogOfCurrentApprovedPlacement(PLACEMENT_ID))
+        .thenReturn(Optional.empty());
+    when(placementRepositoryMock.findById(PLACEMENT_ID)).thenReturn(Optional.of(placement));
+    when(placementRepositoryMock.getOne(PLACEMENT_ID)).thenReturn(placement);
+    when(placementMapperMock.placementToPlacementDTO(placement, null)).thenReturn(oldPlacementDto);
+
+    testObj.delete(PLACEMENT_ID);
+
+    verify(applicationEventPublisher).publishEvent(placementDeletedEventCaptor.capture());
+    PlacementDeletedEvent event = placementDeletedEventCaptor.getValue();
+    assertEquals(oldPlacementDto, event.getPlacementDto());
+    verify(placementRepositoryMock).delete(placement);
+  }
+
+  @Test
+  void saveDetailsShouldPublishPlacementSavedEvent() {
+    PlacementDetailsDTO placementDetailsDTO = new PlacementDetailsDTO();
+    placementDetailsDTO.setId(PLACEMENT_ID);
+
+    Placement placement = new Placement();
+    placement.setId(PLACEMENT_ID);
+    placement.setSpecialties(new HashSet<>());
+
+    Post post = new Post();
+    post.setId(POST_ID);
+    placement.setPost(post);
+
+    Person trainee = new Person();
+    trainee.setId(PERSON_ID);
+    placement.setTrainee(trainee);
+
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(PLACEMENT_ID);
+
+    PlacementDetailsDTO updatedPlacementDetailsDTO = new PlacementDetailsDTO();
+    updatedPlacementDetailsDTO.setId(PLACEMENT_ID);
+
+    PlacementDTO resultDTO = new PlacementDTO();
+    resultDTO.setId(PLACEMENT_ID);
+
+    PlacementDTO existingPlacementDto = new PlacementDTO();
+    existingPlacementDto.setId(PLACEMENT_ID);
+
+    when(placementRepositoryMock.findById(PLACEMENT_ID)).thenReturn(Optional.of(placement));
+    when(placementMapperMock.placementToPlacementDTO(placement, null)).thenReturn(existingPlacementDto);
+    when(placementDetailsMapperMock.placementDetailsDTOToPlacementDetails(placementDetailsDTO))
+        .thenReturn(placementDetails);
+    when(placementRepositoryMock.saveAndFlush(placement)).thenReturn(placement);
+    when(placementMapperMock.placementToPlacementDTO(eq(placement), anyMap()))
+        .thenReturn(resultDTO);
+    doReturn(updatedPlacementDetailsDTO).when(testObj).createDetails(placementDetailsDTO, placement);
+    when(placementDetailsMapperMock.placementDetailsDtoToPlacementDto(updatedPlacementDetailsDTO))
+        .thenReturn(resultDTO);
+
+    testObj.saveDetails(placementDetailsDTO);
+
+    verify(applicationEventPublisher).publishEvent(placementSavedEventCaptor.capture());
+    PlacementSavedEvent event = placementSavedEventCaptor.getValue();
+    assertNotNull(event);
+    assertEquals(resultDTO, event.getPlacementDTO());
+    assertEquals(existingPlacementDto, event.getPreviousPlacementDto());
+  }
+
+  @Test
+  void saveListShouldPublishPlacementSavedEventForEachPlacement() {
+    PlacementDTO placementDTO1 = new PlacementDTO();
+    placementDTO1.setId(PLACEMENT_ID);
+    PlacementDTO placementDTO2 = new PlacementDTO();
+    placementDTO2.setId(PLACEMENT2_ID);
+    List<PlacementDTO> placementDTOs = Lists.newArrayList(placementDTO1, placementDTO2);
+
+    Placement placement1 = new Placement();
+    placement1.setId(PLACEMENT_ID);
+    Placement placement2 = new Placement();
+    placement2.setId(PLACEMENT2_ID);
+    List<Placement> placements = Lists.newArrayList(placement1, placement2);
+
+    PlacementDTO resultDTO1 = new PlacementDTO();
+    resultDTO1.setId(PLACEMENT_ID);
+    PlacementDTO resultDTO2 = new PlacementDTO();
+    resultDTO2.setId(PLACEMENT2_ID);
+    List<PlacementDTO> resultDTOs = Lists.newArrayList(resultDTO1, resultDTO2);
+
+    when(placementMapperMock.placementDTOsToPlacements(placementDTOs)).thenReturn(placements);
+    when(placementRepositoryMock.saveAll(placements)).thenReturn(placements);
+    when(placementMapperMock.placementsToPlacementDTOs(eq(placements), anyMap()))
+        .thenReturn(resultDTOs);
+
+    testObj.save(placementDTOs);
+
+    verify(applicationEventPublisher, times(2)).publishEvent(placementSavedEventCaptor.capture());
+    List<PlacementSavedEvent> events = placementSavedEventCaptor.getAllValues();
+    assertEquals(2, events.size());
+    assertEquals(placementDTO1, events.get(0).getPlacementDTO());
+    assertNull(events.get(0).getPreviousPlacementDto());
+    assertEquals(placementDTO2, events.get(1).getPlacementDTO());
+    assertNull(events.get(1).getPreviousPlacementDto());
+  }
+
+  @Test
+  void linkPlacementSpecialtiesShouldPublishPlacementSavedEventWhenNewPlacement() {
+    PlacementDetailsDTO placementDetailsDTO = new PlacementDetailsDTO();
+    placementDetailsDTO.setId(null);  // null means this is a new placement
+
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(1L);
+
+    Placement placement = new Placement();
+    placement.setId(1L);
+
+    PlacementDTO resultDTO = new PlacementDTO();
+    resultDTO.setId(1L);
+
+    when(placementRepositoryMock.findById(1L)).thenReturn(Optional.of(placement));
+    when(placementRepositoryMock.save(placement)).thenReturn(placement);
+    when(placementMapperMock.placementToPlacementDTO(eq(placement), anyMap()))
+        .thenReturn(resultDTO);
+
+    testObj.linkPlacementSpecialties(placementDetailsDTO, placementDetails);
+
+    verify(applicationEventPublisher).publishEvent(placementSavedEventCaptor.capture());
+    PlacementSavedEvent event = placementSavedEventCaptor.getValue();
+    assertNotNull(event);
+    assertEquals(resultDTO, event.getPlacementDTO());
+    assertNull(event.getPreviousPlacementDto());
+  }
+
+  @Test
+  void linkPlacementSpecialtiesShouldNotPublishPlacementSavedEventWhenExistingPlacement() {
+    PlacementDetailsDTO placementDetailsDTO = new PlacementDetailsDTO();
+    placementDetailsDTO.setId(1L);  // non-null means this is an existing placement
+
+    PlacementDetails placementDetails = new PlacementDetails();
+    placementDetails.setId(1L);
+
+    Placement placement = new Placement();
+    placement.setId(1L);
+
+    when(placementRepositoryMock.findById(1L)).thenReturn(Optional.of(placement));
+    when(placementRepositoryMock.save(placement)).thenReturn(placement);
+
+    testObj.linkPlacementSpecialties(placementDetailsDTO, placementDetails);
+
+    verify(applicationEventPublisher, times(0)).publishEvent(any(PlacementSavedEvent.class));
   }
 }

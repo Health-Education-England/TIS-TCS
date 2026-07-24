@@ -1,25 +1,20 @@
 package com.transformuk.hee.tis.tcs.service.event;
 
+import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 
 public class PlacementDeletedEvent extends ApplicationEvent {
 
-  private Long placementId;
-  private Long personId;
+  private final PlacementDTO placementDto;
 
-  public PlacementDeletedEvent(Long placementId, Long personId) {
-    super(placementId);
-    this.placementId = placementId;
-    this.personId = personId;
+  public PlacementDeletedEvent(PlacementDTO placementDto) {
+    super(placementDto);
+    this.placementDto = placementDto;
   }
 
-  public Long getPlacementId() {
-    return placementId;
-  }
-
-  public Long getPersonId() {
-    return personId;
+  public PlacementDTO getPlacementDto() {
+    return placementDto;
   }
 
   @Override
@@ -31,12 +26,11 @@ public class PlacementDeletedEvent extends ApplicationEvent {
       return false;
     }
     PlacementDeletedEvent that = (PlacementDeletedEvent) o;
-    return Objects.equals(placementId, that.placementId) &&
-        Objects.equals(personId, that.personId);
+    return Objects.equals(placementDto, that.placementDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(placementId, personId);
+    return Objects.hash(placementDto);
   }
 }

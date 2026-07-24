@@ -23,11 +23,16 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,8 +43,10 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PostViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
+import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
+import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewRowMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +55,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,12 +64,21 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class PostElasticSearchServiceTest {
+
+  private static final Long POST_ID = 111L;
+  private static final Long PROGRAMME_ID = 222L;
+  private static final Long SPECIAL_ID = 333L;
+  private static final String QUERY_TEMPLATE =
+      "SELECT * FROM post_view WHERECLAUSE ORDERBYCLAUSE LIMITCLAUSE";
 
   @Mock
   private ElasticsearchOperations elasticsearchOperations;
@@ -71,11 +88,20 @@ class PostElasticSearchServiceTest {
   private PermissionService permissionService;
   @Mock
   private PostViewMapper postViewMapper;
+  @Mock
+  private SqlQuerySupplier sqlQuerySupplier;
+  @Mock
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  @Mock
+  private IndexOperations indexOperations;
 
   @InjectMocks
   private PostElasticSearchService postElasticSearchService;
   private PostView postView;
   private PostViewDTO postViewDto;
+
+  @Captor
+  private ArgumentCaptor<MapSqlParameterSource> paramSourceCaptor;
 
   @BeforeEach
   void setUp() {
@@ -374,5 +400,145 @@ class PostElasticSearchServiceTest {
 
   private ColumnFilter columnFilter(String name, Object... values) {
     return new ColumnFilter(name, Arrays.asList(values));
+  }
+
+  @Test
+  void updatePostDocumentShouldDeleteSaveAndRefreshWhenResultIsNotEmpty() {
+    List<PostView> postViews = Lists.newArrayList(new PostView());
+
+    mockBaseQuery(postViews);
+
+    postElasticSearchService.updatePostDocument(POST_ID);
+
+    verify(namedParameterJdbcTemplate).query(
+        eq("SELECT * FROM post_view WHERE p.id=:id ORDER BY id DESC "),
+        paramSourceCaptor.capture(),
+        any(PostViewRowMapper.class));
+    assertEquals(POST_ID, paramSourceCaptor.getValue().getValue("id"));
+
+    verify(elasticsearchOperations).delete(POST_ID.toString(), PostView.class);
+    verify(elasticsearchOperations).save(postViews);
+    verify(indexOperations).refresh();
+
+    inOrder(elasticsearchOperations, indexOperations)
+        .verify(elasticsearchOperations).delete(POST_ID.toString(), PostView.class);
+    inOrder(elasticsearchOperations, indexOperations)
+        .verify(elasticsearchOperations).save(postViews);
+    inOrder(elasticsearchOperations, indexOperations)
+        .verify(indexOperations).refresh();
+  }
+
+  @Test
+  void updatePostDocumentShouldDeleteAndRefreshWhenResultIsEmpty() {
+    mockBaseQuery(Collections.emptyList());
+
+    postElasticSearchService.updatePostDocument(POST_ID);
+
+    verify(namedParameterJdbcTemplate).query(
+        eq("SELECT * FROM post_view WHERE p.id=:id ORDER BY id DESC "),
+        paramSourceCaptor.capture(),
+        any(PostViewRowMapper.class));
+    assertEquals(POST_ID, paramSourceCaptor.getValue().getValue("id"));
+
+    verify(elasticsearchOperations).delete(POST_ID.toString(), PostView.class);
+    verify(elasticsearchOperations, never()).save(anyIterable());
+    verify(indexOperations).refresh();
+  }
+
+  @Test
+  void updatePostDocumentsForSpecialtyShouldThrowWhenSpecialtyIdIsNull() {
+    assertThrows(NullPointerException.class,
+        () -> postElasticSearchService.updatePostDocumentsForSpecialty(null));
+  }
+
+  @Test
+  void updatePostDocumentsForSpecialtyShouldSaveWhenResultIsNotEmpty() {
+    List<PostView> postViews = Lists.newArrayList(new PostView());
+
+    when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(QUERY_TEMPLATE);
+    when(namedParameterJdbcTemplate.query(any(String.class), any(MapSqlParameterSource.class),
+        any(PostViewRowMapper.class))).thenReturn(postViews);
+
+    postElasticSearchService.updatePostDocumentsForSpecialty(SPECIAL_ID);
+
+    verify(namedParameterJdbcTemplate).query(
+        eq("SELECT * FROM post_view WHERE sp.id=:id ORDER BY id DESC "),
+        paramSourceCaptor.capture(),
+        any(PostViewRowMapper.class));
+    assertEquals(SPECIAL_ID, paramSourceCaptor.getValue().getValue("id"));
+
+    verify(elasticsearchOperations).save(postViews);
+    verify(elasticsearchOperations, never()).delete(any(String.class), eq(PostView.class));
+    verify(elasticsearchOperations, never()).indexOps(PostView.class);
+  }
+
+  @Test
+  void updatePostDocumentsForSpecialtyShouldSkipSaveWhenResultIsEmpty() {
+    when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(QUERY_TEMPLATE);
+    when(namedParameterJdbcTemplate.query(any(String.class), any(MapSqlParameterSource.class),
+        any(PostViewRowMapper.class))).thenReturn(Collections.emptyList());
+
+    postElasticSearchService.updatePostDocumentsForSpecialty(SPECIAL_ID);
+
+    verify(namedParameterJdbcTemplate).query(
+        eq("SELECT * FROM post_view WHERE sp.id=:id ORDER BY id DESC "),
+        paramSourceCaptor.capture(),
+        any(PostViewRowMapper.class));
+    assertEquals(SPECIAL_ID, paramSourceCaptor.getValue().getValue("id"));
+
+    verify(elasticsearchOperations, never()).save(anyIterable());
+    verify(elasticsearchOperations, never()).delete(any(String.class), eq(PostView.class));
+  }
+
+  @Test
+  void updatePostDocumentsForProgrammeShouldThrowWhenProgrammeIdIsNull() {
+    assertThrows(NullPointerException.class,
+        () -> postElasticSearchService.updatePostDocumentsForProgramme(null));
+  }
+
+  @Test
+  void updatePostDocumentsForProgrammeShouldSaveWhenResultIsNotEmpty() {
+    List<PostView> postViews = Lists.newArrayList(new PostView());
+
+    when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(QUERY_TEMPLATE);
+    when(namedParameterJdbcTemplate.query(any(String.class), any(MapSqlParameterSource.class),
+        any(PostViewRowMapper.class))).thenReturn(postViews);
+
+    postElasticSearchService.updatePostDocumentsForProgramme(PROGRAMME_ID);
+
+    verify(namedParameterJdbcTemplate).query(
+        eq("SELECT * FROM post_view WHERE prg.id=:id ORDER BY id DESC "),
+        paramSourceCaptor.capture(),
+        any(PostViewRowMapper.class));
+    assertEquals(PROGRAMME_ID, paramSourceCaptor.getValue().getValue("id"));
+
+    verify(elasticsearchOperations).save(postViews);
+    verify(elasticsearchOperations, never()).delete(any(String.class), eq(PostView.class));
+    verify(elasticsearchOperations, never()).indexOps(PostView.class);
+  }
+
+  @Test
+  void  updatePostDocumentsForProgrammeShouldSkipSaveWhenResultIsEmpty() {
+    when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(QUERY_TEMPLATE);
+    when(namedParameterJdbcTemplate.query(any(String.class), any(MapSqlParameterSource.class),
+        any(PostViewRowMapper.class))).thenReturn(Collections.emptyList());
+
+    postElasticSearchService.updatePostDocumentsForProgramme(PROGRAMME_ID);
+
+    verify(namedParameterJdbcTemplate).query(
+        eq("SELECT * FROM post_view WHERE prg.id=:id ORDER BY id DESC "),
+        paramSourceCaptor.capture(),
+        any(PostViewRowMapper.class));
+    assertEquals(PROGRAMME_ID, paramSourceCaptor.getValue().getValue("id"));
+
+    verify(elasticsearchOperations, never()).save(anyIterable());
+    verify(elasticsearchOperations, never()).delete(any(String.class), eq(PostView.class));
+  }
+
+  private void mockBaseQuery(List<PostView> queryResult) {
+    when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(QUERY_TEMPLATE);
+    when(elasticsearchOperations.indexOps(PostView.class)).thenReturn(indexOperations);
+    when(namedParameterJdbcTemplate.query(any(String.class), any(MapSqlParameterSource.class),
+        any(PostViewRowMapper.class))).thenReturn(queryResult);
   }
 }

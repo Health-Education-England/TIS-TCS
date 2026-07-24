@@ -3,18 +3,35 @@ package com.transformuk.hee.tis.tcs.service.event;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.lang.Nullable;
 
+/**
+ * An event triggered when a placement is saved.
+ */
 public class PlacementSavedEvent extends ApplicationEvent {
 
   private PlacementDTO placementDTO;
+  private PlacementDTO previousPlacementDto;
 
-  public PlacementSavedEvent(PlacementDTO source) {
+  /**
+   * Constructor for PlacementSavedEvent.
+   *
+   * @param previousPlacementDto the previous placement DTO, can be null if there was no previous
+   *                             placement
+   * @param source the current placement DTO that was saved
+   */
+  public PlacementSavedEvent(@Nullable PlacementDTO previousPlacementDto, PlacementDTO source) {
     super(source);
     this.placementDTO = source;
+    this.previousPlacementDto = previousPlacementDto;
   }
 
   public PlacementDTO getPlacementDTO() {
     return placementDTO;
+  }
+
+  public PlacementDTO getPreviousPlacementDto() {
+    return previousPlacementDto;
   }
 
   @Override
@@ -26,11 +43,12 @@ public class PlacementSavedEvent extends ApplicationEvent {
       return false;
     }
     PlacementSavedEvent that = (PlacementSavedEvent) o;
-    return Objects.equals(placementDTO, that.placementDTO);
+    return Objects.equals(placementDTO, that.placementDTO)
+        && Objects.equals(previousPlacementDto, that.previousPlacementDto);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(placementDTO);
+    return Objects.hash(placementDTO, previousPlacementDto);
   }
 }
