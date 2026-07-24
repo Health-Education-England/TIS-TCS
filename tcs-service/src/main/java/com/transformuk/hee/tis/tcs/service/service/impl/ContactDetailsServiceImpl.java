@@ -7,6 +7,7 @@ import com.transformuk.hee.tis.tcs.service.event.ContactDetailsSavedEvent;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.repository.ContactDetailsRepository;
 import com.transformuk.hee.tis.tcs.service.service.ContactDetailsService;
+import com.transformuk.hee.tis.tcs.service.service.helper.AfterCommitEventPublisher;
 import com.transformuk.hee.tis.tcs.service.service.mapper.ContactDetailsMapper;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
     contactDetails = contactDetailsRepository.saveAndFlush(contactDetails);
     ContactDetailsDTO updatedContactDetailsDto = contactDetailsMapper.toDto(contactDetails);
 
-    applicationEventPublisher.publishEvent(
+    AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher,
         new ContactDetailsSavedEvent(existingContactDetailsDto, updatedContactDetailsDto));
     return updatedContactDetailsDto;
   }
@@ -104,7 +105,7 @@ public class ContactDetailsServiceImpl implements ContactDetailsService {
     updatedContactDetailsDtos.stream().distinct().forEach(contactDetailsDto -> {
       ContactDetailsDTO previousContactDetailsDto =
           existingContactDetailDtos.get(contactDetailsDto.getId());
-      applicationEventPublisher.publishEvent(
+      AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher,
           new ContactDetailsSavedEvent(previousContactDetailsDto, contactDetailsDto));
     });
     return updatedContactDetailsDtos;

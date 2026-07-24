@@ -26,9 +26,8 @@ import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.service.PostElasticSearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Listens for PostSavedEvent and PostDeletedEvent and updates the corresponding PostView document
@@ -55,7 +54,7 @@ public class PostEventListener {
    *
    * @param event the PostSavedEvent containing the post ID to update
    */
-  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  @EventListener
   public void handlePostSavedEvent(PostSavedEvent event) {
     Long postId = event.getPostDto().getId();
     LOG.info("Received PostSavedEvent for id [{}]", postId);
@@ -67,7 +66,7 @@ public class PostEventListener {
    *
    * @param event the PostDeletedEvent containing the post ID to update
    */
-  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  @EventListener
   public void handlePostDeletedEvent(PostDeletedEvent event) {
     Long postId = event.getPostId();
     LOG.info("Received PostDeletedEvent for placement id [{}]", postId);

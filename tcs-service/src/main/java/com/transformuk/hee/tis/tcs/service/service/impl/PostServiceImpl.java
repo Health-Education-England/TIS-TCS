@@ -65,6 +65,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.service.EsrNotificationService;
 import com.transformuk.hee.tis.tcs.service.service.PostService;
+import com.transformuk.hee.tis.tcs.service.service.helper.AfterCommitEventPublisher;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
@@ -90,6 +91,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -173,7 +175,7 @@ public class PostServiceImpl implements PostService {
     updateFundingStatus(post);
     PostDTO savedPostDto = postMapper.postToPostDTO(post);
     handleNewPostEsrNotification(postDTO);
-    applicationEventPublisher.publishEvent(new PostSavedEvent(savedPostDto));
+    publishPostSavedEventAfterCommit(savedPostDto);
     return savedPostDto;
   }
 
@@ -208,8 +210,7 @@ public class PostServiceImpl implements PostService {
     posts = postRepository.saveAll(posts);
     posts.forEach(this::updateFundingStatus);
     List<PostDTO> savedPostDtos = postMapper.postsToPostDTOs(posts);
-    savedPostDtos.forEach(
-        postDto -> applicationEventPublisher.publishEvent(new PostSavedEvent(postDto)));
+    savedPostDtos.forEach(this::publishPostSavedEventAfterCommit);
     return savedPostDtos;
   }
 
@@ -433,7 +434,7 @@ public class PostServiceImpl implements PostService {
     currentInDbPost = postRepository.save(payloadPost);
     updateFundingStatus(currentInDbPost);
     PostDTO updatedPostDto = postMapper.postToPostDTO(currentInDbPost);
-    applicationEventPublisher.publishEvent(new PostSavedEvent(updatedPostDto));
+    publishPostSavedEventAfterCommit(updatedPostDto);
     return updatedPostDto;
   }
 
@@ -700,11 +701,23 @@ public class PostServiceImpl implements PostService {
       if (attachedPlacements.isEmpty()) {
         postRepository.clearPostReferences(id);
         postRepository.deleteById(id);
-        applicationEventPublisher.publishEvent(new PostDeletedEvent(id));
+        publishPostDeletedEventAfterCommit(id);
       } else {
         throw new IllegalStateException("Cannot delete post as it has associated placements.");
       }
     }
+  }
+
+  private void publishPostSavedEventAfterCommit(PostDTO postDto) {
+    publishEventAfterCommit(new PostSavedEvent(postDto));
+  }
+
+  private void publishPostDeletedEventAfterCommit(Long postId) {
+    publishEventAfterCommit(new PostDeletedEvent(postId));
+  }
+
+  private void publishEventAfterCommit(ApplicationEvent event) {
+    AfterCommitEventPublisher.publishEventAfterCommit(applicationEventPublisher, event);
   }
 
   /**
