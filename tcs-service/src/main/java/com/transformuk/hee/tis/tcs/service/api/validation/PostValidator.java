@@ -1,6 +1,8 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
+import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -20,10 +22,14 @@ import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.service.impl.NationalPostNumberServiceImpl;
 import com.transformuk.hee.tis.tcs.service.service.mapper.DesignatedBodyMapper;
 import java.lang.reflect.Method;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +50,13 @@ public class PostValidator {
   public static final String SPECIALTIES = "specialties";
   public static final String NATIONAL_POST_NUMBER = "nationalPostNumber";
   public static final String FUNDINGS = "fundings";
-  private ProgrammeRepository programmeRepository;
-  private PostRepository postRepository;
-  private SpecialtyRepository specialtyRepository;
-  private PlacementRepository placementRepository;
-  private ReferenceServiceImpl referenceService;
-  private NationalPostNumberServiceImpl nationalPostNumberServiceImpl;
+  private final ProgrammeRepository programmeRepository;
+  private final PostRepository postRepository;
+  private final SpecialtyRepository specialtyRepository;
+  private final PlacementRepository placementRepository;
+  private final ReferenceServiceImpl referenceService;
+  private final NationalPostNumberServiceImpl nationalPostNumberServiceImpl;
+  private Clock clock = Clock.systemDefaultZone();
 
   @Autowired
   public PostValidator(ProgrammeRepository programmeRepository,
@@ -64,6 +71,10 @@ public class PostValidator {
     this.placementRepository = placementRepository;
     this.referenceService = referenceService;
     this.nationalPostNumberServiceImpl = nationalPostNumberServiceImpl;
+  }
+
+  public void setClock(Clock clock) {
+    this.clock = clock;
   }
 
   /**
@@ -296,24 +307,64 @@ public class PostValidator {
     return fieldErrors;
   }
 
-  private Collection<? extends FieldError> checkFunding(PostDTO postDto) {
+  private List<FieldError> checkFunding(PostDTO postDto) {
+    if (CollectionUtils.isEmpty(postDto.getFundings())) {
+      return new ArrayList<>();
+    }
+
+    return postDto.getFundings().stream()
+        .flatMap(postFundingDto -> getFundingErrors(postFundingDto).stream())
+        .collect(Collectors.toList());
+  }
+
+  private List<FieldError> getFundingErrors(PostFundingDTO postFundingDto) {
     List<FieldError> fieldErrors = new ArrayList<>();
-    if (postDto.getFundings() != null && !postDto.getFundings().isEmpty()) {
-      for (PostFundingDTO postFundingDto : postDto.getFundings()) {
-        if (postFundingDto.getStartDate() == null) {
-          fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
-              "Post funding start date cannot be null or empty"));
-        } else if (postFundingDto.getEndDate() != null
-            && !postFundingDto.getEndDate().isAfter(postFundingDto.getStartDate())) {
-          fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
-              "Post funding end date must not be equal to or before start date"));
-        } else if (postFundingDto.getFundingType() == null) {
-          fieldErrors.add(
-              new FieldError(POST_DTO_NAME, FUNDINGS,
-              "Post Funding must have a funding type"));
-        }
+    if (postFundingDto.getStartDate() == null) {
+      fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
+          "Post funding start date cannot be null or empty"));
+    } else if (postFundingDto.getEndDate() != null
+        && !postFundingDto.getEndDate().isAfter(postFundingDto.getStartDate())) {
+      fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
+          "Post funding end date must not be equal to or before start date"));
+    } else if (postFundingDto.getFundingType() == null) {
+      fieldErrors.add(
+          new FieldError(POST_DTO_NAME, FUNDINGS, "Post Funding must have a funding type"));
+    }
+    boolean isCurrentFunding = postFundingDto.getEndDate() == null
+        || !postFundingDto.getEndDate().isBefore(LocalDate.now(clock));
+
+    // If a current funding type is provided, check whether it has valid subtypes.
+    if (isCurrentFunding && StringUtils.isNotBlank(postFundingDto.getFundingType())) {
+      List<FundingSubTypeDto> currentFundingSubTypes =
+          extractFundingSubTypesFromFundingType(Set.of(postFundingDto.getFundingType()));
+
+      if (CollectionUtils.isEmpty(currentFundingSubTypes)) {
+        return fieldErrors;
+      }
+
+      Set<UUID> currentFundingSubTypeIds = currentFundingSubTypes.stream()
+          .map(FundingSubTypeDto::getId)
+          .collect(Collectors.toSet());
+      UUID fundingSubTypeId = postFundingDto.getFundingSubTypeId();
+      if (fundingSubTypeId == null) {
+        fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
+            "Missing funding subtype. Check funding uses subtypes where available."));
+      } else if (!currentFundingSubTypeIds.contains(fundingSubTypeId)) {
+        fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
+            "Invalid funding subtype for the provided funding type."));
       }
     }
     return fieldErrors;
   }
+
+  private List<FundingSubTypeDto> extractFundingSubTypesFromFundingType(
+      Set<String> fundingTypeLabels) {
+    List<FundingTypeDTO> fundingTypes = referenceService.findCurrentFundingTypesByLabelIn(
+        fundingTypeLabels);
+    return fundingTypes.stream()
+        .flatMap(fundingType -> referenceService
+            .findCurrentFundingSubTypesForFundingTypeId(fundingType.getId()).stream())
+        .collect(Collectors.toList());
+  }
 }
+

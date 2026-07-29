@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,12 +56,12 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -71,7 +72,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -83,9 +84,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
  * Test class created to do integration tests on the controller layer only while mocking everything
  * else
  */
-@RunWith(SpringRunner.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest(classes = Application.class)
-public class PostResource2Test {
+class PostResource2Test {
 
   public static final String POST_DTO_NAME = "PostDTO";
   public static final String SPECIAL_CHARACTERS = "#%$^&**(";
@@ -129,8 +130,9 @@ public class PostResource2Test {
   private ArgumentCaptor<PostSavedEvent> postSavedEventArgumentCaptor;
   private PostEsrEventDto postEsrReconciledDto;
   private PostResource postResource;
-  @Before
-  public void setup() {
+
+  @BeforeEach
+  void setup() {
     postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator,
         placementViewMapper, placementService, placementSummaryDecorator,
@@ -170,48 +172,48 @@ public class PostResource2Test {
   }
 
   @Test
-  public void createPostShouldReturnBadRequestWhenPostIsNotValid() throws Exception {
+  void createPostShouldReturnBadRequestWhenPostIsNotValid() throws Exception {
     BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
     doThrow(new MethodArgumentNotValidException(null, bindingResult)).when(postValidator)
         .validate(postDTO);
 
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  public void createPostShouldReturnBadRequestWhenIdIsNotNull() throws Exception {
+  void createPostShouldReturnBadRequestWhenIdIsNotNull() throws Exception {
     postDTO.setId(1L);
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  public void createPostShouldReturnOk() throws Exception {
+  void createPostShouldReturnOk() throws Exception {
     PostDTO savedPostDTO = new PostDTO();
     savedPostDTO.setId(1L);
     when(postService.save(postDTOArgumentCaptor.capture())).thenReturn(savedPostDTO);
 
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isCreated())
         .andExpect(header().string("location", "/api/posts/1"))
         .andExpect(jsonPath("$.id").value(1));
 
     PostDTO capturedPost = postDTOArgumentCaptor.getValue();
-    Assert.assertEquals(postDTO, capturedPost);
+    assertEquals(postDTO, capturedPost);
   }
 
   @Test
-  public void createPostShouldReturnOkWhenPostsNationalPostNumberContainsSpecialChars()
+  void createPostShouldReturnOkWhenPostsNationalPostNumberContainsSpecialChars()
       throws Exception {
     postDTO.setNationalPostNumber(SPECIAL_CHARACTERS);
 
@@ -222,53 +224,54 @@ public class PostResource2Test {
 
     // Create the Post
     restPostMockMvc.perform(post("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isCreated())
         .andExpect(header().string("location", "/api/posts/1"))
         .andExpect(jsonPath("$.id").value(1));
 
     PostDTO capturedPost = postDTOArgumentCaptor.getValue();
-    Assert.assertEquals(postDTO, capturedPost);
-    Assert.assertEquals(SPECIAL_CHARACTERS, capturedPost.getNationalPostNumber());
+    assertEquals(postDTO, capturedPost);
+    assertEquals(SPECIAL_CHARACTERS,
+        capturedPost.getNationalPostNumber());
   }
 
   @Test
-  public void updatePostShouldFailValidationWhenNoIdIsProvided() throws Exception {
+  void updatePostShouldFailValidationWhenNoIdIsProvided() throws Exception {
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  public void updatePostShouldReturnBaRequestWhenFailingValidation() throws Exception {
+  void updatePostShouldReturnBaRequestWhenFailingValidation() throws Exception {
     BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(postDTO, POST_DTO_NAME);
     doThrow(new MethodArgumentNotValidException(null, bindingResult)).when(postValidator)
         .validate(postDTO);
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  public void updatePostShouldReturnOkWhenPostIsUpdated() throws Exception {
+  void updatePostShouldReturnOkWhenPostIsUpdated() throws Exception {
     postDTO.setId(1L);
     PostDTO updatedPost = new PostDTO().id(1L);
 
     when(postService.update(postDTO)).thenReturn(updatedPost);
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value("1"));
   }
 
   @Test
-  public void updatePostShouldReturnUnauth() throws Exception {
+  void updatePostShouldReturnUnauth() throws Exception {
     long postId = 1L;
     postDTO.setId(postId);
 
@@ -277,35 +280,35 @@ public class PostResource2Test {
         .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
   }
 
   @Test
-  public void getPostShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
+  void getPostShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
     long postId = 1L;
 
     doThrow(new AccessUnauthorisedException("")).when(postService)
         .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(get("/api/posts/{id}", postId)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(postService, never()).findOne(any());
   }
 
   @Test
-  public void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
+  void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrust() throws Exception {
     long personId = 1L;
 
     doThrow(new AccessUnauthorisedException("")).when(postService)
         .canLoggedInUserViewOrAmend(personId);
 
     restPostMockMvc.perform(get("/api/posts/{id}/placements", personId)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(placementViewRepository, never()).findAllByPostIdOrderByDateToDesc(any());
@@ -314,14 +317,14 @@ public class PostResource2Test {
   }
 
   @Test
-  public void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrustNew() throws Exception {
+  void getPostPlacementShouldReturnUnauthWhenUserNotPartOfSameTrustNew() throws Exception {
     long postId = 1L;
 
     doThrow(new AccessUnauthorisedException("")).when(postService)
         .canLoggedInUserViewOrAmend(postId);
 
     restPostMockMvc.perform(get("/api/posts/{postId}/placements/new", postId)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.message").value("error.accessDenied"));
     verify(placementService, never()).getPlacementForPost(any());
@@ -329,7 +332,7 @@ public class PostResource2Test {
   }
 
   @Test
-  public void deletePostShouldReturnUnauthWhenUserDbNotSameAsPostOwner() throws Exception {
+  void deletePostShouldReturnUnauthWhenUserDbNotSameAsPostOwner() throws Exception {
     long postId = 1L;
 
     doThrow(new AccessUnauthorisedException("")).when(postService).delete(postId);
@@ -341,7 +344,7 @@ public class PostResource2Test {
   }
 
   @Test
-  public void updatePostShouldFailWhenThereAreMultiplePrimarySpecialtiesAttached()
+  void updatePostShouldFailWhenThereAreMultiplePrimarySpecialtiesAttached()
       throws Exception {
 
     postDTO.setId(1L);
@@ -358,8 +361,8 @@ public class PostResource2Test {
             postValidator).validate(any(PostDTO.class));
 
     restPostMockMvc.perform(put("/api/posts")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("error.validation"))
         .andExpect(jsonPath("$.fieldErrors[0].field").value("specialties"))
@@ -368,7 +371,7 @@ public class PostResource2Test {
   }
 
   @Test
-  public void shouldUseElasticSearchServiceWhenEnableEsSearchIsEnabled() throws Exception {
+  void shouldUseElasticSearchServiceWhenEnableEsSearchIsEnabled() throws Exception {
     ReflectionTestUtils.setField(postResource, "enableEsSearch", true);
     PostViewDTO postViewDTO = new PostViewDTO();
     postViewDTO.setId(243906L);
@@ -414,7 +417,7 @@ public class PostResource2Test {
   }
 
   @Test
-  public void getAllPostsForProgrammeShouldReturnFoundDtos() throws Exception {
+  void getAllPostsForProgrammeShouldReturnFoundDtos() throws Exception {
     long programmeId = 1L;
     String programmeName = "PROGRAMME NAME";
     long postId = 2L;
@@ -435,7 +438,7 @@ public class PostResource2Test {
         .thenReturn(expectedList);
 
     restPostMockMvc.perform(get("/api/programme/{id}/posts", programmeId)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON.toString()))
         .andExpect(jsonPath("$[0].id").value(postId))
@@ -447,7 +450,7 @@ public class PostResource2Test {
   }
 
   @Test
-  public void getAllPostsForProgrammeShouldReturnFoundDtosWithNpnSearch() throws Exception {
+  void getAllPostsForProgrammeShouldReturnFoundDtosWithNpnSearch() throws Exception {
     long programmeId = 1L;
     String programmeName = "PROGRAMME NAME";
     long postId = 2L;
@@ -467,7 +470,7 @@ public class PostResource2Test {
     when(postService.findPostsForProgrammeIdAndNpn(programmeId, postNpn)).thenReturn(expectedList);
 
     restPostMockMvc.perform(get("/api/programme/{id}/posts?npn=NPN", programmeId)
-        .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON.toString()))
         .andExpect(jsonPath("$[0].id").value(postId))
@@ -479,13 +482,13 @@ public class PostResource2Test {
   }
 
   @Test
-  public void markPostAsEsrPositionChangedShouldCallServiceToMarkItAsChanged() throws Exception {
+  void markPostAsEsrPositionChangedShouldCallServiceToMarkItAsChanged() throws Exception {
 
     PostEsrEvent newPostEvent = new PostEsrEvent();
     doReturn(Optional.of(newPostEvent))
         .when(postService)
         .markPostAsEsrPositionChanged(eq(RECONCILED_POST_ID), postEsrReconciledDtoArgumentCaptor
-        .capture());
+            .capture());
 
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
@@ -496,10 +499,10 @@ public class PostResource2Test {
         .andExpect(status().isOk());
 
     PostEsrEventDto capturedPayload = postEsrReconciledDtoArgumentCaptor.getValue();
-    Assert.assertEquals(postEsrReconciledDto.getEventDateTime(), capturedPayload.getEventDateTime());
-    Assert.assertEquals(postEsrReconciledDto.getFilename(), capturedPayload.getFilename());
-    Assert.assertEquals(postEsrReconciledDto.getPostId(), capturedPayload.getPostId());
-    Assert.assertEquals(postEsrReconciledDto.getPositionNumber(), capturedPayload.getPositionNumber());
-    Assert.assertEquals(postEsrReconciledDto.getPositionId(), capturedPayload.getPositionId());
+    assertEquals(postEsrReconciledDto.getEventDateTime(), capturedPayload.getEventDateTime());
+    assertEquals(postEsrReconciledDto.getFilename(), capturedPayload.getFilename());
+    assertEquals(postEsrReconciledDto.getPostId(), capturedPayload.getPostId());
+    assertEquals(postEsrReconciledDto.getPositionNumber(), capturedPayload.getPositionNumber());
+    assertEquals(postEsrReconciledDto.getPositionId(), capturedPayload.getPositionId());
   }
 }

@@ -38,20 +38,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +62,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @see PostFundingResource
  */
 
-@RunWith(SpringRunner.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest(classes = Application.class)
-public class PostFundingResourceIntTest {
+class PostFundingResourceIntTest {
 
   private static final Long FUNDING_TYPE_ID = 1L;
   private static final String FUNDING_TYPE = "Trust Funded";
@@ -111,25 +111,21 @@ public class PostFundingResourceIntTest {
    * This is a static method, as tests for other entities might also need it, if they test an entity
    * which requires the current entity.
    */
-  public static PostFunding createEntity(EntityManager em) {
-    PostFunding postFunding = new PostFunding();
-    return postFunding;
+  public static PostFunding createEntity() {
+    return new PostFunding();
   }
 
-  /**
-   * Create another entity for this test.
-   * <p>
-   * This is a static method, as tests for other entities might also need it, if they test an entity
-   * which requires another entity - e.g. for testing in bulk.
-   */
-  public static PostFunding createAnotherEntity(EntityManager em) {
-    PostFunding anotherPostFunding = new PostFunding();
-    return anotherPostFunding;
-  }
+  @BeforeEach
+  @Transactional
+  void initTest() {
+    postFunding = createEntity();
+    anotherPostFunding = createEntity();
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
+    Post post = new Post();
+    postRepository.saveAndFlush(post);
+    postFunding.setPost(post);
+    anotherPostFunding.setPost(post);
+
     postFundingValidator = new PostFundingValidator(referenceServiceMock);
     PostFundingResource postFundingResource = new PostFundingResource(postFundingService,
         postFundingValidator, applicationEventPublisher);
@@ -139,21 +135,9 @@ public class PostFundingResourceIntTest {
         .setMessageConverters(jacksonMessageConverter).build();
   }
 
-  @Before
-  @Transactional
-  public void initTest() {
-    postFunding = createEntity(em);
-    anotherPostFunding = createAnotherEntity(em);
-
-    Post post = new Post();
-    postRepository.saveAndFlush(post);
-    postFunding.setPost(post);
-    anotherPostFunding.setPost(post);
-  }
-
   @Test
   @Transactional
-  public void createPostFunding() throws Exception {
+  void createPostFunding() throws Exception {
     int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
 
     // Create the PostFunding
@@ -170,7 +154,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldCreateBulkPostFundings() throws Exception {
+  void shouldCreateBulkPostFundings() throws Exception {
     int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
 
     // Create two post funding DTOs and add to a list
@@ -207,7 +191,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldUpdateBulkPostFundings() throws Exception {
+  void shouldUpdateBulkPostFundings() throws Exception {
     // Add some post fundings
     PostFunding updatedPostFunding = postFundingRepository.saveAndFlush(postFunding);
     PostFunding anotherUpdatedPostFunding = postFundingRepository.saveAndFlush(anotherPostFunding);
@@ -252,7 +236,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void createPostFundingWithExistingId() throws Exception {
+  void createPostFundingWithExistingId() throws Exception {
     int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
 
     // Create the PostFunding with an existing ID
@@ -275,7 +259,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void getAllPostFundings() throws Exception {
+  void getAllPostFundings() throws Exception {
     // Initialize the database
     postFundingRepository.saveAndFlush(postFunding);
 
@@ -288,7 +272,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void getPostFunding() throws Exception {
+  void getPostFunding() throws Exception {
     // Initialize the database
     postFundingRepository.saveAndFlush(postFunding);
 
@@ -301,7 +285,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void getNonExistingPostFunding() throws Exception {
+  void getNonExistingPostFunding() throws Exception {
     // Get the postFunding
     restPostFundingMockMvc.perform(get("/api/post-fundings/{id}", Long.MAX_VALUE))
         .andExpect(status().isNotFound());
@@ -309,7 +293,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void updatePostFunding() throws Exception {
+  void updatePostFunding() throws Exception {
     // Initialize the database
     postFunding.setFundingSubTypeId(FUNDING_SUBTYPE_ID_1);
     postFunding.setFundingReasonId(FUNDING_REASON_ID_1);
@@ -356,7 +340,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldNotUpdatePostFundingWhenValidationFails() throws Exception {
+  void shouldNotUpdatePostFundingWhenValidationFails() throws Exception {
     // Initialize the database
     postFunding.setFundingSubTypeId(FUNDING_SUBTYPE_ID_1);
     postFunding.setFundingReasonId(FUNDING_REASON_ID_1);
@@ -403,7 +387,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void updateNonExistingPostFunding() throws Exception {
+  void updateNonExistingPostFunding() throws Exception {
     int databaseSizeBeforeUpdate = postFundingRepository.findAll().size();
 
     // Create the PostFunding
@@ -422,7 +406,7 @@ public class PostFundingResourceIntTest {
 
   @Test
   @Transactional
-  public void deletePostFunding() throws Exception {
+  void deletePostFunding() throws Exception {
     // Initialize the database
     postFundingRepository.saveAndFlush(postFunding);
     int databaseSizeBeforeDelete = postFundingRepository.findAll().size();
