@@ -535,6 +535,32 @@ class PostElasticSearchServiceTest {
     verify(elasticsearchOperations, never()).delete(any(String.class), eq(PostView.class));
   }
 
+  @Test
+  void shouldContainCaseInsensitiveNationalPostNumberSearch() {
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
+
+    when(postViewMapper.toDtos(anyList())).thenReturn(List.of(postViewDto));
+
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
+
+    postElasticSearchService.searchForPage(
+        "nwn",
+        Collections.emptyList(),
+        PageRequest.of(0, 20)
+    );
+
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
+
+    assertThat(queryAsString)
+        .contains("nationalPostNumber", "*nwn*", "*NWN*");
+  }
+
   private void mockBaseQuery(List<PostView> queryResult) {
     when(sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(QUERY_TEMPLATE);
     when(elasticsearchOperations.indexOps(PostView.class)).thenReturn(indexOperations);
