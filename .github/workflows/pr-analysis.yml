@@ -8,7 +8,7 @@ on:
 jobs:
   analysis:
     name: Analyse PR
-    uses: health-education-england/.github/.github/workflows/pr-analysis-maven.yml@main
+    uses: ./.github/workflows/pr-analysis-maven.yml
     with:
       use-codeartifact: true
     secrets:

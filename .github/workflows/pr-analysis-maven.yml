@@ -1,0 +1,117 @@
+name: PR Analysis
+
+permissions:
+  id-token: write
+  pull-requests: write
+  contents: read
+  issues: write
+
+
+on:
+  workflow_call:
+    inputs:
+      use-codeartifact:
+        description: Whether code artifact should be used to perform the build.
+        required: false
+        type: boolean
+      java-version:
+        default: "17"
+        description: The Java version used to build the project
+        type: string
+    secrets:
+      sonar-token:
+        description: A token allowing access to SonarCloud.
+        required: true
+      checkout-token:
+        description: The token used for performing checkout for private repos.
+        required: false
+
+jobs :
+  analyse:
+    name: Analyse PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.checkout-token ||  github.token  }}
+
+      - name: Set up build JDK
+        uses: actions/setup-java@v4.0.0
+        with:
+          cache: maven
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+
+      - name: Configure AWS credentials
+        if: inputs.use-codeartifact
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: arn:aws:iam::430723991443:role/github-actions-deployer-role
+
+      - name: Add CodeArtifact env var
+        if: inputs.use-codeartifact
+        run: |
+          CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain hee --domain-owner 430723991443 --query authorizationToken --output text --duration-seconds 1200`
+          echo CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN >> $GITHUB_ENV
+          echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
+
+      - name: maven-settings-xml-action
+        if: inputs.use-codeartifact
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
+          repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: Build
+        run: mvn --batch-mode install
+
+      - name: Get modified files
+        id: changed-files
+        uses: Ana06/get-changed-files@v2.3.0
+
+      - name: Check modified files
+        id: check-files
+        run: |
+          do_analysis=false
+          for changed_file in ${{ steps.changed-files.outputs.all }}; do
+            if [[ $changed_file =~ ^(.*\/|)src\/.+$ ]]; then
+              do_analysis=true
+              break
+            fi
+          done
+          echo "do-analysis=$do_analysis" >> $GITHUB_OUTPUT
+
+      - name: Notify skipped analysis
+        if: steps.check-files.outputs.do-analysis == 'false'
+        uses: mshick/add-pr-comment@v2
+        with:
+          allow-repeats: true
+          repo-token: ${{ github.token }}
+          message: |
+            Quality analysis was skipped as no source changes were detected.
+
+      - name: Set up analysis JDK
+        if: steps.check-files.outputs.do-analysis == 'true' && fromJSON(inputs.java-version) < 21
+        uses: actions/setup-java@v5
+        with:
+          cache: maven
+          distribution: temurin
+          java-version: 21
+
+      - name: maven-settings-xml-action
+        if: steps.check-files.outputs.do-analysis == 'true' && inputs.use-codeartifact && fromJSON(inputs.java-version) < 21
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
+          repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: Analyse quality
+        if: steps.check-files.outputs.do-analysis == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SONAR_TOKEN: ${{ secrets.sonar-token }}
+        run: mvn --batch-mode sonar:sonar
