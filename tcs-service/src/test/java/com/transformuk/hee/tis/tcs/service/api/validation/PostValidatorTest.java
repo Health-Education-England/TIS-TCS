@@ -60,6 +60,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -119,26 +120,12 @@ class PostValidatorTest {
         equalTo("Post funding start date cannot be null or empty"));
   }
 
-  @Test
-  void shouldFailValidationWhenFundingEndDateIsBeforeStartDate() {
+  @ParameterizedTest
+  @ValueSource(strings = {"2025-01-18", "2025-01-19"})
+  void shouldFailValidationWhenFundingEndDateIsNotAfterStartDate(LocalDate end) {
     PostFundingDTO funding = new PostFundingDTO();
-    funding.setStartDate(TOMORROW);
-    funding.setEndDate(YESTERDAY);
-    dto.setFundings(Collections.singleton(funding));
-
-    MethodArgumentNotValidException exception =
-        assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
-    List<FieldError> errors = exception.getBindingResult().getFieldErrors();
-    assertThat(errors, hasSize(1));
-    assertThat(errors.get(0).getDefaultMessage(),
-        equalTo("Post funding end date must not be equal to or before start date"));
-  }
-
-  @Test
-  void shouldFailValidationWhenFundingEndDateEqualsStartDate() {
-    PostFundingDTO funding = new PostFundingDTO();
-    funding.setStartDate(TODAY);
-    funding.setEndDate(TODAY);
+    funding.setStartDate(LocalDate.parse("2025-01-19"));
+    funding.setEndDate(end);
     dto.setFundings(Collections.singleton(funding));
 
     MethodArgumentNotValidException exception =
