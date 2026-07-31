@@ -24,9 +24,12 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
+import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -44,15 +47,22 @@ import com.transformuk.hee.tis.tcs.service.repository.PlacementRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
 import com.transformuk.hee.tis.tcs.service.repository.SpecialtyRepository;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -62,7 +72,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @ExtendWith(MockitoExtension.class)
 class PostValidatorTest {
 
+  private static final Clock FIXED_CLOCK =
+      Clock.fixed(Instant.parse("2026-07-27T00:00:00Z"), ZoneOffset.UTC);
+  private static final LocalDate TODAY = LocalDate.now(FIXED_CLOCK);
+  private static final LocalDate YESTERDAY = TODAY.minusDays(1);
+  private static final LocalDate TOMORROW = TODAY.plusDays(1);
+
   PostDTO dto;
+
   @InjectMocks
   PostValidator testObj;
   @Mock
@@ -78,6 +95,7 @@ class PostValidatorTest {
 
   @BeforeEach
   void setUp() {
+    testObj.setClock(FIXED_CLOCK);
     dto = new PostDTO();
     dto.setNationalPostNumber("npn");
     dto.setOwner("London LETBs");
@@ -91,7 +109,7 @@ class PostValidatorTest {
 
   @ParameterizedTest
   @CsvSource(value = {"null,null", "null,2023-04-01"}, nullValues = {"null"})
-  void shouldFailValidationWhenFundingDatesNotValid(LocalDate start, LocalDate end) {
+  void shouldFailValidationWhenFundingStartDateIsNull(LocalDate start, LocalDate end) {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(start);
     funding.setEndDate(end);
@@ -104,11 +122,35 @@ class PostValidatorTest {
         equalTo("Post funding start date cannot be null or empty"));
   }
 
-  @Test
-  void shouldFailValidationWhenFundingTypeNull() {
+  @ParameterizedTest
+  @MethodSource("invalidFundingEndDateCases")
+  void shouldFailValidationWhenFundingEndDateIsEqualToOrBeforeStartDate(LocalDate start,
+      LocalDate end) {
     PostFundingDTO funding = new PostFundingDTO();
-    funding.setStartDate(LocalDate.now().minusDays(1));
-    funding.setEndDate(LocalDate.now().plusMonths(1));
+    funding.setStartDate(start);
+    funding.setEndDate(end);
+    dto.setFundings(Collections.singleton(funding));
+
+    MethodArgumentNotValidException exception =
+        assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
+    List<FieldError> errors = exception.getBindingResult().getFieldErrors();
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getDefaultMessage(),
+        equalTo("Post funding end date must not be equal to or before start date"));
+  }
+
+  private static Stream<Arguments> invalidFundingEndDateCases() {
+    return Stream.of(
+        Arguments.of(TODAY, YESTERDAY),
+        Arguments.of(TODAY, TODAY)
+    );
+  }
+
+  @Test
+  void shouldFailValidationWhenFundingTypeIsNull() {
+    PostFundingDTO funding = new PostFundingDTO();
+    funding.setStartDate(YESTERDAY);
+    funding.setEndDate(TOMORROW);
     dto.setFundings(Collections.singleton(funding));
     MethodArgumentNotValidException exception =
         assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
@@ -238,5 +280,102 @@ class PostValidatorTest {
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getDefaultMessage(),
         equalTo("Cannot create post with NPN override there are other posts with the same NPN"));
+  }
+
+  @Test
+  void shouldFailValidationWhenPostFundingMissingSubtype() {
+    // PostFundingDTO with null subtype and a valid funding type
+    PostFundingDTO funding = new PostFundingDTO();
+    funding.setStartDate(YESTERDAY);
+    funding.setEndDate(TOMORROW);
+    funding.setFundingType("FUNDING_TYPE");
+
+    FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
+    fundingTypeDTO.setId(1L);
+    fundingTypeDTO.setLabel("FUNDING_TYPE");
+
+    FundingSubTypeDto fundingSubTypeDto = new FundingSubTypeDto();
+    fundingSubTypeDto.setFundingType(fundingTypeDTO);
+    fundingSubTypeDto.setId(UUID.randomUUID());
+    fundingSubTypeDto.setLabel("SUBTYPE");
+    dto.setFundings(Collections.singleton(funding));
+
+    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+        .thenReturn(List.of(fundingTypeDTO));
+    when(referenceService
+        .findCurrentFundingSubTypesForFundingTypeId(fundingTypeDTO.getId()))
+        .thenReturn(List.of(fundingSubTypeDto));
+
+    MethodArgumentNotValidException exception =
+        assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
+    List<FieldError> errors = exception.getBindingResult().getFieldErrors();
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getDefaultMessage(),
+        equalTo("Missing funding subtype. Check funding uses subtypes where available."));
+  }
+
+  @Test
+  void shouldFailValidationWhenPostFundingSubtypeNotRelatedToFundingType() {
+    UUID uuid1 = UUID.randomUUID();
+    UUID uuid2 = UUID.randomUUID();
+
+    PostFundingDTO funding = new PostFundingDTO();
+    funding.setStartDate(YESTERDAY);
+    funding.setEndDate(TOMORROW);
+    funding.setFundingType("FUNDING_TYPE");
+    funding.setFundingSubTypeId(uuid1);
+
+    FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
+    fundingTypeDTO.setId(1L);
+    fundingTypeDTO.setLabel("FUNDING_TYPE");
+
+    FundingSubTypeDto fundingSubTypeDto = new FundingSubTypeDto();
+    fundingSubTypeDto.setFundingType(fundingTypeDTO);
+    fundingSubTypeDto.setId(uuid2);
+    fundingSubTypeDto.setLabel("SUBTYPE");
+    dto.setFundings(Collections.singleton(funding));
+
+    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+        .thenReturn(List.of(fundingTypeDTO));
+    when(referenceService
+        .findCurrentFundingSubTypesForFundingTypeId(fundingTypeDTO.getId()))
+        .thenReturn(List.of(fundingSubTypeDto));
+
+    MethodArgumentNotValidException exception =
+        assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
+    List<FieldError> errors = exception.getBindingResult().getFieldErrors();
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getDefaultMessage(),
+        equalTo("Invalid funding subtype for the provided funding type."));
+  }
+
+  @Test
+  void shouldPassValidationWhenPostFundingNotMissingValidSubtype() {
+    UUID uuid = UUID.randomUUID();
+
+    PostFundingDTO funding = new PostFundingDTO();
+    funding.setStartDate(YESTERDAY);
+    funding.setEndDate(TOMORROW);
+    funding.setFundingType("FUNDING_TYPE");
+    funding.setFundingSubTypeId(uuid);
+    dto.setFundings(Collections.singleton(funding));
+
+    FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
+    fundingTypeDTO.setId(1L);
+    fundingTypeDTO.setLabel("FUNDING_TYPE");
+
+    FundingSubTypeDto fundingSubTypeDto = new FundingSubTypeDto();
+    fundingSubTypeDto.setFundingType(fundingTypeDTO);
+    fundingSubTypeDto.setId(uuid);
+    fundingSubTypeDto.setLabel("SUBTYPE");
+    dto.setFundings(Collections.singleton(funding));
+
+    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+        .thenReturn(List.of(fundingTypeDTO));
+    when(referenceService
+        .findCurrentFundingSubTypesForFundingTypeId(fundingTypeDTO.getId()))
+        .thenReturn(List.of(fundingSubTypeDto));
+
+    assertDoesNotThrow(() -> testObj.validate(dto));
   }
 }

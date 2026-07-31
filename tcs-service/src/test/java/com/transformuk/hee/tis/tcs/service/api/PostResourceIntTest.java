@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,8 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
-import com.transformuk.hee.tis.reference.client.ReferenceService;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -76,22 +78,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.apache.commons.codec.net.URLCodec;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,9 +105,9 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @see PostResource
  */
-@RunWith(SpringRunner.class)
+@ExtendWith({MockitoExtension.class})
 @SpringBootTest(classes = Application.class)
-public class PostResourceIntTest {
+class PostResourceIntTest {
 
   public static final String DEFAULT_TRAINEE_EMAIL = "EMAIL@email.com";
   public static final String DEFAULT_TRAINEE_SURNAME = "PERSON_SURNAME";
@@ -148,7 +153,7 @@ public class PostResourceIntTest {
   private SpecialtyRepository specialtyRepository;
   @Autowired
   private PostMapper postMapper;
-  @Mock
+  @MockBean
   private ReferenceServiceImpl referenceService;
   @Mock
   private PostElasticSearchService postElasticSearchService;
@@ -194,8 +199,9 @@ public class PostResourceIntTest {
   private PostSpecialty postSpecialty;
   private Programme programme;
   private Set<PostFunding> postFundings;
-  @Mock
-  private ReferenceService referenceServiceMock;
+  private FundingTypeDTO trustFundingType;
+  private FundingTypeDTO tariffFundingType;
+  private FundingSubTypeDto fundingSubtype;
 
   /**
    * Create an entity for this test.
@@ -287,9 +293,14 @@ public class PostResourceIntTest {
     return postFundings;
   }
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
+  private static FundingTypeDTO createFundingTypeDTO(String label) {
+    FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
+    fundingTypeDTO.setLabel(label);
+    return fundingTypeDTO;
+  }
+
+  @BeforeEach
+  void setup() {
     PostResource postResource = new PostResource(postService, postValidator,
         placementViewRepository, placementViewDecorator, placementViewMapper, placementService,
         placementSummaryDecorator, postElasticSearchService);
@@ -298,10 +309,7 @@ public class PostResourceIntTest {
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
     TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7", "1-1RUZV1D");
-    initTest();
-  }
 
-  public void initTest() {
     post = createEntity();
     post.setOwner(OWNER);
     em.persist(post);
@@ -316,11 +324,14 @@ public class PostResourceIntTest {
     em.persist(post);
     programme = createProgramme();
     em.persist(programme);
+    trustFundingType = createFundingTypeDTO(FUNDING_TYPE_TRUST);
+    tariffFundingType = createFundingTypeDTO(FUNDING_TYPE_TARIFF);
+    fundingSubtype = new FundingSubTypeDto();
   }
 
   @Test
   @Transactional
-  public void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
+  void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setFundingStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
@@ -335,7 +346,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenCreating() throws Exception {
     //given
     PostDTO postDTO = new PostDTO();
     //when & then
@@ -351,7 +362,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
+  void shouldValidateMandatoryFieldsWhenUpdating() throws Exception {
     //given
     PostDTO postDTO = new PostDTO();
     postDTO.setId(1L);
@@ -368,7 +379,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldValidateIdWhenCreating() throws Exception {
+  void shouldValidateIdWhenCreating() throws Exception {
     //given
     Post newPost = createEntity();
     newPost.setId(-1L);
@@ -383,10 +394,10 @@ public class PostResourceIntTest {
         .andExpect(jsonPath("$.fieldErrors[0].field").value("id"));
   }
 
-  @Ignore("Purpose unclear, we might modify by adding specialties to the DTO")
+  @Disabled("Purpose unclear, we might modify by adding specialties to the DTO")
   @Test
   @Transactional
-  public void shouldAllowMMultipleOtherSpecialties() throws Exception {
+  void shouldAllowMultipleOtherSpecialties() throws Exception {
     post = createEntity();
     post.setIntrepidId(POST_INTREPID_ID);
     post.setNationalPostNumber("number2");
@@ -415,14 +426,14 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFailToUpdatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
+  void shouldFailToUpdatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
     // initialize database with a Post
     // the Post needs a Primary specialty as well, otherwise it wouldn't be possible to set a
     // sub_specialty
     post = createEntity();
     PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY,
         post);
-    post.setSpecialties(new HashSet<>(Collections.singletonList(primaryPostSpecialty)));
+    post.setSpecialties(Set.of(primaryPostSpecialty));
     post.setFundings(createPostFundings(post));
     postRepository.saveAndFlush(post);
 
@@ -469,14 +480,14 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldAllowUpdateOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
+  void shouldAllowUpdateOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
     // initialize database with a Post
     // the Post needs a Primary specialty as well, otherwise it wouldn't be possible to set a
     // sub_specialty
     post = createEntity();
     PostSpecialty primaryPostSpecialty = createPostSpecialty(specialty, PostSpecialtyType.PRIMARY,
         post);
-    post.setSpecialties(new HashSet<>(Collections.singletonList(primaryPostSpecialty)));
+    post.setSpecialties(Set.of(primaryPostSpecialty));
     postRepository.saveAndFlush(post);
 
     // Attempt to update a Post with a specialty of specialtyType.SUB_SPECIALTY.
@@ -519,27 +530,27 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFailToCreatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
+  void shouldFailToCreatePostIfSubspecialtyIsNotOfTypeSubspecialty() throws Exception {
     int databaseSizeBeforeCreate = postRepository.findAll().size();
 
     // Attempt to save a Post whose specialty is of specialtyType.PLACEMENT.
     // This involves: creating a PostSpecialty of PostSpecialtyType.SUB_SPECIALTY where the
-    // postSpecialty.specialty is NOT of specialtyType.SUB_SPECIALTY (but specialtyType.PLACEMENT).
+    // specialtyInDto.specialty is NOT of specialtyType.SUB_SPECIALTY (but specialtyType.PLACEMENT).
     // The creation should fail.
 
-    Post post = createEntity();
-    post.setNationalPostNumber("NEW_NPN");
+    Post newpost = createEntity();
+    newpost.setNationalPostNumber("NEW_NPN");
     Specialty notASubspecialty = createSpecialty();
     notASubspecialty.setSpecialtyTypes(new HashSet<>(
         Collections.singletonList(SpecialtyType.PLACEMENT)));
 
     Specialty persistedNonSubspecialty = specialtyRepository.save(notASubspecialty);
 
-    PostSpecialty postSpecialty = createPostSpecialty(persistedNonSubspecialty,
-        PostSpecialtyType.SUB_SPECIALTY, post);
-    post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
-    post.setFundings(createPostFundings(post));
-    PostDTO postDto = postMapper.postToPostDTO(post);
+    PostSpecialty specialtyInDto = createPostSpecialty(persistedNonSubspecialty,
+        PostSpecialtyType.SUB_SPECIALTY, newpost);
+    newpost.setSpecialties(Set.of((specialtyInDto)));
+    newpost.setFundings(createPostFundings(newpost));
+    PostDTO postDto = postMapper.postToPostDTO(newpost);
 
     restPostMockMvc.perform(post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
@@ -554,7 +565,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldAllowCreationOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
+  void shouldAllowCreationOfPostIfSubspecialtyIsOfTypeSubspecialty() throws Exception {
     int databaseSizeBeforeCreate = postRepository.findAll().size();
 
     // Attempt to save a Post whose specialty is of specialtyType.SUB_SPECIALTY.
@@ -572,7 +583,7 @@ public class PostResourceIntTest {
 
     PostSpecialty postSpecialty = createPostSpecialty(persistedSubspecialty,
         PostSpecialtyType.SUB_SPECIALTY, post);
-    post.setSpecialties(new HashSet<>(Collections.singletonList(postSpecialty)));
+    post.setSpecialties(Set.of(postSpecialty));
     post.setFundings(createPostFundings(post));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
@@ -587,7 +598,53 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void createPostWithExistingId() throws Exception {
+  void shouldFailCreateWhenFundingSubTypeNotUsed() throws Exception {
+    int databaseSizeBeforeCreate = postRepository.findAll().size();
+    post = createEntity();
+    post.setNationalPostNumber("NEW_NPN");
+    Specialty subspecialty = createSpecialty();
+    subspecialty.setSpecialtyTypes(new HashSet<>(
+        Collections.singletonList(SpecialtyType.SUB_SPECIALTY)));
+
+    Specialty persistedSubspecialty = specialtyRepository.save(subspecialty);
+
+    postSpecialty = createPostSpecialty(persistedSubspecialty,
+        PostSpecialtyType.SUB_SPECIALTY, post);
+    post.setSpecialties(Set.of(postSpecialty));
+    post.setFundings(createPostFundings(post));
+    PostDTO postDto = postMapper.postToPostDTO(post);
+
+    trustFundingType.setId(1L);
+    tariffFundingType.setId(2L);
+
+    when(referenceService.findCurrentFundingTypesByLabelIn(anySet()))
+        .thenAnswer(invocation -> {
+          Set<String> labels = invocation.getArgument(0);
+          boolean hasTariff = labels.stream()
+              .anyMatch(FUNDING_TYPE_TARIFF::equalsIgnoreCase);
+          return hasTariff ? List.of(tariffFundingType) : List.of(trustFundingType);
+        });
+    when(referenceService.findCurrentFundingSubTypesForFundingTypeId(1L))
+        .thenReturn(Collections.emptyList());
+    when(referenceService.findCurrentFundingSubTypesForFundingTypeId(2L))
+        .thenReturn(List.of(fundingSubtype));
+
+    restPostMockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(TestUtil.convertObjectToJsonBytes(postDto)))
+        .andExpect(status().is4xxClientError())
+        .andDo(r -> System.out.println(r.getResponse().getContentAsString()))
+        .andExpect(jsonPath("$.fieldErrors[0].message").value(
+            containsString(
+                "Missing funding subtype. Check funding uses subtypes where available.")));
+
+    List<Post> postList = postRepository.findAll();
+    assertThat(postList).hasSize(databaseSizeBeforeCreate);
+  }
+
+  @Test
+  @Transactional
+  void createPostWithExistingId() throws Exception {
     int databaseSizeBeforeCreate = postRepository.findAll().size();
     // Create the Post with an existing ID
     Post anotherPost = createEntity();
@@ -605,7 +662,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void getAllPosts() throws Exception {
+  void getAllPosts() throws Exception {
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
@@ -619,7 +676,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldReturnAllPostsWithoutOwnerFilter() throws Exception {
+  void shouldReturnAllPostsWithoutOwnerFilter() throws Exception {
     // another post with different managing owner
     Post anotherPost = createEntity();
     anotherPost.setNationalPostNumber(DEFAULT_POST_NUMBER);
@@ -641,7 +698,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearch() throws Exception {
+  void shouldTextSearch() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setOwner(OWNER);
     postRepository.saveAndFlush(post);
@@ -656,7 +713,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchOnCurrentTrainee() throws Exception {
+  void shouldTextSearchOnCurrentTrainee() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     postRepository.saveAndFlush(post);
     restPostMockMvc.perform(get("/api/posts?searchQuery=TESTPOST"))
@@ -670,7 +727,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldSearchByNationalPostNumber() throws Exception {
+  void shouldSearchByNationalPostNumber() throws Exception {
     Post post = new Post();
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setFundingStatus(Status.CURRENT);
@@ -686,7 +743,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldSearchByNationalPostNumberAndStatus() throws Exception {
+  void shouldSearchByNationalPostNumberAndStatus() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setFundingStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
@@ -702,7 +759,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldOrderPostsByNationalPostNumberDescending() throws Exception {
+  void shouldOrderPostsByNationalPostNumberDescending() throws Exception {
     List<String> npns = Arrays.asList("npn-01", "npn-02", "npn-03");
     Post post1 = createEntity();
     post1.setNationalPostNumber(npns.get(0));
@@ -723,7 +780,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldOrderPostsByNationalPostNumberAscending() throws Exception {
+  void shouldOrderPostsByNationalPostNumberAscending() throws Exception {
     List<String> npns1 = Arrays.asList("npn-01", "npn-02", "npn-03");
     Post post11 = createEntity();
     post11.setNationalPostNumber(npns1.get(0));
@@ -744,7 +801,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterColumns() throws Exception {
+  void shouldFilterColumns() throws Exception {
     //given
     // Initialize the database
     post.setFundingStatus(Status.INACTIVE);
@@ -763,7 +820,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterColumnsBySiteId() throws Exception {
+  void shouldFilterColumnsBySiteId() throws Exception {
     Long siteId = post.getSites().iterator().next().getSiteId();
     //when & then
     String colFilters = new URLCodec()
@@ -779,7 +836,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterColumnsByGradeId() throws Exception {
+  void shouldFilterColumnsByGradeId() throws Exception {
     Long gradeId = post.getGrades().iterator().next().getGradeId();
     //when & then
     String colFilters = new URLCodec()
@@ -795,7 +852,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterColumnsBySpecialtyId() throws Exception {
+  void shouldFilterColumnsBySpecialtyId() throws Exception {
     Long specialtyId = post.getSpecialties().iterator().next().getSpecialty().getId();
     //when & then
     String colFilters = new URLCodec().encode("{\"primarySpecialtyId\":[\"" + specialtyId + "\"]}");
@@ -809,7 +866,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldTextSearchAndFilterColumns() throws Exception {
+  void shouldTextSearchAndFilterColumns() throws Exception {
     //given
     // Initialize the database
     postRepository.saveAndFlush(post);
@@ -835,7 +892,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void getPostId() throws Exception {
+  void getPostId() throws Exception {
     // Get the post
     restPostMockMvc.perform(get("/api/posts/{id}", post.getId()))
         .andExpect(status().isOk())
@@ -852,7 +909,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void getPostByNPN() throws Exception {
+  void getPostByNPN() throws Exception {
     String nationalPostNumberWithSpecialCharacters = TEST_POST_NUMBER + "\\@$&£";
     post.setNationalPostNumber(nationalPostNumberWithSpecialCharacters);
     post.setOwner(OWNER);
@@ -875,7 +932,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void getNonExistingPost() throws Exception {
+  void getNonExistingPost() throws Exception {
     // Get the post
     restPostMockMvc.perform(get("/api/posts/{id}", Long.MAX_VALUE))
         .andExpect(status().isNotFound());
@@ -883,7 +940,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void updatePost() throws Exception {
+  void updatePost() throws Exception {
     // Initialize the database
     post = createEntity();
     post.setIntrepidId(POST_INTREPID_ID);
@@ -929,7 +986,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void updateNonExistingPost() throws Exception {
+  void updateNonExistingPost() throws Exception {
     String expectedNationalPostNumber = "Number3";
     int databaseSizeBeforeUpdate = postRepository.findAll().size();
     post = createEntity();
@@ -948,7 +1005,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void deletePost() throws Exception {
+  void deletePost() throws Exception {
     // Initialize the database
     int databaseSizeBeforeDelete = postRepository.findAll().size();
     PostDTO postDto = postMapper.postToPostDTO(post);
@@ -963,68 +1020,37 @@ public class PostResourceIntTest {
     assertThat(postList).hasSize(databaseSizeBeforeDelete - 1);
   }
 
-  @Test
+  @ParameterizedTest(name = "shouldFail{0}WhenPostFundingInvalid")
+  @CsvSource(value = {"Create,true", "Update,true", "Update,false", "Create,false"})
   @Transactional
-  public void shouldFailCreateWhenNoPostFundingProvided() throws Exception {
-    Post newPost = createEntity();
-    newPost.fundings(null);
-    PostDTO postDTO = postMapper.postToPostDTO(newPost);
+  void shouldFailCreateWhenNoPostFundingProvided(String requestType, Boolean empty)
+      throws Exception {
+    Post post = createEntity();
+    MockHttpServletRequestBuilder method;
+    switch (requestType) {
+      case "Create":
+        method = post("/api/posts");
+        break;
+      case "Update":
+        postRepository.saveAndFlush(post);
+        method = put("/api/posts");
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid request type: " + requestType);
+    }
+    post.fundings(empty ? new HashSet<>() : null);
+    PostDTO postDto = postMapper.postToPostDTO(post);
 
-    restPostMockMvc.perform(post("/api/posts")
+    restPostMockMvc.perform(method
             .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
+            .content(TestUtil.convertObjectToJsonBytes(postDto)))
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
   }
 
   @Test
   @Transactional
-  public void shouldFailCreateWhenEmptyPostFundingProvided() throws Exception {
-    Post newPost = createEntity();
-    PostDTO postDTO = postMapper.postToPostDTO(newPost);
-    postDTO.setFundings(new HashSet<>());
-
-    restPostMockMvc.perform(post("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().is4xxClientError())
-        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
-  }
-
-  @Test
-  @Transactional
-  public void shouldFailUpdateWhenNoPostFundingProvided() throws Exception {
-    Post updatePost = createEntity();
-    postRepository.saveAndFlush(updatePost);
-
-    PostDTO postDTO = postMapper.postToPostDTO(updatePost);
-
-    restPostMockMvc.perform(put("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().is4xxClientError())
-        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
-  }
-
-  @Test
-  @Transactional
-  public void shouldFailUpdateWhenEmptyPostFundingProvided() throws Exception {
-    Post updatePost = createEntity();
-    postRepository.saveAndFlush(updatePost);
-
-    PostDTO postDTO = postMapper.postToPostDTO(updatePost);
-    postDTO.setFundings(new HashSet<>());
-
-    restPostMockMvc.perform(put("/api/posts")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(postDTO)))
-        .andExpect(status().is4xxClientError())
-        .andExpect(jsonPath("$.fieldErrors[0].message").value("Post Funding is required"));
-  }
-
-  @Test
-  @Transactional
-  public void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
+  void bulkCreateShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
         .suffix(UPDATED_SUFFIX)
@@ -1058,7 +1084,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void bulkUpdateShouldSucceedWhenDataIsValid() throws Exception {
+  void bulkUpdateShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .id(post.getId())
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
@@ -1108,7 +1134,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void bulkPatchNewOldPostShouldSucceedWhenDataIsValid() throws Exception {
+  void bulkPatchNewOldPostShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .id(post.getId())
         .nationalPostNumber(UPDATED_NATIONAL_POST_NUMBER)
@@ -1145,39 +1171,57 @@ public class PostResourceIntTest {
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
 
-  @Test
+  @ParameterizedTest(name = "bulkPatch endpoint {0} should fail when no data is sent")
+  @CsvSource({
+      "/api/bulk-patch-new-old-posts",
+      "/api/bulk-patch-post-sites",
+      "/api/bulk-patch-post-grades",
+      "/api/bulk-patch-post-programmes",
+      "/api/bulk-patch-post-specialties"
+  })
   @Transactional
-  public void bulkPatchNewOldPostShouldFailWhenNoDataIsSent() throws Exception {
+  void bulkPatchShouldFailWhenNoDataIsSent(String endpoint) throws Exception {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     List<PostDTO> payload = Lists.newArrayList();
-    restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
+
+    restPostMockMvc.perform(patch(endpoint)
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
+
+    // Validate that posts are unchanged in the database.
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
 
-  @Test
+  @ParameterizedTest(name = "bulkPatch endpoint {0} should fail when payload has no post id")
+  @CsvSource({
+      "/api/bulk-patch-new-old-posts",
+      "/api/bulk-patch-post-sites",
+      "/api/bulk-patch-post-grades",
+      "/api/bulk-patch-post-programmes",
+      "/api/bulk-patch-post-specialties"
+  })
   @Transactional
-  public void bulkPatchNewOldPostShouldFailWhenDataIsSentWithNoId() throws Exception {
+  void bulkPatchShouldFailWhenDataIsSentWithNoId(String endpoint) throws Exception {
     int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
     PostDTO postDTO = new PostDTO();
     postDTO.setTrainingDescription("RANDOM DATA");
     List<PostDTO> payload = Lists.newArrayList(postDTO);
-    restPostMockMvc.perform(patch("/api/bulk-patch-new-old-posts")
+
+    restPostMockMvc.perform(patch(endpoint)
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(payload)))
         .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
+
+    // Validate that posts are unchanged in the database.
     List<Post> postList = postRepository.findAll();
     assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
   }
 
   @Test
   @Transactional
-  public void bulkPatchPostSitesShouldSucceedWhenDataIsValid() throws Exception {
+  void bulkPatchPostSitesShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .intrepidId(UPDATED_INTREPID_ID);
     Post oldPost = createEntity();
@@ -1198,37 +1242,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void bulkPatchPostSiteshouldFailWhenNoDataIsSent() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    List<PostDTO> payload = Lists.newArrayList();
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostSiteShouldFailWhenDataIsSentWithNoId() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    PostDTO postDTO = new PostDTO();
-    postDTO.setTrainingDescription("RANDOM DATA");
-    List<PostDTO> payload = Lists.newArrayList(postDTO);
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-sites")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostGradesShouldSucceedWhenDataIsValid() throws Exception {
+  void bulkPatchPostGradesShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .intrepidId(DEFAULT_INTREPID_ID);
     PostGradeDTO postGradeDTO = new PostGradeDTO(null, NEW_GRADE_ID, PostGradeType.APPROVED);
@@ -1246,37 +1260,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void bulkPatchPostGradesShouldFailWhenNoDataIsSent() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    List<PostDTO> payload = Lists.newArrayList();
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostGradesShouldFailWhenDataIsSentWithNoId() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    PostDTO postDTO = new PostDTO();
-    postDTO.setTrainingDescription("RANDOM DATA");
-    List<PostDTO> payload = Lists.newArrayList(postDTO);
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-grades")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostProgrammesShouldSucceedWhenDataIsValid() throws Exception {
+  void bulkPatchPostProgrammesShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .intrepidId(DEFAULT_INTREPID_ID);
     ProgrammeDTO programmeDTO = new ProgrammeDTO();
@@ -1303,37 +1287,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void bulkPatchPostProgrammesShouldFailWhenNoDataIsSent() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    List<PostDTO> payload = Lists.newArrayList();
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostProgrammesShouldFailWhenDataIsSentWithNoId() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    PostDTO postDTO = new PostDTO();
-    postDTO.setTrainingDescription("RANDOM DATA");
-    List<PostDTO> payload = Lists.newArrayList(postDTO);
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-programmes")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostSpecialtiesShouldSucceedWhenDataIsValid() throws Exception {
+  void bulkPatchPostSpecialtiesShouldSucceedWhenDataIsValid() throws Exception {
     PostDTO postDTO = new PostDTO()
         .intrepidId(DEFAULT_INTREPID_ID);
     SpecialtyDTO specialtyDTO = new SpecialtyDTO();
@@ -1362,37 +1316,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void bulkPatchPostSpecialtiesShouldFailWhenNoDataIsSent() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    List<PostDTO> payload = Lists.newArrayList();
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void bulkPatchPostSpecialtiesShouldFailWhenDataIsSentWithNoId() throws Exception {
-    int expectedDatabaseSizeAfterBulkUpdate = postRepository.findAll().size();
-    PostDTO postDTO = new PostDTO();
-    postDTO.setTrainingDescription("RANDOM DATA");
-    List<PostDTO> payload = Lists.newArrayList(postDTO);
-    restPostMockMvc.perform(patch("/api/bulk-patch-post-specialties")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(payload)))
-        .andExpect(status().isBadRequest());
-    // Validate that both Post are still in the database
-    List<Post> postList = postRepository.findAll();
-    assertThat(postList).hasSize(expectedDatabaseSizeAfterBulkUpdate);
-  }
-
-  @Test
-  @Transactional
-  public void patchPostFundingsShouldSucceedWhenDataIsValid() throws Exception {
+  void patchPostFundingsShouldSucceedWhenDataIsValid() throws Exception {
     // Initialize the database
     post.setStatus(Status.CURRENT);
     post.setFundings(Sets.newHashSet());
@@ -1441,7 +1365,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterPostsByDeaneryNumbers() throws Exception {
+  void shouldFilterPostsByDeaneryNumbers() throws Exception {
     List<String> npns = preparePostRecords();
     restPostMockMvc.perform(post("/api/posts/filter/deanery")
             .contentType(MediaType.APPLICATION_JSON)
@@ -1455,7 +1379,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldFilterPostsByDeaneryNumbersAndHonorsPageSize() throws Exception {
+  void shouldFilterPostsByDeaneryNumbersAndHonorsPageSize() throws Exception {
     List<String> npns = preparePostRecords();
     restPostMockMvc.perform(post("/api/posts/filter/deanery")
             .contentType(MediaType.APPLICATION_JSON)
@@ -1469,7 +1393,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldGetPlacementsSummaryByPostId() throws Exception {
+  void shouldGetPlacementsSummaryByPostId() throws Exception {
     Person person = PersonResourceIntTest.createEntity();
     person = personRepository.saveAndFlush(person);
     final ContactDetails contactDetails = new ContactDetails();
@@ -1512,7 +1436,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldThrowErrorAndFailToSavePostWhenPostFundingHasEndDateBeforeStartDate()
+  void shouldThrowErrorAndFailToSavePostWhenPostFundingHasEndDateBeforeStartDate()
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
@@ -1551,7 +1475,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldThrowErrorAndFailToSavePostWhenPostFundingHasNullOrEmptyStartDate()
+  void shouldThrowErrorAndFailToSavePostWhenPostFundingHasNullOrEmptyStartDate()
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
@@ -1589,7 +1513,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldSavePostWhenPostFundingHasValidStartAndEndDate() throws Exception {
+  void shouldSavePostWhenPostFundingHasValidStartAndEndDate() throws Exception {
     // Valid fundings
     PostFundingDTO validFunding1 = new PostFundingDTO();
     validFunding1.setStartDate(LocalDate.now().minusDays(10));
@@ -1624,7 +1548,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void shouldThrowErrorAndFailTo_UpdatePostWhenPostFundingHasNullOrEmptyStartDate()
+  void shouldThrowErrorAndFailTo_UpdatePostWhenPostFundingHasNullOrEmptyStartDate()
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
@@ -1678,7 +1602,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void getPostsInShouldReturnMatchingPosts() throws Exception {
+  void getPostsInShouldReturnMatchingPosts() throws Exception {
     // Given
     Post post1 = createEntity();
     post1.setNationalPostNumber("NPN100");
@@ -1698,7 +1622,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void getPostsInShouldReturnEmptyForNonExistingNumbers() throws Exception {
+  void getPostsInShouldReturnEmptyForNonExistingNumbers() throws Exception {
     restPostMockMvc.perform(get("/api/posts/in/{nationalPostNumbers}", "NONEXIST1,NONEXIST2"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -1708,7 +1632,7 @@ public class PostResourceIntTest {
 
   @Test
   @Transactional
-  public void getPostsInThrowsServerErrorForEmptyInput() throws Exception {
+  void getPostsInThrowsServerErrorForEmptyInput() throws Exception {
     // NOTE: This endpoint returns a 500 error due to Spring's PathVariable conversion error when
     // no IDs are provided.
     // The API signature cannot be changed, so this test highlights the non-standard response.
