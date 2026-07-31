@@ -55,11 +55,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -119,11 +122,13 @@ class PostValidatorTest {
         equalTo("Post funding start date cannot be null or empty"));
   }
 
-  @Test
-  void shouldFailValidationWhenFundingEndDateIsBeforeStartDate() {
+  @ParameterizedTest
+  @MethodSource("invalidFundingEndDateCases")
+  void shouldFailValidationWhenFundingEndDateIsEqualToOrBeforeStartDate(LocalDate start,
+      LocalDate end) {
     PostFundingDTO funding = new PostFundingDTO();
-    funding.setStartDate(TODAY);
-    funding.setEndDate(YESTERDAY);
+    funding.setStartDate(start);
+    funding.setEndDate(end);
     dto.setFundings(Collections.singleton(funding));
 
     MethodArgumentNotValidException exception =
@@ -134,19 +139,11 @@ class PostValidatorTest {
         equalTo("Post funding end date must not be equal to or before start date"));
   }
 
-  @Test
-  void shouldFailValidationWhenFundingEndDateEqualsStartDate() {
-    PostFundingDTO funding = new PostFundingDTO();
-    funding.setStartDate(TODAY);
-    funding.setEndDate(TODAY);
-    dto.setFundings(Collections.singleton(funding));
-
-    MethodArgumentNotValidException exception =
-        assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
-    List<FieldError> errors = exception.getBindingResult().getFieldErrors();
-    assertThat(errors, hasSize(1));
-    assertThat(errors.get(0).getDefaultMessage(),
-        equalTo("Post funding end date must not be equal to or before start date"));
+  private static Stream<Arguments> invalidFundingEndDateCases() {
+    return Stream.of(
+        Arguments.of(TODAY, YESTERDAY),
+        Arguments.of(TODAY, TODAY)
+    );
   }
 
   @Test
