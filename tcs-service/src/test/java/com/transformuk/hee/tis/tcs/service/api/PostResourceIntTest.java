@@ -106,7 +106,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @see PostResource
  */
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 @SpringBootTest(classes = Application.class)
 class PostResourceIntTest {
 
@@ -310,10 +310,7 @@ class PostResourceIntTest {
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
     TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7", "1-1RUZV1D");
-    initTest();
-  }
 
-  void initTest() {
     post = createEntity();
     post.setOwner(OWNER);
     em.persist(post);

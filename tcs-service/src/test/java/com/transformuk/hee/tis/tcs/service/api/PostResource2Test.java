@@ -84,7 +84,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
  * Test class created to do integration tests on the controller layer only while mocking everything
  * else
  */
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 @SpringBootTest(classes = Application.class)
 class PostResource2Test {
 

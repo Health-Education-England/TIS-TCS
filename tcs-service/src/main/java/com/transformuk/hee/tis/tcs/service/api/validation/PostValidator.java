@@ -336,7 +336,7 @@ public class PostValidator {
     // If a current funding type is provided, check whether it has valid subtypes.
     if (isCurrentFunding && StringUtils.isNotBlank(postFundingDto.getFundingType())) {
       List<FundingSubTypeDto> currentFundingSubTypes =
-          extractFundingSubTypesFromFundingType(Set.of(postFundingDto.getFundingType()));
+          extractFundingSubTypesFromFundingType(postFundingDto.getFundingType());
 
       if (CollectionUtils.isEmpty(currentFundingSubTypes)) {
         return fieldErrors;
@@ -358,9 +358,9 @@ public class PostValidator {
   }
 
   private List<FundingSubTypeDto> extractFundingSubTypesFromFundingType(
-      Set<String> fundingTypeLabels) {
+      String fundingTypeLabel) {
     List<FundingTypeDTO> fundingTypes = referenceService.findCurrentFundingTypesByLabelIn(
-        fundingTypeLabels);
+        Set.of(fundingTypeLabel));
     return fundingTypes.stream()
         .flatMap(fundingType -> referenceService
             .findCurrentFundingSubTypesForFundingTypeId(fundingType.getId()).stream())

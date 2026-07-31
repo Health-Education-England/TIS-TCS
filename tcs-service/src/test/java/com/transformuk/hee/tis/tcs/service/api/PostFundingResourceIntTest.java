@@ -62,7 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see PostFundingResource
  */
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 @SpringBootTest(classes = Application.class)
 class PostFundingResourceIntTest {
 

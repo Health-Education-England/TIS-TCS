@@ -122,7 +122,7 @@ class PostValidatorTest {
   @Test
   void shouldFailValidationWhenFundingEndDateIsBeforeStartDate() {
     PostFundingDTO funding = new PostFundingDTO();
-    funding.setStartDate(TOMORROW);
+    funding.setStartDate(TODAY);
     funding.setEndDate(YESTERDAY);
     dto.setFundings(Collections.singleton(funding));
 
