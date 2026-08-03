@@ -234,8 +234,9 @@ public class PostElasticSearchService {
       searchQuery = StringUtils.remove(searchQuery, '"');
       String wildcard = "*" + searchQuery + "*";
 
+      addNationalPostNumberWildcardQuery(shouldQuery, searchQuery);
+
       shouldQuery
-          .should(new WildcardQueryBuilder(NATIONAL_POST_NUMBER, wildcard))
           .should(new WildcardQueryBuilder(PROGRAMME_NAMES, wildcard))
           .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_NAME, searchQuery))
           .should(new WildcardQueryBuilder(FUNDING_TYPES, wildcard))
@@ -416,5 +417,15 @@ public class PostElasticSearchService {
     Preconditions.checkNotNull(postId, "Post id cannot be null");
     // postId is the document id in the PostView index, so we can delete it directly
     elasticsearchOperations.delete(String.valueOf(postId), PostView.class);
+  }
+
+  private void addNationalPostNumberWildcardQuery(BoolQueryBuilder query, String searchQuery) {
+    query.should(new WildcardQueryBuilder(
+        NATIONAL_POST_NUMBER, "*" + searchQuery + "*"
+    ));
+
+    query.should(new WildcardQueryBuilder(
+        NATIONAL_POST_NUMBER, "*" + searchQuery.toUpperCase() + "*"
+    ));
   }
 }
