@@ -35,9 +35,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 public class DocumentResourceTest {
 
   private static final long PERSON_BASE_ID = 10;
-  private static final byte[] TEST_FILE_CONTENT = "DataDataDataDataDataData".getBytes();
-  private static final String TEST_FILE_NAME = "document.txt";
-  private static final String TEST_FILE_CONTENT_TYPE = "text/plain";
+  // Valid PDF header bytes
+  private static final byte[] TEST_FILE_CONTENT = new byte[]{
+      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46,
+      (byte) 0x2D, (byte) 0x31, (byte) 0x2E, (byte) 0x34
+  };
+  private static final String TEST_FILE_NAME = "document.pdf";
+  private static final String TEST_FILE_CONTENT_TYPE = "application/pdf";
   private static final String TEST_FILE_FORM_FIELD_NAME = "document";
 
   private MockMvc mockMvc;
@@ -85,7 +89,7 @@ public class DocumentResourceTest {
     documentDto.setId(1L);
     documentDto.setTitle(TEST_FILE_NAME);
     documentDto.setFileName(TEST_FILE_NAME);
-    documentDto.setFileExtension("txt");
+    documentDto.setFileExtension("pdf");
     documentDto.setContentType(TEST_FILE_CONTENT_TYPE);
     documentDto.setSize((long) TEST_FILE_CONTENT.length);
     documentDto.setPersonId(PERSON_BASE_ID);
@@ -107,7 +111,7 @@ public class DocumentResourceTest {
     documentDto.setId(1L);
     documentDto.setTitle(TEST_FILE_NAME);
     documentDto.setFileName(TEST_FILE_NAME);
-    documentDto.setFileExtension("txt");
+    documentDto.setFileExtension("pdf");
     documentDto.setContentType(TEST_FILE_CONTENT_TYPE);
     documentDto.setSize((long) TEST_FILE_CONTENT.length);
     documentDto.setPersonId(PERSON_BASE_ID);
