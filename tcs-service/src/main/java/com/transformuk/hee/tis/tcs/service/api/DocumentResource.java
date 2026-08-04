@@ -11,6 +11,7 @@ import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.api.util.FileValidator;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
@@ -114,8 +115,8 @@ public class DocumentResource {
   }
 
   /**
-   * Marking this endpoint as deprecated and changing the url to be /old please see {@link
-   * #downloadDocumentByIdV2} for its replacement
+   * Marking this endpoint as deprecated and changing the url to be /old please see
+   * {@link #downloadDocumentByIdV2} for its replacement
    *
    * @param response
    * @param documentId
@@ -354,6 +355,10 @@ public class DocumentResource {
       return Optional.empty();
     }
 
+    if (!isValidFileType(documentParam)) {
+      return Optional.empty();
+    }
+
     try {
       document.setUploadedBy(
           TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper
@@ -375,6 +380,18 @@ public class DocumentResource {
     }
 
     return Optional.of(document);
+  }
+
+  private boolean isValidFileType(final MultipartFile documentParam) {
+    final String filename = documentParam.getOriginalFilename();
+
+    final String fileExtension = FileValidator.extractFileExtension(filename);
+    if (fileExtension.isEmpty()) {
+      LOG.warn("File '{}' has no valid extension", filename);
+      return false;
+    }
+
+    return FileValidator.isValidFileType(documentParam);
   }
 
   private void streamFile(final DocumentDTO document, final HttpServletResponse response,
