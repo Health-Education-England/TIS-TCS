@@ -387,7 +387,7 @@ public class DocumentResource {
 
     final String fileExtension = FileValidator.extractFileExtension(filename);
     if (fileExtension.isEmpty()) {
-      LOG.warn("File '{}' has no valid extension", filename);
+      LOG.warn("File has no valid extension");
       return false;
     }
 

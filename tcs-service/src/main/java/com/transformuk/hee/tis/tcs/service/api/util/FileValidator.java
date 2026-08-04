@@ -64,19 +64,18 @@ public class FileValidator {
     // Extension check
     final String fileExtension = extractFileExtension(filename);
     if (!ALLOWED_FILE_EXTENSIONS.contains(fileExtension.toLowerCase())) {
-      LOG.warn("File extension '{}' is not permitted for file '{}'", fileExtension, filename);
+      LOG.warn("Rejected upload due to disallowed file extension");
       return false;
     }
 
     // Magic bytes check
     try {
       if (!isValidMagicBytes(documentParam, fileExtension)) {
-        LOG.warn("File signature validation failed for file '{}' with extension '{}'",
-            filename, fileExtension);
+        LOG.warn("Rejected upload due to invalid file signature");
         return false;
       }
     } catch (IOException ex) {
-      LOG.error("Failed to validate magic bytes for '{}'", filename, ex);
+      LOG.error("Failed to validate file signature", ex);
       return false;
     }
 
@@ -85,11 +84,11 @@ public class FileValidator {
       final String detectedType = TIKA.detect(documentParam.getInputStream(), filename);
 
       if (!ALLOWED_MEDIA_TYPES.contains(detectedType)) {
-        LOG.warn("Detected file type '{}' is not permitted for file '{}'.", detectedType, filename);
+        LOG.warn("Rejected upload due to disallowed media type");
         return false;
       }
     } catch (IOException ex) {
-      LOG.error("Failed to detect file type for '{}'", filename, ex);
+      LOG.error("Failed to detect file type", ex);
       return false;
     }
 
@@ -130,8 +129,7 @@ public class FileValidator {
     final int bytesRead = documentParam.getInputStream().read(fileHeader);
 
     if (bytesRead < 4) {
-      LOG.warn("File '{}' is too small to contain a valid header",
-          documentParam.getOriginalFilename());
+      LOG.warn("Rejected upload because file header is too small");
       return false;
     }
 
@@ -145,7 +143,7 @@ public class FileValidator {
       case "xlsx":
         return matchesSignature(fileHeader, ZIP_SIGNATURE);
       default:
-        LOG.warn("No magic bytes validation defined for extension '{}'", fileExtension);
+        LOG.warn("Rejected upload due to unsupported extension mapping");
         return false;
     }
   }
