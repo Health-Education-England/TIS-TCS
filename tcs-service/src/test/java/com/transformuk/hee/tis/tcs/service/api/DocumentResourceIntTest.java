@@ -25,6 +25,8 @@ import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeDeserializer;
 import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeSerializer;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
+import com.transformuk.hee.tis.tcs.service.api.util.FileSignature;
+import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
@@ -69,19 +71,12 @@ public class DocumentResourceIntTest {
   private static final long PERSON_BASE_ID = 10;
   private static final long DOCUMENT_BASE_ID = 100;
   private static final long TAG_BASE_ID = 1000;
-  // Content begins with PDF magic bytes
-  private static final byte[] TEST_FILE_CONTENT = new byte[]{
-      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46,
-      (byte) 0x2D, (byte) 0x31, (byte) 0x2E, (byte) 0x34
-  };
+  private static final byte[] TEST_FILE_CONTENT = FileSignature.PDF.bytes();
   private static final String TEST_FILE_NAME = "document.pdf";
   private static final String TEST_FILE_CONTENT_TYPE = "application/pdf";
-  // Spoofed file: PDF extension but EXE magic bytes
-  private static final byte[] TEST_SPOOFED_FILE_CONTENT = new byte[]{0x4D, 0x5A, 0x00, 0x00};
   private static final String TEST_SPOOFED_FILE_NAME = "spoofed.pdf";
   private static final String TEST_SPOOFED_FILE_CONTENT_TYPE = "application/pdf";
-  // Disallowed file type: exe
-  private static final byte[] TEST_EXE_FILE_CONTENT = new byte[]{0x4D, 0x5A, 0x00, 0x00};
+  private static final byte[] TEST_EXE_FILE_CONTENT = FileSignature.MZ.bytes();
   private static final String TEST_EXE_FILE_NAME = "malware.exe";
   private static final String TEST_EXE_FILE_CONTENT_TYPE = "application/x-msdownload";
   private static final String TEST_FILE_FORM_FIELD_NAME = "document";
@@ -120,7 +115,8 @@ public class DocumentResourceIntTest {
   @Before
   public void setup() throws SQLException {
     MockitoAnnotations.initMocks(this);
-    final DocumentResource documentResource = new DocumentResource(documentService, tagService);
+    final DocumentResource documentResource = new DocumentResource(documentService, tagService,
+        new DocumentUploadValidator());
     mockMvc = MockMvcBuilders.standaloneSetup(documentResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .build();
@@ -164,7 +160,7 @@ public class DocumentResourceIntTest {
   @Test
   public void uploadDocument_shouldReturnHTTP400_WhenFileHasSpoofedExtension() throws Exception {
     final MockMultipartFile mockFile = new MockMultipartFile(TEST_FILE_FORM_FIELD_NAME,
-        TEST_SPOOFED_FILE_NAME, TEST_SPOOFED_FILE_CONTENT_TYPE, TEST_SPOOFED_FILE_CONTENT);
+        TEST_SPOOFED_FILE_NAME, TEST_SPOOFED_FILE_CONTENT_TYPE, TEST_EXE_FILE_CONTENT);
 
     mockMvc.perform(fileUpload(DocumentResource.PATH_API + DocumentResource.PATH_DOCUMENTS)
             .file(mockFile)

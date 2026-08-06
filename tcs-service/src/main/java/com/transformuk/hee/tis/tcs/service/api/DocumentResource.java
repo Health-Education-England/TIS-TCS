@@ -11,7 +11,8 @@ import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
-import com.transformuk.hee.tis.tcs.service.api.util.FileValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
@@ -54,10 +55,13 @@ public class DocumentResource {
   private static final Logger LOG = LoggerFactory.getLogger(DocumentResource.class);
   private final DocumentService documentService;
   private final TagService tagService;
+  private final DocumentUploadValidator documentUploadValidator;
 
-  DocumentResource(final DocumentService documentService, final TagService tagService) {
+  DocumentResource(final DocumentService documentService, final TagService tagService,
+      final DocumentUploadValidator documentUploadValidator) {
     this.documentService = documentService;
     this.tagService = tagService;
+    this.documentUploadValidator = documentUploadValidator;
   }
 
   @GetMapping(value = PATH_DOCUMENTS + "/{entity}/{personId}", produces = APPLICATION_JSON)
@@ -237,6 +241,14 @@ public class DocumentResource {
     LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
         personId, filename);
 
+    try {
+      documentUploadValidator.validate(documentParam);
+    } catch (ValidationException ex) {
+      LOG.warn("Document with person '{}' and document name '{}' failed file type validation",
+          personId, filename);
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     final Optional<DocumentDTO> newDocument = createDocument(documentParam, personId);
 
     if (!newDocument.isPresent()) {
@@ -355,10 +367,6 @@ public class DocumentResource {
       return Optional.empty();
     }
 
-    if (!isValidFileType(documentParam)) {
-      return Optional.empty();
-    }
-
     try {
       document.setUploadedBy(
           TisSecurityHelper.getProfileFromContext().getFirstName() + " " + TisSecurityHelper
@@ -380,18 +388,6 @@ public class DocumentResource {
     }
 
     return Optional.of(document);
-  }
-
-  private boolean isValidFileType(final MultipartFile documentParam) {
-    final String filename = documentParam.getOriginalFilename();
-
-    final String fileExtension = FileValidator.extractFileExtension(filename);
-    if (fileExtension.isEmpty()) {
-      LOG.warn("File has no valid extension");
-      return false;
-    }
-
-    return FileValidator.isValidFileType(documentParam);
   }
 
   private void streamFile(final DocumentDTO document, final HttpServletResponse response,
