@@ -8,6 +8,10 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Validates the document upload request. Checks that the file is of a valid type and has a valid
+ * extension.
+ */
 @Component
 public class DocumentUploadValidator {
 
@@ -19,12 +23,20 @@ public class DocumentUploadValidator {
       .map(ext -> "." + ext)
       .collect(Collectors.joining(", "))
       + " files are supported.";
+
+  /**
+   * Validates the uploaded document. Throws a ValidationException if the file is not a valid type.
+   *
+   * @param documentParam the uploaded file
+   * @throws ValidationException if the file is not a valid type
+   */
   public void validate(final MultipartFile documentParam) throws ValidationException {
     final BeanPropertyBindingResult bindingResult =
         new BeanPropertyBindingResult(documentParam, OBJECT_NAME);
 
     if (!FileValidationUtil.isValidFileType(documentParam)) {
-      bindingResult.addError(new FieldError(OBJECT_NAME, DOCUMENT_FIELD, INVALID_FILE_TYPE_MESSAGE));
+      bindingResult.addError(
+          new FieldError(OBJECT_NAME, DOCUMENT_FIELD, INVALID_FILE_TYPE_MESSAGE));
       throw new ValidationException(bindingResult);
     }
   }
