@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
-import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
 import java.util.Optional;
@@ -61,7 +60,6 @@ public class DocumentResourceTest {
     DocumentResource testObj = new DocumentResource(documentServiceMock, tagServiceMock,
         new DocumentUploadValidator());
     mockMvc = MockMvcBuilders.standaloneSetup(testObj)
-        .setControllerAdvice(new ExceptionTranslator())
         .build();
 
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");

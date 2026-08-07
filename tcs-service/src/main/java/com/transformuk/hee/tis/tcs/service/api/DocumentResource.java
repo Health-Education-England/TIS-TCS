@@ -236,18 +236,12 @@ public class DocumentResource {
   public ResponseEntity<DocumentId> uploadDocument(
       @RequestParam("personId") final Long personId,
       @RequestParam("document") final MultipartFile documentParam
-  ) throws IOException {
+  ) throws IOException, ValidationException {
     String filename = getConverter(documentParam.getOriginalFilename()).decodeUrl().toString();
     LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
         personId, filename);
 
-    try {
-      documentUploadValidator.validate(documentParam);
-    } catch (ValidationException ex) {
-      LOG.warn("Document with person '{}' and document name '{}' failed file type validation",
-          personId, filename);
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+    documentUploadValidator.validate(documentParam);
 
     final Optional<DocumentDTO> newDocument = createDocument(documentParam, personId);
 
