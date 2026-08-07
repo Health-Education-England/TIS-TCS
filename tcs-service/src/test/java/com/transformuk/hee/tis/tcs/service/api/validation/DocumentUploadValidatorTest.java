@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.transformuk.hee.tis.tcs.service.api.util.FileSignature;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,19 @@ import org.springframework.web.multipart.MultipartFile;
 class DocumentUploadValidatorTest {
 
   private static final String FORM_FIELD = "document";
+  private static final byte[] PDF_BYTES = new byte[]{
+      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46, (byte) 0x2D
+  };
+  private static final byte[] DOC_BYTES = new byte[]{
+      (byte) 0xD0, (byte) 0xCF, (byte) 0x11, (byte) 0xE0,
+      (byte) 0xA1, (byte) 0xB1, (byte) 0x1A, (byte) 0xE1
+  };
+  private static final byte[] ZIP_BYTES = new byte[]{
+      (byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04
+  };
+  private static final byte[] MZ_BYTES = new byte[]{
+      (byte) 0x4D, (byte) 0x5A
+  };
 
   private DocumentUploadValidator validator;
 
@@ -39,13 +51,13 @@ class DocumentUploadValidatorTest {
   static Stream<MultipartFile> invalidFiles() {
     return Stream.of(
         new MockMultipartFile(FORM_FIELD, "malware.exe",
-            "application/x-msdownload", FileSignature.MZ.bytes()),
+            "application/x-msdownload", MZ_BYTES),
         new MockMultipartFile(FORM_FIELD, "nodotfile",
-            "application/pdf", FileSignature.PDF.bytes()),
+            "application/pdf", PDF_BYTES),
         new MockMultipartFile(FORM_FIELD, null,
-            "application/pdf", FileSignature.PDF.bytes()),
+            "application/pdf", PDF_BYTES),
         new MockMultipartFile(FORM_FIELD, "spoofed.pdf",
-            "application/pdf", FileSignature.MZ.bytes())
+            "application/pdf", MZ_BYTES)
     );
   }
 
@@ -58,24 +70,24 @@ class DocumentUploadValidatorTest {
   static Stream<MultipartFile> validFiles() {
     return Stream.of(
         new MockMultipartFile(FORM_FIELD, "document.pdf",
-            "application/pdf", FileSignature.PDF.bytes()),
+            "application/pdf", PDF_BYTES),
         new MockMultipartFile(FORM_FIELD, "document.doc",
-            "application/msword", FileSignature.OLE2.bytes()),
+            "application/msword", DOC_BYTES),
         new MockMultipartFile(FORM_FIELD, "spreadsheet.xls",
-            "application/vnd.ms-excel", FileSignature.OLE2.bytes()),
+            "application/vnd.ms-excel", DOC_BYTES),
         new MockMultipartFile(FORM_FIELD, "document.docx",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            FileSignature.ZIP.bytes()),
+            ZIP_BYTES),
         new MockMultipartFile(FORM_FIELD, "spreadsheet.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            FileSignature.ZIP.bytes())
+            ZIP_BYTES)
     );
   }
 
   @Test
   void validate_shouldPopulateFieldErrorOnDocument_whenFileTypeIsInvalid() {
     MultipartFile file = new MockMultipartFile(FORM_FIELD, "malware.exe",
-        "application/x-msdownload", FileSignature.MZ.bytes());
+        "application/x-msdownload", MZ_BYTES);
 
     ValidationException ex = assertThrows(ValidationException.class, () -> validator.validate(file));
     assertThat(ex.getBindingResult().hasErrors()).isTrue();

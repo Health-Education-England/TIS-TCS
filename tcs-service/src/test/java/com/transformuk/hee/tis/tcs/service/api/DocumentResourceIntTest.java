@@ -25,7 +25,6 @@ import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeDeserializer;
 import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeSerializer;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.api.util.FileSignature;
 import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
@@ -71,12 +70,16 @@ public class DocumentResourceIntTest {
   private static final long PERSON_BASE_ID = 10;
   private static final long DOCUMENT_BASE_ID = 100;
   private static final long TAG_BASE_ID = 1000;
-  private static final byte[] TEST_FILE_CONTENT = FileSignature.PDF.bytes();
+  private static final byte[] TEST_FILE_CONTENT = new byte[]{
+      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46, (byte) 0x2D
+  };
   private static final String TEST_FILE_NAME = "document.pdf";
   private static final String TEST_FILE_CONTENT_TYPE = "application/pdf";
   private static final String TEST_SPOOFED_FILE_NAME = "spoofed.pdf";
   private static final String TEST_SPOOFED_FILE_CONTENT_TYPE = "application/pdf";
-  private static final byte[] TEST_EXE_FILE_CONTENT = FileSignature.MZ.bytes();
+  private static final byte[] TEST_EXE_FILE_CONTENT = new byte[]{
+      (byte) 0x4D, (byte) 0x5A
+  };
   private static final String TEST_EXE_FILE_NAME = "malware.exe";
   private static final String TEST_EXE_FILE_CONTENT_TYPE = "application/x-msdownload";
   private static final String TEST_FILE_FORM_FIELD_NAME = "document";

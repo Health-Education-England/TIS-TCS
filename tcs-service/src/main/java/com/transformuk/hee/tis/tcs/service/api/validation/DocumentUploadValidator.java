@@ -1,6 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.validation;
 
-import com.transformuk.hee.tis.tcs.service.api.util.DocumentUploadConstraints;
+import com.transformuk.hee.tis.tcs.service.api.util.DocumentUploadFileType;
 import com.transformuk.hee.tis.tcs.service.api.util.FileValidationUtil;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ public class DocumentUploadValidator {
   private static final String OBJECT_NAME = "DocumentUpload";
   private static final String DOCUMENT_FIELD = "document";
   private static final String INVALID_FILE_TYPE_MESSAGE = "Only "
-      + DocumentUploadConstraints.ALLOWED_FILE_EXTENSIONS.stream()
+      + DocumentUploadFileType.allowedExtensions().stream()
       .sorted()
       .map(ext -> "." + ext)
       .collect(Collectors.joining(", "))

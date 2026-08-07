@@ -1,31 +1,68 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
- * Magic bytes used for file signature validation. Each value stores only the invariant prefix
- * bytes for that format;
+ * Upload file-type policy definitions used by validation.
  */
 public enum FileSignature {
-  PDF(new byte[]{ // .pdf
-      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46, (byte) 0x2D
-  }),
-  OLE2(new byte[]{ // .doc, .xls
-      (byte) 0xD0, (byte) 0xCF, (byte) 0x11, (byte) 0xE0,
-      (byte) 0xA1, (byte) 0xB1, (byte) 0x1A, (byte) 0xE1
-  }),
-  ZIP(new byte[]{ // .docx, .xlsx
-      (byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04
-  }),
-  MZ(new byte[]{ // .exe
-      (byte) 0x4D, (byte) 0x5A
-  });
+  PDF("pdf", "application/pdf", true),
+  DOC("doc", "application/msword", true),
+  XLS("xls", "application/vnd.ms-excel", true),
+  DOCX("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", true),
+  XLSX("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", true),
+  MZ("exe", "application/x-msdownload", false);
 
-  private final byte[] bytes;
+  private static final Map<String, FileSignature> BY_EXTENSION = Arrays.stream(values())
+      .collect(Collectors.toUnmodifiableMap(FileSignature::extension, Function.identity()));
 
-  FileSignature(final byte[] bytes) {
-    this.bytes = bytes;
+  private final String extension;
+  private final String mediaType;
+  private final boolean allowedUploadType;
+
+  FileSignature(final String extension, final String mediaType, final boolean allowedUploadType) {
+    this.extension = extension;
+    this.mediaType = mediaType;
+    this.allowedUploadType = allowedUploadType;
   }
 
-  public byte[] bytes() {
-    return bytes.clone();
+  public String extension() {
+    return extension;
+  }
+
+  public String mediaType() {
+    return mediaType;
+  }
+
+  public boolean allowedUploadType() {
+    return allowedUploadType;
+  }
+
+
+  public static Optional<FileSignature> fromExtension(final String extension) {
+    if (extension == null) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(BY_EXTENSION.get(extension.toLowerCase(Locale.ROOT)));
+  }
+
+  public static Set<String> allowedExtensions() {
+    return Arrays.stream(values())
+        .filter(FileSignature::allowedUploadType)
+        .map(FileSignature::extension)
+        .collect(Collectors.toUnmodifiableSet());
+  }
+
+  public static Set<String> allowedMediaTypes() {
+    return Arrays.stream(values())
+        .filter(FileSignature::allowedUploadType)
+        .map(FileSignature::mediaType)
+        .collect(Collectors.toUnmodifiableSet());
   }
 }

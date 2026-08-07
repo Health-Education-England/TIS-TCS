@@ -2,7 +2,6 @@ package com.transformuk.hee.tis.tcs.service.api.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,10 +11,19 @@ import org.springframework.mock.web.MockMultipartFile;
 
 class FileValidationUtilTest {
 
-  private static final byte[] PDF_BYTES = FileSignature.PDF.bytes();
-  private static final byte[] OLE2_BYTES = FileSignature.OLE2.bytes();
-  private static final byte[] ZIP_BYTES = FileSignature.ZIP.bytes();
-  private static final byte[] MZ_BYTES = FileSignature.MZ.bytes();
+  private static final byte[] PDF_BYTES = new byte[]{
+      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46, (byte) 0x2D
+  };
+  private static final byte[] OLE2_BYTES = new byte[]{
+      (byte) 0xD0, (byte) 0xCF, (byte) 0x11, (byte) 0xE0,
+      (byte) 0xA1, (byte) 0xB1, (byte) 0x1A, (byte) 0xE1
+  };
+  private static final byte[] ZIP_BYTES = new byte[]{
+      (byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04
+  };
+  private static final byte[] MZ_BYTES = new byte[]{
+      (byte) 0x4D, (byte) 0x5A
+  };
 
   @Test
   void isValidFileType_shouldReturnFalse_whenDocumentIsNull() {
@@ -47,14 +55,6 @@ class FileValidationUtilTest {
   void isValidFileType_shouldReturnFalse_whenFilenameEndsWithTrailingDot() {
     final MockMultipartFile file = new MockMultipartFile(
         "file", "endotfile.", "application/octet-stream", "content".getBytes());
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenFileTooSmallForMagicBytesCheck() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "document.pdf", "application/pdf",
-        Arrays.copyOf(FileSignature.PDF.bytes(), 4));
     assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
   }
 

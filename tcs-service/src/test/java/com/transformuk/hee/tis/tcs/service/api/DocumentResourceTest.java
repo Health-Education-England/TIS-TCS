@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
-import com.transformuk.hee.tis.tcs.service.api.util.FileSignature;
 import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
@@ -39,7 +38,9 @@ public class DocumentResourceTest {
 
   private static final long PERSON_BASE_ID = 10;
 
-  private static final byte[] TEST_FILE_CONTENT = FileSignature.PDF.bytes();
+  private static final byte[] TEST_FILE_CONTENT = new byte[]{
+      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46, (byte) 0x2D
+  };
   private static final String TEST_FILE_NAME = "document.pdf";
   private static final String TEST_FILE_CONTENT_TYPE = "application/pdf";
   private static final String TEST_FILE_FORM_FIELD_NAME = "document";
