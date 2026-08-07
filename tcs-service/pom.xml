@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.61.1</version>
+  <version>6.61.2</version>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -142,6 +142,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${commons-lang.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>2.9.2</version>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
