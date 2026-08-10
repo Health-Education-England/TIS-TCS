@@ -8,18 +8,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class FileSignatureTest {
+class DocumentUploadFileTypeTest {
 
   @Test
   void fromExtension_shouldReturnEmpty_whenExtensionIsNull() {
-    Optional<FileSignature> fileType = FileSignature.fromExtension(null);
+    Optional<DocumentUploadFileType> fileType = DocumentUploadFileType.fromExtension(null);
 
     assertThat(fileType).isEmpty();
   }
 
   @Test
   void fromExtension_shouldReturnEmpty_whenExtensionIsUnknown() {
-    Optional<FileSignature> fileType = FileSignature.fromExtension("txt");
+    Optional<DocumentUploadFileType> fileType = DocumentUploadFileType.fromExtension("txt");
 
     assertThat(fileType).isEmpty();
   }
@@ -27,36 +27,31 @@ class FileSignatureTest {
   @ParameterizedTest
   @ValueSource(strings = {"pdf", "doc", "xls", "docx", "xlsx"})
   void fromExtension_shouldResolveCaseInsensitiveExtensions(String extension) {
-    Optional<FileSignature> fileType = FileSignature.fromExtension(extension.toUpperCase());
+    Optional<DocumentUploadFileType> fileType = DocumentUploadFileType
+        .fromExtension(extension.toUpperCase());
 
     assertThat(fileType).isNotEmpty();
   }
 
   @Test
   void allowedExtensions_shouldContainOnlyAllowedUploadExtensions() {
-    Set<String> extensions = FileSignature.allowedExtensions();
+    Set<String> extensions = DocumentUploadFileType.allowedExtensions();
 
     assertThat(extensions)
-        .containsExactlyInAnyOrder(
-            FileSignature.PDF.extension(),
-            FileSignature.DOC.extension(),
-            FileSignature.XLS.extension(),
-            FileSignature.DOCX.extension(),
-            FileSignature.XLSX.extension())
-        .doesNotContain(FileSignature.MZ.extension());
+        .containsExactlyInAnyOrder("pdf", "doc", "xls", "docx", "xlsx");
   }
 
   @Test
   void allowedMediaTypes_shouldContainOnlyAllowedUploadMediaTypes() {
-    Set<String> mediaTypes = FileSignature.allowedMediaTypes();
+    Set<String> mediaTypes = DocumentUploadFileType.allowedMediaTypes();
 
     assertThat(mediaTypes)
         .containsExactlyInAnyOrder(
-            FileSignature.PDF.mediaType(),
-            FileSignature.DOC.mediaType(),
-            FileSignature.XLS.mediaType(),
-            FileSignature.DOCX.mediaType(),
-            FileSignature.XLSX.mediaType())
-        .doesNotContain(FileSignature.MZ.mediaType());
+            "application/pdf",
+            "application/msword",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   }
 }
+

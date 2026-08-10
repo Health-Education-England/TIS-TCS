@@ -24,19 +24,34 @@ public enum DocumentUploadFileType {
 
   private final String extension;
   private final String mediaType;
+
+  /**
+   * @param extension the file extension (without the dot)
+   * @param mediaType the MIME type of the file
+   */
   DocumentUploadFileType(final String extension, final String mediaType) {
     this.extension = extension;
     this.mediaType = mediaType;
   }
 
+  /**
+   * @return the file extension (without the dot)
+   */
   public String extension() {
     return extension;
   }
 
+  /**
+   * @return the MIME type of the file
+   */
   public String mediaType() {
     return mediaType;
   }
 
+  /**
+   * @param extension the file extension (without the dot)
+   * @return the DocumentUploadFileType for the given extension, or empty if not found
+   */
   public static Optional<DocumentUploadFileType> fromExtension(final String extension) {
     if (extension == null) {
       return Optional.empty();
@@ -44,12 +59,18 @@ public enum DocumentUploadFileType {
     return Optional.ofNullable(BY_EXTENSION.get(extension.toLowerCase(Locale.ROOT)));
   }
 
+  /**
+   * @return the set of allowed file extensions (without the dot)
+   */
   public static Set<String> allowedExtensions() {
     return Arrays.stream(values())
         .map(DocumentUploadFileType::extension)
         .collect(Collectors.toUnmodifiableSet());
   }
 
+  /**
+   * @return the set of allowed MIME types
+   */
   public static Set<String> allowedMediaTypes() {
     return Arrays.stream(values())
         .map(DocumentUploadFileType::mediaType)
