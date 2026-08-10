@@ -26,6 +26,7 @@ import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeDeserializer;
 import com.transformuk.hee.tis.tcs.api.dto.jackson.LocalDateTimeSerializer;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.config.AzureProperties;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
@@ -55,6 +56,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.mock.web.MockMultipartFile;
@@ -62,6 +64,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -122,6 +127,7 @@ public class DocumentResourceIntTest {
         new DocumentUploadValidator());
     mockMvc = MockMvcBuilders.standaloneSetup(documentResource)
         .setCustomArgumentResolvers(pageableArgumentResolver)
+        .setControllerAdvice(new ValidationExceptionHandler())
         .build();
 
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
@@ -1175,6 +1181,16 @@ public class DocumentResourceIntTest {
     @Override
     public Iterator<T> iterator() {
       return null;
+    }
+  }
+
+  @ControllerAdvice
+  private static class ValidationExceptionHandler {
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handleValidationException() {
+      // Status-only handler for upload validation failures in standalone MockMvc setup.
     }
   }
 }
