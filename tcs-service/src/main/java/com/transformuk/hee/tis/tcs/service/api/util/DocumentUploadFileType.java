@@ -26,6 +26,8 @@ public enum DocumentUploadFileType {
   private final String mediaType;
 
   /**
+   * Creates a document upload file type definition.
+   *
    * @param extension the file extension (without the dot)
    * @param mediaType the MIME type of the file
    */
@@ -35,6 +37,8 @@ public enum DocumentUploadFileType {
   }
 
   /**
+   * Returns the file extension associated with this upload type.
+   *
    * @return the file extension (without the dot)
    */
   public String extension() {
@@ -42,6 +46,8 @@ public enum DocumentUploadFileType {
   }
 
   /**
+   * Returns the MIME type associated with this upload type.
+   *
    * @return the MIME type of the file
    */
   public String mediaType() {
@@ -49,6 +55,8 @@ public enum DocumentUploadFileType {
   }
 
   /**
+   * Finds the upload file type for a given file extension.
+   *
    * @param extension the file extension (without the dot)
    * @return the DocumentUploadFileType for the given extension, or empty if not found
    */
@@ -60,6 +68,8 @@ public enum DocumentUploadFileType {
   }
 
   /**
+   * Returns all allowed upload file extensions.
+   *
    * @return the set of allowed file extensions (without the dot)
    */
   public static Set<String> allowedExtensions() {
@@ -69,6 +79,8 @@ public enum DocumentUploadFileType {
   }
 
   /**
+   * Returns all allowed upload MIME types.
+   *
    * @return the set of allowed MIME types
    */
   public static Set<String> allowedMediaTypes() {
