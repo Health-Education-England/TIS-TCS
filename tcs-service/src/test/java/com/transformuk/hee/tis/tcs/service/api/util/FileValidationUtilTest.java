@@ -3,7 +3,6 @@ package com.transformuk.hee.tis.tcs.service.api.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,83 +24,11 @@ class FileValidationUtilTest {
       (byte) 0x4D, (byte) 0x5A
   };
 
-  @Test
-  void isValidFileType_shouldReturnFalse_whenDocumentIsNull() {
-    assertThat(FileValidationUtil.isValidFileType(null)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenExtensionIsDisallowedTxt() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "document.txt", "text/plain", "plain text content".getBytes());
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenExtensionIsDisallowedExe() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "malware.exe", "application/x-msdownload", MZ_BYTES);
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenFileHasNoExtension() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "nodotfile", "application/octet-stream", "content".getBytes());
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenFilenameEndsWithTrailingDot() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "endotfile.", "application/octet-stream", "content".getBytes());
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenSpoofedPdfHasMzHeader() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "spoofed.pdf", "application/pdf", MZ_BYTES);
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenSpoofedDocHasPdfHeader() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "spoofed.doc", "application/msword", PDF_BYTES);
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenSpoofedXlsHasZipHeader() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "spoofed.xls", "application/vnd.ms-excel", ZIP_BYTES);
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenSpoofedDocxHasOle2Header() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "spoofed.docx",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        OLE2_BYTES);
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnFalse_whenSpoofedXlsxHasOle2Header() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "spoofed.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        OLE2_BYTES);
-    assertThat(FileValidationUtil.isValidFileType(file)).isFalse();
-  }
-
-  @Test
-  void isValidFileType_shouldReturnTrue_whenValidPdf() {
-    final MockMultipartFile file = new MockMultipartFile(
-        "file", "document.pdf", "application/pdf", PDF_BYTES);
-    assertThat(FileValidationUtil.isValidFileType(file)).isTrue();
+  @ParameterizedTest(name = "[{index}] {0}")
+  @MethodSource("invalidFileTypeProvider")
+  void isValidFileType_shouldReturnFalse_forInvalidFiles(String description,
+      MockMultipartFile file) {
+    assertThat(FileValidationUtil.isValidFileType(file)).as(description).isFalse();
   }
 
   @ParameterizedTest(name = "[{index}] {0}")
@@ -109,7 +36,25 @@ class FileValidationUtilTest {
   void isValidFileType_shouldReturnTrue_forValidFiles(String description, String filename,
       String contentType, byte[] content) {
     final MockMultipartFile file = new MockMultipartFile("file", filename, contentType, content);
-    assertThat(FileValidationUtil.isValidFileType(file)).isTrue();
+    assertThat(FileValidationUtil.isValidFileType(file)).as(description).isTrue();
+  }
+
+  static Stream<Arguments> invalidFileTypeProvider() {
+    return Stream.of(
+        Arguments.of("Document is null", null),
+        Arguments.of("Disallowed extension exe",
+            new MockMultipartFile("file", "malware.exe", "application/x-msdownload", MZ_BYTES)),
+        Arguments.of("No extension",
+            new MockMultipartFile("file", "nodotfile", "application/octet-stream",
+                "content".getBytes())),
+        Arguments.of("Trailing dot extension",
+            new MockMultipartFile("file", "endotfile.", "application/octet-stream",
+                "content".getBytes())),
+        Arguments.of("Spoofed pdf has mz header",
+            new MockMultipartFile("file", "spoofed.pdf", "application/pdf", MZ_BYTES)),
+        Arguments.of("Spoofed doc has pdf header",
+            new MockMultipartFile("file", "spoofed.doc", "application/msword", PDF_BYTES))
+    );
   }
 
   static Stream<Arguments> validFileTypeProvider() {

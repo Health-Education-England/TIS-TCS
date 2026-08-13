@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
 import java.io.IOException;
-import java.util.Locale;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,12 @@ public class FileValidationUtil {
     }
 
     final String filename = documentParam.getOriginalFilename();
-    final String fileExtension = extractFileExtension(filename).toLowerCase(Locale.ROOT);
-    final DocumentUploadFileType expectedType = DocumentUploadFileType
-        .fromExtension(fileExtension).orElse(null);
+    final String fileExtension = extractFileExtension(filename);
+    DocumentUploadFileType expectedType;
 
-    if (expectedType == null) {
+    try{
+      expectedType = DocumentUploadFileType.fromExtension(fileExtension);
+    } catch (IllegalArgumentException e) {
       LOG.warn("Rejected upload due to disallowed file extension");
       return false;
     }
