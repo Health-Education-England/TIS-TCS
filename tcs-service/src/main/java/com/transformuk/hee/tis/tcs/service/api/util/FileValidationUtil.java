@@ -35,7 +35,7 @@ public class FileValidationUtil {
     final String fileExtension = extractFileExtension(filename);
     DocumentUploadFileType expectedType;
 
-    try{
+    try {
       expectedType = DocumentUploadFileType.fromExtension(fileExtension);
     } catch (IllegalArgumentException e) {
       LOG.warn("Rejected upload due to disallowed file extension");
