@@ -69,6 +69,11 @@ class PostViewTest {
   }
 
   @Test
+  void shouldMapFundingSubtypeIdsAsKeywordField() throws NoSuchFieldException {
+    assertKeywordField("fundingSubtypeIds");
+  }
+
+  @Test
   void shouldMapOwnersAsKeywordField() throws NoSuchFieldException {
     assertKeywordField("owner");
   }
