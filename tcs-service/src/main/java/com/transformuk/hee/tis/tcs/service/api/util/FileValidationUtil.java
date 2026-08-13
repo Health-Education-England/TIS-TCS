@@ -1,6 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.api.util;
 
 import java.io.IOException;
+import java.util.Optional;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,8 @@ public class FileValidationUtil {
     }
 
     final String filename = documentParam.getOriginalFilename();
-    final String fileExtension = extractFileExtension(filename);
+    final String fileExtension = Optional.ofNullable(StringUtils.getFilenameExtension(filename))
+        .orElse("");
     DocumentUploadFileType expectedType;
 
     try {
@@ -60,21 +62,5 @@ public class FileValidationUtil {
     }
 
     return true;
-  }
-
-  /**
-   * Extracts the file extension from a filename. Returns empty string if filename is null, empty,
-   * or has no extension.
-   *
-   * @param filename the filename to extract extension from
-   * @return the file extension or empty string
-   */
-  private static String extractFileExtension(final String filename) {
-    if (!StringUtils.hasLength(filename) || filename.lastIndexOf('.') == 0) {
-      return "";
-    }
-
-    final String extension = StringUtils.getFilenameExtension(filename);
-    return extension == null ? "" : extension;
   }
 }
