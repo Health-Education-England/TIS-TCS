@@ -26,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -48,29 +50,11 @@ class PostViewTest {
     assertThat(idField.getType()).isEqualTo(Long.class);
   }
 
-  @Test
-  void shouldMapNationalPostNumberAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("nationalPostNumber");
-  }
-
-  @Test
-  void shouldMapPrimarySpecialtyCodeAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("primarySpecialtyCode");
-  }
-
-  @Test
-  void shouldMapStatusAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("status");
-  }
-
-  @Test
-  void shouldMapFundingTypesAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("fundingTypes");
-  }
-
-  @Test
-  void shouldMapOwnersAsKeywordField() throws NoSuchFieldException {
-    assertKeywordField("owner");
+  @ParameterizedTest
+  @ValueSource(strings = {"nationalPostNumber", "primarySpecialtyCode", "status", "fundingTypes",
+      "fundingSubtypeIds", "owner"})
+  void shouldMapFieldAsKeywordField(String fieldName) throws NoSuchFieldException {
+    assertKeywordField(fieldName);
   }
 
   @Test
