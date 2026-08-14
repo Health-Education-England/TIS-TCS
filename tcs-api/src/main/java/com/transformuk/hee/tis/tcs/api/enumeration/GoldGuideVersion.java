@@ -5,5 +5,6 @@ package com.transformuk.hee.tis.tcs.api.enumeration;
  */
 public enum GoldGuideVersion {
   GG9,
-  GG10
+  GG10,
+  GG11
 }
