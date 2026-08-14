@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
+import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
 import java.util.Optional;
@@ -35,9 +36,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 public class DocumentResourceTest {
 
   private static final long PERSON_BASE_ID = 10;
-  private static final byte[] TEST_FILE_CONTENT = "DataDataDataDataDataData".getBytes();
-  private static final String TEST_FILE_NAME = "document.txt";
-  private static final String TEST_FILE_CONTENT_TYPE = "text/plain";
+
+  private static final byte[] TEST_FILE_CONTENT = new byte[]{
+      (byte) 0x25, (byte) 0x50, (byte) 0x44, (byte) 0x46, (byte) 0x2D
+  };
+  private static final String TEST_FILE_NAME = "document.pdf";
+  private static final String TEST_FILE_CONTENT_TYPE = "application/pdf";
   private static final String TEST_FILE_FORM_FIELD_NAME = "document";
 
   private MockMvc mockMvc;
@@ -53,8 +57,10 @@ public class DocumentResourceTest {
 
   @Before
   public void setup() {
-    DocumentResource testObj = new DocumentResource(documentServiceMock, tagServiceMock);
-    mockMvc = MockMvcBuilders.standaloneSetup(testObj).build();
+    DocumentResource testObj = new DocumentResource(documentServiceMock, tagServiceMock,
+        new DocumentUploadValidator());
+    mockMvc = MockMvcBuilders.standaloneSetup(testObj)
+        .build();
 
     TestUtils.mockUserprofile("jamesh", "1-AIIDR8", "1-AIIDWA");
   }
@@ -85,7 +91,7 @@ public class DocumentResourceTest {
     documentDto.setId(1L);
     documentDto.setTitle(TEST_FILE_NAME);
     documentDto.setFileName(TEST_FILE_NAME);
-    documentDto.setFileExtension("txt");
+    documentDto.setFileExtension("pdf");
     documentDto.setContentType(TEST_FILE_CONTENT_TYPE);
     documentDto.setSize((long) TEST_FILE_CONTENT.length);
     documentDto.setPersonId(PERSON_BASE_ID);
@@ -107,7 +113,7 @@ public class DocumentResourceTest {
     documentDto.setId(1L);
     documentDto.setTitle(TEST_FILE_NAME);
     documentDto.setFileName(TEST_FILE_NAME);
-    documentDto.setFileExtension("txt");
+    documentDto.setFileExtension("pdf");
     documentDto.setContentType(TEST_FILE_CONTENT_TYPE);
     documentDto.setSize((long) TEST_FILE_CONTENT.length);
     documentDto.setPersonId(PERSON_BASE_ID);

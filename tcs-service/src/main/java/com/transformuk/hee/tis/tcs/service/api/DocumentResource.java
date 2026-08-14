@@ -11,6 +11,8 @@ import com.transformuk.hee.tis.tcs.api.dto.DocumentDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TagDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
+import com.transformuk.hee.tis.tcs.service.api.validation.DocumentUploadValidator;
+import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.DocumentService;
 import com.transformuk.hee.tis.tcs.service.service.TagService;
@@ -53,10 +55,13 @@ public class DocumentResource {
   private static final Logger LOG = LoggerFactory.getLogger(DocumentResource.class);
   private final DocumentService documentService;
   private final TagService tagService;
+  private final DocumentUploadValidator documentUploadValidator;
 
-  DocumentResource(final DocumentService documentService, final TagService tagService) {
+  DocumentResource(final DocumentService documentService, final TagService tagService,
+      final DocumentUploadValidator documentUploadValidator) {
     this.documentService = documentService;
     this.tagService = tagService;
+    this.documentUploadValidator = documentUploadValidator;
   }
 
   @GetMapping(value = PATH_DOCUMENTS + "/{entity}/{personId}", produces = APPLICATION_JSON)
@@ -114,8 +119,8 @@ public class DocumentResource {
   }
 
   /**
-   * Marking this endpoint as deprecated and changing the url to be /old please see {@link
-   * #downloadDocumentByIdV2} for its replacement
+   * Marking this endpoint as deprecated and changing the url to be /old please see
+   * {@link #downloadDocumentByIdV2} for its replacement
    *
    * @param response
    * @param documentId
@@ -231,10 +236,12 @@ public class DocumentResource {
   public ResponseEntity<DocumentId> uploadDocument(
       @RequestParam("personId") final Long personId,
       @RequestParam("document") final MultipartFile documentParam
-  ) throws IOException {
+  ) throws IOException, ValidationException {
     String filename = getConverter(documentParam.getOriginalFilename()).decodeUrl().toString();
     LOG.info("Received 'UploadDocument' request with person '{}' and document name '{}'",
         personId, filename);
+
+    documentUploadValidator.validate(documentParam);
 
     final Optional<DocumentDTO> newDocument = createDocument(documentParam, personId);
 
