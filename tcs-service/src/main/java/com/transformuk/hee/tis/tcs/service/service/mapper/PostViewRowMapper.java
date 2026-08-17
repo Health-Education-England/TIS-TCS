@@ -70,6 +70,8 @@ public class PostViewRowMapper implements RowMapper<PostView> {
 
     view.setFundingTypes(toStringList(getNullableString(rs, "fundingType")));
 
+    view.setFundingSubtypeIds(toStringList(getNullableString(rs, "fundingSubtypeIds")));
+
     view.setOwner(getNullableString(rs, "owner"));
 
     view.setTrustIds(toLongList(getNullableString(rs, "trustIds")));
