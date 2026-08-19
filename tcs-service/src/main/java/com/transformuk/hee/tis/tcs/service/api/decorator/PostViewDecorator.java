@@ -3,10 +3,10 @@ package com.transformuk.hee.tis.tcs.service.api.decorator;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PostViewDecorator {
-
-  private static final Logger log = LoggerFactory.getLogger(PostViewDecorator.class);
-  private AsyncReferenceService referenceService;
+  private final AsyncReferenceService referenceService;
 
   @Autowired
   public PostViewDecorator(AsyncReferenceService referenceService) {
@@ -33,6 +31,7 @@ public class PostViewDecorator {
     // collect all the codes from the list
     Set<Long> gradeIds = new HashSet<>();
     Set<Long> siteIds = new HashSet<>();
+    Set<String> fundingSubtypeIds = new HashSet<>();
     postViews.forEach(postView -> {
       if (postView.getApprovedGradeId() != null) {
         gradeIds.add(postView.getApprovedGradeId());
@@ -40,11 +39,15 @@ public class PostViewDecorator {
       if (postView.getPrimarySiteId() != null) {
         siteIds.add(postView.getPrimarySiteId());
       }
+      if (postView.getFundingSubtypeIds() != null) {
+        fundingSubtypeIds.addAll(postView.getFundingSubtypeIds());
+      }
     });
 
     CompletableFuture.allOf(
         decorateGradesOnPost(gradeIds, postViews),
-        decorateSitesOnPost(siteIds, postViews))
+        decorateSitesOnPost(siteIds, postViews),
+        decorateFundingSubtypesOnPost(fundingSubtypeIds, postViews))
         .join();
   }
 
@@ -71,6 +74,21 @@ public class PostViewDecorator {
           postView.setPrimarySiteCode(siteMap.get(postView.getPrimarySiteId()).getSiteCode());
           postView.setPrimarySiteName(siteMap.get(postView.getPrimarySiteId()).getSiteName());
           postView.setPrimarySiteKnownAs(siteMap.get(postView.getPrimarySiteId()).getSiteKnownAs());
+        }
+      }
+    });
+  }
+
+  protected CompletableFuture<Void> decorateFundingSubtypesOnPost(Set<String> ids,
+      List<PostViewDTO> postViewDTOS) {
+    return referenceService.doWithFundingSubtypeAsync(ids, fundingSubtypeMap -> {
+      for (PostViewDTO postView : postViewDTOS) {
+        if (postView.getFundingSubtypeIds() != null) {
+          List<String> fundingSubtypeNames = postView.getFundingSubtypeIds().stream()
+              .map(fundingSubtypeMap::get)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList());
+          postView.setFundingSubtypeNames(fundingSubtypeNames);
         }
       }
     });

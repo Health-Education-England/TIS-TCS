@@ -80,6 +80,7 @@ public class PostElasticSearchService {
   private static final String PRIMARY_SPECIALTY_NAME = "primarySpecialtyName";
   private static final String PROGRAMME_NAMES = "programmeNames";
   private static final String FUNDING_TYPES = "fundingTypes";
+  private static final String FUNDING_SUBTYPE_IDS = "fundingSubtypeIds";
   private static final String PRIMARY_SPECIALTY_ID = "primarySpecialtyId";
   private static final String PRIMARY_SITE_ID = "primarySiteId";
   private static final String APPROVED_GRADE_ID = "approvedGradeId";
@@ -98,6 +99,7 @@ public class PostElasticSearchService {
       NATIONAL_POST_NUMBER,
       PRIMARY_SPECIALTY_CODE,
       FUNDING_TYPES,
+      FUNDING_SUBTYPE_IDS,
       PRIMARY_SPECIALTY_ID,
       PRIMARY_SITE_ID,
       APPROVED_GRADE_ID

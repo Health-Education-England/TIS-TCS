@@ -79,6 +79,9 @@ class PostElasticSearchServiceTest {
   private static final Long SPECIAL_ID = 333L;
   private static final String QUERY_TEMPLATE =
       "SELECT * FROM post_view WHERECLAUSE ORDERBYCLAUSE LIMITCLAUSE";
+  private static final String FUNDING_SUBTYPE_ID_1 = "Funding Subtype id 1";
+  private static final String FUNDING_SUBTYPE_ID_2 = "Funding Subtype id 2";
+  private static final String FIELD_FUNDING_SUBTYPE_IDS = "fundingSubtypeIds";
 
   @Mock
   private ElasticsearchOperations elasticsearchOperations;
@@ -119,6 +122,7 @@ class PostElasticSearchServiceTest {
     postView.setPrimarySpecialtyName("General Surgery");
     postView.setPrimarySiteId(200L);
     postView.setApprovedGradeId(300L);
+    postView.setFundingSubtypeIds(Lists.newArrayList(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2));
 
     postViewDto = new PostViewDTO();
     postViewDto.setId(1000L);
@@ -134,6 +138,8 @@ class PostElasticSearchServiceTest {
     postViewDto.setPrimarySpecialtyName("General Surgery");
     postViewDto.setPrimarySiteId(200L);
     postViewDto.setApprovedGradeId(300L);
+    postViewDto.setFundingSubtypeIds(
+        Lists.newArrayList(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2));
 
     lenient().when(postViewMapper.toDtos(anyList())).thenReturn(List.of(postViewDto));
 
@@ -173,6 +179,8 @@ class PostElasticSearchServiceTest {
     assertThat(dto.getFundingType()).isEqualTo("Tariff");
     assertThat(dto.getCurrentTraineeSurname()).isEqualTo("Smith");
     assertThat(dto.getCurrentTraineeForenames()).isEqualTo("John");
+    assertThat(dto.getFundingSubtypeIds()).containsExactlyInAnyOrder(FUNDING_SUBTYPE_ID_1,
+        FUNDING_SUBTYPE_ID_2);
 
     verify(postViewDecorator).decorate(result.getContent());
   }
@@ -262,6 +270,32 @@ class PostElasticSearchServiceTest {
         "approvedGradeId",
         "primarySpecialtyId"
     );
+  }
+
+  @Test
+  void shouldBuildTermQueryForFundingSubtypeIdsColumnFilter() {
+    List<ColumnFilter> filters = Collections.singletonList(
+        columnFilter(FIELD_FUNDING_SUBTYPE_IDS, FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2)
+    );
+
+    Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
+
+    SearchHits<PostView> mockedSearchHits = searchHits(postView);
+
+    when(elasticsearchOperations.search(any(NativeSearchQuery.class), eq(PostView.class)))
+        .thenReturn(mockedSearchHits);
+
+    postElasticSearchService.searchForPage(null, filters, pageable);
+
+    ArgumentCaptor<NativeSearchQuery> queryCaptor =
+        ArgumentCaptor.forClass(NativeSearchQuery.class);
+
+    verify(elasticsearchOperations).search(queryCaptor.capture(), eq(PostView.class));
+
+    String queryAsString = queryCaptor.getValue().getQuery().toString();
+
+    assertThat(queryAsString).contains(FIELD_FUNDING_SUBTYPE_IDS, FUNDING_SUBTYPE_ID_1,
+        FUNDING_SUBTYPE_ID_2);
   }
 
   @Test

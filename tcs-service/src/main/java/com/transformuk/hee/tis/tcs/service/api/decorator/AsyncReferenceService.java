@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.decorator;
 
+import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.LocalOfficeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
@@ -23,7 +24,7 @@ public class AsyncReferenceService {
 
   private static final Logger log = LoggerFactory.getLogger(AsyncReferenceService.class);
 
-  private ReferenceService referenceService;
+  private final ReferenceService referenceService;
 
   @Autowired
   public AsyncReferenceService(ReferenceService referenceService) {
@@ -89,6 +90,33 @@ public class AsyncReferenceService {
       log.warn("Reference decorator call to local office failed", e);
     }
 
+    return CompletableFuture.completedFuture(null);
+  }
+
+  /**
+   * Find the fundingSubtype given the Ids, and accept the found fundingSubtypes in the consumer.
+   *
+   * @param ids the fundingSubtype ids to look for
+   * @param consumer the consumer to accept the found fundingSubtypes
+   *
+   * @return a CompletableFuture that completes when the operation is done
+   */
+  @Async
+  public CompletableFuture<Void> doWithFundingSubtypeAsync(Set<String> ids,
+      Consumer<Map<String, String>> consumer) {
+    if (CollectionUtils.isNotEmpty(ids)) {
+      try {
+        List<FundingSubTypeDto> fundingSubtypeList = referenceService.findFundingSubtypesIdIn(ids);
+        if (CollectionUtils.isNotEmpty(fundingSubtypeList)) {
+          Map<String, String> fundingSubtypeMap = fundingSubtypeList.stream()
+              .collect(Collectors.toMap(fundingSubtype -> fundingSubtype.getId().toString(),
+                  FundingSubTypeDto::getLabel));
+          consumer.accept(fundingSubtypeMap);
+        }
+      } catch (Exception e) {
+        log.warn("Reference decorator call to funding subtypes failed", e);
+      }
+    }
     return CompletableFuture.completedFuture(null);
   }
 }
