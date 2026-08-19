@@ -50,6 +50,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewRowMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,8 +80,8 @@ class PostElasticSearchServiceTest {
   private static final Long SPECIAL_ID = 333L;
   private static final String QUERY_TEMPLATE =
       "SELECT * FROM post_view WHERECLAUSE ORDERBYCLAUSE LIMITCLAUSE";
-  private static final String FUNDING_SUBTYPE_ID_1 = "Funding Subtype id 1";
-  private static final String FUNDING_SUBTYPE_ID_2 = "Funding Subtype id 2";
+  private static final String FUNDING_SUBTYPE_ID_1 = UUID.randomUUID().toString();
+  private static final String FUNDING_SUBTYPE_ID_2 = UUID.randomUUID().toString();
   private static final String FIELD_FUNDING_SUBTYPE_IDS = "fundingSubtypeIds";
 
   @Mock

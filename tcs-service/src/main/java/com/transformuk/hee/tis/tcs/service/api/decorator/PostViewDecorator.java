@@ -80,9 +80,9 @@ public class PostViewDecorator {
   }
 
   protected CompletableFuture<Void> decorateFundingSubtypesOnPost(Set<String> ids,
-      List<PostViewDTO> postViewDTOS) {
+      List<PostViewDTO> postViewDtos) {
     return referenceService.doWithFundingSubtypeAsync(ids, fundingSubtypeMap -> {
-      for (PostViewDTO postView : postViewDTOS) {
+      for (PostViewDTO postView : postViewDtos) {
         if (postView.getFundingSubtypeIds() != null) {
           List<String> fundingSubtypeNames = postView.getFundingSubtypeIds().stream()
               .map(fundingSubtypeMap::get)
