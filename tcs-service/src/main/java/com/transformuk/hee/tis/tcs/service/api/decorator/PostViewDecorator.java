@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,7 +33,7 @@ public class PostViewDecorator {
     // collect all the codes from the list
     Set<Long> gradeIds = new HashSet<>();
     Set<Long> siteIds = new HashSet<>();
-    Set<String> fundingSubtypeIds = new HashSet<>();
+    Set<UUID> fundingSubtypeIds = new HashSet<>();
     postViews.forEach(postView -> {
       if (postView.getApprovedGradeId() != null) {
         gradeIds.add(postView.getApprovedGradeId());
@@ -80,7 +81,7 @@ public class PostViewDecorator {
     });
   }
 
-  protected CompletableFuture<Void> decorateFundingSubtypesOnPost(Set<String> ids,
+  protected CompletableFuture<Void> decorateFundingSubtypesOnPost(Set<UUID> ids,
       List<PostViewDTO> postViewDtos) {
     return referenceService.doWithFundingSubtypeAsync(ids, fundingSubtypeMap -> {
       for (PostViewDTO postView : postViewDtos) {

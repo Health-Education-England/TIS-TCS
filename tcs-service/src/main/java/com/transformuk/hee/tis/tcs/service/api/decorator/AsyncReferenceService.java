@@ -8,6 +8,7 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -102,15 +103,14 @@ public class AsyncReferenceService {
    * @return a CompletableFuture that completes when the operation is done
    */
   @Async
-  public CompletableFuture<Void> doWithFundingSubtypeAsync(Set<String> ids,
-      Consumer<Map<String, String>> consumer) {
+  public CompletableFuture<Void> doWithFundingSubtypeAsync(Set<UUID> ids,
+      Consumer<Map<UUID, String>> consumer) {
     if (CollectionUtils.isNotEmpty(ids)) {
       try {
         List<FundingSubTypeDto> fundingSubtypeList = referenceService.findFundingSubtypesIdIn(ids);
         if (CollectionUtils.isNotEmpty(fundingSubtypeList)) {
-          Map<String, String> fundingSubtypeMap = fundingSubtypeList.stream()
-              .collect(Collectors.toMap(fundingSubtype -> fundingSubtype.getId().toString(),
-                  FundingSubTypeDto::getLabel));
+          Map<UUID, String> fundingSubtypeMap = fundingSubtypeList.stream()
+              .collect(Collectors.toMap(FundingSubTypeDto::getId, FundingSubTypeDto::getLabel));
           consumer.accept(fundingSubtypeMap);
         }
       } catch (Exception e) {

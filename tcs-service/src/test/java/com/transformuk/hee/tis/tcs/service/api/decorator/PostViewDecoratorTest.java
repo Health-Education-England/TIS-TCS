@@ -35,6 +35,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
@@ -53,9 +54,9 @@ class PostViewDecoratorTest {
   private static final String SITE_CODE = "Site code";
   private static final String SITE_NAME = "Site name";
   private static final String SITE_KNOWN_AS = "Site Known As";
-  private static final String FUNDING_SUBTYPE_ID_1 = "Funding subtype id 1";
-  private static final String FUNDING_SUBTYPE_ID_2 = "Funding subtype id 2";
-  private static final String UNKNOWN_FUNDING_SUBTYPE_ID = "Unknown funding subtype id";
+  private static final UUID FUNDING_SUBTYPE_ID_1 = UUID.randomUUID();
+  private static final UUID FUNDING_SUBTYPE_ID_2 = UUID.randomUUID();
+  private static final UUID UNKNOWN_FUNDING_SUBTYPE_ID = UUID.randomUUID();
   private static final String FUNDING_SUBTYPE_NAME_1 = "Funding subtype 1";
   private static final String FUNDING_SUBTYPE_NAME_2 = "Funding subtype 2";
 
@@ -67,7 +68,7 @@ class PostViewDecoratorTest {
 
   @Test
   void shouldPopulateFundingSubtypeNamesInOrderAndIgnoreUnknownIds() {
-    Set<String> ids = Set.of(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2,
+    Set<UUID> ids = Set.of(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2,
         UNKNOWN_FUNDING_SUBTYPE_ID);
     PostViewDTO postViewWithFundingSubtypes = new PostViewDTO();
     postViewWithFundingSubtypes.setFundingSubtypeIds(
@@ -79,7 +80,7 @@ class PostViewDecoratorTest {
 
     when(referenceService.doWithFundingSubtypeAsync(eq(ids), any()))
         .thenAnswer(invocation -> {
-          Consumer<Map<String, String>> consumer = invocation.getArgument(1);
+          Consumer<Map<UUID, String>> consumer = invocation.getArgument(1);
           consumer.accept(Map.of(
               FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_NAME_1,
               FUNDING_SUBTYPE_ID_2, FUNDING_SUBTYPE_NAME_2
@@ -101,7 +102,7 @@ class PostViewDecoratorTest {
   void shouldDecoratePostsUsingCollectedGradeSiteAndFundingSubtypeIds() {
     Set<Long> gradeIds = Set.of(GRADE_ID);
     Set<Long> siteIds = Set.of(SITE_ID);
-    Set<String> fundingSubtypeIds = Set.of(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2);
+    Set<UUID> fundingSubtypeIds = Set.of(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2);
 
     PostViewDTO postViewDto1 = new PostViewDTO();
     postViewDto1.setApprovedGradeId(GRADE_ID);
@@ -142,7 +143,7 @@ class PostViewDecoratorTest {
 
     when(referenceService.doWithFundingSubtypeAsync(eq(fundingSubtypeIds), any()))
         .thenAnswer(invocation -> {
-          Consumer<Map<String, String>> consumer = invocation.getArgument(1);
+          Consumer<Map<UUID, String>> consumer = invocation.getArgument(1);
           consumer.accept(Map.of(
               FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_NAME_1,
               FUNDING_SUBTYPE_ID_2, FUNDING_SUBTYPE_NAME_2

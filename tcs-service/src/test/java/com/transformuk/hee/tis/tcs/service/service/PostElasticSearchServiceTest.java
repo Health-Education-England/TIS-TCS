@@ -80,8 +80,8 @@ class PostElasticSearchServiceTest {
   private static final Long SPECIAL_ID = 333L;
   private static final String QUERY_TEMPLATE =
       "SELECT * FROM post_view WHERECLAUSE ORDERBYCLAUSE LIMITCLAUSE";
-  private static final String FUNDING_SUBTYPE_ID_1 = UUID.randomUUID().toString();
-  private static final String FUNDING_SUBTYPE_ID_2 = UUID.randomUUID().toString();
+  private static final UUID FUNDING_SUBTYPE_ID_1 = UUID.randomUUID();
+  private static final UUID FUNDING_SUBTYPE_ID_2 = UUID.randomUUID();
   private static final String FIELD_FUNDING_SUBTYPE_IDS = "fundingSubtypeIds";
 
   @Mock
@@ -123,7 +123,8 @@ class PostElasticSearchServiceTest {
     postView.setPrimarySpecialtyName("General Surgery");
     postView.setPrimarySiteId(200L);
     postView.setApprovedGradeId(300L);
-    postView.setFundingSubtypeIds(Lists.newArrayList(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2));
+    postView.setFundingSubtypeIds(
+        Lists.newArrayList(FUNDING_SUBTYPE_ID_1.toString(), FUNDING_SUBTYPE_ID_2.toString()));
 
     postViewDto = new PostViewDTO();
     postViewDto.setId(1000L);
@@ -295,8 +296,8 @@ class PostElasticSearchServiceTest {
 
     String queryAsString = queryCaptor.getValue().getQuery().toString();
 
-    assertThat(queryAsString).contains(FIELD_FUNDING_SUBTYPE_IDS, FUNDING_SUBTYPE_ID_1,
-        FUNDING_SUBTYPE_ID_2);
+    assertThat(queryAsString).contains(FIELD_FUNDING_SUBTYPE_IDS, FUNDING_SUBTYPE_ID_1.toString(),
+        FUNDING_SUBTYPE_ID_2.toString());
   }
 
   @Test

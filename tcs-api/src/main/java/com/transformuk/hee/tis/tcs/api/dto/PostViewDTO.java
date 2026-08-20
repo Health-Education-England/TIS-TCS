@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.api.dto;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 
 /**
@@ -55,7 +56,7 @@ public class PostViewDTO implements Serializable {
 
   private List<String> fundingSubtypeNames;
 
-  private List<String> fundingSubtypeIds;
+  private List<UUID> fundingSubtypeIds;
 
   private String owner;
 

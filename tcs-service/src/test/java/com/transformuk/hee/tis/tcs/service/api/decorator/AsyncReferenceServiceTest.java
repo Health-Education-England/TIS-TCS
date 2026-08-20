@@ -23,6 +23,7 @@ package com.transformuk.hee.tis.tcs.service.api.decorator;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -53,14 +54,14 @@ class AsyncReferenceServiceTest {
   @Mock
   private ReferenceService referenceService;
   @Mock
-  private Consumer<Map<String, String>> fundingSubtypeConsumer;
+  private Consumer<Map<UUID, String>> fundingSubtypeConsumer;
 
   @InjectMocks
   private AsyncReferenceService asyncReferenceService;
 
   @Test
   void shouldFetchFundingSubtypesAndPassIdToLabelMapToConsumer() {
-    Set<String> ids = Set.of(ID_1.toString(), ID_2.toString());
+    Set<UUID> ids = Set.of(ID_1, ID_2);
 
     FundingSubTypeDto fundingSubtypeOne = new FundingSubTypeDto();
     fundingSubtypeOne.setId(ID_1);
@@ -79,8 +80,8 @@ class AsyncReferenceServiceTest {
     assertTrue(result.isDone());
     verify(referenceService).findFundingSubtypesIdIn(ids);
     verify(fundingSubtypeConsumer).accept(Map.of(
-        ID_1.toString(), LABEL_1,
-        ID_2.toString(), LABEL_2
+        ID_1, LABEL_1,
+        ID_2, LABEL_2
     ));
   }
 
@@ -96,7 +97,8 @@ class AsyncReferenceServiceTest {
 
   @Test
   void shouldNotCallConsumerWhenNoFundingSubtypesAreFound() {
-    Set<String> ids = Set.of(UUID.randomUUID().toString());
+    Set<UUID> ids = Set.of(ID_1);
+
     when(referenceService.findFundingSubtypesIdIn(ids)).thenReturn(List.of());
 
     CompletableFuture<Void> result = asyncReferenceService.doWithFundingSubtypeAsync(ids,
@@ -104,12 +106,13 @@ class AsyncReferenceServiceTest {
 
     assertTrue(result.isDone());
     verify(referenceService).findFundingSubtypesIdIn(ids);
-    verify(fundingSubtypeConsumer, never()).accept(org.mockito.ArgumentMatchers.anyMap());
+    verify(fundingSubtypeConsumer, never()).accept(anyMap());
   }
 
   @Test
   void shouldSwallowReferenceServiceExceptions() {
-    Set<String> ids = Set.of(UUID.randomUUID().toString());
+    Set<UUID> ids = Set.of(ID_1);
+
     when(referenceService.findFundingSubtypesIdIn(ids))
         .thenThrow(new RuntimeException("Reference failure"));
 

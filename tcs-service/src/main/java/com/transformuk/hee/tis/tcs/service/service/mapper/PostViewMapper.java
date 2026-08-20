@@ -24,6 +24,8 @@ package com.transformuk.hee.tis.tcs.service.service.mapper;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.job.post.PostView;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -39,6 +41,8 @@ public interface PostViewMapper {
   @Mapping(source = "programmeNames", target = "programmeNames",
       qualifiedByName = "joinWithSemicolon")
   @Mapping(source = "fundingTypes", target = "fundingType", qualifiedByName = "joinWithSemicolon")
+  @Mapping(source = "fundingSubtypeIds", target = "fundingSubtypeIds",
+      qualifiedByName = "stringsToUuids")
   PostViewDTO toDto(PostView postView);
 
   List<PostViewDTO> toDtos(List<PostView> postViews);
@@ -53,5 +57,16 @@ public interface PostViewMapper {
     }
 
     return String.join("; ", values);
+  }
+
+  /**
+   * Converts a list of UUID strings to a list of UUIDs.
+   */
+  @Named("stringsToUuids")
+  default List<UUID> stringsToUuids(List<String> values) {
+    if (CollectionUtils.isEmpty(values)) {
+      return List.of();
+    }
+    return values.stream().map(UUID::fromString).collect(Collectors.toList());
   }
 }
