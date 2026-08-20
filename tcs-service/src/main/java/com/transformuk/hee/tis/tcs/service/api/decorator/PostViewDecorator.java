@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,7 @@ public class PostViewDecorator {
       if (postView.getPrimarySiteId() != null) {
         siteIds.add(postView.getPrimarySiteId());
       }
-      if (postView.getFundingSubtypeIds() != null) {
+      if (CollectionUtils.isNotEmpty(postView.getFundingSubtypeIds())) {
         fundingSubtypeIds.addAll(postView.getFundingSubtypeIds());
       }
     });
