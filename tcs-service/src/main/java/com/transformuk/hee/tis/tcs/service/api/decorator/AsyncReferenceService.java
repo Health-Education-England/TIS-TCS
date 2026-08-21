@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.api.decorator;
 
+import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
 import com.transformuk.hee.tis.reference.api.dto.GradeDTO;
 import com.transformuk.hee.tis.reference.api.dto.LocalOfficeDTO;
 import com.transformuk.hee.tis.reference.api.dto.SiteDTO;
@@ -7,6 +8,7 @@ import com.transformuk.hee.tis.reference.client.ReferenceService;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,7 +25,7 @@ public class AsyncReferenceService {
 
   private static final Logger log = LoggerFactory.getLogger(AsyncReferenceService.class);
 
-  private ReferenceService referenceService;
+  private final ReferenceService referenceService;
 
   @Autowired
   public AsyncReferenceService(ReferenceService referenceService) {
@@ -89,6 +91,32 @@ public class AsyncReferenceService {
       log.warn("Reference decorator call to local office failed", e);
     }
 
+    return CompletableFuture.completedFuture(null);
+  }
+
+  /**
+   * Find the fundingSubtype given the Ids, and accept the found fundingSubtypes in the consumer.
+   *
+   * @param ids the fundingSubtype ids to look for
+   * @param consumer the consumer to accept the found fundingSubtypes
+   *
+   * @return a CompletableFuture that completes when the operation is done
+   */
+  @Async
+  public CompletableFuture<Void> doWithFundingSubtypeAsync(Set<UUID> ids,
+      Consumer<Map<UUID, String>> consumer) {
+    if (CollectionUtils.isNotEmpty(ids)) {
+      try {
+        List<FundingSubTypeDto> fundingSubtypeList = referenceService.findFundingSubtypesIdIn(ids);
+        if (CollectionUtils.isNotEmpty(fundingSubtypeList)) {
+          Map<UUID, String> fundingSubtypeMap = fundingSubtypeList.stream()
+              .collect(Collectors.toMap(FundingSubTypeDto::getId, FundingSubTypeDto::getLabel));
+          consumer.accept(fundingSubtypeMap);
+        }
+      } catch (Exception e) {
+        log.warn("Reference decorator call to funding subtypes failed", e);
+      }
+    }
     return CompletableFuture.completedFuture(null);
   }
 }
