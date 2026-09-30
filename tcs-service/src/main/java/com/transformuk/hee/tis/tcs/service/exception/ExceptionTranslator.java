@@ -72,7 +72,7 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ErrorVM processBadEnumError(HttpMessageNotReadableException ex) {
-    log.error(ex.getMessage(), ex);
+    log.warn("Unreadable request body: {}", ex.getMessage());
     ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
 
     String field = null;
