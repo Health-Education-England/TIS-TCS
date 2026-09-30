@@ -1,5 +1,5 @@
 # --- Default ---
-* @Health-Education-England/internal-admin-backend @Health-Education-England/trainee-backend @Health-Education-England/internal-admin-devops
+* @Health-Education-England/internal-admin-backend @Health-Education-England/internal-admin-devops
 
 # --- DevOps owned ---
 /.github/workflows/ @Health-Education-England/internal-admin-devops
