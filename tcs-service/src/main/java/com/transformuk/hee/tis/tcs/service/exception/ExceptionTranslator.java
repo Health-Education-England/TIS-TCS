@@ -1,5 +1,7 @@
 package com.transformuk.hee.tis.tcs.service.exception;
 
+import com.fasterxml.jackson.databind.JsonMappingException.Reference;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.transformuk.hee.tis.tcs.service.api.validation.ValidationException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -70,9 +72,25 @@ public class ExceptionTranslator {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ErrorVM processBadEnumError(HttpMessageNotReadableException ex) {
-    log.error(ex.getMessage(), ex);
+    log.warn("Unreadable request body: {}", ex.getMessage());
     ErrorVM dto = new ErrorVM(ErrorConstants.ERR_VALIDATION);
-    dto.add(null, null, ex.getMessage());
+
+    String field = null;
+    if (ex.getCause() instanceof MismatchedInputException) {
+      List<Reference> path = ((MismatchedInputException) ex.getCause()).getPath();
+      for (int i = path.size() - 1; i >= 0; i--) {
+        String fieldName = path.get(i).getFieldName();
+        if (fieldName != null) {
+          field = fieldName;
+          break;
+        }
+      }
+    }
+
+    String message = field != null
+        ? "The value provided is not valid for field '" + field + "'"
+        : "The request body could not be read";
+    dto.add(null, field, message);
     return dto;
   }
 
