@@ -1,0 +1,9 @@
+# --- Default ---
+* @Health-Education-England/internal-admin-backend
+
+# --- DevOps owned ---
+/.github/workflows/ @Health-Education-England/internal-admin-devops
+/.aws/ @Health-Education-England/internal-admin-devops
+/tcs-service/Dockerfile @Health-Education-England/internal-admin-devops
+/tcs-service/mvnw* @Health-Education-England/internal-admin-devops
+/.mvn/ @Health-Education-England/internal-admin-devops
