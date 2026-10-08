@@ -334,10 +334,6 @@
   <packaging>war</packaging>
   <name>tcs-service</name>
 
-  <prerequisites>
-    <maven>${maven.version}</maven>
-  </prerequisites>
-
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1g</argLine>
@@ -363,7 +359,7 @@
     <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <maven.version>3.0.0</maven.version>
+    <maven.version>3.6.3</maven.version>
 
     <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
     <run.addResources>false</run.addResources>
