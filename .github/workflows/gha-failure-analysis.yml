@@ -1,0 +1,92 @@
+name: GHA Analysis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - tmp/gha-analysis-2026-10-08
+
+jobs:
+  analyse:
+    name: Analyse Workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.checkout-token ||  github.token  }}
+
+      - name: Set up build JDK
+        uses: actions/setup-java@v4.0.0
+        with:
+          cache: maven
+          distribution: temurin
+          java-version: 17
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: arn:aws:iam::430723991443:role/github-actions-deployer-role
+
+      - name: Add CodeArtifact env var
+        run: |
+          CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain hee --domain-owner 430723991443 --query authorizationToken --output text --duration-seconds 1200`
+          echo CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN >> $GITHUB_ENV
+          echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
+          repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: Build
+        run: mvn --batch-mode install
+
+      - name: Get modified files
+        id: changed-files
+        uses: Ana06/get-changed-files@v2.3.0
+
+      - name: Check modified files
+        id: check-files
+        run: |
+          do_analysis=false
+          for changed_file in ${{ steps.changed-files.outputs.all }}; do
+            if [[ $changed_file =~ ^(.*\/|)src\/.+$ ]]; then
+              do_analysis=true
+              break
+            fi
+          done
+          echo "do-analysis=$do_analysis" >> $GITHUB_OUTPUT
+
+      - name: Notify skipped analysis
+        if: steps.check-files.outputs.do-analysis == 'false'
+        uses: mshick/add-pr-comment@v2
+        with:
+          allow-repeats: true
+          repo-token: ${{ github.token }}
+          message: |
+            Quality analysis was skipped as no source changes were detected.
+
+      - name: Set up analysis JDK
+        uses: actions/setup-java@v5
+        with:
+          cache: maven
+          distribution: temurin
+          java-version: 21
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          servers: '[{ "id": "hee--Health-Education-England", "username": "aws", "password": "${env.CODEARTIFACT_AUTH_TOKEN}" }]'
+          repositories: '[{ "id": "hee--Health-Education-England", "url": "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/" }]'
+
+      - name: Analyse quality
+        if: steps.check-files.outputs.do-analysis == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SONAR_TOKEN: ${{ secrets.sonar-token }}
+        run: mvn --batch-mode org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
