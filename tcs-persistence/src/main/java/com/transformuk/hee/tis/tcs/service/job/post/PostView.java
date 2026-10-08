@@ -67,6 +67,9 @@ public class PostView {
   @Field(type = FieldType.Keyword)
   private List<String> fundingTypes;
 
+  @Field(type = FieldType.Long)
+  private List<Long> fundingTypeIds;
+
   @Field(type = FieldType.Keyword)
   private List<String> fundingSubtypeIds;
 

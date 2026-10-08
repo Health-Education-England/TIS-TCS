@@ -56,6 +56,8 @@ public class PostViewDTO implements Serializable {
 
   private List<String> fundingSubtypeNames;
 
+  private List<Long> fundingTypeIds;
+
   private List<UUID> fundingSubtypeIds;
 
   private String owner;
