@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
 
 class PostMapperTest {
 
+  private static final UUID FUNDING_SUBTYPE_ID = UUID.randomUUID();
+  private static final Long FUNDING_TYPE_ID = 111L;
+
   PostMapper postMapper;
 
   @BeforeEach
@@ -26,9 +29,9 @@ class PostMapperTest {
   @Test
   void postToPostDtoTest() {
     //given
-    UUID fundingSubTypeId = UUID.randomUUID();
     PostFunding postFunding = new PostFunding();
-    postFunding.setFundingSubTypeId(fundingSubTypeId);
+    postFunding.setFundingSubTypeId(FUNDING_SUBTYPE_ID);
+    postFunding.setFundingTypeId(FUNDING_TYPE_ID);
 
     Post post = new Post();
     post.setId(3L);
@@ -43,15 +46,16 @@ class PostMapperTest {
     assertEquals(1, postDTO.getFundings().size());
 
     PostFundingDTO postFundingDto = postDTO.getFundings().iterator().next();
-    assertEquals(fundingSubTypeId, postFundingDto.getFundingSubTypeId());
+    assertEquals(FUNDING_SUBTYPE_ID, postFundingDto.getFundingSubTypeId());
+    assertEquals(FUNDING_TYPE_ID, postFundingDto.getFundingTypeId());
   }
 
   @Test
   void postDtoToPostTest() {
     //given
-    UUID fundingSubTypeId = UUID.randomUUID();
     PostFundingDTO postFundingDto = new PostFundingDTO();
-    postFundingDto.setFundingSubTypeId(fundingSubTypeId);
+    postFundingDto.setFundingSubTypeId(FUNDING_SUBTYPE_ID);
+    postFundingDto.setFundingTypeId(FUNDING_TYPE_ID);
 
     PostDTO postDto = new PostDTO();
     postDto.setId(3L);
@@ -66,7 +70,8 @@ class PostMapperTest {
     assertEquals(Status.CURRENT, post.getFundingStatus());
     assertEquals(1, post.getFundings().size());
     PostFunding postFunding = post.getFundings().iterator().next();
-    assertEquals(fundingSubTypeId, postFunding.getFundingSubTypeId());
+    assertEquals(FUNDING_SUBTYPE_ID, postFunding.getFundingSubTypeId());
+    assertEquals(FUNDING_TYPE_ID, postFunding.getFundingTypeId());
   }
 
   @Test

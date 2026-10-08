@@ -77,6 +77,7 @@ class PostValidatorTest {
   private static final LocalDate TODAY = LocalDate.now(FIXED_CLOCK);
   private static final LocalDate YESTERDAY = TODAY.minusDays(1);
   private static final LocalDate TOMORROW = TODAY.plusDays(1);
+  private static final Long FUNDING_TYPE_ID = 111L;
 
   PostDTO dto;
 
@@ -289,6 +290,7 @@ class PostValidatorTest {
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
     funding.setFundingType("FUNDING_TYPE");
+    funding.setFundingTypeId(FUNDING_TYPE_ID);
 
     FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setId(1L);
@@ -323,6 +325,7 @@ class PostValidatorTest {
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
     funding.setFundingType("FUNDING_TYPE");
+    funding.setFundingTypeId(FUNDING_TYPE_ID);
     funding.setFundingSubTypeId(uuid1);
 
     FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
@@ -357,6 +360,7 @@ class PostValidatorTest {
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
     funding.setFundingType("FUNDING_TYPE");
+    funding.setFundingTypeId(FUNDING_TYPE_ID);
     funding.setFundingSubTypeId(uuid);
     dto.setFundings(Collections.singleton(funding));
 
