@@ -145,7 +145,9 @@ class PostResourceIntTest {
   private static final String OWNER = "Kent, Surrey and Sussex";
   private static final String OWNER_NORTH_EAST = "North East";
   private static final String FUNDING_TYPE_TRUST = "TRUST";
+  private static final Long FUNDING_TYPE_ID_TRUST = 111L;
   private static final String FUNDING_TYPE_TARIFF = "TARIFF";
+  private static final Long FUNDING_TYPE_ID_TARIFF = 222L;
   private static final String UPDATED_OWNER = "North West London";
   @Autowired
   private PostRepository postRepository;
@@ -278,8 +280,10 @@ class PostResourceIntTest {
     Set<PostFunding> postFundings = new HashSet<>();
     PostFunding postFundingTrust = new PostFunding();
     postFundingTrust.setFundingType(FUNDING_TYPE_TRUST);
+    postFundingTrust.setFundingTypeId(FUNDING_TYPE_ID_TRUST);
     PostFunding postFundingTarrif = new PostFunding();
     postFundingTarrif.setFundingType(FUNDING_TYPE_TARIFF);
+    postFundingTarrif.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     LocalDate futureDate = LocalDate.now().plusYears(5);
     LocalDate oldDate = LocalDate.now().minusMonths(6);
     postFundingTrust.setEndDate(futureDate);
@@ -904,7 +908,11 @@ class PostResourceIntTest {
         .andExpect(jsonPath("$.owner").value(OWNER))
         .andExpect(jsonPath("$.postFamily").value(DEFAULT_POST_FAMILY))
         .andExpect(jsonPath("$.employingBodyId").value(DEFAULT_EMPLOYING_BODY))
-        .andExpect(jsonPath("$.trainingBodyId").value(DEFAULT_TRAINING_BODY_ID));
+        .andExpect(jsonPath("$.trainingBodyId").value(DEFAULT_TRAINING_BODY_ID))
+        .andExpect(jsonPath("$.fundings[*].fundingTypeId").value(
+            hasItem(FUNDING_TYPE_ID_TARIFF.intValue())))
+        .andExpect(jsonPath("$.fundings[*].fundingTypeId").value(
+            hasItem(FUNDING_TYPE_ID_TARIFF.intValue())));
   }
 
   @Test
@@ -982,6 +990,12 @@ class PostResourceIntTest {
     assertThat(testPost.getTrainingBodyId()).isEqualTo(UPDATED_TRAINING_BODY);
     assertThat(testPost.getTrainingDescription()).isEqualTo(UPDATED_TRAINING_DESCRIPTION);
     assertThat(testPost.getLocalPostNumber()).isEqualTo(UPDATED_LOCAL_POST_NUMBER);
+    Set<PostFunding> testPostFundings = testPost.getFundings();
+    assertThat(testPostFundings).hasSize(2);
+    assertThat(testPostFundings.stream()
+        .anyMatch(f -> f.getFundingTypeId().equals(FUNDING_TYPE_ID_TARIFF))).isTrue();
+    assertThat(testPostFundings.stream()
+        .anyMatch(f -> f.getFundingTypeId().equals(FUNDING_TYPE_ID_TRUST))).isTrue();
   }
 
   @Test
@@ -1441,12 +1455,14 @@ class PostResourceIntTest {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
     validFunding.setFundingType(FUNDING_TYPE_TARIFF);
+    validFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid end date for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
     invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
+    invalidFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     invalidFunding.setStartDate(LocalDate.now());
     invalidFunding.setEndDate(LocalDate.now().minusDays(10));
 
@@ -1480,12 +1496,14 @@ class PostResourceIntTest {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
     validFunding.setFundingType(FUNDING_TYPE_TARIFF);
+    validFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
     invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
+    invalidFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
@@ -1519,10 +1537,12 @@ class PostResourceIntTest {
     validFunding1.setStartDate(LocalDate.now().minusDays(10));
     validFunding1.setEndDate(LocalDate.now().plusDays(1));
     validFunding1.setFundingType(FUNDING_TYPE_TARIFF);
+    validFunding1.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
 
     PostFundingDTO validFunding2 = new PostFundingDTO();
     validFunding2.setStartDate(LocalDate.now());
     validFunding2.setFundingType(FUNDING_TYPE_TARIFF);
+    validFunding2.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
     Post testPost = createEntity();
@@ -1553,12 +1573,14 @@ class PostResourceIntTest {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
     validFunding.setFundingType(FUNDING_TYPE_TARIFF);
+    validFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
     invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
+    invalidFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
