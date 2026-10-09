@@ -339,6 +339,7 @@
   </prerequisites>
 
   <properties>
+    <project.build.outputTimestamp>x</project.build.outputTimestamp>
     <maven.deploy.skip>true</maven.deploy.skip>
     <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1g</argLine>
     <assertj.version>3.6.2</assertj.version>
