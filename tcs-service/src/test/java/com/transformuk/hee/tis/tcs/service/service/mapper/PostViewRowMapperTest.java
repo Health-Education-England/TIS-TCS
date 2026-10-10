@@ -57,6 +57,7 @@ class PostViewRowMapperTest {
   private static final String COL_OWNER = "owner";
   private static final String COL_TRUST_IDS = "trustIds";
   private static final String COL_PROGRAMME_IDS = "programmeIds";
+  private static final String COL_FUNDING_TYPE_IDS = "fundingTypeIds";
 
   private static final Long ID = 223603L;
   private static final Long ZERO_LONG = 0L;
@@ -67,6 +68,8 @@ class PostViewRowMapperTest {
   private static final Long PRIMARY_SITE_ID = 2571L;
   private static final Long APPROVED_GRADE_ID = 555L;
   private static final Long PRIMARY_SPECIALTY_ID = 174L;
+  private static final Long FUNDING_TYPE_ID_1 = 111L;
+  private static final Long FUNDING_TYPE_ID_2 = 222L;
 
   private static final String CURRENT_TRAINEE_SURNAMES_1 = "RRRRR";
   private static final String CURRENT_TRAINEE_SURNAMES_2 = "YYYYY";
@@ -92,6 +95,7 @@ class PostViewRowMapperTest {
   private static final String CONCAT_FUNDING_TYPES = FUNDING_TYPE_1 + ";" + FUNDING_TYPE_2;
   private static final String CONCAT_FUNDING_TYPES_WITH_SPACES =
       FUNDING_TYPE_1 + "; " + FUNDING_TYPE_2;
+  private static final String CONCAT_FUNDING_TYPE_IDS = FUNDING_TYPE_ID_1 + "," + FUNDING_TYPE_ID_2;
   private static final String CONCAT_TRAINEE_SURNAMES =
       CURRENT_TRAINEE_SURNAMES_1 + ", " + CURRENT_TRAINEE_SURNAMES_2;
   private static final String CONCAT_TRAINEE_FORENAMES =
@@ -130,6 +134,7 @@ class PostViewRowMapperTest {
     when(resultSet.getString(COL_PROGRAMMES)).thenReturn(CONCAT_PROGRAMMES);
     when(resultSet.getString(COL_FUNDING_STATUS)).thenReturn(FUNDING_STATUS.name());
     when(resultSet.getString(COL_FUNDING_TYPE)).thenReturn(CONCAT_FUNDING_TYPES);
+    when(resultSet.getString(COL_FUNDING_TYPE_IDS)).thenReturn(CONCAT_FUNDING_TYPE_IDS);
     when(resultSet.getString(COL_FUNDING_SUBTYPE_IDS)).thenReturn(CONCAT_FUNDING_SUBTYPE_IDS);
     when(resultSet.getString(COL_OWNER)).thenReturn(OWNER);
 
@@ -159,6 +164,9 @@ class PostViewRowMapperTest {
 
     assertThat(result.getFundingTypes())
         .containsExactly(FUNDING_TYPE_1, FUNDING_TYPE_2);
+
+    assertThat(result.getFundingTypeIds())
+        .containsExactly(FUNDING_TYPE_ID_1, FUNDING_TYPE_ID_2);
 
     assertThat(result.getFundingSubtypeIds())
         .containsExactly(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2);
@@ -227,6 +235,8 @@ class PostViewRowMapperTest {
 
     assertThat(result.getProgrammeNames()).isEmpty();
     assertThat(result.getFundingTypes()).isEmpty();
+    assertThat(result.getFundingTypeIds()).isEmpty();
+    assertThat(result.getFundingSubtypeIds()).isEmpty();
     assertThat(result.getTrustIds()).isEmpty();
     assertThat(result.getProgrammeIds()).isEmpty();
     assertThat(result.getFundingSubtypeIds()).isEmpty();
@@ -240,6 +250,8 @@ class PostViewRowMapperTest {
     when(resultSet.getString(anyString())).thenReturn(null);
     when(resultSet.getString(COL_PROGRAMMES)).thenReturn(CONCAT_PROGRAMMES_WITH_SPACES);
     when(resultSet.getString(COL_FUNDING_TYPE)).thenReturn(CONCAT_FUNDING_TYPES_WITH_SPACES);
+    when(resultSet.getString(COL_FUNDING_TYPE_IDS)).thenReturn(CONCAT_FUNDING_TYPE_IDS);
+    when(resultSet.getString(COL_FUNDING_SUBTYPE_IDS)).thenReturn(CONCAT_FUNDING_SUBTYPE_IDS);
     when(resultSet.getString(COL_SURNAMES)).thenReturn(CONCAT_TRAINEE_SURNAMES);
     when(resultSet.getString(COL_FORENAMES)).thenReturn(CONCAT_TRAINEE_FORENAMES);
 
@@ -253,6 +265,10 @@ class PostViewRowMapperTest {
 
     assertThat(result.getFundingTypes())
         .containsExactly(FUNDING_TYPE_1, FUNDING_TYPE_2);
+    assertThat(result.getFundingTypeIds())
+        .containsExactly(FUNDING_TYPE_ID_1, FUNDING_TYPE_ID_2);
+    assertThat(result.getFundingSubtypeIds())
+        .containsExactly(FUNDING_SUBTYPE_ID_1, FUNDING_SUBTYPE_ID_2);
 
     assertThat(result.getCurrentTraineeSurnames()).isEqualTo(CONCAT_TRAINEE_SURNAMES);
     assertThat(result.getCurrentTraineeForenames()).isEqualTo(CONCAT_TRAINEE_FORENAMES);
