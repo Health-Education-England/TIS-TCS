@@ -326,17 +326,24 @@ public class PostValidator {
         && !postFundingDto.getEndDate().isAfter(postFundingDto.getStartDate())) {
       fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
           "Post funding end date must not be equal to or before start date"));
-    } else if (postFundingDto.getFundingTypeId() == null) {
+    } else if (postFundingDto.getFundingType() == null) {
       fieldErrors.add(
           new FieldError(POST_DTO_NAME, FUNDINGS, "Post Funding must have a funding type"));
+    } else if (postFundingDto.getFundingTypeId() == null) {
+      fieldErrors.add(
+          new FieldError(POST_DTO_NAME, FUNDINGS, "Post Funding must have a funding type id"));
     }
+
+    FundingTypeDTO matchedFundingTypeDto =
+        validateFundingTypeAgainstReference(postFundingDto, fieldErrors);
+
     boolean isCurrentFunding = postFundingDto.getEndDate() == null
         || !postFundingDto.getEndDate().isBefore(LocalDate.now(clock));
 
     // If a current funding type is provided, check whether it has valid subtypes.
-    if (isCurrentFunding && StringUtils.isNotBlank(postFundingDto.getFundingType())) {
+    if (isCurrentFunding && matchedFundingTypeDto != null) {
       List<FundingSubTypeDto> currentFundingSubTypes =
-          extractFundingSubTypesFromFundingType(postFundingDto.getFundingType());
+          extractFundingSubTypesFromFundingType(matchedFundingTypeDto);
 
       if (CollectionUtils.isEmpty(currentFundingSubTypes)) {
         return fieldErrors;
@@ -358,13 +365,32 @@ public class PostValidator {
   }
 
   private List<FundingSubTypeDto> extractFundingSubTypesFromFundingType(
-      String fundingTypeLabel) {
-    List<FundingTypeDTO> fundingTypes = referenceService.findCurrentFundingTypesByLabelIn(
-        Set.of(fundingTypeLabel));
-    return fundingTypes.stream()
-        .flatMap(fundingType -> referenceService
-            .findCurrentFundingSubTypesForFundingTypeId(fundingType.getId()).stream())
-        .collect(Collectors.toList());
+      FundingTypeDTO fundingTypeDto) {
+    return new ArrayList<>(referenceService
+        .findCurrentFundingSubTypesForFundingTypeId(fundingTypeDto.getId()));
+  }
+
+  private FundingTypeDTO validateFundingTypeAgainstReference(PostFundingDTO postFundingDto,
+      List<FieldError> fieldErrors) {
+    String fundingType = postFundingDto.getFundingType();
+    Long fundingTypeId = postFundingDto.getFundingTypeId();
+
+    if (StringUtils.isBlank(fundingType)) {
+      return null;
+    }
+
+    List<FundingTypeDTO> candidateFundingTypes =
+        referenceService.findCurrentFundingTypesByLabelIn(Set.of(fundingType));
+
+    FundingTypeDTO matchedFundingTypeDto = candidateFundingTypes.stream()
+        .filter(fundingTypeDto -> fundingTypeDto.getId().equals(fundingTypeId))
+        .findFirst()// there will be at most one match, as the id is unique
+        .orElse(null);
+
+    if (matchedFundingTypeDto == null) {
+      fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
+          "funding type and funding type id do not match a valid funding type in the reference data"));
+    }
+    return matchedFundingTypeDto;
   }
 }
-
