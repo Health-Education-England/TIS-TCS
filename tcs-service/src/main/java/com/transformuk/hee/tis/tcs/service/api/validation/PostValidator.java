@@ -389,7 +389,8 @@ public class PostValidator {
 
     if (matchedFundingTypeDto == null) {
       fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
-          "funding type and funding type id do not match a valid funding type in the reference data"));
+          "funding type and funding type id do not match a valid funding type in the "
+              + "reference data"));
     }
     return matchedFundingTypeDto;
   }
