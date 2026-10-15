@@ -71,15 +71,15 @@ public class PostFunding implements Serializable {
       return false;
     }
     PostFunding that = (PostFunding) o;
-    return Objects.equals(id, that.id) &&
-        Objects.equals(intrepidId, that.intrepidId) &&
-        Objects.equals(fundingType, that.fundingType) &&
-        Objects.equals(fundingTypeId, that.fundingTypeId) &&
-        Objects.equals(info, that.info) &&
-        Objects.equals(startDate, that.startDate) &&
-        Objects.equals(endDate, that.endDate) &&
-        Objects.equals(fundingBodyId, that.fundingBodyId) &&
-        Objects.equals(fundingReasonId, that.fundingReasonId);
+    return Objects.equals(id, that.id)
+        && Objects.equals(intrepidId, that.intrepidId)
+        && Objects.equals(fundingType, that.fundingType)
+        && Objects.equals(fundingTypeId, that.fundingTypeId)
+        && Objects.equals(info, that.info)
+        && Objects.equals(startDate, that.startDate)
+        && Objects.equals(endDate, that.endDate)
+        && Objects.equals(fundingBodyId, that.fundingBodyId)
+        && Objects.equals(fundingReasonId, that.fundingReasonId);
   }
 
   @Override
