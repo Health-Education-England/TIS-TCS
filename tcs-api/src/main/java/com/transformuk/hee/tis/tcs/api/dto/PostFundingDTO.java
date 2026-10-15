@@ -47,16 +47,16 @@ public class PostFundingDTO implements Serializable {
       return false;
     }
     PostFundingDTO that = (PostFundingDTO) o;
-    return Objects.equals(id, that.id) &&
-        Objects.equals(intrepidId, that.intrepidId) &&
-        Objects.equals(fundingTypeId, that.fundingTypeId) &&
-        Objects.equals(fundingSubTypeId, that.fundingSubTypeId) &&
-        Objects.equals(info, that.info) &&
-        Objects.equals(startDate, that.startDate) &&
-        Objects.equals(endDate, that.endDate) &&
-        Objects.equals(fundingBodyId, that.fundingBodyId) &&
-        Objects.equals(messageList, that.messageList) &&
-        Objects.equals(fundingReasonId, that.fundingReasonId);
+    return Objects.equals(id, that.id)
+        && Objects.equals(intrepidId, that.intrepidId)
+        && Objects.equals(fundingTypeId, that.fundingTypeId)
+        && Objects.equals(fundingSubTypeId, that.fundingSubTypeId)
+        && Objects.equals(info, that.info)
+        && Objects.equals(startDate, that.startDate)
+        && Objects.equals(endDate, that.endDate)
+        && Objects.equals(fundingBodyId, that.fundingBodyId)
+        && Objects.equals(messageList, that.messageList)
+        && Objects.equals(fundingReasonId, that.fundingReasonId);
   }
 
   @Override
