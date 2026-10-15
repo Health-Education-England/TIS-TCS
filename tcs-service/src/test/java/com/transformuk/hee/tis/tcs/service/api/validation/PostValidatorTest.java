@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
+import com.transformuk.hee.tis.reference.api.enums.Status;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -161,7 +162,7 @@ class PostValidatorTest {
     List<FieldError> errors = exception.getBindingResult().getFieldErrors();
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getDefaultMessage(),
-        equalTo("Post Funding must have a funding type"));
+        equalTo("Post Funding must have a funding type id"));
   }
 
   @Test
@@ -169,12 +170,11 @@ class PostValidatorTest {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
-    funding.setFundingType("FUNDING_TYPE");
     dto.setFundings(Collections.singleton(funding));
     MethodArgumentNotValidException exception =
         assertThrows(MethodArgumentNotValidException.class, () -> testObj.validate(dto));
     List<FieldError> errors = exception.getBindingResult().getFieldErrors();
-    assertThat(errors, hasSize(2));
+    assertThat(errors, hasSize(1));
     List<String> errorMessages = errors.stream().map(FieldError::getDefaultMessage)
         .collect(Collectors.toList());
     assertThat(errorMessages,
@@ -186,11 +186,10 @@ class PostValidatorTest {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
-    funding.setFundingType("FUNDING_TYPE");
     funding.setFundingTypeId(FUNDING_TYPE_ID);
     dto.setFundings(Collections.singleton(funding));
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+    when(referenceService.findFundingTypesIdIn(Collections.singleton(FUNDING_TYPE_ID)))
         .thenReturn(Collections.emptyList());
 
     MethodArgumentNotValidException exception =
@@ -198,23 +197,24 @@ class PostValidatorTest {
     List<FieldError> errors = exception.getBindingResult().getFieldErrors();
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getDefaultMessage(),
-        containsString("funding type and funding type id do not match a valid funding type"));
+        containsString(
+            "Funding type id does not match a valid funding type in the reference data"));
   }
 
   @Test
-  void shouldFailValidationWhenFundingTypeReferenceDoesNotMatchId() {
+  void shouldFailValidationWhenFundingTypeReferenceIsInactive() {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
-    funding.setFundingType("FUNDING_TYPE");
     funding.setFundingTypeId(FUNDING_TYPE_ID);
     dto.setFundings(Collections.singleton(funding));
 
     FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setId(999L);
     fundingTypeDTO.setLabel("FUNDING_TYPE");
+    fundingTypeDTO.setStatus(Status.INACTIVE);
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+    when(referenceService.findFundingTypesIdIn(Collections.singleton(FUNDING_TYPE_ID)))
         .thenReturn(List.of(fundingTypeDTO));
 
     MethodArgumentNotValidException exception =
@@ -222,7 +222,8 @@ class PostValidatorTest {
     List<FieldError> errors = exception.getBindingResult().getFieldErrors();
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getDefaultMessage(),
-        containsString("funding type and funding type id do not match a valid funding type"));
+        containsString(
+            "Funding type id does not match a valid funding type in the reference data"));
   }
 
   @Test
@@ -353,13 +354,12 @@ class PostValidatorTest {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
-    funding.setFundingType("FUNDING_TYPE");
     funding.setFundingTypeId(FUNDING_TYPE_ID);
-    funding.setFundingTypeId(1L);
 
     FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setId(1L);
     fundingTypeDTO.setLabel("FUNDING_TYPE");
+    fundingTypeDTO.setStatus(Status.CURRENT);
 
     FundingSubTypeDto fundingSubTypeDto = new FundingSubTypeDto();
     fundingSubTypeDto.setFundingType(fundingTypeDTO);
@@ -367,7 +367,7 @@ class PostValidatorTest {
     fundingSubTypeDto.setLabel("SUBTYPE");
     dto.setFundings(Collections.singleton(funding));
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+    when(referenceService.findFundingTypesIdIn(Collections.singleton(FUNDING_TYPE_ID)))
         .thenReturn(List.of(fundingTypeDTO));
     when(referenceService
         .findCurrentFundingSubTypesForFundingTypeId(fundingTypeDTO.getId()))
@@ -389,13 +389,13 @@ class PostValidatorTest {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
-    funding.setFundingType("FUNDING_TYPE");
     funding.setFundingTypeId(FUNDING_TYPE_ID);
     funding.setFundingSubTypeId(uuid1);
 
     FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setId(1L);
     fundingTypeDTO.setLabel("FUNDING_TYPE");
+    fundingTypeDTO.setStatus(Status.CURRENT);
 
     FundingSubTypeDto fundingSubTypeDto = new FundingSubTypeDto();
     fundingSubTypeDto.setFundingType(fundingTypeDTO);
@@ -403,7 +403,7 @@ class PostValidatorTest {
     fundingSubTypeDto.setLabel("SUBTYPE");
     dto.setFundings(Collections.singleton(funding));
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+    when(referenceService.findFundingTypesIdIn(Collections.singleton(FUNDING_TYPE_ID)))
         .thenReturn(List.of(fundingTypeDTO));
     when(referenceService
         .findCurrentFundingSubTypesForFundingTypeId(fundingTypeDTO.getId()))
@@ -424,7 +424,6 @@ class PostValidatorTest {
     PostFundingDTO funding = new PostFundingDTO();
     funding.setStartDate(YESTERDAY);
     funding.setEndDate(TOMORROW);
-    funding.setFundingType("FUNDING_TYPE");
     funding.setFundingTypeId(FUNDING_TYPE_ID);
     funding.setFundingSubTypeId(uuid);
     dto.setFundings(Collections.singleton(funding));
@@ -432,14 +431,14 @@ class PostValidatorTest {
     FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setId(1L);
     fundingTypeDTO.setLabel("FUNDING_TYPE");
-
+    fundingTypeDTO.setStatus(Status.CURRENT);
     FundingSubTypeDto fundingSubTypeDto = new FundingSubTypeDto();
     fundingSubTypeDto.setFundingType(fundingTypeDTO);
     fundingSubTypeDto.setId(uuid);
     fundingSubTypeDto.setLabel("SUBTYPE");
     dto.setFundings(Collections.singleton(funding));
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(Collections.singleton("FUNDING_TYPE")))
+    when(referenceService.findFundingTypesIdIn(Collections.singleton(FUNDING_TYPE_ID)))
         .thenReturn(List.of(fundingTypeDTO));
     when(referenceService
         .findCurrentFundingSubTypesForFundingTypeId(fundingTypeDTO.getId()))

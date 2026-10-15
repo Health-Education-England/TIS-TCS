@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.api.validation;
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
+import com.transformuk.hee.tis.reference.api.enums.Status;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostDTO;
@@ -326,9 +327,6 @@ public class PostValidator {
         && !postFundingDto.getEndDate().isAfter(postFundingDto.getStartDate())) {
       fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
           "Post funding end date must not be equal to or before start date"));
-    } else if (postFundingDto.getFundingType() == null) {
-      fieldErrors.add(
-          new FieldError(POST_DTO_NAME, FUNDINGS, "Post Funding must have a funding type"));
     } else if (postFundingDto.getFundingTypeId() == null) {
       fieldErrors.add(
           new FieldError(POST_DTO_NAME, FUNDINGS, "Post Funding must have a funding type id"));
@@ -372,26 +370,18 @@ public class PostValidator {
 
   private FundingTypeDTO validateFundingTypeAgainstReference(PostFundingDTO postFundingDto,
       List<FieldError> fieldErrors) {
-    String fundingType = postFundingDto.getFundingType();
     Long fundingTypeId = postFundingDto.getFundingTypeId();
-
-    if (StringUtils.isBlank(fundingType)) {
+    if (fundingTypeId == null) {
       return null;
     }
 
-    List<FundingTypeDTO> candidateFundingTypes =
-        referenceService.findCurrentFundingTypesByLabelIn(Set.of(fundingType));
-
-    FundingTypeDTO matchedFundingTypeDto = candidateFundingTypes.stream()
-        .filter(fundingTypeDto -> fundingTypeDto.getId().equals(fundingTypeId))
-        .findFirst()// there will be at most one match, as the id is unique
-        .orElse(null);
-
-    if (matchedFundingTypeDto == null) {
-      fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
-          "funding type and funding type id do not match a valid funding type in the "
-              + "reference data"));
-    }
-    return matchedFundingTypeDto;
+    return referenceService.findFundingTypesIdIn(Set.of(fundingTypeId))
+        .stream().filter(fundingTypeDto -> fundingTypeDto.getStatus().equals(Status.CURRENT))
+        .findFirst()
+        .orElseGet(() -> {
+          fieldErrors.add(new FieldError(POST_DTO_NAME, FUNDINGS,
+              "Funding type id does not match a valid funding type in the reference data"));
+          return null;
+        });
   }
 }

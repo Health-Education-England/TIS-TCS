@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.common.collect.Lists;
 import com.transformuk.hee.tis.reference.api.dto.FundingSubTypeDto;
 import com.transformuk.hee.tis.reference.api.dto.FundingTypeDTO;
+import com.transformuk.hee.tis.reference.api.enums.Status;
 import com.transformuk.hee.tis.reference.client.impl.ReferenceServiceImpl;
 import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
@@ -157,8 +158,8 @@ class PostFundingResourceIntTest {
     int databaseSizeBeforeCreate = postFundingRepository.findAll().size();
 
     // Create two post funding DTOs and add to a list
-    postFunding.setFundingType(FUNDING_TYPE);
-    anotherPostFunding.setFundingType(FUNDING_TYPE);
+    postFunding.setFundingTypeId(FUNDING_TYPE_ID);
+    anotherPostFunding.setFundingTypeId(FUNDING_TYPE_ID);
     postFunding.setEndDate(END_DATE);
     anotherPostFunding.setEndDate(END_DATE);
     PostFundingDTO postFundingDTO = postFundingMapper.postFundingToPostFundingDTO(postFunding);
@@ -166,6 +167,7 @@ class PostFundingResourceIntTest {
         .postFundingToPostFundingDTO(anotherPostFunding);
     List<PostFundingDTO> postFundingDTOS = Lists
         .newArrayList(postFundingDTO, anotherPostFundingDTO);
+
     restPostFundingMockMvc.perform(post("/api/bulk-post-fundings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postFundingDTOS)))
@@ -175,9 +177,9 @@ class PostFundingResourceIntTest {
     List<PostFunding> postFundings = postFundingRepository.findAll();
 
     assertThat(postFundings).hasSize(databaseSizeBeforeCreate + 2);
-    PostFunding anotherPostFunding = postFundings.get(postFundings.size() - 1);
-    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE);
-    assertThat(anotherPostFunding.getEndDate()).isEqualTo(END_DATE);
+    PostFunding secondPostFunding = postFundings.get(postFundings.size() - 1);
+    assertThat(secondPostFunding.getFundingTypeId()).isEqualTo(FUNDING_TYPE_ID);
+    assertThat(secondPostFunding.getEndDate()).isEqualTo(END_DATE);
 
     verify(applicationEventPublisher, times(2)).publishEvent(createdEventCaptor.capture());
     List<PostFundingCreatedEvent> events = createdEventCaptor.getAllValues();
@@ -199,7 +201,7 @@ class PostFundingResourceIntTest {
     // Update the post funding details
 
     updatedPostFunding.setEndDate(END_DATE);
-    anotherUpdatedPostFunding.setFundingType(FUNDING_TYPE);
+    anotherUpdatedPostFunding.setFundingTypeId(FUNDING_TYPE_ID);
 
     PostFundingDTO postFundingDTO = postFundingMapper
         .postFundingToPostFundingDTO(updatedPostFunding);
@@ -222,7 +224,7 @@ class PostFundingResourceIntTest {
     PostFunding anotherPostFunding = postFundingRepository
         .findById(anotherUpdatedPostFunding.getId()).orElse(null);
     assertThat(postFunding.getEndDate()).isEqualTo(END_DATE);
-    assertThat(anotherPostFunding.getFundingType()).isEqualTo(FUNDING_TYPE);
+    assertThat(anotherPostFunding.getFundingTypeId()).isEqualTo(FUNDING_TYPE_ID);
 
     verify(applicationEventPublisher, times(2)).publishEvent(savedEventCaptor.capture());
     List<PostFundingSavedEvent> events = savedEventCaptor.getAllValues();
@@ -304,19 +306,19 @@ class PostFundingResourceIntTest {
         .orElse(null);
     PostFundingDTO postFundingDto = postFundingMapper
         .postFundingToPostFundingDTO(updatedPostFunding);
-    postFundingDto.setFundingType(FUNDING_TYPE);
     postFundingDto.setFundingSubTypeId(FUNDING_SUBTYPE_ID);
+    postFundingDto.setFundingTypeId(FUNDING_TYPE_ID);
 
     FundingTypeDTO fundingTypeDto = new FundingTypeDTO();
     fundingTypeDto.setId(FUNDING_TYPE_ID);
     fundingTypeDto.setLabel(FUNDING_TYPE);
+    fundingTypeDto.setStatus(Status.CURRENT);
 
     FundingSubTypeDto fundingSubtypeDto = new FundingSubTypeDto();
     fundingSubtypeDto.setId(FUNDING_SUBTYPE_ID);
 
-    when(referenceServiceMock.findCurrentFundingTypesByLabelIn(
-        Collections.singleton(FUNDING_TYPE))).thenReturn(
-        Collections.singletonList(fundingTypeDto));
+    when(referenceServiceMock.findFundingTypesIdIn(Collections.singleton(FUNDING_TYPE_ID)))
+        .thenReturn(Collections.singletonList(fundingTypeDto));
     when(referenceServiceMock.findCurrentFundingSubTypesForFundingTypeId(
         FUNDING_TYPE_ID)).thenReturn(Collections.singletonList(fundingSubtypeDto));
 
@@ -351,19 +353,12 @@ class PostFundingResourceIntTest {
         .orElse(null);
     PostFundingDTO postFundingDto = postFundingMapper
         .postFundingToPostFundingDTO(updatedPostFunding);
-    postFundingDto.setFundingType(FUNDING_TYPE);
     postFundingDto.setFundingSubTypeId(FUNDING_SUBTYPE_ID);
     postFundingDto.setFundingReasonId(FUNDING_REASON_ID_2);
+    postFundingDto.setFundingTypeId(FUNDING_TYPE_ID);
 
-    FundingTypeDTO fundingTypeDto = new FundingTypeDTO();
-    fundingTypeDto.setId(FUNDING_TYPE_ID);
-    fundingTypeDto.setLabel(FUNDING_TYPE);
-
-    when(referenceServiceMock.findCurrentFundingTypesByLabelIn(
-        Collections.singleton(FUNDING_TYPE))).thenReturn(
-        Collections.singletonList(fundingTypeDto));
-    when(referenceServiceMock.findCurrentFundingSubTypesForFundingTypeId(
-        FUNDING_TYPE_ID)).thenReturn(Collections.emptyList());
+    when(referenceServiceMock.findFundingTypesIdIn(Collections.singleton(FUNDING_TYPE_ID)))
+        .thenReturn(Collections.emptyList());
 
     restPostFundingMockMvc.perform(put("/api/post-fundings")
             .contentType(MediaType.APPLICATION_JSON)

@@ -35,6 +35,7 @@ public class PostFunding implements Serializable {
   @JoinColumn(name = "postId")
   private Post post;
 
+  @Deprecated
   @Column(name = "fundingType")
   private String fundingType;
 

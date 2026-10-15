@@ -279,10 +279,8 @@ class PostResourceIntTest {
   private static Set<PostFunding> createPostFundings(Post post) {
     Set<PostFunding> postFundings = new HashSet<>();
     PostFunding postFundingTrust = new PostFunding();
-    postFundingTrust.setFundingType(FUNDING_TYPE_TRUST);
     postFundingTrust.setFundingTypeId(FUNDING_TYPE_ID_TRUST);
     PostFunding postFundingTarrif = new PostFunding();
-    postFundingTarrif.setFundingType(FUNDING_TYPE_TARIFF);
     postFundingTarrif.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     LocalDate futureDate = LocalDate.now().plusYears(5);
     LocalDate oldDate = LocalDate.now().minusMonths(6);
@@ -301,6 +299,7 @@ class PostResourceIntTest {
     FundingTypeDTO fundingTypeDTO = new FundingTypeDTO();
     fundingTypeDTO.setLabel(label);
     fundingTypeDTO.setId(id);
+    fundingTypeDTO.setStatus(com.transformuk.hee.tis.reference.api.enums.Status.CURRENT);
     return fundingTypeDTO;
   }
 
@@ -345,8 +344,7 @@ class PostResourceIntTest {
             get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters="
                 + colFilters)
                 .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER))
-        .andExpect(jsonPath("$.[*].fundingType").value(contains("TRUST; TARIFF")));
+        .andExpect(jsonPath("$.[*].nationalPostNumber").value(TEST_POST_NUMBER));
   }
 
   @Test
@@ -518,11 +516,11 @@ class PostResourceIntTest {
     updatedPost.setFundings(createPostFundings(updatedPost));
     PostDTO updatedPostDto = postMapper.postToPostDTO(updatedPost);
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(anySet()))
+    when(referenceService.findFundingTypesIdIn(anySet()))
         .thenAnswer(invocation -> {
-          Set<String> labels = invocation.getArgument(0);
-          boolean hasTariff = labels.stream()
-              .anyMatch(FUNDING_TYPE_TARIFF::equalsIgnoreCase);
+          Set<Long> ids = invocation.getArgument(0);
+          boolean hasTariff = ids.stream()
+              .anyMatch(FUNDING_TYPE_ID_TARIFF::equals);
           return List.of(hasTariff ? tariffFundingType : trustFundingType);
         });
 
@@ -600,11 +598,11 @@ class PostResourceIntTest {
     post.setFundings(createPostFundings(post));
     PostDTO postDto = postMapper.postToPostDTO(post);
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(anySet()))
+    when(referenceService.findFundingTypesIdIn(anySet()))
         .thenAnswer(invocation -> {
-          Set<String> labels = invocation.getArgument(0);
-          boolean hasTariff = labels.stream()
-              .anyMatch(FUNDING_TYPE_TARIFF::equalsIgnoreCase);
+          Set<Long> ids = invocation.getArgument(0);
+          boolean hasTariff = ids.stream()
+              .anyMatch(FUNDING_TYPE_ID_TARIFF::equals);
           return List.of(hasTariff ? tariffFundingType : trustFundingType);
         });
 
@@ -638,13 +636,14 @@ class PostResourceIntTest {
     trustFundingType.setId(FUNDING_TYPE_ID_TRUST);
     tariffFundingType.setId(FUNDING_TYPE_ID_TARIFF);
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(anySet()))
+    when(referenceService.findFundingTypesIdIn(anySet()))
         .thenAnswer(invocation -> {
-          Set<String> labels = invocation.getArgument(0);
-          boolean hasTariff = labels.stream()
-              .anyMatch(FUNDING_TYPE_TARIFF::equalsIgnoreCase);
+          Set<Long> ids = invocation.getArgument(0);
+          boolean hasTariff = ids.stream()
+              .anyMatch(FUNDING_TYPE_ID_TARIFF::equals);
           return List.of(hasTariff ? tariffFundingType : trustFundingType);
         });
+
     when(referenceService.findCurrentFundingSubTypesForFundingTypeId(FUNDING_TYPE_ID_TRUST))
         .thenReturn(Collections.emptyList());
     when(referenceService.findCurrentFundingSubTypesForFundingTypeId(FUNDING_TYPE_ID_TARIFF))
@@ -987,11 +986,11 @@ class PostResourceIntTest {
     // Current post funding
     updatedPost.setFundings(createPostFundings(post));
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(anySet()))
+    when(referenceService.findFundingTypesIdIn(anySet()))
         .thenAnswer(invocation -> {
-          Set<String> labels = invocation.getArgument(0);
-          boolean hasTariff = labels.stream()
-              .anyMatch(FUNDING_TYPE_TARIFF::equalsIgnoreCase);
+          Set<Long> ids = invocation.getArgument(0);
+          boolean hasTariff = ids.stream()
+              .anyMatch(FUNDING_TYPE_ID_TARIFF::equals);
           return List.of(hasTariff ? tariffFundingType : trustFundingType);
         });
 
@@ -1367,15 +1366,15 @@ class PostResourceIntTest {
 
     Set<PostFundingDTO> postFundingDTOs = new HashSet<>();
     PostFundingDTO pfDto1 = new PostFundingDTO();
-    pfDto1.setFundingType("Academic - Trust");
     pfDto1.setFundingBodyId("864");
+    pfDto1.setFundingTypeId(1234L);
     pfDto1.setStartDate(LocalDate.of(2019, 4, 4));
     pfDto1.setEndDate(LocalDate.of(2019, 5, 4));
     postFundingDTOs.add(pfDto1);
 
     PostFundingDTO pfDto2 = new PostFundingDTO();
-    pfDto2.setFundingType("lalala");
     pfDto2.setFundingBodyId("864");
+    pfDto2.setFundingTypeId(4321L);
     pfDto2.setStartDate(LocalDate.of(2019, 4, 4));
     pfDto2.setEndDate(LocalDate.of(2019, 5, 4));
     postFundingDTOs.add(pfDto2);
@@ -1383,9 +1382,9 @@ class PostResourceIntTest {
     postDTO.setFundings(postFundingDTOs);
 
     FundingTypeDTO fundingTypeDto = new FundingTypeDTO();
-    fundingTypeDto.setLabel("Academic - Trust");
-    when(referenceService
-        .findCurrentFundingTypesByLabelIn(Sets.newHashSet("Academic - Trust", "lalala")))
+    fundingTypeDto.setId(1234L);
+    fundingTypeDto.setStatus(com.transformuk.hee.tis.reference.api.enums.Status.CURRENT);
+    when(referenceService.findFundingTypesIdIn(Sets.newHashSet(1234L, 4321L)))
         .thenReturn(Collections.singletonList(fundingTypeDto));
 
     restPostMockMvc.perform(patch("/api/post/fundings")
@@ -1479,14 +1478,12 @@ class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
-    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid end date for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
-    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     invalidFunding.setStartDate(LocalDate.now());
     invalidFunding.setEndDate(LocalDate.now().minusDays(10));
@@ -1501,7 +1498,7 @@ class PostResourceIntTest {
     fundings.add(invalidFunding);
     postDTO.setFundings(fundings);
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(Sets.newHashSet(FUNDING_TYPE_TARIFF)))
+    when(referenceService.findFundingTypesIdIn(Sets.newHashSet(FUNDING_TYPE_ID_TARIFF)))
         .thenReturn(Collections.singletonList(tariffFundingType));
 
     restPostMockMvc.perform(post("/api/posts")
@@ -1523,14 +1520,12 @@ class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
-    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
-    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
@@ -1564,15 +1559,13 @@ class PostResourceIntTest {
     PostFundingDTO validFunding1 = new PostFundingDTO();
     validFunding1.setStartDate(LocalDate.now().minusDays(10));
     validFunding1.setEndDate(LocalDate.now().plusDays(1));
-    validFunding1.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding1.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
 
     PostFundingDTO validFunding2 = new PostFundingDTO();
     validFunding2.setStartDate(LocalDate.now());
-    validFunding2.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding2.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
 
-    when(referenceService.findCurrentFundingTypesByLabelIn(Sets.newHashSet(FUNDING_TYPE_TARIFF)))
+    when(referenceService.findFundingTypesIdIn(Sets.newHashSet(FUNDING_TYPE_ID_TARIFF)))
         .thenReturn(Collections.singletonList(tariffFundingType));
 
     int databaseSizeBeforeCreate = postRepository.findAll().size();
@@ -1603,14 +1596,12 @@ class PostResourceIntTest {
       throws Exception {
     // Valid start and end date for funding
     PostFundingDTO validFunding = new PostFundingDTO();
-    validFunding.setFundingType(FUNDING_TYPE_TARIFF);
     validFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     validFunding.setStartDate(LocalDate.now().minusDays(10));
     validFunding.setEndDate(LocalDate.now());
 
     // Invalid - start date null for funding
     PostFundingDTO invalidFunding = new PostFundingDTO();
-    invalidFunding.setFundingType(FUNDING_TYPE_TARIFF);
     invalidFunding.setFundingTypeId(FUNDING_TYPE_ID_TARIFF);
     invalidFunding.setEndDate(LocalDate.now());
 
