@@ -36,6 +36,8 @@ public class PostFunding implements Serializable {
   private Post post;
 
   /**
+   * Legacy funding type label.
+   *
    * @deprecated Use {@link #fundingTypeId} instead.
    */
   @Deprecated(forRemoval = true)
