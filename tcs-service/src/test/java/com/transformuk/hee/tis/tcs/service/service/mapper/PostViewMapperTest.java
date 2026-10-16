@@ -45,7 +45,6 @@ class PostViewMapperTest {
   private static final String FORENAME = "John";
   private static final String NPN = "NPN-001";
   private static final String PROGRAMME_X = "Programme X";
-  private static final String TARIFF = "Tariff";
 
   private PostViewMapper mapper;
 

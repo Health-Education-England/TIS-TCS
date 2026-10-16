@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -35,7 +36,10 @@ public class PostFunding implements Serializable {
   @JoinColumn(name = "postId")
   private Post post;
 
-  @Deprecated
+  /**
+   * @deprecated Use {@link #fundingTypeId)} instead.
+   */
+  @Deprecated(forRemoval = true)
   @Column(name = "fundingType")
   private String fundingType;
 
