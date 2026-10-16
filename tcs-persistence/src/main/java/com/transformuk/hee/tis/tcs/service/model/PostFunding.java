@@ -1,6 +1,5 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -37,7 +36,7 @@ public class PostFunding implements Serializable {
   private Post post;
 
   /**
-   * @deprecated Use {@link #fundingTypeId)} instead.
+   * @deprecated Use {@link #fundingTypeId} instead.
    */
   @Deprecated(forRemoval = true)
   @Column(name = "fundingType")
@@ -77,7 +76,6 @@ public class PostFunding implements Serializable {
     PostFunding that = (PostFunding) o;
     return Objects.equals(id, that.id)
         && Objects.equals(intrepidId, that.intrepidId)
-        && Objects.equals(fundingType, that.fundingType)
         && Objects.equals(fundingTypeId, that.fundingTypeId)
         && Objects.equals(info, that.info)
         && Objects.equals(startDate, that.startDate)
@@ -88,7 +86,7 @@ public class PostFunding implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, fundingType, fundingTypeId, info, startDate, endDate,
+    return Objects.hash(id, intrepidId, fundingTypeId, info, startDate, endDate,
         fundingBodyId, fundingReasonId);
   }
 }
