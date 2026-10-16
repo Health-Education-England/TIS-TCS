@@ -146,7 +146,6 @@ class PostResource2Test {
     PostFundingDTO postFundingDTO = new PostFundingDTO();
     postFundingDTO.setStartDate(LocalDate.now().minusDays(1));
     postFundingDTO.setEndDate(LocalDate.now().plusMonths(1));
-    postFundingDTO.setFundingType("HEE Funded - Tariff");
 
     postDTO = new PostDTO();
     postDTO.setStatus(Status.CURRENT);
@@ -379,7 +378,6 @@ class PostResource2Test {
     postViewDTO.setOwner("North West");
     postViewDTO.setPrimarySpecialtyName("Gastroenterology");
     postViewDTO.setProgrammeNames("Gastroenterology");
-    postViewDTO.setFundingType("Funded - Tariff");
 
     Page<PostViewDTO> page = new PageImpl<>(
         Collections.singletonList(postViewDTO)

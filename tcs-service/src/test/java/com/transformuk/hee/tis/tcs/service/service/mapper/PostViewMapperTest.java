@@ -45,7 +45,6 @@ class PostViewMapperTest {
   private static final String FORENAME = "John";
   private static final String NPN = "NPN-001";
   private static final String PROGRAMME_X = "Programme X";
-  private static final String TARIFF = "Tariff";
 
   private PostViewMapper mapper;
 
@@ -86,7 +85,7 @@ class PostViewMapperTest {
     postView.setNationalPostNumber(NPN);
     postView.setStatus(Status.CURRENT);
     postView.setProgrammeNames(List.of(PROGRAMME_X));
-    postView.setFundingTypes(List.of(TARIFF));
+    postView.setFundingTypeIds(List.of(ID_1));
     postView.setFundingSubtypeIds(List.of(UUID_1.toString()));
 
     PostViewDTO dto = mapper.toDto(postView);
@@ -97,7 +96,7 @@ class PostViewMapperTest {
     assertThat(dto.getNationalPostNumber()).isEqualTo(NPN);
     assertThat(dto.getStatus()).isEqualTo(Status.CURRENT);
     assertThat(dto.getProgrammeNames()).isEqualTo(PROGRAMME_X);
-    assertThat(dto.getFundingType()).isEqualTo(TARIFF);
+    assertThat(dto.getFundingTypeIds()).containsExactly(ID_1);
     assertThat(dto.getFundingSubtypeIds()).containsExactly(UUID_1);
   }
 

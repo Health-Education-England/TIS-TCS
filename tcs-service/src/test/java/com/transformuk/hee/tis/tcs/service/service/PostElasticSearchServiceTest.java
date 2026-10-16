@@ -115,7 +115,6 @@ class PostElasticSearchServiceTest {
     postView.setStatus(Status.CURRENT);
     postView.setOwner("East of England");
     postView.setProgrammeNames(Lists.newArrayList("General Surgery"));
-    postView.setFundingTypes(Lists.newArrayList("Tariff"));
     postView.setCurrentTraineeSurnames("Smith");
     postView.setCurrentTraineeForenames("John");
     postView.setPrimarySpecialtyId(100L);
@@ -132,7 +131,6 @@ class PostElasticSearchServiceTest {
     postViewDto.setStatus(Status.CURRENT);
     postViewDto.setOwner("East of England");
     postViewDto.setProgrammeNames("General Surgery");
-    postViewDto.setFundingType("Tariff");
     postViewDto.setCurrentTraineeSurname("Smith");
     postViewDto.setCurrentTraineeForenames("John");
     postViewDto.setPrimarySpecialtyId(100L);
@@ -178,7 +176,6 @@ class PostElasticSearchServiceTest {
     assertThat(dto.getStatus()).isEqualTo(Status.CURRENT);
     assertThat(dto.getOwner()).isEqualTo("East of England");
     assertThat(dto.getProgrammeNames()).isEqualTo("General Surgery");
-    assertThat(dto.getFundingType()).isEqualTo("Tariff");
     assertThat(dto.getCurrentTraineeSurname()).isEqualTo("Smith");
     assertThat(dto.getCurrentTraineeForenames()).isEqualTo("John");
     assertThat(dto.getFundingSubtypeIds()).containsExactlyInAnyOrder(FUNDING_SUBTYPE_ID_1,

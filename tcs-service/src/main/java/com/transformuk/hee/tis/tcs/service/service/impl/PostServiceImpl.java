@@ -1006,7 +1006,6 @@ public class PostServiceImpl implements PostService {
     public PostViewDTO mapRow(ResultSet rs, int i) throws SQLException {
       PostViewDTO view = super.mapRow(rs, i);
       view.setProgrammeNames(rs.getString("programmes"));
-      view.setFundingType(rs.getString("fundingType"));
       view.setIntrepidId(rs.getString("intrepidId"));
       view.setCurrentTraineeSurname(rs.getString("surnames"));
       view.setCurrentTraineeForenames(rs.getString("forenames"));

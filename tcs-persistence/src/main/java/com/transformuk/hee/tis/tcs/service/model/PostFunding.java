@@ -35,8 +35,17 @@ public class PostFunding implements Serializable {
   @JoinColumn(name = "postId")
   private Post post;
 
+  /**
+   * Legacy funding type label.
+   *
+   * @deprecated Use {@link #fundingTypeId} instead.
+   */
+  @Deprecated(forRemoval = true)
   @Column(name = "fundingType")
   private String fundingType;
+
+  @Column(name = "fundingTypeId")
+  private Long fundingTypeId;
 
   @Type(type = "org.hibernate.type.UUIDCharType")
   @Column(name = "fundingSubTypeId")
@@ -67,19 +76,19 @@ public class PostFunding implements Serializable {
       return false;
     }
     PostFunding that = (PostFunding) o;
-    return Objects.equals(id, that.id) &&
-        Objects.equals(intrepidId, that.intrepidId) &&
-        Objects.equals(fundingType, that.fundingType) &&
-        Objects.equals(info, that.info) &&
-        Objects.equals(startDate, that.startDate) &&
-        Objects.equals(endDate, that.endDate) &&
-        Objects.equals(fundingBodyId, that.fundingBodyId) &&
-        Objects.equals(fundingReasonId, that.fundingReasonId);
+    return Objects.equals(id, that.id)
+        && Objects.equals(intrepidId, that.intrepidId)
+        && Objects.equals(fundingTypeId, that.fundingTypeId)
+        && Objects.equals(info, that.info)
+        && Objects.equals(startDate, that.startDate)
+        && Objects.equals(endDate, that.endDate)
+        && Objects.equals(fundingBodyId, that.fundingBodyId)
+        && Objects.equals(fundingReasonId, that.fundingReasonId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, intrepidId, fundingType, info, startDate, endDate, fundingBodyId,
-        fundingReasonId);
+    return Objects.hash(id, intrepidId, fundingTypeId, info, startDate, endDate,
+        fundingBodyId, fundingReasonId);
   }
 }

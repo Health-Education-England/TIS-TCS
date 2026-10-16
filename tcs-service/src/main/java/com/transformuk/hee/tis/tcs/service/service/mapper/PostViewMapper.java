@@ -40,7 +40,6 @@ public interface PostViewMapper {
   @Mapping(source = "currentTraineeSurnames", target = "currentTraineeSurname")
   @Mapping(source = "programmeNames", target = "programmeNames",
       qualifiedByName = "joinWithSemicolon")
-  @Mapping(source = "fundingTypes", target = "fundingType", qualifiedByName = "joinWithSemicolon")
   @Mapping(source = "fundingSubtypeIds", target = "fundingSubtypeIds",
       qualifiedByName = "stringsToUuids")
   PostViewDTO toDto(PostView postView);
