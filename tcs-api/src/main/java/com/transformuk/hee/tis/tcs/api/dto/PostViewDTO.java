@@ -52,9 +52,9 @@ public class PostViewDTO implements Serializable {
 
   private Status status;
 
-  private String fundingType;
-
   private List<String> fundingSubtypeNames;
+
+  private List<Long> fundingTypeIds;
 
   private List<UUID> fundingSubtypeIds;
 

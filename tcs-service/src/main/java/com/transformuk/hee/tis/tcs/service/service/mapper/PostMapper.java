@@ -164,7 +164,7 @@ public class PostMapper {
     if (postFunding != null) {
       result = new PostFundingDTO();
       result.setId(postFunding.getId());
-      result.setFundingType(postFunding.getFundingType());
+      result.setFundingTypeId(postFunding.getFundingTypeId());
       result.setInfo(postFunding.getInfo());
       result.setStartDate(postFunding.getStartDate());
       result.setEndDate(postFunding.getEndDate());
@@ -336,7 +336,7 @@ public class PostMapper {
     if (postFundingDTO != null) {
       result = new PostFunding();
       result.setId(postFundingDTO.getId());
-      result.setFundingType(postFundingDTO.getFundingType());
+      result.setFundingTypeId(postFundingDTO.getFundingTypeId());
       result.setInfo(postFundingDTO.getInfo());
       result.setStartDate(postFundingDTO.getStartDate());
       result.setEndDate(postFundingDTO.getEndDate());

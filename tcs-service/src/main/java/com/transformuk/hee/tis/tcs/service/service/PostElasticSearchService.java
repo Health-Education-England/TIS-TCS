@@ -79,7 +79,7 @@ public class PostElasticSearchService {
   private static final String PRIMARY_SPECIALTY_CODE = "primarySpecialtyCode";
   private static final String PRIMARY_SPECIALTY_NAME = "primarySpecialtyName";
   private static final String PROGRAMME_NAMES = "programmeNames";
-  private static final String FUNDING_TYPES = "fundingTypes";
+  private static final String FUNDING_TYPE_IDS = "fundingTypeIds";
   private static final String FUNDING_SUBTYPE_IDS = "fundingSubtypeIds";
   private static final String PRIMARY_SPECIALTY_ID = "primarySpecialtyId";
   private static final String PRIMARY_SITE_ID = "primarySiteId";
@@ -98,7 +98,7 @@ public class PostElasticSearchService {
       OWNER,
       NATIONAL_POST_NUMBER,
       PRIMARY_SPECIALTY_CODE,
-      FUNDING_TYPES,
+      FUNDING_TYPE_IDS,
       FUNDING_SUBTYPE_IDS,
       PRIMARY_SPECIALTY_ID,
       PRIMARY_SITE_ID,
@@ -106,8 +106,7 @@ public class PostElasticSearchService {
   );
 
   private static final Map<String, String> FIELD_MAPPINGS = Map.of(
-      "currentTraineeSurname", CURRENT_TRAINEE_SURNAMES,
-      "fundingType", FUNDING_TYPES
+      "currentTraineeSurname", CURRENT_TRAINEE_SURNAMES
   );
 
   private final ElasticsearchOperations elasticsearchOperations;
@@ -241,7 +240,6 @@ public class PostElasticSearchService {
       shouldQuery
           .should(new WildcardQueryBuilder(PROGRAMME_NAMES, wildcard))
           .should(new MatchQueryBuilder(PRIMARY_SPECIALTY_NAME, searchQuery))
-          .should(new WildcardQueryBuilder(FUNDING_TYPES, wildcard))
           .should(new WildcardQueryBuilder(OWNER, wildcard))
           .should(new WildcardQueryBuilder(CURRENT_TRAINEE_SURNAMES, wildcard))
           .should(new WildcardQueryBuilder(CURRENT_TRAINEE_FORENAMES, wildcard));

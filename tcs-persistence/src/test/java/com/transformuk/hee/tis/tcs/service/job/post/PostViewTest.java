@@ -51,7 +51,7 @@ class PostViewTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"nationalPostNumber", "primarySpecialtyCode", "status", "fundingTypes",
+  @ValueSource(strings = {"nationalPostNumber", "primarySpecialtyCode", "status",
       "fundingSubtypeIds", "owner"})
   void shouldMapFieldAsKeywordField(String fieldName) throws NoSuchFieldException {
     assertKeywordField(fieldName);
