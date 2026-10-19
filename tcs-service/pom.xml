@@ -12,7 +12,7 @@
 
   <groupId>com.transformuk.hee.tis</groupId>
   <artifactId>tcs-service</artifactId>
-  <version>6.64.0</version>
+  <version>6.64.1</version>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>

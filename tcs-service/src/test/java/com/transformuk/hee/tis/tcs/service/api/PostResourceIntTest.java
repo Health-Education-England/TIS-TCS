@@ -1538,6 +1538,9 @@ class PostResourceIntTest {
     fundings.add(invalidFunding);
     postDTO.setFundings(fundings);
 
+    when(referenceService.findFundingTypesIdIn(Sets.newHashSet(FUNDING_TYPE_ID_TARIFF)))
+        .thenReturn(Collections.singletonList(tariffFundingType));
+
     restPostMockMvc.perform(post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(postDTO)))
@@ -1615,6 +1618,9 @@ class PostResourceIntTest {
     postDto.setFundings(fundings);
     // For update post must have an id
     postDto.setId(1L);
+
+    when(referenceService.findFundingTypesIdIn(Sets.newHashSet(FUNDING_TYPE_ID_TARIFF)))
+        .thenReturn(Collections.singletonList(tariffFundingType));
 
     restPostMockMvc.perform(put("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
