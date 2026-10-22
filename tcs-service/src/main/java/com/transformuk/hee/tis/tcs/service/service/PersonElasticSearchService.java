@@ -17,7 +17,7 @@ import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchReposit
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.impl.PersonTrustRowMapper;
-import com.transformuk.hee.tis.tcs.service.service.impl.PersonViewRowMapper;
+import com.transformuk.hee.tis.tcs.service.mapper.PersonViewRowMapper;
 import com.transformuk.hee.tis.tcs.service.service.impl.ProgrammeMembershipRowMapper;
 import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
 import java.util.HashMap;
