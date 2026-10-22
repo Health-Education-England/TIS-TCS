@@ -41,6 +41,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PostViewRowMapperTest {
 
+  private static final String LIST_SEPARATOR = ";";
+  private static final String LIST_SEPARATOR_WITH_TRAILING_WHITESPACE = "; ";
   private static final String COL_ID = "id";
   private static final String COL_PRIMARY_SITE_ID = "primarySiteId";
   private static final String COL_APPROVED_GRADE_ID = "approvedGradeId";
@@ -86,16 +88,18 @@ class PostViewRowMapperTest {
   private static final String FUNDING_SUBTYPE_ID_2 = "BBBB";
 
   private static final String CONCAT_FUNDING_SUBTYPE_IDS =
-      FUNDING_SUBTYPE_ID_1 + ";" + FUNDING_SUBTYPE_ID_2;
-  private static final String CONCAT_PROGRAMMES = PROGRAMME_1 + ";" + PROGRAMME_2;
-  private static final String CONCAT_PROGRAMMES_WITH_SPACES = PROGRAMME_3 + "; " + PROGRAMME_2;
-  private static final String CONCAT_FUNDING_TYPE_IDS = FUNDING_TYPE_ID_1 + "," + FUNDING_TYPE_ID_2;
+      FUNDING_SUBTYPE_ID_1 + LIST_SEPARATOR + FUNDING_SUBTYPE_ID_2;
+  private static final String CONCAT_PROGRAMMES = PROGRAMME_1 + LIST_SEPARATOR + PROGRAMME_2;
+  private static final String CONCAT_PROGRAMMES_WITH_SPACES =
+      PROGRAMME_3 + LIST_SEPARATOR_WITH_TRAILING_WHITESPACE + PROGRAMME_2;
+  private static final String CONCAT_FUNDING_TYPE_IDS =
+      FUNDING_TYPE_ID_1 + LIST_SEPARATOR + FUNDING_TYPE_ID_2;
   private static final String CONCAT_TRAINEE_SURNAMES =
       CURRENT_TRAINEE_SURNAMES_1 + ", " + CURRENT_TRAINEE_SURNAMES_2;
   private static final String CONCAT_TRAINEE_FORENAMES =
       CURRENT_TRAINEE_FORENAMES_1 + ", " + CURRENT_TRAINEE_FORENAMES_2;
-  private static final String CONCAT_TRUST_IDS = TRUST_ID_1 + "," + TRUST_ID_2;
-  private static final String CONCAT_PROGRAMME_IDS = PROGRAMME_ID_1 + "," + PROGRAMME_ID_2;
+  private static final String CONCAT_TRUST_IDS = TRUST_ID_1 + LIST_SEPARATOR + TRUST_ID_2;
+  private static final String CONCAT_PROGRAMME_IDS = PROGRAMME_ID_1 + LIST_SEPARATOR + PROGRAMME_ID_2;
 
   private static final Status FUNDING_STATUS = Status.CURRENT;
 
