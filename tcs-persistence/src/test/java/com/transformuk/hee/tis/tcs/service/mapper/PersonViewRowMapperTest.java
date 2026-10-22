@@ -93,7 +93,7 @@ class PersonViewRowMapperTest {
     PersonView result = rowMapper.mapRow(resultSet, 0);
 
     assertThat(result).isNotNull();
-    assertThat(result.getPersonId()).isEqualTo(0L);
+    assertThat(result.getPersonId()).isZero();
     assertThat(result.getIntrepidId()).isNull();
     assertThat(result.getSurname()).isNull();
     assertThat(result.getForenames()).isNull();

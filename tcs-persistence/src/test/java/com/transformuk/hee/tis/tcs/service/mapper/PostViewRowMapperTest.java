@@ -99,7 +99,8 @@ class PostViewRowMapperTest {
   private static final String CONCAT_TRAINEE_FORENAMES =
       CURRENT_TRAINEE_FORENAMES_1 + ", " + CURRENT_TRAINEE_FORENAMES_2;
   private static final String CONCAT_TRUST_IDS = TRUST_ID_1 + LIST_SEPARATOR + TRUST_ID_2;
-  private static final String CONCAT_PROGRAMME_IDS = PROGRAMME_ID_1 + LIST_SEPARATOR + PROGRAMME_ID_2;
+  private static final String CONCAT_PROGRAMME_IDS =
+      PROGRAMME_ID_1 + LIST_SEPARATOR + PROGRAMME_ID_2;
 
   private static final Status FUNDING_STATUS = Status.CURRENT;
 
