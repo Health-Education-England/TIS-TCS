@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
@@ -40,7 +41,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PostViewRowMapper implements RowMapper<PostView> {
 
-  private static final String STRING_LIST_SEPARATOR_REGEX = ";";
+  private static final String LIST_SEPARATOR_REGEX = ";";
 
   @NonNull
   @Override
@@ -89,25 +90,22 @@ public class PostViewRowMapper implements RowMapper<PostView> {
   }
 
   private List<Long> toLongList(String value) {
-    if (StringUtils.isEmpty(value)) {
-      return Collections.emptyList();
-    }
-
-    return Arrays.stream(value.split(","))
-        .map(String::trim)
-        .filter(StringUtils::isNotBlank)
-        .map(Long::valueOf)
-        .collect(Collectors.toList());
+    return toList(value, Long::valueOf);
   }
 
   private List<String> toStringList(String value) {
+    return toList(value, Function.identity());
+  }
+
+  private <T> List<T> toList(String value, Function<String, T> mapper) {
     if (StringUtils.isEmpty(value)) {
       return Collections.emptyList();
     }
 
-    return Arrays.stream(value.split(STRING_LIST_SEPARATOR_REGEX))
+    return Arrays.stream(value.split(LIST_SEPARATOR_REGEX))
         .map(String::trim)
         .filter(StringUtils::isNotBlank)
+        .map(mapper)
         .collect(Collectors.toList());
   }
 }
