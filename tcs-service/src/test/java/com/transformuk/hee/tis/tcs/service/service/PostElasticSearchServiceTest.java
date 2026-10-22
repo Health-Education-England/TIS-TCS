@@ -46,7 +46,7 @@ import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewMapper;
-import com.transformuk.hee.tis.tcs.service.service.mapper.PostViewRowMapper;
+import com.transformuk.hee.tis.tcs.service.mapper.PostViewRowMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
