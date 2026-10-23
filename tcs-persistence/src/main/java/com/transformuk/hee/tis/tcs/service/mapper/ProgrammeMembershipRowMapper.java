@@ -1,4 +1,4 @@
-package com.transformuk.hee.tis.tcs.service.service.impl;
+package com.transformuk.hee.tis.tcs.service.mapper;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.service.job.person.ProgrammeMembershipDto;
