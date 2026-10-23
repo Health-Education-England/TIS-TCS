@@ -28,6 +28,7 @@ import com.transformuk.hee.tis.tcs.service.api.util.ColumnFilterUtil;
 import com.transformuk.hee.tis.tcs.service.event.PlacementDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PlacementSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DateRangeColumnFilterException;
+import com.transformuk.hee.tis.tcs.service.mapper.PlacementRowMapper;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Comment;
 import com.transformuk.hee.tis.tcs.service.model.EsrNotification;
