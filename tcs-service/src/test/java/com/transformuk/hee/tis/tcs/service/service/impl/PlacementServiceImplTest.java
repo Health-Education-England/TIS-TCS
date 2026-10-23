@@ -244,7 +244,7 @@ class PlacementServiceImplTest {
     Map<String, Object> capturedParams = mapArgumentCaptor.getValue();
     assertTrue(capturedParams.containsKey("traineeId"));
 
-    com.transformuk.hee.tis.tcs.service.mapper.PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
+    PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
     assertNotNull(capturedRowMapper);
   }
 
@@ -374,7 +374,7 @@ class PlacementServiceImplTest {
     Map<String, Object> capturedParams = mapArgumentCaptor.getValue();
     assertTrue(capturedParams.containsKey("postId"));
 
-    com.transformuk.hee.tis.tcs.service.mapper.PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
+    PlacementRowMapper capturedRowMapper = placementRowMapperArgumentCaptor.getValue();
     assertNotNull(capturedRowMapper);
   }
 
