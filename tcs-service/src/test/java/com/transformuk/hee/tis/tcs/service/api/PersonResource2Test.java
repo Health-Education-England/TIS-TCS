@@ -52,7 +52,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -67,13 +66,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @SpringBootTest(classes = Application.class)
-@ExtendWith(SpringExtension.class)
 public class PersonResource2Test {
 
   private MockMvc mockMvc;
@@ -121,7 +118,7 @@ public class PersonResource2Test {
   private static final String PROGRAMME_ADMIN = "HEE Programme Admin";
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     MockitoAnnotations.initMocks(this);
 
     PersonResource personResource = new PersonResource(personServiceMock,
@@ -148,7 +145,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotUpdatePerson() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotUpdatePerson() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -166,7 +163,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewSpecificPerson() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotViewSpecificPerson() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -181,7 +178,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotDeleteSpecificPerson() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotDeleteSpecificPerson() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -196,7 +193,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewSpecificBasicPersonData()
+  void unauthorisedExceptionThrownWhenUserCannotViewSpecificBasicPersonData()
       throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
@@ -212,7 +209,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPersonPlacements() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotViewPersonPlacements() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -229,7 +226,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcId() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcId() throws Exception {
 
     String gmcId = "12345";
     long personId = 1L;
@@ -245,7 +242,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcIdNew()
+  void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcIdNew()
       throws Exception {
 
     String gmcId = "12345";
@@ -262,7 +259,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingPersonIdNew()
+  void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingPersonIdNew()
       throws Exception {
 
     long personId = 1L;
@@ -278,7 +275,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void getPersonV2ShouldReturnPersonWithNoQualificationData() throws Exception {
+  void getPersonV2ShouldReturnPersonWithNoQualificationData() throws Exception {
     long personId = 1L;
     PersonV2DTO foundPerson = new PersonV2DTO();
 
@@ -294,7 +291,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void getPersonV2ShouldReturnPersonWithNoNationalInsuranceNumber() throws Exception {
+  void getPersonV2ShouldReturnPersonWithNoNationalInsuranceNumber() throws Exception {
     long personId = 1L;
     PersonV2DTO foundPerson = new PersonV2DTO();
     PersonalDetailsDTO personalDetailsDto = new PersonalDetailsDTO();
@@ -313,7 +310,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void findPeopleOnProgrammeShouldReturnPagedResultsOfFound() throws Exception {
+  void findPeopleOnProgrammeShouldReturnPagedResultsOfFound() throws Exception {
     Long programmeId = 1L;
     String searchQuery = "john";
     int page = 0;
@@ -342,7 +339,7 @@ public class PersonResource2Test {
         .andExpect(jsonPath("$.content.[0].programmeId").value(1));
   }
 
-  @ParameterizedTest(name = "AC {0}")
+  @ParameterizedTest(name = "{0}")
   @MethodSource("peopleAccessArguments")
   void shouldApplyPeopleAccessRulesForAllACScenarios(
       PeopleAccessScenario scenario) throws Exception {
@@ -406,6 +403,11 @@ public class PersonResource2Test {
       this.programmeCount = programmeCount;
       this.expectedEmpty = expectedEmpty;
     }
+
+    @Override
+    public String toString() {
+      return "AC " + acNo + " - " + roles;
+    }
   }
 
   private static List<PeopleAccessScenario> peopleAccessScenarios() {
@@ -438,7 +440,7 @@ public class PersonResource2Test {
 
   private static Stream<Arguments> peopleAccessArguments() {
     return peopleAccessScenarios().stream()
-        .map(scenario -> Arguments.of(scenario));
+        .map(Arguments::of);
   }
 
   private Set<Trust> createTrusts(int count) {

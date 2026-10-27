@@ -13,8 +13,8 @@ import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
-import org.springframework.stereotype.Component;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.stereotype.Component;
 
 /**
  * Apply a filter if the current logged in user is a Trust user
@@ -39,7 +39,8 @@ public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
       return Optional.empty();
     }
 
-    boolean hasTrustRole = roles != null && (roles.contains(TRUST_OBSERVER) || roles.contains(TRUST_ADMIN));
+    boolean hasTrustRole =
+        roles != null && (roles.contains(TRUST_OBSERVER) || roles.contains(TRUST_ADMIN));
 
     Set<Trust> assignedTrusts = currentUserProfile.getAssignedTrusts();
 

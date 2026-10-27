@@ -37,7 +37,8 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
       return Optional.empty();
     }
 
-    boolean hasProgrammeRole = roles != null && (roles.contains(PROGRAMME_OBSERVER) || roles.contains(PROGRAMME_ADMIN));
+    boolean hasProgrammeRole = roles != null
+        && (roles.contains(PROGRAMME_OBSERVER) || roles.contains(PROGRAMME_ADMIN));
 
     Set<Programme> assignedProgrammes = currentUserProfile.getAssignedProgrammes();
 
@@ -51,7 +52,8 @@ public class ProgrammeBasedFilterStrategy implements RoleBasedFilterStrategy {
     if (CollectionUtils.isNotEmpty(assignedProgrammes)) {
 
       MatchQueryBuilder statusMatchQueryBuilder =
-          (columnFilters == null ? Collections.<ColumnFilter>emptyList() : columnFilters).stream().filter(
+          (columnFilters == null ? Collections.<ColumnFilter>emptyList()
+              : columnFilters).stream().filter(
                   columnFilter -> StringUtils.equals(columnFilter.getName(), "programmeMembershipStatus"))
               .findFirst().map(columnFilter -> getProgrammeMembershipStatusQueryBuilder(
                   ProgrammeMembershipStatus.valueOf(columnFilter.getValues().get(0).toString())))
