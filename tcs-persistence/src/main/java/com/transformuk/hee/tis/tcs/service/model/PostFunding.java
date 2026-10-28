@@ -35,15 +35,6 @@ public class PostFunding implements Serializable {
   @JoinColumn(name = "postId")
   private Post post;
 
-  /**
-   * Legacy funding type label.
-   *
-   * @deprecated Use {@link #fundingTypeId} instead.
-   */
-  @Deprecated(forRemoval = true)
-  @Column(name = "fundingType")
-  private String fundingType;
-
   @Column(name = "fundingTypeId")
   private Long fundingTypeId;
 
