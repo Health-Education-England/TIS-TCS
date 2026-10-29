@@ -6,6 +6,7 @@ import static org.mockito.internal.util.collections.Sets.newSet;
 import com.transformuk.hee.tis.security.model.AuthenticatedUser;
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.security.model.UserProfile;
+import com.transformuk.hee.tis.security.model.Programme;
 import java.util.Set;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,5 +49,22 @@ public class TestUtils {
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
   }
 
+  public static void mockUserProfileWithRolesAndAssociations(
+      String userName, Set<String> roles, Set<Trust> trusts, Set<Programme> programmes) {
+
+    UserProfile userProfile = new UserProfile();
+    userProfile.setUserName(userName);
+    userProfile.setRoles(roles);
+    userProfile.setAssignedTrusts(trusts);
+    userProfile.setAssignedProgrammes(programmes);
+
+    AuthenticatedUser authenticatedUser =
+        new AuthenticatedUser(userName, "dummyToken", userProfile, null);
+
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken(authenticatedUser, null);
+
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+  }
 }
 

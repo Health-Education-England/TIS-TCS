@@ -2,9 +2,13 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,6 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.common.collect.Lists;
+import com.transformuk.hee.tis.security.model.Programme;
+import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
@@ -38,9 +44,17 @@ import com.transformuk.hee.tis.tcs.service.service.PersonService;
 import com.transformuk.hee.tis.tcs.service.service.PlacementService;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PlacementViewMapper;
 import java.util.ArrayList;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,12 +66,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class PersonResource2Test {
 
@@ -100,9 +112,13 @@ public class PersonResource2Test {
   private PersonElasticSearchService personElasticSearchServiceMock;
 
   private PersonDTO personDTOStub;
+  private static final String TRUST_OBSERVER = "HEE Trust Observer";
+  private static final String TRUST_ADMIN = "HEE Trust Admin";
+  private static final String PROGRAMME_OBSERVER = "HEE Programme Observer";
+  private static final String PROGRAMME_ADMIN = "HEE Programme Admin";
 
-  @Before
-  public void setup() {
+  @BeforeEach
+  void setup() {
     MockitoAnnotations.initMocks(this);
 
     PersonResource personResource = new PersonResource(personServiceMock,
@@ -129,7 +145,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotUpdatePerson() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotUpdatePerson() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -147,7 +163,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewSpecificPerson() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotViewSpecificPerson() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -162,7 +178,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotDeleteSpecificPerson() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotDeleteSpecificPerson() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -177,7 +193,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewSpecificBasicPersonData()
+  void unauthorisedExceptionThrownWhenUserCannotViewSpecificBasicPersonData()
       throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
@@ -193,7 +209,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPersonPlacements() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotViewPersonPlacements() throws Exception {
 
     doThrow(new AccessUnauthorisedException("")).when(personServiceMock)
         .canLoggedInUserViewOrAmend(1L);
@@ -210,7 +226,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcId() throws Exception {
+  void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcId() throws Exception {
 
     String gmcId = "12345";
     long personId = 1L;
@@ -226,7 +242,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcIdNew()
+  void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingGmcIdNew()
       throws Exception {
 
     String gmcId = "12345";
@@ -243,7 +259,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingPersonIdNew()
+  void unauthorisedExceptionThrownWhenUserCannotViewPlacementsUsingPersonIdNew()
       throws Exception {
 
     long personId = 1L;
@@ -259,7 +275,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void getPersonV2ShouldReturnPersonWithNoQualificationData() throws Exception {
+  void getPersonV2ShouldReturnPersonWithNoQualificationData() throws Exception {
     long personId = 1L;
     PersonV2DTO foundPerson = new PersonV2DTO();
 
@@ -275,7 +291,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void getPersonV2ShouldReturnPersonWithNoNationalInsuranceNumber() throws Exception {
+  void getPersonV2ShouldReturnPersonWithNoNationalInsuranceNumber() throws Exception {
     long personId = 1L;
     PersonV2DTO foundPerson = new PersonV2DTO();
     PersonalDetailsDTO personalDetailsDto = new PersonalDetailsDTO();
@@ -294,7 +310,7 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void findPeopleOnProgrammeShouldReturnPagedResultsOfFound() throws Exception {
+  void findPeopleOnProgrammeShouldReturnPagedResultsOfFound() throws Exception {
     Long programmeId = 1L;
     String searchQuery = "john";
     int page = 0;
@@ -323,8 +339,131 @@ public class PersonResource2Test {
         .andExpect(jsonPath("$.content.[0].programmeId").value(1));
   }
 
-//  @Test
-//  public void shouldPerformValidationOnPersonCreate() {
-//    mockMvc.perform(post("/api/person"))
-//  }
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("peopleAccessArguments")
+  void shouldApplyPeopleAccessRulesForAllACScenarios(
+      PeopleAccessScenario scenario) throws Exception {
+
+    reset(personElasticSearchServiceMock, personViewDecoratorMock);
+
+    Set<Trust> trusts = createTrusts(scenario.trustCount);
+    Set<Programme> programmes = createProgrammes(scenario.programmeCount);
+
+    TestUtils.mockUserProfileWithRolesAndAssociations(
+        "testuser", scenario.roles, trusts, programmes);
+
+    Pageable pageable = PageRequest.of(0, 100);
+
+    Page<PersonViewDTO> expectedPage;
+
+    if (scenario.expectedEmpty) {
+      expectedPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+    } else {
+      PersonViewDTO person = new PersonViewDTO();
+      person.setId(1L);
+
+      expectedPage = new PageImpl<>(Collections.singletonList(person), pageable, 1);
+    }
+
+    when(personElasticSearchServiceMock.searchForPage(
+        nullable(String.class), nullable(List.class), any(Pageable.class)))
+        .thenReturn(expectedPage);
+
+    when(personViewDecoratorMock.decorate(anyList()))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    mockMvc.perform(
+            get("/api/people")
+                .param("enableES", "true")
+                .param("page", "0")
+                .param("size", "100")
+                .param("searchQuery", "")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()")
+            .value(scenario.expectedEmpty ? 0 : 1));
+
+    verify(personElasticSearchServiceMock, times(1))
+        .searchForPage(nullable(String.class), nullable(List.class), any(Pageable.class));
+  }
+
+  private static class PeopleAccessScenario {
+
+    private final int acNo;
+    private final Set<String> roles;
+    private final int trustCount;
+    private final int programmeCount;
+    private final boolean expectedEmpty;
+
+    private PeopleAccessScenario(int acNo, Set<String> roles, int trustCount,
+        int programmeCount, boolean expectedEmpty) {
+      this.acNo = acNo;
+      this.roles = roles;
+      this.trustCount = trustCount;
+      this.programmeCount = programmeCount;
+      this.expectedEmpty = expectedEmpty;
+    }
+
+    @Override
+    public String toString() {
+      return "AC " + acNo + " - " + roles;
+    }
+  }
+
+  private static List<PeopleAccessScenario> peopleAccessScenarios() {
+    return Arrays.asList(
+        new PeopleAccessScenario(1, Set.of(TRUST_OBSERVER), 0, 0, true),
+        new PeopleAccessScenario(2, Set.of(TRUST_OBSERVER), 2, 0, false),
+        new PeopleAccessScenario(3, Set.of(TRUST_ADMIN), 0, 0, true),
+        new PeopleAccessScenario(4, Set.of(TRUST_ADMIN), 2, 0, false),
+
+        new PeopleAccessScenario(5, Set.of(PROGRAMME_OBSERVER), 0, 0, true),
+        new PeopleAccessScenario(6, Set.of(PROGRAMME_OBSERVER), 0, 2, false),
+        new PeopleAccessScenario(7, Set.of(PROGRAMME_ADMIN), 0, 0, true),
+        new PeopleAccessScenario(8, Set.of(PROGRAMME_ADMIN), 0, 2, false),
+
+        new PeopleAccessScenario(
+            9, Set.of(TRUST_OBSERVER, PROGRAMME_OBSERVER), 0, 1, true),
+        new PeopleAccessScenario(
+            10, Set.of(TRUST_OBSERVER, PROGRAMME_OBSERVER), 1, 0, true),
+        new PeopleAccessScenario(
+            11, Set.of(TRUST_OBSERVER, PROGRAMME_OBSERVER), 0, 0, true),
+
+        new PeopleAccessScenario(
+            12, Set.of(TRUST_ADMIN, PROGRAMME_ADMIN), 0, 1, true),
+        new PeopleAccessScenario(
+            13, Set.of(TRUST_ADMIN, PROGRAMME_ADMIN), 1, 0, true),
+        new PeopleAccessScenario(
+            14, Set.of(TRUST_ADMIN, PROGRAMME_ADMIN), 0, 0, true)
+    );
+  }
+
+  private static Stream<Arguments> peopleAccessArguments() {
+    return peopleAccessScenarios().stream()
+        .map(Arguments::of);
+  }
+
+  private Set<Trust> createTrusts(int count) {
+    Set<Trust> trusts = new HashSet<>();
+
+    for (int i = 1; i <= count; i++) {
+      Trust trust = new Trust();
+      trust.setId((long) i);
+      trusts.add(trust);
+    }
+
+    return trusts;
+  }
+
+  private Set<Programme> createProgrammes(int count) {
+    Set<Programme> programmes = new HashSet<>();
+
+    for (int i = 1; i <= count; i++) {
+      Programme programme = new Programme();
+      programme.setId((long) i);
+      programmes.add(programme);
+    }
+
+    return programmes;
+  }
 }
