@@ -7,7 +7,7 @@ SELECT p.id,
                           pl.dateFrom <= DATE_ADD(CURDATE(), INTERVAL 13 WEEK))
                       THEN 1
                     ELSE 0
-           END) > 0 THEN 'CURRENT'
+           END) > 0 THEN 'ACTIVE'
          ELSE 'INACTIVE'
          END AS status
 
