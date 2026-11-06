@@ -1,7 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
