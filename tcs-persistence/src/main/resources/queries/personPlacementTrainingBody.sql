@@ -9,7 +9,7 @@ SELECT p.id,
                     ELSE 0
            END) > 0 THEN 'CURRENT'
          ELSE 'INACTIVE'
-         END AS placementStatus
+         END AS status
 
 FROM Person p
 LEFT JOIN Placement pl

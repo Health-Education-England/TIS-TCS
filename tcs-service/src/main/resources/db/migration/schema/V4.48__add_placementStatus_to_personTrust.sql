@@ -1,2 +1,2 @@
--- This migration adds the placementStatus column to the PersonTrust table.
-ALTER TABLE `PersonTrust` ADD COLUMN `placementStatus` varchar(255);
+-- This migration adds the status column to the PersonTrust table.
+ALTER TABLE `PersonTrust` ADD COLUMN `status` varchar(255);
