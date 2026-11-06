@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,9 +42,9 @@ public class PersonTrust {
 
   /**
    * The placement status of the person in relation to the trust.
-   * The possible values are defined in the Status enumeration: CURRENT, INACTIVE.
+   * The possible values are defined in the PersonTrustStatus enumeration.
    */
   @Enumerated(EnumType.STRING)
-  @Column(name = "placementStatus")
-  private Status placementStatus;
+  @Column(name = "status")
+  private PersonTrustStatus status;
 }
