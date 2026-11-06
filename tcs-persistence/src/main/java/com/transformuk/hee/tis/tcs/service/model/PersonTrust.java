@@ -1,7 +1,10 @@
 package com.transformuk.hee.tis.tcs.service.model;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,4 +38,12 @@ public class PersonTrust {
 
   @Column(name = "trustName")
   private String trustName;
+
+  /**
+   * The placement status of the person in relation to the trust.
+   * The possible values are defined in the PersonTrustStatus enumeration.
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status")
+  private PersonTrustStatus status;
 }
