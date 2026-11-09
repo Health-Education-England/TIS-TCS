@@ -56,7 +56,7 @@ public class PersonElasticSearchService {
   public static final String CURRENT_STATUS = "CURRENT";
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
   private static final String PERSON_TRUST_QUERY =
-      "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
+      "SELECT personId, trustId, status FROM PersonTrust WHERE personId IN (:personIds)";
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
   @Autowired

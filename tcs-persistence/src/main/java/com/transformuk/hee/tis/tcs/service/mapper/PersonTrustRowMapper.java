@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.mapper;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +13,9 @@ public class PersonTrustRowMapper implements RowMapper<PersonTrustDto> {
     final PersonTrustDto dto = new PersonTrustDto();
     dto.setPersonId(rs.getLong("personId"));
     dto.setTrustId(rs.getLong("trustId"));
+    dto.setStatus(
+        rs.getString("status") != null ?
+            PersonTrustStatus.valueOf(rs.getString("status")) : null);
     return dto;
   }
 }
