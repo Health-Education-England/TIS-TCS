@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
-import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
@@ -35,8 +33,6 @@ class PersonElasticSearchServiceTest {
   private SqlQuerySupplier sqlQuerySupplier;
   @Mock
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-  @Mock
-  private PersonViewDecorator personViewDecorator;
 
   private PersonElasticSearchService service;
 
@@ -47,15 +43,12 @@ class PersonElasticSearchServiceTest {
     ReflectionTestUtils.setField(service, "sqlQuerySupplier", sqlQuerySupplier);
     ReflectionTestUtils.setField(service, "namedParameterJdbcTemplate", namedParameterJdbcTemplate);
     ReflectionTestUtils.setField(service, "roleBasedFilterStrategies", Collections.emptySet());
-    ReflectionTestUtils.setField(service, "personViewDecorator", personViewDecorator);
-    when(personViewDecorator.decorate(any(List.class))).thenAnswer(invocation -> invocation.getArgument(0));
   }
 
   @Test
   void shouldAddActiveTrustStatusFilterWhenRequested() {
     PersonView personView = new PersonView();
-    personView.setPersonId(123L);
-    personView.setStatus(Status.CURRENT);
+    personView.setProgrammeMemberships(Collections.emptySet());
 
     Pageable pageable = PageRequest.of(0, 10);
     when(personElasticSearchRepository.search(any(QueryBuilder.class), eq(pageable)))
@@ -73,8 +66,7 @@ class PersonElasticSearchServiceTest {
   @Test
   void shouldNotAddActiveTrustStatusFilterByDefault() {
     PersonView personView = new PersonView();
-    personView.setPersonId(456L);
-    personView.setStatus(Status.CURRENT);
+    personView.setProgrammeMemberships(Collections.emptySet());
 
     Pageable pageable = PageRequest.of(0, 10);
     when(personElasticSearchRepository.search(any(QueryBuilder.class), eq(pageable)))
@@ -91,8 +83,7 @@ class PersonElasticSearchServiceTest {
   @Test
   void shouldIgnoreInvalidTrustStatusFilter() {
     PersonView personView = new PersonView();
-    personView.setPersonId(789L);
-    personView.setStatus(Status.CURRENT);
+    personView.setProgrammeMemberships(Collections.emptySet());
 
     Pageable pageable = PageRequest.of(0, 10);
     when(personElasticSearchRepository.search(any(QueryBuilder.class), eq(pageable)))
