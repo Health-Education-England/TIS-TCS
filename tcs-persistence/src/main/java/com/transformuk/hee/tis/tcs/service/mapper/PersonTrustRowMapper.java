@@ -14,8 +14,8 @@ public class PersonTrustRowMapper implements RowMapper<PersonTrustDto> {
     dto.setPersonId(rs.getLong("personId"));
     dto.setTrustId(rs.getLong("trustId"));
     dto.setStatus(
-        rs.getString("status") != null ?
-            PersonTrustStatus.valueOf(rs.getString("status")) : null);
+        rs.getString("status") != null
+            ? PersonTrustStatus.valueOf(rs.getString("status")) : null);
     return dto;
   }
 }

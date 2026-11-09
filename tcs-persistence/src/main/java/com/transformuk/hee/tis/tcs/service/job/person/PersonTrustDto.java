@@ -6,6 +6,9 @@ import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * A DTO to hold the personId, trustId and status of a person-trust relationship.
+ */
 @Setter
 @Getter
 public class PersonTrustDto implements Serializable {
