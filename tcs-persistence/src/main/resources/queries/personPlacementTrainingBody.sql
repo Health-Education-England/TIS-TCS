@@ -1,4 +1,15 @@
-SELECT distinct p.id, po.trainingBodyId
+SELECT p.id,
+       po.trainingBodyId,
+       CASE
+         WHEN SUM(CASE
+                    WHEN (pl.dateFrom <= CURDATE() AND pl.dateTo >= CURDATE())
+                      OR (pl.dateFrom > CURDATE() AND
+                          pl.dateFrom <= DATE_ADD(CURDATE(), INTERVAL 13 WEEK))
+                      THEN 1
+                    ELSE 0
+           END) > 0 THEN 'ACTIVE'
+         ELSE 'INACTIVE'
+         END AS status
 
 FROM Person p
 LEFT JOIN Placement pl
@@ -6,9 +17,8 @@ LEFT JOIN Placement pl
 LEFT JOIN Post po
   ON po.id = pl.postId
 
-WHERE (p.id, po.trainingBodyId) > (:lastId,:lastTrainingBodyId)
-
-AND po.trainingBodyId IS NOT NULL
+WHERE po.trainingBodyId IS NOT NULL
+GROUP BY p.id, po.trainingBodyId
+HAVING (p.id, po.trainingBodyId) > (:lastId, :lastTrainingBodyId)
 ORDER BY p.id ASC, po.trainingBodyId ASC
-
 LIMIT :pageSize
