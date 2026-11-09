@@ -1,5 +1,6 @@
 package com.transformuk.hee.tis.tcs.service.service;
 
+import static com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus.ACTIVE;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 
 import com.google.common.base.Preconditions;
@@ -7,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
@@ -56,7 +58,7 @@ public class PersonElasticSearchService {
   public static final String CURRENT_STATUS = "CURRENT";
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
   private static final String PERSON_TRUST_QUERY =
-      "SELECT personId, trustId FROM PersonTrust WHERE personId IN (:personIds)";
+      "SELECT personId, trustId, status FROM PersonTrust WHERE personId IN (:personIds)";
   @Autowired
   private PersonElasticSearchRepository personElasticSearchRepository;
   @Autowired
@@ -105,11 +107,32 @@ public class PersonElasticSearchService {
 
   public Page<PersonViewDTO> searchForPage(String searchQuery,
       List<ColumnFilter> columnFilters, Pageable pageable) {
+    return searchForPage(searchQuery, columnFilters, pageable, null);
+  }
+
+  public Page<PersonViewDTO> searchForPage(String searchQuery,
+      List<ColumnFilter> columnFilters, Pageable pageable, String personTrustStatus) {
 
     try {
       // iterate over the column filters, if they have multiple values per filter, place a should between then
       // for each column filter set, place a must between them
       BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+
+      PersonTrustStatus parsedPersonTrustStatus = null;
+      if (StringUtils.isNotBlank(personTrustStatus)) {
+        try {
+          parsedPersonTrustStatus = PersonTrustStatus.valueOf(personTrustStatus.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+          LOG.debug("Invalid person trust status filter: {}", personTrustStatus, e);
+        }
+      }
+
+      if (Objects.equals(parsedPersonTrustStatus, ACTIVE)) {
+        mustBetweenDifferentColumnFilters.must(
+            nestedQuery("trusts",
+                new TermQueryBuilder("trusts.status", parsedPersonTrustStatus.name()),
+                ScoreMode.None));
+      }
 
       ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
       Set<String> appliedFilters = applyRoleBasedFilters(columnFilters, mustBetweenDifferentColumnFilters);

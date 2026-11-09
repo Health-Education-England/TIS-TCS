@@ -205,6 +205,7 @@ public class PersonResource {
       final Pageable pageable,
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
       @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
+      @RequestParam(value = "personTrustStatus", required = false) String personTrustStatus,
       @RequestParam(required = false, defaultValue = "false") boolean enableES) throws IOException {
 
     log.debug("REST request to get a page of People begin");
@@ -218,7 +219,8 @@ public class PersonResource {
 
     //feature flag to enable es, allow the enabling from the FE
     if (enableEsSearch || enableES) {
-      page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
+      page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable,
+          personTrustStatus);
     } else {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);

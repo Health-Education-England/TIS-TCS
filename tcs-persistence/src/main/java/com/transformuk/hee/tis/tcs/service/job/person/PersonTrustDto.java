@@ -7,13 +7,19 @@ public class PersonTrustDto implements Serializable {
 
   private Long personId;
   private Long trustId;
+  private String status;
 
   public PersonTrustDto() {
   }
 
   public PersonTrustDto(Long personId, Long trustId) {
+    this(personId, trustId, null);
+  }
+
+  public PersonTrustDto(Long personId, Long trustId, String status) {
     this.personId = personId;
     this.trustId = trustId;
+    this.status = status;
   }
 
   public Long getPersonId() {
@@ -32,6 +38,14 @@ public class PersonTrustDto implements Serializable {
     this.trustId = trustId;
   }
 
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -41,8 +55,8 @@ public class PersonTrustDto implements Serializable {
       return false;
     }
     PersonTrustDto that = (PersonTrustDto) o;
-    return Objects.equals(personId, that.personId) &&
-        Objects.equals(trustId, that.trustId);
+    return Objects.equals(personId, that.personId)
+        && Objects.equals(trustId, that.trustId);
   }
 
   @Override

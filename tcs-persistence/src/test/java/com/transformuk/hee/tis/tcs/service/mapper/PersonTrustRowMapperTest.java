@@ -29,11 +29,27 @@ class PersonTrustRowMapperTest {
   void shouldMapPersonTrustFromResultSet() throws SQLException {
     when(resultSet.getLong("personId")).thenReturn(123L);
     when(resultSet.getLong("trustId")).thenReturn(456L);
+    when(resultSet.getString("status")).thenReturn("ACTIVE");
 
     PersonTrustDto result = rowMapper.mapRow(resultSet, 0);
 
     assertThat(result).isNotNull();
     assertThat(result.getPersonId()).isEqualTo(123L);
     assertThat(result.getTrustId()).isEqualTo(456L);
+    assertThat(result.getStatus()).isEqualTo("ACTIVE");
+  }
+
+  @Test
+  void shouldMapNullStatusWhenResultSetValueIsNull() throws SQLException {
+    when(resultSet.getLong("personId")).thenReturn(123L);
+    when(resultSet.getLong("trustId")).thenReturn(456L);
+    when(resultSet.getString("status")).thenReturn(null);
+
+    PersonTrustDto result = rowMapper.mapRow(resultSet, 0);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getPersonId()).isEqualTo(123L);
+    assertThat(result.getTrustId()).isEqualTo(456L);
+    assertThat(result.getStatus()).isNull();
   }
 }
