@@ -3,6 +3,7 @@ package com.transformuk.hee.tis.tcs.service.mapper;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,11 +37,11 @@ class PersonTrustRowMapperTest {
     assertThat(result).isNotNull();
     assertThat(result.getPersonId()).isEqualTo(123L);
     assertThat(result.getTrustId()).isEqualTo(456L);
-    assertThat(result.getStatus()).isEqualTo("ACTIVE");
+    assertThat(result.getStatus()).isEqualTo(PersonTrustStatus.ACTIVE);
   }
 
   @Test
-  void shouldMapNullStatusWhenResultSetValueIsNull() throws SQLException {
+  void shouldMapPersonTrustFromResultSetWhenStatusIsNull() throws SQLException {
     when(resultSet.getLong("personId")).thenReturn(123L);
     when(resultSet.getLong("trustId")).thenReturn(456L);
     when(resultSet.getString("status")).thenReturn(null);

@@ -1,31 +1,56 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright 2026 Crown Copyright (NHS England)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.transformuk.hee.tis.tcs.service.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
+import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
+import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
+import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
+import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class PersonElasticSearchServiceTest {
+
+  private static final Long PERSON_ID_1 = 100L;
+  private static final Long PERSON_ID_2 = 200L;
 
   @Mock
   private PersonElasticSearchRepository personElasticSearchRepository;
@@ -33,68 +58,58 @@ class PersonElasticSearchServiceTest {
   private SqlQuerySupplier sqlQuerySupplier;
   @Mock
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
+  @Mock
+  private Set<RoleBasedFilterStrategy> roleBasedFilterStrategies;
+  @Mock
+  private PersonViewDecorator personViewDecorator;
+  @Mock
+  private PermissionService permissionService;
+  @InjectMocks
   private PersonElasticSearchService service;
 
-  @BeforeEach
-  void setUp() {
-    service = new PersonElasticSearchService();
-    ReflectionTestUtils.setField(service, "personElasticSearchRepository", personElasticSearchRepository);
-    ReflectionTestUtils.setField(service, "sqlQuerySupplier", sqlQuerySupplier);
-    ReflectionTestUtils.setField(service, "namedParameterJdbcTemplate", namedParameterJdbcTemplate);
-    ReflectionTestUtils.setField(service, "roleBasedFilterStrategies", Collections.emptySet());
+  @Test
+  void updateDocumentWithTrustDataShouldGroupTrustsByPersonId() {
+    PersonView person1 = new PersonView();
+    person1.setPersonId(PERSON_ID_1);
+
+    PersonView person2 = new PersonView();
+    person2.setPersonId(PERSON_ID_2);
+
+    PersonTrustDto activeTrust = new PersonTrustDto();
+    activeTrust.setPersonId(PERSON_ID_1);
+    activeTrust.setTrustId(1L);
+    activeTrust.setStatus(PersonTrustStatus.ACTIVE);
+
+    PersonTrustDto inactiveTrust = new PersonTrustDto();
+    inactiveTrust.setPersonId(PERSON_ID_1);
+    inactiveTrust.setTrustId(2L);
+    inactiveTrust.setStatus(PersonTrustStatus.INACTIVE);
+
+    PersonTrustDto otherTrust = new PersonTrustDto();
+    otherTrust.setPersonId(PERSON_ID_2);
+    otherTrust.setTrustId(3L);
+    otherTrust.setStatus(PersonTrustStatus.ACTIVE);
+
+    when(namedParameterJdbcTemplate.query(anyString(), any(MapSqlParameterSource.class),
+        any(RowMapper.class))).thenReturn(Arrays.asList(activeTrust, inactiveTrust, otherTrust));
+
+    service.updateDocumentWithTrustData(Arrays.asList(person1, person2));
+
+    assertThat(person1.getTrusts()).containsExactlyInAnyOrder(activeTrust, inactiveTrust);
+    assertThat(person2.getTrusts()).containsExactly(otherTrust);
   }
 
   @Test
-  void shouldAddActiveTrustStatusFilterWhenRequested() {
-    PersonView personView = new PersonView();
-    personView.setProgrammeMemberships(Collections.emptySet());
+  void updateDocumentWithTrustDataShouldSetEmptyTrustSetWhenNoTrustDataExists() {
+    PersonView person = new PersonView();
+    person.setPersonId(PERSON_ID_1);
 
-    Pageable pageable = PageRequest.of(0, 10);
-    when(personElasticSearchRepository.search(any(QueryBuilder.class), eq(pageable)))
-        .thenReturn(new PageImpl<>(List.of(personView), pageable, 1L));
+    when(namedParameterJdbcTemplate.query(anyString(), any(MapSqlParameterSource.class),
+        any(RowMapper.class))).thenReturn(Collections.emptyList());
 
-    service.searchForPage(null, Collections.emptyList(), pageable, "ACTIVE");
+    service.updateDocumentWithTrustData(Collections.singletonList(person));
 
-    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
-    verify(personElasticSearchRepository).search(queryCaptor.capture(), eq(pageable));
-
-    assertThat(queryCaptor.getValue().toString()).contains("status");
-    assertThat(queryCaptor.getValue().toString()).contains("ACTIVE");
-  }
-
-  @Test
-  void shouldNotAddActiveTrustStatusFilterByDefault() {
-    PersonView personView = new PersonView();
-    personView.setProgrammeMemberships(Collections.emptySet());
-
-    Pageable pageable = PageRequest.of(0, 10);
-    when(personElasticSearchRepository.search(any(QueryBuilder.class), eq(pageable)))
-        .thenReturn(new PageImpl<>(List.of(personView), pageable, 1L));
-
-    service.searchForPage(null, Collections.emptyList(), pageable, null);
-
-    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
-    verify(personElasticSearchRepository).search(queryCaptor.capture(), eq(pageable));
-
-    assertThat(queryCaptor.getValue().toString()).doesNotContain("ACTIVE");
-  }
-
-  @Test
-  void shouldIgnoreInvalidTrustStatusFilter() {
-    PersonView personView = new PersonView();
-    personView.setProgrammeMemberships(Collections.emptySet());
-
-    Pageable pageable = PageRequest.of(0, 10);
-    when(personElasticSearchRepository.search(any(QueryBuilder.class), eq(pageable)))
-        .thenReturn(new PageImpl<>(List.of(personView), pageable, 1L));
-
-    service.searchForPage(null, Collections.emptyList(), pageable, "NOT_A_VALID_STATUS");
-
-    ArgumentCaptor<QueryBuilder> queryCaptor = ArgumentCaptor.forClass(QueryBuilder.class);
-    verify(personElasticSearchRepository).search(queryCaptor.capture(), eq(pageable));
-
-    assertThat(queryCaptor.getValue().toString()).doesNotContain("NOT_A_VALID_STATUS");
-    assertThat(queryCaptor.getValue().toString()).doesNotContain("ACTIVE");
+    assertThat(person.getTrusts()).isNotNull();
+    assertThat(person.getTrusts()).isEmpty();
   }
 }
