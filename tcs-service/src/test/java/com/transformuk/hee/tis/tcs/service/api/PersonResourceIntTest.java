@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -89,6 +90,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -1295,5 +1299,27 @@ public class PersonResourceIntTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @Transactional
+  void getAllPeopleWithPersonTrustStatusFilter() throws Exception {
+    PersonViewDTO personViewDTO = new PersonViewDTO();
+    personViewDTO.setId(person.getId());
+    personViewDTO.setForenames(PERSON_FORENAMES);
+    personViewDTO.setSurname(PERSON_SURNAME);
+
+    Page<PersonViewDTO> page = new PageImpl<>(
+        Collections.singletonList(personViewDTO), PageRequest.of(0, 10), 1);
+
+    when(personElasticSearchServiceMock.searchForPage(eq(""), any(), any(), eq("ACTIVE")))
+        .thenReturn(page);
+
+    restPersonMockMvc.perform(get("/api/people?sort=id,desc&personTrustStatus=ACTIVE&enableES=true"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(jsonPath("$.[*].id").value(hasItem(person.getId().intValue())))
+        .andExpect(jsonPath("$.[*].forenames").value(hasItem(PERSON_FORENAMES)))
+        .andExpect(jsonPath("$.[*].surname").value(hasItem(PERSON_SURNAME)));
   }
 }
