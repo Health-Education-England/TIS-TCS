@@ -1,34 +1,27 @@
 package com.transformuk.hee.tis.tcs.service.job.person;
 
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import java.io.Serializable;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
 
+/**
+ * A DTO to hold the personId, trustId and status of a person-trust relationship.
+ */
+@Setter
+@Getter
 public class PersonTrustDto implements Serializable {
 
   private Long personId;
   private Long trustId;
+  private PersonTrustStatus status;
 
   public PersonTrustDto() {
   }
 
   public PersonTrustDto(Long personId, Long trustId) {
     this.personId = personId;
-    this.trustId = trustId;
-  }
-
-  public Long getPersonId() {
-    return personId;
-  }
-
-  public void setPersonId(Long personId) {
-    this.personId = personId;
-  }
-
-  public Long getTrustId() {
-    return trustId;
-  }
-
-  public void setTrustId(Long trustId) {
     this.trustId = trustId;
   }
 
@@ -41,12 +34,13 @@ public class PersonTrustDto implements Serializable {
       return false;
     }
     PersonTrustDto that = (PersonTrustDto) o;
-    return Objects.equals(personId, that.personId) &&
-        Objects.equals(trustId, that.trustId);
+    return Objects.equals(personId, that.personId)
+        && Objects.equals(trustId, that.trustId)
+        && Objects.equals(status, that.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(personId, trustId);
+    return Objects.hash(personId, trustId, status);
   }
 }
