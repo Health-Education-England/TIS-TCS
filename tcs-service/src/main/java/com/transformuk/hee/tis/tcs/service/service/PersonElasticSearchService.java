@@ -56,6 +56,7 @@ import org.springframework.stereotype.Component;
 public class PersonElasticSearchService {
 
   public static final String CURRENT_STATUS = "CURRENT";
+  private static final String TRUST_ID_FIELD = "trusts.trustId";
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
   private static final String PERSON_TRUST_QUERY =
       "SELECT personId, trustId, status FROM PersonTrust WHERE personId IN (:personIds)";
@@ -115,15 +116,18 @@ public class PersonElasticSearchService {
 
       PersonTrustStatus trustStatus = EnumUtils.getEnum(PersonTrustStatus.class,
           personTrustStatus);
-      if (trustStatus == PersonTrustStatus.ACTIVE) {
+
+      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
+      Set<String> appliedFilters = applyRoleBasedFilters(columnFilters,
+          mustBetweenDifferentColumnFilters, trustStatus);
+
+      // trust users already have the status combined with their trust ids in the role based filter
+      if (trustStatus == PersonTrustStatus.ACTIVE && !appliedFilters.contains(TRUST_ID_FIELD)) {
         // nested query matches the person if at least one trust has status ACTIVE
         mustBetweenDifferentColumnFilters.must(nestedQuery("trusts",
             new MatchQueryBuilder("trusts.status", PersonTrustStatus.ACTIVE.name()),
             ScoreMode.None));
       }
-
-      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
-      Set<String> appliedFilters = applyRoleBasedFilters(columnFilters, mustBetweenDifferentColumnFilters);
       if (CollectionUtils.isNotEmpty(columnFilters)) {
         for (ColumnFilter columnFilter : columnFilters) {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
@@ -238,12 +242,12 @@ public class PersonElasticSearchService {
    * @return
    */
   private Set<String> applyRoleBasedFilters(List<ColumnFilter> columnFilters,
-      BoolQueryBuilder mustBetweenDifferentColumnFilters) {
+      BoolQueryBuilder mustBetweenDifferentColumnFilters, PersonTrustStatus trustStatus) {
     //find if there are any strategies based off roles need executing
     Set<String> appliedFilters = Sets.newHashSet();
     for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
       Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy
-          .getFilter(columnFilters);
+          .getFilter(columnFilters, trustStatus);
       if (nameToFilterOptionalTuple.isPresent()) {
         Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
         appliedFilters.add(nameToFilterTuple.v1());
