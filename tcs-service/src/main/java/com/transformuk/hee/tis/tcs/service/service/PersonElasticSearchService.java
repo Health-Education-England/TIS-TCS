@@ -117,7 +117,6 @@ public class PersonElasticSearchService {
       PersonTrustStatus trustStatus = EnumUtils.getEnum(PersonTrustStatus.class,
           personTrustStatus);
 
-      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
       Set<String> appliedFilters = applyRoleBasedFilters(columnFilters,
           mustBetweenDifferentColumnFilters, trustStatus);
 
@@ -174,6 +173,8 @@ public class PersonElasticSearchService {
       pageable = replaceSortByIdHack(pageable);
 
       Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
+
+      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
 
       return new PageImpl<>(
           convertPersonViewToDTO(result.getContent(), programmeMembershipStatusFilter), pageable,
