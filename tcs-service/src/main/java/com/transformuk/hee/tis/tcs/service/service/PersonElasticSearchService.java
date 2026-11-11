@@ -116,8 +116,9 @@ public class PersonElasticSearchService {
       PersonTrustStatus trustStatus = EnumUtils.getEnum(PersonTrustStatus.class,
           personTrustStatus);
       if (trustStatus == PersonTrustStatus.ACTIVE) {
+        // nested query matches the person if at least one trust has status ACTIVE
         mustBetweenDifferentColumnFilters.must(nestedQuery("trusts",
-            new TermQueryBuilder("trusts.status", PersonTrustStatus.ACTIVE.name()),
+            new MatchQueryBuilder("trusts.status", PersonTrustStatus.ACTIVE.name()),
             ScoreMode.None));
       }
 
