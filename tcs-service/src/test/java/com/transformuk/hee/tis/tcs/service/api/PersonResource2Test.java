@@ -323,6 +323,34 @@ public class PersonResource2Test {
         .andExpect(jsonPath("$.content.[0].programmeId").value(1));
   }
 
+  @Test
+  public void getAllPeopleShouldPassPersonTrustStatusToElasticSearchService() throws Exception {
+    Page<PersonViewDTO> searchResults = new PageImpl<>(new ArrayList<>(), PageRequest.of(0, 20),
+        0);
+    when(personElasticSearchServiceMock.searchForPage(any(), any(), any(), eq("ACTIVE")))
+        .thenReturn(searchResults);
+
+    mockMvc.perform(get("/api/people?enableES=true&personTrustStatus=ACTIVE")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(personElasticSearchServiceMock).searchForPage(any(), any(), any(), eq("ACTIVE"));
+  }
+
+  @Test
+  public void getAllPeopleShouldPassNullPersonTrustStatusWhenNotProvided() throws Exception {
+    Page<PersonViewDTO> searchResults = new PageImpl<>(new ArrayList<>(), PageRequest.of(0, 20),
+        0);
+    when(personElasticSearchServiceMock.searchForPage(any(), any(), any(), eq(null)))
+        .thenReturn(searchResults);
+
+    mockMvc.perform(get("/api/people?enableES=true")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(personElasticSearchServiceMock).searchForPage(any(), any(), any(), eq(null));
+  }
+
 //  @Test
 //  public void shouldPerformValidationOnPersonCreate() {
 //    mockMvc.perform(post("/api/person"))

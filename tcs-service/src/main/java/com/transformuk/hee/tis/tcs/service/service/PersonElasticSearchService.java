@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.collect.Tuple;
@@ -104,12 +106,20 @@ public class PersonElasticSearchService {
   }
 
   public Page<PersonViewDTO> searchForPage(String searchQuery,
-      List<ColumnFilter> columnFilters, Pageable pageable) {
+      List<ColumnFilter> columnFilters, Pageable pageable, String personTrustStatus) {
 
     try {
       // iterate over the column filters, if they have multiple values per filter, place a should between then
       // for each column filter set, place a must between them
       BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
+
+      PersonTrustStatus trustStatus = EnumUtils.getEnum(PersonTrustStatus.class,
+          personTrustStatus);
+      if (trustStatus == PersonTrustStatus.ACTIVE) {
+        mustBetweenDifferentColumnFilters.must(nestedQuery("trusts",
+            new TermQueryBuilder("trusts.status", PersonTrustStatus.ACTIVE.name()),
+            ScoreMode.None));
+      }
 
       ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
       Set<String> appliedFilters = applyRoleBasedFilters(columnFilters, mustBetweenDifferentColumnFilters);
