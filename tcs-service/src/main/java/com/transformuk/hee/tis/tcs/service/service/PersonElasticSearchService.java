@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.ProgrammeMembershipStatus;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.collect.Tuple;
@@ -104,15 +106,19 @@ public class PersonElasticSearchService {
   }
 
   public Page<PersonViewDTO> searchForPage(String searchQuery,
-      List<ColumnFilter> columnFilters, Pageable pageable) {
+      List<ColumnFilter> columnFilters, Pageable pageable, String personTrustStatus) {
 
     try {
       // iterate over the column filters, if they have multiple values per filter, place a should between then
       // for each column filter set, place a must between them
       BoolQueryBuilder mustBetweenDifferentColumnFilters = new BoolQueryBuilder();
 
-      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
-      Set<String> appliedFilters = applyRoleBasedFilters(columnFilters, mustBetweenDifferentColumnFilters);
+      PersonTrustStatus trustStatus = EnumUtils.getEnum(PersonTrustStatus.class,
+          personTrustStatus);
+
+      Set<String> appliedFilters = applyRoleBasedFilters(columnFilters,
+          mustBetweenDifferentColumnFilters, trustStatus);
+
       if (CollectionUtils.isNotEmpty(columnFilters)) {
         for (ColumnFilter columnFilter : columnFilters) {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();
@@ -159,6 +165,8 @@ public class PersonElasticSearchService {
       pageable = replaceSortByIdHack(pageable);
 
       Page<PersonView> result = personElasticSearchRepository.search(fullQuery, pageable);
+
+      ProgrammeMembershipStatus programmeMembershipStatusFilter = ProgrammeMembershipStatus.CURRENT;
 
       return new PageImpl<>(
           convertPersonViewToDTO(result.getContent(), programmeMembershipStatusFilter), pageable,
@@ -227,12 +235,12 @@ public class PersonElasticSearchService {
    * @return
    */
   private Set<String> applyRoleBasedFilters(List<ColumnFilter> columnFilters,
-      BoolQueryBuilder mustBetweenDifferentColumnFilters) {
+      BoolQueryBuilder mustBetweenDifferentColumnFilters, PersonTrustStatus trustStatus) {
     //find if there are any strategies based off roles need executing
     Set<String> appliedFilters = Sets.newHashSet();
     for (RoleBasedFilterStrategy roleBasedFilterStrategy : roleBasedFilterStrategies) {
       Optional<Tuple<String, BoolQueryBuilder>> nameToFilterOptionalTuple = roleBasedFilterStrategy
-          .getFilter(columnFilters);
+          .getFilter(columnFilters, trustStatus);
       if (nameToFilterOptionalTuple.isPresent()) {
         Tuple<String, BoolQueryBuilder> nameToFilterTuple = nameToFilterOptionalTuple.get();
         appliedFilters.add(nameToFilterTuple.v1());

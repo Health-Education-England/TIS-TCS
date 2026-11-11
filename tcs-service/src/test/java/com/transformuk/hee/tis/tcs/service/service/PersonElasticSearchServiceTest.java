@@ -23,7 +23,11 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
@@ -36,12 +40,25 @@ import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
+import org.elasticsearch.common.collect.Tuple;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -51,6 +68,9 @@ class PersonElasticSearchServiceTest {
 
   private static final Long PERSON_ID_1 = 100L;
   private static final Long PERSON_ID_2 = 200L;
+
+  @Captor
+  ArgumentCaptor<QueryBuilder> queryBuilderArgumentCaptor;
 
   @Mock
   private PersonElasticSearchRepository personElasticSearchRepository;
@@ -111,5 +131,41 @@ class PersonElasticSearchServiceTest {
 
     assertThat(person.getTrusts()).isNotNull();
     assertThat(person.getTrusts()).isEmpty();
+  }
+
+
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {"ACTIVE", "INACTIVE", "", "notAStatus"})
+  void searchForPageShouldNotAddTrustStatusQueryWhenNoRoleBasedTrustFilter(
+      String personTrustStatus) {
+    Pageable pageable = PageRequest.of(0, 20);
+    when(personElasticSearchRepository.search(queryBuilderArgumentCaptor.capture(), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
+    when(roleBasedFilterStrategies.iterator()).thenReturn(Collections.emptyIterator());
+
+    service.searchForPage(null, Collections.emptyList(), pageable, personTrustStatus);
+
+    String query = queryBuilderArgumentCaptor.getValue().toString();
+    assertThat(query).doesNotContain("\"trusts.status\"");
+  }
+
+  @Test
+  void searchForPageShouldDelegateTrustStatusToRoleBasedTrustFilterWhenApplied() {
+    Pageable pageable = PageRequest.of(0, 20);
+    when(personElasticSearchRepository.search(queryBuilderArgumentCaptor.capture(), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
+    RoleBasedFilterStrategy trustStrategy = mock(RoleBasedFilterStrategy.class);
+    BoolQueryBuilder trustFilter = new BoolQueryBuilder().must(new MatchQueryBuilder("marker", "x"));
+    when(trustStrategy.getFilter(anyList(), eq(PersonTrustStatus.ACTIVE)))
+        .thenReturn(Optional.of(new Tuple<>("trusts.trustId", trustFilter)));
+    when(roleBasedFilterStrategies.iterator())
+        .thenReturn(Collections.singletonList(trustStrategy).iterator());
+
+    service.searchForPage(null, Collections.emptyList(), pageable, "ACTIVE");
+
+    verify(trustStrategy).getFilter(anyList(), eq(PersonTrustStatus.ACTIVE));
+    String query = queryBuilderArgumentCaptor.getValue().toString();
+    assertThat(query).contains("\"marker\"").doesNotContain("\"trusts.status\"");
   }
 }
