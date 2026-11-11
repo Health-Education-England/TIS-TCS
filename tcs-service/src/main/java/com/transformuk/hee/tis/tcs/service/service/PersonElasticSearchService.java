@@ -56,7 +56,6 @@ import org.springframework.stereotype.Component;
 public class PersonElasticSearchService {
 
   public static final String CURRENT_STATUS = "CURRENT";
-  private static final String TRUST_ID_FIELD = "trusts.trustId";
   private static final Logger LOG = LoggerFactory.getLogger(PersonElasticSearchService.class);
   private static final String PERSON_TRUST_QUERY =
       "SELECT personId, trustId, status FROM PersonTrust WHERE personId IN (:personIds)";
@@ -120,13 +119,6 @@ public class PersonElasticSearchService {
       Set<String> appliedFilters = applyRoleBasedFilters(columnFilters,
           mustBetweenDifferentColumnFilters, trustStatus);
 
-      // trust users already have the status combined with their trust ids in the role based filter
-      if (trustStatus == PersonTrustStatus.ACTIVE && !appliedFilters.contains(TRUST_ID_FIELD)) {
-        // nested query matches the person if at least one trust has status ACTIVE
-        mustBetweenDifferentColumnFilters.must(nestedQuery("trusts",
-            new MatchQueryBuilder("trusts.status", PersonTrustStatus.ACTIVE.name()),
-            ScoreMode.None));
-      }
       if (CollectionUtils.isNotEmpty(columnFilters)) {
         for (ColumnFilter columnFilter : columnFilters) {
           BoolQueryBuilder shouldBetweenSameColumnFilter = new BoolQueryBuilder();

@@ -134,23 +134,11 @@ class PersonElasticSearchServiceTest {
   }
 
 
-  @Test
-  void searchForPageShouldAddNestedTrustStatusQueryWhenActive() {
-    Pageable pageable = PageRequest.of(0, 20);
-    when(personElasticSearchRepository.search(queryBuilderArgumentCaptor.capture(), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
-    when(roleBasedFilterStrategies.iterator()).thenReturn(Collections.emptyIterator());
-
-    service.searchForPage(null, Collections.emptyList(), pageable, "ACTIVE");
-
-    String query = queryBuilderArgumentCaptor.getValue().toString();
-    assertThat(query).contains("\"trusts.status\"", "\"ACTIVE\"");
-  }
-
   @ParameterizedTest
   @NullSource
-  @ValueSource(strings = {"INACTIVE", "", "notAStatus"})
-  void searchForPageShouldNotAddTrustStatusQueryWhenNotActive(String personTrustStatus) {
+  @ValueSource(strings = {"ACTIVE", "INACTIVE", "", "notAStatus"})
+  void searchForPageShouldNotAddTrustStatusQueryWhenNoRoleBasedTrustFilter(
+      String personTrustStatus) {
     Pageable pageable = PageRequest.of(0, 20);
     when(personElasticSearchRepository.search(queryBuilderArgumentCaptor.capture(), any(Pageable.class)))
         .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
