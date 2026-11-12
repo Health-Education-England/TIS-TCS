@@ -6,7 +6,9 @@ import com.google.common.collect.Sets;
 import com.transformuk.hee.tis.security.model.Trust;
 import com.transformuk.hee.tis.tcs.TestUtils;
 import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.elasticsearch.common.collect.Tuple;
@@ -19,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 class TrustRoleBasedFilterStrategyTest {
@@ -36,26 +37,30 @@ class TrustRoleBasedFilterStrategyTest {
     SecurityContextHolder.clearContext();
   }
 
+  private static List<ColumnFilter> trustStatusFilter(PersonTrustStatus status) {
+    return Collections.singletonList(
+        new ColumnFilter("personTrustStatus", Collections.singletonList(status)));
+  }
+
   @ParameterizedTest
   @NullAndEmptySource
   void getFilterShouldReturnEmptyWhenUserHasNoTrusts(Set<Trust> assignedTrusts) {
     TestUtils.mockUserProfileWithAssociatedTrusts("user", assignedTrusts);
 
     Optional<Tuple<String, BoolQueryBuilder>> filter = strategy
-        .getFilter(Collections.emptyList(), PersonTrustStatus.ACTIVE);
+        .getFilter(trustStatusFilter(PersonTrustStatus.ACTIVE));
 
     assertThat(filter).isEmpty();
   }
 
   @ParameterizedTest
-  @NullSource
   @EnumSource(value = PersonTrustStatus.class, mode = EnumSource.Mode.EXCLUDE, names = "ACTIVE")
   void getFilterShouldNotIncludeStatusWhenNotActive(PersonTrustStatus trustStatus) {
     TestUtils.mockUserProfileWithAssociatedTrusts("user",
         Sets.newHashSet(new Trust(1L, "ABC", "Trust 1")));
 
     Optional<Tuple<String, BoolQueryBuilder>> filter = strategy
-        .getFilter(Collections.emptyList(), trustStatus);
+        .getFilter(trustStatusFilter(trustStatus));
 
     assertThat(filter).isPresent();
     assertThat(filter.get().v1()).isEqualTo("trusts.trustId");
@@ -64,12 +69,13 @@ class TrustRoleBasedFilterStrategyTest {
         .doesNotContain("\"trusts.status\"");
   }
 
-  @Test
-  void getFilterWithoutStatusShouldNotIncludeStatus() {
+  @ParameterizedTest
+  @NullAndEmptySource
+  void getFilterShouldNotIncludeStatusWhenNoTrustStatusFilter(List<ColumnFilter> columnFilters) {
     TestUtils.mockUserProfileWithAssociatedTrusts("user",
         Sets.newHashSet(new Trust(1L, "ABC", "Trust 1")));
 
-    Optional<Tuple<String, BoolQueryBuilder>> filter = strategy.getFilter(Collections.emptyList());
+    Optional<Tuple<String, BoolQueryBuilder>> filter = strategy.getFilter(columnFilters);
 
     assertThat(filter).isPresent();
     assertThat(filter.get().v2().toString()).doesNotContain("\"trusts.status\"");
@@ -81,7 +87,7 @@ class TrustRoleBasedFilterStrategyTest {
         Sets.newHashSet(new Trust(1L, "ABC", "Trust 1"), new Trust(2L, "DEF", "Trust 2")));
 
     Optional<Tuple<String, BoolQueryBuilder>> filter = strategy
-        .getFilter(Collections.emptyList(), PersonTrustStatus.ACTIVE);
+        .getFilter(trustStatusFilter(PersonTrustStatus.ACTIVE));
 
     assertThat(filter).isPresent();
     BoolQueryBuilder trustFilter = filter.get().v2();
