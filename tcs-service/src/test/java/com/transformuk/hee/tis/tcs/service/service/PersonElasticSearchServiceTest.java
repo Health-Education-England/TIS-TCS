@@ -23,9 +23,7 @@ package com.transformuk.hee.tis.tcs.service.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,12 +32,14 @@ import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonTrustDto;
 import com.transformuk.hee.tis.tcs.service.job.person.PersonView;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.PersonElasticSearchRepository;
 import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.impl.PermissionService;
 import com.transformuk.hee.tis.tcs.service.strategy.RoleBasedFilterStrategy;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.elasticsearch.common.collect.Tuple;
@@ -49,8 +49,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -86,6 +85,11 @@ class PersonElasticSearchServiceTest {
   private PermissionService permissionService;
   @InjectMocks
   private PersonElasticSearchService service;
+
+  private static List<ColumnFilter> trustStatusFilter(PersonTrustStatus status) {
+    return Collections.singletonList(
+        new ColumnFilter("personTrustStatus", Collections.singletonList(status)));
+  }
 
   @Test
   void updateDocumentWithTrustDataShouldGroupTrustsByPersonId() {
@@ -135,19 +139,18 @@ class PersonElasticSearchServiceTest {
 
 
   @ParameterizedTest
-  @NullSource
-  @ValueSource(strings = {"ACTIVE", "INACTIVE", "", "notAStatus"})
+  @EnumSource(PersonTrustStatus.class)
   void searchForPageShouldNotAddTrustStatusQueryWhenNoRoleBasedTrustFilter(
-      String personTrustStatus) {
+      PersonTrustStatus personTrustStatus) {
     Pageable pageable = PageRequest.of(0, 20);
     when(personElasticSearchRepository.search(queryBuilderArgumentCaptor.capture(), any(Pageable.class)))
         .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
     when(roleBasedFilterStrategies.iterator()).thenReturn(Collections.emptyIterator());
 
-    service.searchForPage(null, Collections.emptyList(), pageable, personTrustStatus);
+    service.searchForPage(null, trustStatusFilter(personTrustStatus), pageable);
 
     String query = queryBuilderArgumentCaptor.getValue().toString();
-    assertThat(query).doesNotContain("\"trusts.status\"");
+    assertThat(query).doesNotContain("\"trusts.status\"").doesNotContain("personTrustStatus");
   }
 
   @Test
@@ -157,15 +160,17 @@ class PersonElasticSearchServiceTest {
         .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
     RoleBasedFilterStrategy trustStrategy = mock(RoleBasedFilterStrategy.class);
     BoolQueryBuilder trustFilter = new BoolQueryBuilder().must(new MatchQueryBuilder("marker", "x"));
-    when(trustStrategy.getFilter(anyList(), eq(PersonTrustStatus.ACTIVE)))
+    List<ColumnFilter> columnFilters = trustStatusFilter(PersonTrustStatus.ACTIVE);
+    when(trustStrategy.getFilter(columnFilters))
         .thenReturn(Optional.of(new Tuple<>("trusts.trustId", trustFilter)));
     when(roleBasedFilterStrategies.iterator())
         .thenReturn(Collections.singletonList(trustStrategy).iterator());
 
-    service.searchForPage(null, Collections.emptyList(), pageable, "ACTIVE");
+    service.searchForPage(null, columnFilters, pageable);
 
-    verify(trustStrategy).getFilter(anyList(), eq(PersonTrustStatus.ACTIVE));
+    verify(trustStrategy).getFilter(columnFilters);
     String query = queryBuilderArgumentCaptor.getValue().toString();
-    assertThat(query).contains("\"marker\"").doesNotContain("\"trusts.status\"");
+    assertThat(query).contains("\"marker\"").doesNotContain("\"trusts.status\"")
+        .doesNotContain("personTrustStatus");
   }
 }

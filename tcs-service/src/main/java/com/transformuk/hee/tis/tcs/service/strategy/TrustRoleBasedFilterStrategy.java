@@ -24,29 +24,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
 
+  public static final String TRUST_STATUS_COLUMN_FILTER = "personTrustStatus";
   private static final String COLUMN_FILTER = "trusts.trustId";
   private static final String STATUS_FIELD = "trusts.status";
 
-  @Override
-  public Optional<Tuple<String, BoolQueryBuilder>> getFilter(List<ColumnFilter> columnFilters) {
-    return getFilter(columnFilters, null);
-  }
-
   /**
    * If the user has assigned trusts, match people with at least one of those trusts. When the
-   * requested trust status is ACTIVE, the status must match on that same trust entry.
+   * personTrustStatus column filter contains ACTIVE, the status must match on that same trust
+   * entry.
    */
   @Override
-  public Optional<Tuple<String, BoolQueryBuilder>> getFilter(List<ColumnFilter> columnFilters,
-      PersonTrustStatus trustStatus) {
+  public Optional<Tuple<String, BoolQueryBuilder>> getFilter(List<ColumnFilter> columnFilters) {
     UserProfile currentUserProfile = TisSecurityHelper.getProfileFromContext();
     Set<Trust> assignedTrusts = currentUserProfile.getAssignedTrusts();
     if (CollectionUtils.isNotEmpty(assignedTrusts)) {
+      boolean filterActive = containsActiveFilter(columnFilters);
       BoolQueryBuilder trustRoleFilter = new BoolQueryBuilder();
       assignedTrusts.forEach(t -> {
         BoolQueryBuilder trustQuery = new BoolQueryBuilder()
             .must(new MatchQueryBuilder(COLUMN_FILTER, t.getId()));
-        if (trustStatus == PersonTrustStatus.ACTIVE) {
+        if (filterActive) {
           trustQuery.must(new MatchQueryBuilder(STATUS_FIELD, PersonTrustStatus.ACTIVE.name()));
         }
         trustRoleFilter.should(new NestedQueryBuilder("trusts", trustQuery, ScoreMode.None));
@@ -54,5 +51,12 @@ public class TrustRoleBasedFilterStrategy implements RoleBasedFilterStrategy {
       return Optional.of(new Tuple<>(COLUMN_FILTER, trustRoleFilter));
     }
     return Optional.empty();
+  }
+
+  private static boolean containsActiveFilter(List<ColumnFilter> columnFilters) {
+    return columnFilters != null && columnFilters.stream()
+        .filter(cf -> TRUST_STATUS_COLUMN_FILTER.equals(cf.getName()))
+        .anyMatch(cf -> cf.getValues() != null
+            && cf.getValues().contains(PersonTrustStatus.ACTIVE));
   }
 }

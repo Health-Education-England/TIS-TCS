@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PlacementSummaryDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PlacementViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Update;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementSummaryDecorator;
@@ -126,7 +127,7 @@ public class PersonResource {
    *
    * @param personDto the personDto to create
    * @return the ResponseEntity with status 201 (Created) and with body the new personDto, or with
-   *     status 400 (Bad Request) if the person has already an ID
+   * status 400 (Bad Request) if the person has already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/people")
@@ -137,8 +138,8 @@ public class PersonResource {
     log.debug("REST request to save Person : {}", personDto);
     if (personDto.getId() != null) {
       return ResponseEntity.badRequest().headers(
-          HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists",
-              "A new person cannot already have an ID"))
+              HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists",
+                  "A new person cannot already have an ID"))
           .body(null);
     }
     personValidator.validate(personDto, null, Create.class);
@@ -159,8 +160,8 @@ public class PersonResource {
    *
    * @param personDto the personDto to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated personDto, or with
-   *     status 400 (Bad Request) if the personDto is not valid, or with status 500 (Internal Server
-   *     Error) if the personDto couldn't be updated
+   * status 400 (Bad Request) if the personDto is not valid, or with status 500 (Internal Server
+   * Error) if the personDto couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/people")
@@ -205,23 +206,21 @@ public class PersonResource {
       final Pageable pageable,
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
       @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
-      @RequestParam(required = false, defaultValue = "false") boolean enableES,
-      @RequestParam(value = "personTrustStatus", required = false) String personTrustStatus)
+      @RequestParam(required = false, defaultValue = "false") boolean enableES)
       throws IOException {
 
     log.debug("REST request to get a page of People begin");
     searchQuery = getConverter(searchQuery).fromJson().decodeUrl().escapeForSql().toString();
     String searchQueryES = getConverter(searchQuery).fromJson().decodeUrl().escapeForElasticSearch()
         .toString();
-    final List<Class> filterEnumList = Lists.newArrayList(Status.class);
+    final List<Class> filterEnumList = Lists.newArrayList(Status.class, PersonTrustStatus.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
     final Page<PersonViewDTO> page;
 
     //feature flag to enable es, allow the enabling from the FE
     if (enableEsSearch || enableES) {
-      page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable,
-          personTrustStatus);
+      page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
     } else {
       if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
         page = personService.findAll(pageable);
@@ -309,7 +308,7 @@ public class PersonResource {
    *
    * @param ids the ids to search by
    * @return the ResponseEntity with status 200 (OK)  and the list of personBasicDetails in body, or
-   *     empty list
+   * empty list
    */
   @GetMapping("/people/in/{ids}/basic")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -344,7 +343,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   *     (Not Found)
+   * (Not Found)
    */
   @GetMapping("/people/{id}")
   @PreAuthorize("hasRole('ETL') or hasPermission('tis:people::person:', 'View')")
@@ -364,7 +363,7 @@ public class PersonResource {
    *
    * @param id the id of the personDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the personDTO, or with status 404
-   *     (Not Found)
+   * (Not Found)
    */
   @GetMapping("/people/v2/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")

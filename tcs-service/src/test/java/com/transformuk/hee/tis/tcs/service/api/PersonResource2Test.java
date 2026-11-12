@@ -2,6 +2,7 @@ package com.transformuk.hee.tis.tcs.service.api;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -19,6 +20,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
+import com.transformuk.hee.tis.tcs.api.enumeration.PersonTrustStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.decorator.PersonViewDecorator;
@@ -324,31 +326,23 @@ public class PersonResource2Test {
   }
 
   @Test
-  public void getAllPeopleShouldPassPersonTrustStatusToElasticSearchService() throws Exception {
+  public void getAllPeopleShouldParsePersonTrustStatusColumnFilterAsEnum() throws Exception {
     Page<PersonViewDTO> searchResults = new PageImpl<>(new ArrayList<>(), PageRequest.of(0, 20),
         0);
-    when(personElasticSearchServiceMock.searchForPage(any(), any(), any(), eq("ACTIVE")))
+    when(personElasticSearchServiceMock.searchForPage(any(), any(), any()))
         .thenReturn(searchResults);
 
-    mockMvc.perform(get("/api/people?enableES=true&personTrustStatus=ACTIVE")
+    mockMvc.perform(get("/api/people?enableES=true&columnFilters={columnFilters}",
+        "{\"personTrustStatus\":[\"ACTIVE\"]}")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(personElasticSearchServiceMock).searchForPage(any(), any(), any(), eq("ACTIVE"));
-  }
-
-  @Test
-  public void getAllPeopleShouldPassNullPersonTrustStatusWhenNotProvided() throws Exception {
-    Page<PersonViewDTO> searchResults = new PageImpl<>(new ArrayList<>(), PageRequest.of(0, 20),
-        0);
-    when(personElasticSearchServiceMock.searchForPage(any(), any(), any(), eq(null)))
-        .thenReturn(searchResults);
-
-    mockMvc.perform(get("/api/people?enableES=true")
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(personElasticSearchServiceMock).searchForPage(any(), any(), any(), eq(null));
+    verify(personElasticSearchServiceMock).searchForPage(any(),
+        argThat(cfs -> cfs.stream().anyMatch(
+            cf -> "personTrustStatus".equals(cf.getName())
+                && cf.getValues().contains(
+                PersonTrustStatus.ACTIVE))),
+        any());
   }
 
 //  @Test
