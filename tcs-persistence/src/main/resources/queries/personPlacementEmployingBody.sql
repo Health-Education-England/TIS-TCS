@@ -18,7 +18,8 @@ LEFT JOIN Post po
   ON po.id = pl.postId
 
 WHERE po.employingBodyId IS NOT NULL
+  AND p.id >= :lastId
+  AND (p.id > :lastId OR po.employingBodyId > :lastEmployingBodyId)
 GROUP BY p.id, po.employingBodyId
-HAVING (p.id, po.employingBodyId) > (:lastId, :lastEmployingBodyId)
 ORDER BY p.id ASC, po.employingBodyId ASC
 LIMIT :pageSize
