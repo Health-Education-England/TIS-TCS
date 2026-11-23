@@ -841,7 +841,8 @@ public class PostServiceImpl implements PostService {
           case "fundingType":
             whereClause.append(" AND EXISTS (SELECT 1 FROM PostFunding pf ")
                 .append("WHERE pf.postId = p.id AND pf.fundingTypeId in (:fundingTypeList) ")
-                .append("AND (curdate() BETWEEN pf.startDate AND pf.endDate OR pf.endDate IS NULL))");
+                .append("AND (curdate() BETWEEN pf.startDate AND pf.endDate "
+                    + "OR pf.endDate IS NULL))");
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
@@ -850,12 +851,11 @@ public class PostServiceImpl implements PostService {
       });
     }
     if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" AND (nationalPostNumber LIKE :searchString " +
-          "OR EXISTS (SELECT 1 FROM ProgrammePost pp " +
-          "JOIN Programme prg ON prg.id = pp.programmeId " +
-          "WHERE pp.postId = p.id AND prg.programmeName LIKE :searchString) " +
-          "OR surnames LIKE :searchString " +
-          "OR forenames LIKE :searchString ) ");
+      whereClause.append(" AND (nationalPostNumber LIKE :searchString "
+          + "OR EXISTS (SELECT 1 FROM ProgrammePost pp "
+          + "JOIN Programme prg ON prg.id = pp.programmeId "
+          + "WHERE pp.postId = p.id AND prg.programmeName LIKE :searchString) "
+          + "OR forenames LIKE :searchString ) ");
     }
     return whereClause.toString();
   }
