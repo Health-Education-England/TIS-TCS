@@ -855,6 +855,7 @@ public class PostServiceImpl implements PostService {
           + "OR EXISTS (SELECT 1 FROM ProgrammePost pp "
           + "JOIN Programme prg ON prg.id = pp.programmeId "
           + "WHERE pp.postId = p.id AND prg.programmeName LIKE :searchString) "
+          + "OR surnames LIKE :searchString "
           + "OR forenames LIKE :searchString ) ");
     }
     return whereClause.toString();
