@@ -540,7 +540,10 @@ class PostElasticSearchServiceTest {
     postElasticSearchService.updatePostDocumentsForProgramme(PROGRAMME_ID);
 
     verify(namedParameterJdbcTemplate).query(
-        eq("SELECT * FROM post_view WHERE prg.id=:id ORDER BY id DESC "),
+        eq("SELECT * FROM post_view WHERE EXISTS (SELECT 1\n"
+            + "              FROM `ProgrammePost` pp2\n"
+            + "              WHERE pp2.`postId` = p.`id`\n"
+            + "              AND pp2.`programmeId` = :id) ORDER BY id DESC "),
         paramSourceCaptor.capture(),
         any(PostViewRowMapper.class));
     assertEquals(PROGRAMME_ID, paramSourceCaptor.getValue().getValue("id"));
@@ -559,7 +562,10 @@ class PostElasticSearchServiceTest {
     postElasticSearchService.updatePostDocumentsForProgramme(PROGRAMME_ID);
 
     verify(namedParameterJdbcTemplate).query(
-        eq("SELECT * FROM post_view WHERE prg.id=:id ORDER BY id DESC "),
+        eq("SELECT * FROM post_view WHERE EXISTS (SELECT 1\n"
+            + "              FROM `ProgrammePost` pp2\n"
+            + "              WHERE pp2.`postId` = p.`id`\n"
+            + "              AND pp2.`programmeId` = :id) ORDER BY id DESC "),
         paramSourceCaptor.capture(),
         any(PostViewRowMapper.class));
     assertEquals(PROGRAMME_ID, paramSourceCaptor.getValue().getValue("id"));

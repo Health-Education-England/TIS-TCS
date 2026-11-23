@@ -395,9 +395,9 @@ public class PostElasticSearchService {
   public void updatePostDocumentsForProgramme(Long programmeId) {
     Preconditions.checkNotNull(programmeId, "Programme Id cannot be null");
     String query = getQuery()
-        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE p.`id` IN (SELECT pp2.`postId`\n"
-            + "                 FROM `ProgrammePost` pp2\n"
-            + "                 WHERE pp2.`programmeId` = :id)");
+        .replace(WHERE_CLAUSE_PLACEHOLDER, "WHERE EXISTS (SELECT 1 "
+            + "FROM `ProgrammePost` pp2 "
+            + "WHERE pp2.`postId` = p.`id` AND pp2.`programmeId` = :id)");
 
     List<PostView> postViews = runQuery(query, programmeId);
     saveDocuments(postViews);

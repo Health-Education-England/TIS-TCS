@@ -531,12 +531,14 @@ public class PostServiceImpl implements PostService {
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
     String whereClause = " WHERE 1=1 ";
     if (permissionService.isUserTrustAdmin()) {
-      whereClause = whereClause + "AND trustId in (:trustList) ";
+      whereClause = whereClause + "AND EXISTS (SELECT 1 FROM PostTrust pt "
+          + "WHERE pt.postId = p.id AND pt.trustId in (:trustList)) ";
       paramSource.addValue("trustList", permissionService.getUsersTrustIds());
     }
 
     if (permissionService.isProgrammeObserver()) {
-      whereClause = whereClause + "AND pp.programmeId in (:programmesList) ";
+      whereClause = whereClause + "AND EXISTS (SELECT 1 FROM ProgrammePost pp "
+          + "WHERE pp.postId = p.id AND pp.programmeId in (:programmesList)) ";
       paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
     }
 
@@ -573,7 +575,8 @@ public class PostServiceImpl implements PostService {
     String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
 
     if (permissionService.isProgrammeObserver()) {
-      whereClause = whereClause + "AND pp.programmeId in (:programmesList) ";
+      whereClause = whereClause + "AND EXISTS (SELECT 1 FROM ProgrammePost pp "
+          + "WHERE pp.postId = p.id AND pp.programmeId in (:programmesList)) ";
       paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
     }
 
@@ -793,7 +796,8 @@ public class PostServiceImpl implements PostService {
     final StringBuilder whereClause = new StringBuilder();
     whereClause.append(" WHERE 1=1 ");
     if (permissionService.isUserTrustAdmin()) {
-      whereClause.append("AND trustId in (:trustList) ");
+      whereClause.append("AND EXISTS (SELECT 1 FROM PostTrust pt ")
+          .append("WHERE pt.postId = p.id AND pt.trustId in (:trustList)) ");
     }
     //add the column filters criteria
     if (columnFilters != null && !columnFilters.isEmpty()) {
@@ -815,7 +819,9 @@ public class PostServiceImpl implements PostService {
             whereClause.append(" AND name in (:nameList)");
             break;
           case "programmeNames":
-            whereClause.append(" AND programmeName in (:programmeNameList)");
+            whereClause.append(" AND EXISTS (SELECT 1 FROM ProgrammePost pp ")
+                .append("JOIN Programme prg ON prg.id = pp.programmeId ")
+                .append("WHERE pp.postId = p.id AND prg.programmeName in (:programmeNameList))");
             break;
           case "nationalPostNumber":
             whereClause.append(" AND nationalPostNumber in (:nationalPostNumberList)");
@@ -833,7 +839,9 @@ public class PostServiceImpl implements PostService {
             whereClause.append(" AND pg.gradeId in (:gradeIdList)");
             break;
           case "fundingType":
-            whereClause.append(" AND pf.fundingType in (:fundingTypeList)");
+            whereClause.append(" AND EXISTS (SELECT 1 FROM PostFunding pf ")
+                .append("WHERE pf.postId = p.id AND pf.fundingTypeId in (:fundingTypeList) ")
+                .append("AND (curdate() BETWEEN pf.startDate AND pf.endDate OR pf.endDate IS NULL))");
             break;
           default:
             throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
@@ -843,7 +851,9 @@ public class PostServiceImpl implements PostService {
     }
     if (StringUtils.isNotEmpty(searchString)) {
       whereClause.append(" AND (nationalPostNumber LIKE :searchString " +
-          "OR programmeName LIKE :searchString " +
+          "OR EXISTS (SELECT 1 FROM ProgrammePost pp " +
+          "JOIN Programme prg ON prg.id = pp.programmeId " +
+          "WHERE pp.postId = p.id AND prg.programmeName LIKE :searchString) " +
           "OR surnames LIKE :searchString " +
           "OR forenames LIKE :searchString ) ");
     }
@@ -862,7 +872,7 @@ public class PostServiceImpl implements PostService {
       columnFilters.forEach(cf -> {
         switch (cf.getName()) {
           case "programmeName":
-            paramSource.addValue("surnameList", cf.getValues());
+            paramSource.addValue("programmeNameList", cf.getValues());
             break;
           case "currentTraineeSurname":
             paramSource.addValue("surnameList", cf.getValues());

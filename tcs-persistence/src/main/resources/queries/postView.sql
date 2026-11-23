@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-SELECT p.`id`                         AS `id`,
+SELECT DISTINCT p.`id`                AS `id`,
        pg.`gradeId`                   AS `approvedGradeId`,
        ps.`specialtyId`               AS `primarySpecialtyId`,
        sp.`specialtyCode`             AS `primarySpecialtyCode`,
