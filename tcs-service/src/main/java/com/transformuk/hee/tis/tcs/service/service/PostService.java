@@ -8,7 +8,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -101,41 +100,12 @@ public interface PostService {
   PostDTO updateFundingStatus(long postId);
 
   /**
-   * Get all the post by dbcs
-   *
-   * @param dbcs
-   * @param pageable
-   * @return
-   */
-  Page<PostDTO> findAll(Set<String> dbcs, Pageable pageable);
-
-
-  /**
    * Get all the post by National Post Numbers
    *
    * @param npns
    * @return
    */
   List<PostDTO> findAllByNationalPostNumbers(List<String> npns);
-
-  /**
-   * Get all the posts.
-   *
-   * @param pageable the pagination information
-   * @return the list of entities
-   */
-  Page<PostViewDTO> findAll(Pageable pageable);
-
-  /**
-   * Get all the posts using the given smart search string and filters.
-   *
-   * @param searchString the search string to match, can be null
-   * @param columnFilers the exact key value filters to apply, can be null
-   * @param pageable     the pagination information
-   * @return the list of entities
-   */
-  Page<PostViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
-      Pageable pageable);
 
   /**
    * Get the "id" post.

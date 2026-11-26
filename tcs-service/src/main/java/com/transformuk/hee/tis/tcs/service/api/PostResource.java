@@ -86,8 +86,8 @@ public class PostResource {
   private final PlacementService placementService;
   private final PlacementSummaryDecorator placementSummaryDecorator;
   private final PostElasticSearchService postElasticSearchService;
-  @Value("${enable.es.search}")
-  private boolean enableEsSearch;
+//  @Value("${enable.es.search}")
+//  private boolean enableEsSearch;
 
   public PostResource(PostService postService, PostValidator postValidator,
       PlacementViewRepository placementViewRepository,
@@ -173,24 +173,14 @@ public class PostResource {
       @RequestParam(value = "columnFilters", required = false) String columnFilterJson)
       throws IOException {
     log.debug("REST request to get a page of Posts");
-    String originalSearchQuery = searchQuery;
-    searchQuery = getConverter(originalSearchQuery).fromJson().decodeUrl().escapeForSql()
-        .toString();
-    String searchQueryEs = getConverter(originalSearchQuery).fromJson().decodeUrl()
+    String searchQueryEs = getConverter(searchQuery).fromJson().decodeUrl()
         .escapeForElasticSearch()
         .toString();
     List<Class> filterEnumList = Lists.newArrayList(Status.class, PostSuffix.class,
         PostGradeType.class, PostSpecialtyType.class);
     List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
-    Page<PostViewDTO> page;
-    if (enableEsSearch) {
-      page = postElasticSearchService.searchForPage(searchQueryEs, columnFilters, pageable);
-    } else if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-      page = postService.findAll(pageable);
-    } else {
-      page = postService.advancedSearch(searchQuery, columnFilters, pageable);
-    }
+    Page<PostViewDTO> page = postElasticSearchService.searchForPage(searchQueryEs, columnFilters, pageable);
     log.debug("REST request to get a page of Posts completed successfully");
 
     HttpHeaders headers = PaginationUtil.generateBasicPaginationHttpHeaders(page, "/api/posts");

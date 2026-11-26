@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -31,6 +32,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -90,6 +92,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -332,12 +335,39 @@ class PostResourceIntTest {
     fundingSubtype = new FundingSubTypeDto();
   }
 
+  private PostViewDTO toViewDto(Post source) {
+    PostViewDTO dto = new PostViewDTO();
+    dto.setId(source.getId());
+    dto.setNationalPostNumber(source.getNationalPostNumber());
+    dto.setStatus(source.getFundingStatus());
+    dto.setOwner(source.getOwner());
+    source.getSites().stream().filter(s -> s.getPostSiteType() == PostSiteType.PRIMARY).findFirst()
+        .ifPresent(s -> dto.setPrimarySiteId(s.getSiteId()));
+    source.getGrades().stream().filter(g -> g.getPostGradeType() == PostGradeType.APPROVED)
+        .findFirst()
+        .ifPresent(g -> dto.setApprovedGradeId(g.getGradeId()));
+    source.getSpecialties().stream()
+        .filter(s -> s.getPostSpecialtyType() == PostSpecialtyType.PRIMARY)
+        .findFirst().ifPresent(s -> dto.setPrimarySpecialtyId(s.getSpecialty().getId()));
+    return dto;
+  }
+
+  private void mockSearch(PageImpl<PostViewDTO> page) {
+    when(postElasticSearchService.searchForPage(any(), any(), any())).thenReturn(page);
+  }
+
+  private void mockSearch(Post... posts) {
+    List<PostViewDTO> dtos = Arrays.stream(posts).map(this::toViewDto).collect(Collectors.toList());
+    mockSearch(new PageImpl<>(dtos));
+  }
+
   @Test
   @Transactional
   void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setFundingStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
+    mockSearch(post);
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
     restPostMockMvc.perform(
             get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters="
@@ -682,6 +712,7 @@ class PostResourceIntTest {
   @Test
   @Transactional
   void getAllPosts() throws Exception {
+    mockSearch(post);
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
@@ -701,6 +732,7 @@ class PostResourceIntTest {
     anotherPost.setNationalPostNumber(DEFAULT_POST_NUMBER);
     anotherPost.setOwner(OWNER_NORTH_EAST);
     postRepository.saveAndFlush(anotherPost);
+    mockSearch(post, anotherPost);
     int databaseSize = postRepository.findAll().size();
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,asc"))
@@ -721,6 +753,7 @@ class PostResourceIntTest {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setOwner(OWNER);
     postRepository.saveAndFlush(post);
+    mockSearch(post);
     restPostMockMvc.perform(get("/api/posts?searchQuery=TEST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -735,6 +768,7 @@ class PostResourceIntTest {
   void shouldTextSearchOnCurrentTrainee() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     postRepository.saveAndFlush(post);
+    mockSearch(post);
     restPostMockMvc.perform(get("/api/posts?searchQuery=TESTPOST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -789,6 +823,7 @@ class PostResourceIntTest {
     Post post3 = createEntity();
     post3.setNationalPostNumber(npns.get(2));
     postRepository.saveAndFlush(post3);
+    mockSearch(post3, post2, post1, post);
     restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,desc")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$[0].nationalPostNumber").value("npn-03"))
@@ -810,6 +845,7 @@ class PostResourceIntTest {
     Post post33 = createEntity();
     post33.setNationalPostNumber(npns1.get(2));
     postRepository.saveAndFlush(post33);
+    mockSearch(post, post11, post22, post33);
     restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$[0].nationalPostNumber").value("AAAAAAAAAA"))
@@ -826,6 +862,7 @@ class PostResourceIntTest {
     post.setFundingStatus(Status.INACTIVE);
     post.setOwner(OWNER);
     postRepository.saveAndFlush(post);
+    mockSearch(post);
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         OWNER + "\"]}");
@@ -841,6 +878,7 @@ class PostResourceIntTest {
   @Transactional
   void shouldFilterColumnsBySiteId() throws Exception {
     Long siteId = post.getSites().iterator().next().getSiteId();
+    mockSearch(post);
     //when & then
     String colFilters = new URLCodec()
         .encode("{\"primarySiteId\":[\"" + siteId + "\"],\"owner\":[\"" +
@@ -857,6 +895,7 @@ class PostResourceIntTest {
   @Transactional
   void shouldFilterColumnsByGradeId() throws Exception {
     Long gradeId = post.getGrades().iterator().next().getGradeId();
+    mockSearch(post);
     //when & then
     String colFilters = new URLCodec()
         .encode("{\"approvedGradeId\":[\"" + gradeId + "\"],\"owner\":[\"" +
@@ -873,6 +912,7 @@ class PostResourceIntTest {
   @Transactional
   void shouldFilterColumnsBySpecialtyId() throws Exception {
     Long specialtyId = post.getSpecialties().iterator().next().getSpecialty().getId();
+    mockSearch(post);
     //when & then
     String colFilters = new URLCodec().encode("{\"primarySpecialtyId\":[\"" + specialtyId + "\"]}");
     // Get all the programmeList
@@ -899,6 +939,7 @@ class PostResourceIntTest {
     otherNumberPostView.setFundingStatus(Status.INACTIVE);
     otherNumberPostView.setOwner(OWNER);
     postRepository.saveAndFlush(otherNumberPostView);
+    mockSearch(otherNumberPostView);
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         OWNER + "\"]}");

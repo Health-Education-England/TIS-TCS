@@ -119,7 +119,6 @@ class PostResource2Test {
   @Autowired
   private ExceptionTranslator exceptionTranslator;
 
-
   private PostDTO postDTO;
   @Captor
   private ArgumentCaptor<PostDTO> postDTOArgumentCaptor;
@@ -140,7 +139,6 @@ class PostResource2Test {
         .setCustomArgumentResolvers(pageableArgumentResolver)
         .setControllerAdvice(exceptionTranslator)
         .setMessageConverters(jacksonMessageConverter).build();
-    ReflectionTestUtils.setField(postResource, "enableEsSearch", true);
     TestUtils.mockUserprofile("jamesh", "1-1RUZV6H", "1-1RSSQ05", "1-1RSSPZ7");
 
     PostFundingDTO postFundingDTO = new PostFundingDTO();
@@ -370,7 +368,6 @@ class PostResource2Test {
 
   @Test
   void shouldUseElasticSearchServiceWhenEnableEsSearchIsEnabled() throws Exception {
-    ReflectionTestUtils.setField(postResource, "enableEsSearch", true);
     PostViewDTO postViewDTO = new PostViewDTO();
     postViewDTO.setId(243906L);
     postViewDTO.setNationalPostNumber("NWN/RM317/018/HT/002");
@@ -402,15 +399,11 @@ class PostResource2Test {
         .andExpect(jsonPath("$[0].status").value("CURRENT"))
         .andExpect(jsonPath("$[0].owner").value("North West"));
 
-    Boolean enableEsSearch = (Boolean) ReflectionTestUtils.getField(postResource, "enableEsSearch");
-    assertThat(enableEsSearch).isTrue();
     verify(postElasticSearchService).searchForPage(
         any(),
         anyList(),
         any(Pageable.class)
     );
-    verify(postService, never()).findAll(any(Pageable.class));
-    verify(postService, never()).advancedSearch(any(), anyList(), any(Pageable.class));
   }
 
   @Test

@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -85,12 +84,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -418,25 +412,6 @@ class PostServiceImplTest {
 
     long count = testObj.countCurrentFundings(testPost);
     assertEquals(0L, count);
-  }
-
-  @Test
-  void findAllShouldRetrieveAllInstances() {
-    String query = "PostQuery";
-    List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
-    when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(namedParameterJdbcTemplateMock
-        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
-        .thenReturn(mappedPosts);
-    when(pageableMock.getPageSize()).thenReturn(20);
-
-    Page<PostViewDTO> result = testObj.findAll(pageableMock);
-
-    assertEquals(1, result.getContent().size());
-    verify(sqlQuerySupplierMock).getQuery(SqlQuerySupplier.POST_VIEW);
-    verify(namedParameterJdbcTemplateMock)
-        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class));
   }
 
   @Test
@@ -808,68 +783,6 @@ class PostServiceImplTest {
     resultsFromQuery.add(new PostViewDTO());
     String whereClause = testObj.createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
     assertTrue(whereClause.contains("fundingTypeList"));
-  }
-
-  @Test
-  void advancedSearchShouldSearchWithDescOrderByCurrentTraineeSurname() {
-    final int PAGE = 1;
-    final int SIZE = 100;
-    final Sort surnameSortOrder = Sort.by(Sort.Direction.DESC, "currentTraineeSurname");
-    final String SEARCH_STRING = StringUtils.EMPTY;
-    final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
-    final String WHERE_CLAUSE = StringUtils.EMPTY;
-    List<PostViewDTO> resultsFromQuery = new ArrayList<>();
-    resultsFromQuery.add(new PostViewDTO());
-    PageRequest pageable = PageRequest.of(PAGE, SIZE, surnameSortOrder);
-    doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
-    when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(namedParameterJdbcTemplateMock
-        .query(queryCaptor.capture(), any(MapSqlParameterSource.class),
-            any(PostServiceImpl.PostViewRowMapper.class)))
-        .thenReturn(resultsFromQuery);
-    testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
-    String capturedQueryString = queryCaptor.getValue();
-    int indexOfGroupBy = capturedQueryString.indexOf("group by");
-    assertTrue(indexOfGroupBy >= 0);
-    int indexOfOrderBy = capturedQueryString.indexOf("ORDER BY surnames DESC");
-    assertTrue(indexOfOrderBy >= 0);
-    //ordering
-    assertTrue(indexOfGroupBy < indexOfOrderBy);
-    //multiples
-    assertFalse(
-        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
-  }
-
-  @Test
-  void advancedSearchShouldSearchWithAscendingOrderByCurrentTraineeSurname() {
-    final int PAGE = 1;
-    final int SIZE = 100;
-    final Sort surnameSortOrder = Sort.by(Sort.Direction.ASC, "currentTraineeSurname");
-    final String SEARCH_STRING = StringUtils.EMPTY;
-    final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
-    final String WHERE_CLAUSE = StringUtils.EMPTY;
-    List<PostViewDTO> resultsFromQuery = new ArrayList<>();
-    resultsFromQuery.add(new PostViewDTO());
-    PageRequest pageable = PageRequest.of(PAGE, SIZE, surnameSortOrder);
-    doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
-    when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(namedParameterJdbcTemplateMock
-        .query(queryCaptor.capture(), any(MapSqlParameterSource.class),
-            any(PostServiceImpl.PostViewRowMapper.class)))
-        .thenReturn(resultsFromQuery);
-    testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
-    String capturedQueryString = queryCaptor.getValue();
-    int indexOfGroupBy = capturedQueryString.indexOf("group by");
-    assertTrue(indexOfGroupBy >= 0);
-    int indexOfOrderBy = capturedQueryString.indexOf("ORDER BY surnames ASC");
-    assertTrue(indexOfOrderBy >= 0);
-    //ordering
-    assertTrue(indexOfGroupBy < indexOfOrderBy);
-    //multiples
-    assertFalse(
-        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
   }
 
   @Test
