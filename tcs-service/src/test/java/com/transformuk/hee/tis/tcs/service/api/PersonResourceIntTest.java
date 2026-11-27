@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -46,6 +47,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidat
 import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.TrainerApprovalValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -79,6 +81,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -91,6 +94,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -324,12 +329,40 @@ public class PersonResourceIntTest {
     return dto;
   }
 
-  private void mockPersonSearch(Person... people) {
+  private boolean hasFilter(List<ColumnFilter> filters, String filterName, String filterValue) {
+    if (filters == null) {
+      return false;
+    }
+    return filters.stream().anyMatch(filter -> filterName.equals(filter.getName())
+        && filter.getValues() != null
+        && filter.getValues().stream().map(String::valueOf)
+        .anyMatch(value -> filterValue.equalsIgnoreCase(value)));
+  }
+
+  private boolean hasSort(Pageable pageable, String property, Sort.Direction direction) {
+    return pageable != null && pageable.getSort() != null && pageable.getSort().stream()
+        .anyMatch(
+            order -> property.equals(order.getProperty()) && direction == order.getDirection());
+  }
+
+  private void mockPersonSearch(String expectedSearch, String expectedFilterName,
+      String expectedFilterValue, String expectedSortProperty,
+      Sort.Direction expectedSortDirection, Person... people) {
+    if (expectedSortProperty != null && expectedSortDirection == null) {
+      throw new IllegalArgumentException(
+          "expectedSortDirection is required when expectedSortProperty is set");
+    }
     List<PersonViewDTO> results = new ArrayList<>();
     for (Person pe: people) {
       results.add(toPersonViewDto(pe));
     }
-    when(personElasticSearchServiceMock.searchForPage(any(), any(), any()))
+    when(personElasticSearchServiceMock.searchForPage(
+        argThat(search -> Objects.equals(expectedSearch, search)),
+        argThat(filters -> expectedFilterName == null
+            ? (filters == null || filters.isEmpty())
+            : hasFilter(filters, expectedFilterName, expectedFilterValue)),
+        argThat(pageable -> expectedSortProperty == null
+            || hasSort(pageable, expectedSortProperty, expectedSortDirection))))
         .thenReturn(new PageImpl<>(results));
   }
 
@@ -603,7 +636,7 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    mockPersonSearch(person);
+    mockPersonSearch(null, null, null, "id", Sort.Direction.DESC, person);
 
     // Get all the personList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
@@ -800,7 +833,7 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    mockPersonSearch(anotherPerson);
+    mockPersonSearch(PERSON_SURNAME, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNAME))
         .andExpect(status().isOk())
@@ -822,7 +855,7 @@ public class PersonResourceIntTest {
     final GmcDetails gmcDetails = anotherPerson.getGmcDetails();
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
-    mockPersonSearch(anotherPerson);
+    mockPersonSearch(GMC_NUMBER, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
@@ -848,7 +881,7 @@ public class PersonResourceIntTest {
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    mockPersonSearch(anotherPerson);
+    mockPersonSearch(GDC_NUMBER, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
         .andExpect(status().isOk())
@@ -868,7 +901,7 @@ public class PersonResourceIntTest {
     final Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     createPersonBlankSubSections(anotherPerson);
-    mockPersonSearch(anotherPerson);
+    mockPersonSearch(DEFAULT_PUBLIC_HEALTH_NUMBER, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(status().isOk())
@@ -891,7 +924,7 @@ public class PersonResourceIntTest {
     otherStatusPerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherStatusPerson);
     createPersonBlankSubSections(otherStatusPerson);
-    mockPersonSearch(otherStatusPerson);
+    mockPersonSearch(null, "status", "INACTIVE", "id", Sort.Direction.DESC, otherStatusPerson);
 
     //when & then
     final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
@@ -922,7 +955,8 @@ public class PersonResourceIntTest {
     final ContactDetails contactDetails = otherNamePerson.getContactDetails();
     contactDetails.setSurname(PERSON_OHTER_SURNANME);
     contactDetailsRepository.saveAndFlush(contactDetails);
-    mockPersonSearch(otherNamePerson);
+    mockPersonSearch(PERSON_OHTER_SURNANME, "status", "INACTIVE", "id",
+        Sort.Direction.DESC, otherNamePerson);
 
     //when & then
     final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
