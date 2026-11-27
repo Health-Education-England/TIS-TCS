@@ -212,7 +212,8 @@ public class PersonResource {
     final List<Class> filterEnumList = Lists.newArrayList(Status.class, PersonTrustStatus.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
-    final Page<PersonViewDTO> page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
+    final Page<PersonViewDTO> page =
+        personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
     final HttpHeaders headers = PaginationUtil
         .generateBasicPaginationHttpHeaders(page, "/api/people");
     return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers,
