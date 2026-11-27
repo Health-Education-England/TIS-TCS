@@ -27,6 +27,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -89,6 +90,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -252,6 +254,8 @@ public class PersonResourceIntTest {
 
     when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+
+    person = createEntity();
   }
 
   private Person createPersonBlankSubSections(final Person person) {
@@ -284,9 +288,49 @@ public class PersonResourceIntTest {
     return person;
   }
 
-  @BeforeEach
-  void initTest() {
-    person = createEntity();
+  private PersonViewDTO toPersonViewDto(Person source) {
+    PersonViewDTO dto = new PersonViewDTO();
+    dto.setId(source.getId());
+    dto.setIntrepidId(source.getIntrepidId());
+    dto.setRole(source.getRole());
+    dto.setStatus(source.getStatus());
+    dto.setPublicHealthNumber(source.getPublicHealthNumber());
+
+    ContactDetails contactDetails = source.getContactDetails();
+    if (contactDetails == null && source.getId() != null) {
+      contactDetails = contactDetailsRepository.findById(source.getId()).orElse(null);
+    }
+    if (contactDetails != null) {
+      dto.setForenames(contactDetails.getForenames());
+      dto.setSurname(contactDetails.getSurname());
+    }
+
+    GmcDetails gmcDetails = source.getGmcDetails();
+    if (gmcDetails == null && source.getId() != null) {
+      gmcDetails = gmcDetailsRepository.findById(source.getId()).orElse(null);
+    }
+    if (gmcDetails != null) {
+      dto.setGmcNumber(gmcDetails.getGmcNumber());
+    }
+
+    GdcDetails gdcDetails = source.getGdcDetails();
+    if (gdcDetails == null && source.getId() != null) {
+      gdcDetails = gdcDetailsRepository.findById(source.getId()).orElse(null);
+    }
+    if (gdcDetails != null) {
+      dto.setGdcNumber(gdcDetails.getGdcNumber());
+    }
+
+    return dto;
+  }
+
+  private void mockPersonSearch(Person... people) {
+    List<PersonViewDTO> results = new ArrayList<>();
+    for (Person pe: people) {
+      results.add(toPersonViewDto(pe));
+    }
+    when(personElasticSearchServiceMock.searchForPage(any(), any(), any()))
+        .thenReturn(new PageImpl<>(results));
   }
 
   @Test
@@ -559,6 +603,7 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(person);
 
     // Get all the personList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
@@ -755,6 +800,7 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNAME))
         .andExpect(status().isOk())
@@ -776,6 +822,7 @@ public class PersonResourceIntTest {
     final GmcDetails gmcDetails = anotherPerson.getGmcDetails();
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
+    mockPersonSearch(anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
@@ -801,6 +848,7 @@ public class PersonResourceIntTest {
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
         .andExpect(status().isOk())
@@ -820,6 +868,7 @@ public class PersonResourceIntTest {
     final Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     createPersonBlankSubSections(anotherPerson);
+    mockPersonSearch(anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(status().isOk())
@@ -842,6 +891,7 @@ public class PersonResourceIntTest {
     otherStatusPerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherStatusPerson);
     createPersonBlankSubSections(otherStatusPerson);
+    mockPersonSearch(otherStatusPerson);
 
     //when & then
     final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
@@ -872,6 +922,7 @@ public class PersonResourceIntTest {
     final ContactDetails contactDetails = otherNamePerson.getContactDetails();
     contactDetails.setSurname(PERSON_OHTER_SURNANME);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(otherNamePerson);
 
     //when & then
     final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");

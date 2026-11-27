@@ -50,7 +50,6 @@ import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -93,8 +92,6 @@ public class PersonResource {
   private final ContactDetailsValidator contactDetailsValidator;
   private final RightToWorkValidator rightToWorkValidator;
   private final PersonElasticSearchService personElasticSearchService;
-  @Value("${enable.es.search}")
-  private boolean enableEsSearch;
 
   public PersonResource(PersonService personService,
       PlacementViewRepository placementViewRepository,
@@ -205,8 +202,7 @@ public class PersonResource {
   public ResponseEntity<List<PersonViewDTO>> getAllPeople(
       final Pageable pageable,
       @RequestParam(value = "searchQuery", required = false) String searchQuery,
-      @RequestParam(value = "columnFilters", required = false) final String columnFilterJson,
-      @RequestParam(required = false, defaultValue = "false") boolean enableES)
+      @RequestParam(value = "columnFilters", required = false) final String columnFilterJson)
       throws IOException {
 
     log.debug("REST request to get a page of People begin");
@@ -216,19 +212,7 @@ public class PersonResource {
     final List<Class> filterEnumList = Lists.newArrayList(Status.class, PersonTrustStatus.class);
     final List<ColumnFilter> columnFilters = ColumnFilterUtil
         .getColumnFilters(columnFilterJson, filterEnumList);
-    final Page<PersonViewDTO> page;
-
-    //feature flag to enable es, allow the enabling from the FE
-    if (enableEsSearch || enableES) {
-      page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
-    } else {
-      if (StringUtils.isEmpty(searchQuery) && StringUtils.isEmpty(columnFilterJson)) {
-        page = personService.findAll(pageable);
-      } else {
-        page = personService.advancedSearch(searchQuery, columnFilters, pageable);
-      }
-      log.debug("REST request to get a page of People completed successfully");
-    }
+    final Page<PersonViewDTO> page = personElasticSearchService.searchForPage(searchQueryES, columnFilters, pageable);
     final HttpHeaders headers = PaginationUtil
         .generateBasicPaginationHttpHeaders(page, "/api/people");
     return new ResponseEntity<>(personViewDecorator.decorate(page.getContent()), headers,

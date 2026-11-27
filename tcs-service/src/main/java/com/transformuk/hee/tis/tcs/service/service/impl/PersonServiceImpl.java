@@ -9,19 +9,15 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.TrainerApprovalDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.ApprovalStatus;
-import com.transformuk.hee.tis.tcs.api.enumeration.PersonOwnerRule;
-import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.PersonValidator;
 import com.transformuk.hee.tis.tcs.service.event.PersonCreatedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PersonSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -56,10 +52,7 @@ import com.transformuk.hee.tis.tcs.service.service.mapper.PersonMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PersonalDetailsDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.RightToWorkDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.TrainerApprovalDtoMapper;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -75,23 +68,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
-
 
 /**
  * Service Implementation for managing Person.
@@ -398,67 +386,6 @@ public class PersonServiceImpl implements PersonService {
   }
 
   /**
-   * Get all the people.
-   *
-   * @param pageable the pagination information
-   * @return the list of entities
-   */
-  @Cacheable(value = "personFindAll", sync = true)
-  @Override
-  @Transactional(readOnly = true)
-  public Page<PersonViewDTO> findAll(final Pageable pageable) {
-    log.debug("Request to get all People");
-
-    final int size = pageable.getPageSize() + 1;
-    final long offset = pageable.getOffset();
-    MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-
-    query = query.replaceAll("TRUST_JOIN",
-        permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)"
-            : StringUtils.EMPTY);
-
-    String whereClause = " WHERE 1=1 ";
-
-    if (permissionService.isUserTrustAdmin()) {
-      whereClause = whereClause + "AND trustId IN (:trustList) ";
-      paramSource.addValue("trustList", permissionService.getUsersTrustIds());
-    }
-
-    if (permissionService.isProgrammeObserver()) {
-      whereClause = whereClause + "AND pm.programmeId IN (:programmesList) ";
-      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
-    }
-
-    query = query.replaceAll("WHERECLAUSE", whereClause);
-
-    //For order by clause
-    final String orderByClause = createOrderByClauseWithParams(pageable);
-    query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
-
-    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
-
-    log.debug("running full person query with no filters");
-    final StopWatch stopWatch = new StopWatch();
-    stopWatch.start();
-    List<PersonViewDTO> persons = namedParameterJdbcTemplate
-        .query(query, paramSource, new PersonViewRowMapper());
-    stopWatch.stop();
-    log.debug("full person query finished in: [{}]s", stopWatch.getTotalTimeSeconds());
-
-    if (CollectionUtils.isEmpty(persons)) {
-      return Page.empty(pageable);
-    }
-
-    int personCount = persons.size();
-    if (personCount > pageable.getPageSize()) {
-      persons = persons.subList(0, pageable.getPageSize()); //ignore any additional
-    }
-
-    return new PageImpl<>(persons, pageable, personCount);
-  }
-
-  /**
    * Advanced search for person list view.
    * <p>
    * There are two queries that happen in this method, one to retrieve the data based on the search
@@ -488,187 +415,6 @@ public class PersonServiceImpl implements PersonService {
 
     return result.map(person -> personBasicDetailsMapper.toDto(person)).getContent();
   }
-
-  @Cacheable(value = "personAdvSearch", sync = true)
-  @Override
-  @Transactional(readOnly = true)
-  public Page<PersonViewDTO> advancedSearch(final String searchString,
-      final List<ColumnFilter> columnFilters, final Pageable pageable) {
-    final int size = pageable.getPageSize() + 1;
-    final long offset = pageable.getOffset();
-    MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.PERSON_VIEW);
-    query = query.replaceAll("TRUST_JOIN",
-        permissionService.isUserTrustAdmin() ? " left join PersonTrust pt on (pt.personId = p.id)"
-            : StringUtils.EMPTY);
-
-    String whereClause = createWhereClause(searchString, columnFilters);
-
-    if (permissionService.isUserTrustAdmin()) {
-      paramSource.addValue("trustList", permissionService.getUsersTrustIds());
-    }
-
-    if (permissionService.isProgrammeObserver()) {
-      whereClause = whereClause + "AND pm.programmeId in (:programmesList) ";
-      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
-    }
-
-    query = query.replaceAll("WHERECLAUSE", whereClause);
-
-    //add the text search criteria
-    if (StringUtils.isNotEmpty(searchString)) {
-      paramSource.addValue("searchString", "%" + searchString + "%");
-      paramSource.addValue("searchStringArray", Arrays.asList(searchString.split(",")));
-    }
-
-    applyFilterByParams(columnFilters, paramSource);
-
-    //For order by clause
-    final String orderByClause = createOrderByClauseWithParams(pageable);
-    query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
-
-    //limit is 0 based
-    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
-
-    List<PersonViewDTO> persons = namedParameterJdbcTemplate
-        .query(query, paramSource, new PersonViewRowMapper());
-
-    if (CollectionUtils.isEmpty(persons)) {
-      return Page.empty(pageable);
-    }
-
-    int personCount = persons.size();
-    if (personCount > pageable.getPageSize()) {
-      persons = persons.subList(0, pageable.getPageSize()); //ignore any additional
-    }
-
-    return new PageImpl<>(persons, pageable, personCount);
-  }
-
-  /**
-   * To generate order by clause with parameterised sort
-   *
-   * @param pageable
-   * @return
-   */
-  private String createOrderByClauseWithParams(Pageable pageable) {
-    final StringBuilder orderByClause = new StringBuilder();
-    if (pageable.getSort() != null) {
-      if (pageable.getSort().iterator().hasNext()) {
-        Sort.Order order = pageable.getSort().iterator().next();
-        orderByClause.append(" ORDER BY ").append(order.getProperty()).append(" ")
-            .append(order.getDirection()).append(" ");
-      }
-    }
-    return orderByClause.toString();
-  }
-
-  /**
-   * For parameterised query add param based on filter criteria
-   *
-   * @param columnFilters
-   * @param paramSource
-   */
-  private void applyFilterByParams(List<ColumnFilter> columnFilters,
-      MapSqlParameterSource paramSource) {
-    if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> {
-
-        switch (cf.getName()) {
-          case "programmeName":
-            paramSource.addValue("programmeNameList", cf.getValues());
-            break;
-          case "gradeId":
-            paramSource.addValue("gradeIdList", cf.getValues());
-            break;
-          case "specialty":
-            paramSource.addValue("specialtyList", cf.getValues());
-            break;
-          case "placementType":
-            paramSource.addValue("placementTypeList", cf.getValues());
-            break;
-          case "siteId":
-            paramSource.addValue("siteIdList", cf.getValues());
-            break;
-          case "role":
-            paramSource.addValue("roleList", cf.getValues());
-            break;
-          case "currentOwner":
-            paramSource.addValue("currentOwnerList", cf.getValues());
-            break;
-          case "status":
-            paramSource.addValue("statusList",
-                cf.getValues().stream().map(o -> ((Status) o).name()).collect(Collectors.toList()));
-            break;
-          default:
-            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                "] you need to add an additional case statement or remove it from the request");
-        }
-      });
-    }
-  }
-
-
-  private String createWhereClause(final String searchString,
-      final List<ColumnFilter> columnFilters) {
-    final StringBuilder whereClause = new StringBuilder();
-    whereClause.append(" WHERE 1=1 ");
-
-    if (permissionService.isUserTrustAdmin()) {
-      whereClause.append("AND trustId in (:trustList) ");
-    }
-
-    //add the column filters criteria
-    if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> {
-
-        switch (cf.getName()) {
-          case "programmeName":
-            whereClause.append(" AND prg.programmeName in (:programmeNameList)");
-            break;
-          case "gradeId":
-            whereClause.append(" AND pl.gradeId in (:gradeIdList)");
-            break;
-          case "specialty":
-            whereClause.append(" AND s.name in (:specialtyList)");
-            break;
-          case "placementType":
-            whereClause.append(" AND pl.placementType in (:placementTypeList)");
-            break;
-          case "siteId":
-            whereClause.append(" AND pl.siteId in (:siteIdList)");
-            break;
-          case "role":
-            whereClause.append(" AND p.role in (:roleList)");
-            break;
-          case "currentOwner":
-            whereClause.append(" AND lo.owner in (:currentOwnerList)");
-            break;
-          case "status":
-            whereClause.append(" AND p.status in (:statusList)");
-            break;
-          default:
-            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                "] you need to add an additional case statement or remove it from the request");
-        }
-      });
-    }
-
-    if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" AND (p.publicHealthNumber LIKE :searchString " +
-          "OR cd.surname LIKE :searchString " +
-          "OR cd.forenames LIKE :searchString " +
-          "OR gmc.gmcNumber LIKE :searchString " +
-          "OR gdc.gdcNumber LIKE :searchString " +
-          "OR p.role LIKE :searchString ");
-      if (StringUtils.isNumeric(searchString)) {
-        whereClause.append(" OR p.id in (:searchStringArray)");
-      }
-      whereClause.append(" ) ");
-    }
-    return whereClause.toString();
-  }
-
 
   /**
    * Get one person by id.
@@ -896,55 +642,4 @@ public class PersonServiceImpl implements PersonService {
       }
     }
   }
-
-  private String getLoggedInUsersAssociatedTrusts() {
-    String commaSepTrustIds = permissionService.getUsersTrustIds().stream()
-        .map(Object::toString)
-        .reduce((x, y) -> x + ", " + y).orElse(StringUtils.EMPTY);
-    return commaSepTrustIds;
-  }
-
-  public class PersonViewRowMapper implements RowMapper<PersonViewDTO> {
-
-    @Override
-    public PersonViewDTO mapRow(final ResultSet rs, final int id) throws SQLException {
-      final PersonViewDTO view = new PersonViewDTO();
-      view.setId(rs.getLong("id"));
-      view.setIntrepidId(rs.getString("intrepidId"));
-      view.setSurname(rs.getString("surname"));
-      view.setForenames(rs.getString("forenames"));
-      view.setGmcNumber(rs.getString("gmcNumber"));
-      view.setGdcNumber(rs.getString("gdcNumber"));
-      view.setPublicHealthNumber(rs.getString("publicHealthNumber"));
-      view.setProgrammeId(rs.getLong("programmeId"));
-      view.setProgrammeName(rs.getString("programmeName"));
-      view.setProgrammeNumber(rs.getString("programmeNumber"));
-      view.setTrainingNumber(rs.getString("trainingNumber"));
-      view.setGradeId(rs.getLong("gradeId"));
-      if (rs.wasNull()) {
-        view.setGradeId(null);
-      }
-      view.setGradeAbbreviation(rs.getString("gradeAbbreviation"));
-
-      view.setSiteCode(rs.getString("siteCode"));
-      view.setSiteId(rs.getLong("siteId"));
-      if (rs.wasNull()) {
-        view.setSiteId(null);
-      }
-      view.setPlacementType(rs.getString("placementType"));
-      view.setSpecialty(rs.getString("specialty"));
-      view.setRole(rs.getString("role"));
-      final String status = rs.getString("status");
-      if (StringUtils.isNotEmpty(status)) {
-        view.setStatus(Status.valueOf(status));
-      }
-      view.setCurrentOwner(rs.getString("currentOwner"));
-      final String ownerRule = rs.getString("currentOwnerRule");
-      if (StringUtils.isNotEmpty(ownerRule)) {
-        view.setCurrentOwnerRule(PersonOwnerRule.valueOf(ownerRule));
-      }
-      return view;
-    }
-  }
-
 }

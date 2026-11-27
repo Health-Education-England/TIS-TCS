@@ -4,8 +4,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PersonBasicDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonLiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonV2DTO;
-import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.repository.RightToWorkRepository;
 import java.util.List;
 import java.util.Set;
@@ -52,26 +50,6 @@ public interface PersonService {
    * @return The patched entities.
    */
   List<PersonDTO> patch(List<PersonDTO> personDtos);
-
-  /**
-   * Get all the people.
-   *
-   * @param pageable the pagination information
-   * @return the list of entities
-   */
-  Page<PersonViewDTO> findAll(Pageable pageable);
-
-  /**
-   * Get all the people using the given smart search string and filters.
-   *
-   * @param searchString the search string to match, can be null
-   * @param columnFilers the exact key value filters to apply, can be null
-   * @param pageable     the pagination information
-   * @return the list of entities
-   */
-  Page<PersonViewDTO> advancedSearch(String searchString, List<ColumnFilter> columnFilers,
-      Pageable pageable);
-
 
   /**
    * Looks for person basic details with support of only smart search and automatically limited to
