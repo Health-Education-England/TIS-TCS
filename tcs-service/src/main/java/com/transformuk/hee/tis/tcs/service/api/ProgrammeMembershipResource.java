@@ -69,8 +69,8 @@ public class ProgrammeMembershipResource {
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new
-   * programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembership has already
-   * an ID
+   *     programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembership has
+   *     already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programme-memberships")
@@ -104,9 +104,9 @@ public class ProgrammeMembershipResource {
    *
    * @param programmeMembershipDto the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated
-   * programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembershipDTO is not
-   * valid, or with status 500 (Internal Server Error) if the programmeMembershipDTO couldn't be
-   * updated
+   *     programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembershipDTO is
+   *     not valid, or with status 500 (Internal Server Error) if the programmeMembershipDTO
+   *     couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/programme-memberships")
@@ -147,7 +147,7 @@ public class ProgrammeMembershipResource {
    *
    * @param id the id of the programmeMembershipDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO, or
-   * with status 404 (Not Found)
+   *     with status 404 (Not Found)
    */
   @GetMapping("/programme-memberships/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -169,8 +169,8 @@ public class ProgrammeMembershipResource {
    *
    * @param ids a comma-separated list of programmeMembershipDTO ids to retrieve
    * @return the ResponseEntity with status 200 (OK) and the programmeMembershipDTO list, or with
-   * status 400 (Bad Request) if the ids are invalid or with status 404 (Not Found) if no programme
-   * memberships are found
+   *     status 400 (Bad Request) if the ids are invalid or with status 404 (Not Found) if no
+   *     programme memberships are found
    */
   @GetMapping("/programme-memberships/summary-list")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -203,12 +203,12 @@ public class ProgrammeMembershipResource {
   }
 
   /**
+   * POST /programme-memberships/delete/ : delete the programmeMembership using the pm id stored on
+   * the cm id.
+   *
    * @param programmeMembershipDTO the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK)
-   * @deprecated Use {@link #deleteProgrammeMembershipByUuid instead}
-   *
-   * <p> POST /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
-   * id. </p>
+   * @deprecated Use {@link #deleteProgrammeMembershipByUuid(UUID)} instead.
    */
   @Deprecated()
   @PostMapping("/programme-memberships/delete/")
