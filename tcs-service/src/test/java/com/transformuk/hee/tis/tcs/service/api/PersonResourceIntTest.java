@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -27,6 +28,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ContactDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GdcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.GmcDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PersonViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PersonalDetailsDTO;
 import com.transformuk.hee.tis.tcs.api.dto.RightToWorkDTO;
 import com.transformuk.hee.tis.tcs.api.dto.validation.Create;
@@ -45,6 +47,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PersonalDetailsValidat
 import com.transformuk.hee.tis.tcs.service.api.validation.RightToWorkValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.TrainerApprovalValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.GdcDetails;
 import com.transformuk.hee.tis.tcs.service.model.GmcDetails;
@@ -78,6 +81,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.codec.net.URLCodec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -89,6 +93,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -252,6 +259,8 @@ public class PersonResourceIntTest {
 
     when(permissionServiceMock.canViewSensitiveData()).thenReturn(true);
     when(permissionServiceMock.canEditSensitiveData()).thenReturn(true);
+
+    person = createEntity();
   }
 
   private Person createPersonBlankSubSections(final Person person) {
@@ -284,9 +293,77 @@ public class PersonResourceIntTest {
     return person;
   }
 
-  @BeforeEach
-  void initTest() {
-    person = createEntity();
+  private PersonViewDTO toPersonViewDto(Person source) {
+    PersonViewDTO dto = new PersonViewDTO();
+    dto.setId(source.getId());
+    dto.setIntrepidId(source.getIntrepidId());
+    dto.setRole(source.getRole());
+    dto.setStatus(source.getStatus());
+    dto.setPublicHealthNumber(source.getPublicHealthNumber());
+
+    ContactDetails contactDetails = source.getContactDetails();
+    if (contactDetails == null && source.getId() != null) {
+      contactDetails = contactDetailsRepository.findById(source.getId()).orElse(null);
+    }
+    if (contactDetails != null) {
+      dto.setForenames(contactDetails.getForenames());
+      dto.setSurname(contactDetails.getSurname());
+    }
+
+    GmcDetails gmcDetails = source.getGmcDetails();
+    if (gmcDetails == null && source.getId() != null) {
+      gmcDetails = gmcDetailsRepository.findById(source.getId()).orElse(null);
+    }
+    if (gmcDetails != null) {
+      dto.setGmcNumber(gmcDetails.getGmcNumber());
+    }
+
+    GdcDetails gdcDetails = source.getGdcDetails();
+    if (gdcDetails == null && source.getId() != null) {
+      gdcDetails = gdcDetailsRepository.findById(source.getId()).orElse(null);
+    }
+    if (gdcDetails != null) {
+      dto.setGdcNumber(gdcDetails.getGdcNumber());
+    }
+
+    return dto;
+  }
+
+  private boolean hasFilter(List<ColumnFilter> filters, String filterName, String filterValue) {
+    if (filters == null) {
+      return false;
+    }
+    return filters.stream().anyMatch(filter -> filterName.equals(filter.getName())
+        && filter.getValues() != null
+        && filter.getValues().stream().map(String::valueOf)
+        .anyMatch(filterValue::equalsIgnoreCase));
+  }
+
+  private boolean hasSort(Pageable pageable, String property, Sort.Direction direction) {
+    return pageable != null && pageable.getSort() != null && pageable.getSort().stream()
+        .anyMatch(
+            order -> property.equals(order.getProperty()) && direction == order.getDirection());
+  }
+
+  private void mockPersonSearch(String expectedSearch, String expectedFilterName,
+      String expectedFilterValue, String expectedSortProperty,
+      Sort.Direction expectedSortDirection, Person... people) {
+    if (expectedSortProperty != null && expectedSortDirection == null) {
+      throw new IllegalArgumentException(
+          "expectedSortDirection is required when expectedSortProperty is set");
+    }
+    List<PersonViewDTO> results = new ArrayList<>();
+    for (Person pe: people) {
+      results.add(toPersonViewDto(pe));
+    }
+    when(personElasticSearchServiceMock.searchForPage(
+        argThat(search -> Objects.equals(expectedSearch, search)),
+        argThat(filters -> expectedFilterName == null
+            ? (filters == null || filters.isEmpty())
+            : hasFilter(filters, expectedFilterName, expectedFilterValue)),
+        argThat(pageable -> expectedSortProperty == null
+            || hasSort(pageable, expectedSortProperty, expectedSortDirection))))
+        .thenReturn(new PageImpl<>(results));
   }
 
   @Test
@@ -559,6 +636,7 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(null, null, null, "id", Sort.Direction.DESC, person);
 
     // Get all the personList
     restPersonMockMvc.perform(get("/api/people?sort=id,desc"))
@@ -755,6 +833,7 @@ public class PersonResourceIntTest {
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(PERSON_SURNAME, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + PERSON_SURNAME))
         .andExpect(status().isOk())
@@ -776,6 +855,7 @@ public class PersonResourceIntTest {
     final GmcDetails gmcDetails = anotherPerson.getGmcDetails();
     gmcDetails.setGmcNumber(GMC_NUMBER);
     gmcDetailsRepository.saveAndFlush(gmcDetails);
+    mockPersonSearch(GMC_NUMBER, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GMC_NUMBER))
         .andExpect(status().isOk())
@@ -801,6 +881,7 @@ public class PersonResourceIntTest {
     contactDetails.setForenames(PERSON_FORENAMES);
     contactDetails.setSurname(PERSON_SURNAME);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(GDC_NUMBER, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + GDC_NUMBER))
         .andExpect(status().isOk())
@@ -820,6 +901,7 @@ public class PersonResourceIntTest {
     final Person anotherPerson = createEntity();
     personRepository.saveAndFlush(anotherPerson);
     createPersonBlankSubSections(anotherPerson);
+    mockPersonSearch(DEFAULT_PUBLIC_HEALTH_NUMBER, null, null, null, null, anotherPerson);
 
     restPersonMockMvc.perform(get("/api/people?searchQuery=" + DEFAULT_PUBLIC_HEALTH_NUMBER))
         .andExpect(status().isOk())
@@ -842,6 +924,7 @@ public class PersonResourceIntTest {
     otherStatusPerson.setStatus(Status.INACTIVE);
     personRepository.saveAndFlush(otherStatusPerson);
     createPersonBlankSubSections(otherStatusPerson);
+    mockPersonSearch(null, "status", "INACTIVE", "id", Sort.Direction.DESC, otherStatusPerson);
 
     //when & then
     final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");
@@ -872,6 +955,8 @@ public class PersonResourceIntTest {
     final ContactDetails contactDetails = otherNamePerson.getContactDetails();
     contactDetails.setSurname(PERSON_OHTER_SURNANME);
     contactDetailsRepository.saveAndFlush(contactDetails);
+    mockPersonSearch(PERSON_OHTER_SURNANME, "status", "INACTIVE", "id",
+        Sort.Direction.DESC, otherNamePerson);
 
     //when & then
     final String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"]}");

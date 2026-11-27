@@ -35,6 +35,3 @@ spring:
       uris: ${ES_URLS}
 
 application:
-
-enable.es.search: ${ENABLE_ES_SEARCH}
-

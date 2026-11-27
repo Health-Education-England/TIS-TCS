@@ -19,5 +19,3 @@ logging:
   file: ${LOG_DIR:${HOME}}/tcs.log
 
 application:
-
-enable.es.search: ${ENABLE_ES_SEARCH}

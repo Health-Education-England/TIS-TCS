@@ -90,7 +90,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -104,7 +103,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 import org.springframework.web.client.ResourceAccessException;
 
 /**
@@ -488,21 +486,6 @@ public class PostServiceImpl implements PostService {
   }
 
   /**
-   * Get all the posts.
-   *
-   * @param pageable the pagination information
-   * @return the list of entities
-   */
-  @Override
-  @Transactional(readOnly = true)
-  public Page<PostDTO> findAll(Set<String> dbcs, Pageable pageable) {
-    log.debug("Request to get all Posts");
-    Set<String> deaneries = DesignatedBodyMapper.map(dbcs);
-    Page<Post> result = postRepository.findByOwnerIn(deaneries, pageable);
-    return result.map(post -> postMapper.postToPostDTO(post));
-  }
-
-  /**
    * Get posts by national post numbers
    *
    * @return the list of entities
@@ -512,107 +495,6 @@ public class PostServiceImpl implements PostService {
   public List<PostDTO> findAllByNationalPostNumbers(List<String> npns) {
     log.debug("Request to get all Posts by npn : " + npns);
     return postMapper.postsToPostDTOs(postRepository.findByNationalPostNumberIn(npns));
-  }
-
-  /**
-   * Get all the posts.
-   *
-   * @param pageable the pagination information
-   * @return the list of entities
-   */
-  @Cacheable(value = "postFindAll", sync = true)
-  @Override
-  @Transactional(readOnly = true)
-  public Page<PostViewDTO> findAll(Pageable pageable) {
-    log.debug("Request to get all Posts");
-    final int size = pageable.getPageSize() + 1;
-    final long offset = pageable.getOffset();
-    MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
-    String whereClause = " WHERE 1=1 ";
-    if (permissionService.isUserTrustAdmin()) {
-      whereClause = whereClause + "AND EXISTS (SELECT 1 FROM PostTrust pt "
-          + "WHERE pt.postId = p.id AND pt.trustId in (:trustList)) ";
-      paramSource.addValue("trustList", permissionService.getUsersTrustIds());
-    }
-
-    if (permissionService.isProgrammeObserver()) {
-      whereClause = whereClause + "AND EXISTS (SELECT 1 FROM ProgrammePost pp "
-          + "WHERE pp.postId = p.id AND pp.programmeId in (:programmesList)) ";
-      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
-    }
-
-    // Where condition
-    query = query.replaceAll("WHERECLAUSE", whereClause);
-    //For order by clause
-    final String orderByClause = createOrderByClauseWithParams(pageable);
-    query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
-    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
-    List<PostViewDTO> posts = namedParameterJdbcTemplate
-        .query(query, paramSource, new PostServiceImpl.PostViewRowMapper());
-
-    if (CollectionUtils.isEmpty(posts)) {
-      return Page.empty(pageable);
-    }
-
-    final int postCount = posts.size();
-    if (postCount > pageable.getPageSize()) {
-      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
-    }
-    return new PageImpl<>(posts, pageable, postCount);
-  }
-
-  @Cacheable(value = "postAdvSearch", sync = true)
-  @Override
-  @Transactional(readOnly = true)
-  public Page<PostViewDTO> advancedSearch(String searchString,
-      List<ColumnFilter> columnFilters, Pageable pageable) {
-    MapSqlParameterSource paramSource = new MapSqlParameterSource();
-    String whereClause = createWhereClause(searchString, columnFilters);
-    StopWatch stopWatch;
-    final int size = pageable.getPageSize() + 1;
-    final long offset = pageable.getOffset();
-    String query = sqlQuerySupplier.getQuery(SqlQuerySupplier.POST_VIEW);
-
-    if (permissionService.isProgrammeObserver()) {
-      whereClause = whereClause + "AND EXISTS (SELECT 1 FROM ProgrammePost pp "
-          + "WHERE pp.postId = p.id AND pp.programmeId in (:programmesList)) ";
-      paramSource.addValue("programmesList", permissionService.getUsersProgrammeIds());
-    }
-
-    query = query.replaceAll("WHERECLAUSE", whereClause);
-
-    if (permissionService.isUserTrustAdmin()) {
-      paramSource.addValue("trustList", permissionService.getUsersTrustIds());
-    }
-
-    //For order by clause
-    final String orderByClause = createOrderByClauseWithParams(pageable);
-    query = query.replaceAll("ORDERBYCLAUSE", orderByClause);
-    //limit is 0 based
-    query = query.replaceAll("LIMITCLAUSE", "limit " + size + " offset " + offset);
-    if (StringUtils.isNotEmpty(searchString)) {
-      paramSource.addValue("searchString", "%" + searchString + "%");
-    }
-    applyFilterByParams(columnFilters, paramSource);
-    log.debug("REST request to get for the Post query");
-    stopWatch = new StopWatch();
-    stopWatch.start();
-    List<PostViewDTO> posts = namedParameterJdbcTemplate
-        .query(query, paramSource, new PostServiceImpl.PostViewRowMapper());
-    stopWatch.stop();
-    log.debug("REST request for the Post query finished in: [{}]s",
-        stopWatch.getTotalTimeSeconds());
-    if (CollectionUtils.isEmpty(posts)) {
-      return Page.empty(pageable);
-    }
-    int postCount = posts.size();
-    if (postCount > pageable.getPageSize()) {
-      posts = posts.subList(0, pageable.getPageSize()); //ignore any additional
-    }
-    Page<PostViewDTO> dtoPage = new PageImpl<>(posts, pageable, postCount);
-    postViewDecorator.decorate(dtoPage.getContent());
-    return dtoPage;
   }
 
   @Override
@@ -789,76 +671,6 @@ public class PostServiceImpl implements PostService {
     PostEsrEvent newPost = postEsrEventRepository.save(newPostEsrEvent);
     return Optional.ofNullable(
         postEsrEventDtoMapper.postEsrEventToPostEsrEventDto(newPost));
-  }
-
-  protected String createWhereClause(final String searchString,
-      final List<ColumnFilter> columnFilters) {
-    final StringBuilder whereClause = new StringBuilder();
-    whereClause.append(" WHERE 1=1 ");
-    if (permissionService.isUserTrustAdmin()) {
-      whereClause.append("AND EXISTS (SELECT 1 FROM PostTrust pt ")
-          .append("WHERE pt.postId = p.id AND pt.trustId in (:trustList)) ");
-    }
-    //add the column filters criteria
-    if (columnFilters != null && !columnFilters.isEmpty()) {
-      columnFilters.forEach(cf -> {
-        switch (cf.getName()) {
-          case "currentTraineeSurname":
-            whereClause.append(" AND surnames in (:surnameList)");
-            break;
-          case "currentTraineeForenames":
-            whereClause.append(" AND forenames in (:forenamesList)");
-            break;
-          case "primarySpecialtyId":
-            whereClause.append(" AND specialtyId in (:specialtyIdList)");
-            break;
-          case "primarySpecialtyCode":
-            whereClause.append(" AND specialtyCode in (:specialtyCodeList)");
-            break;
-          case "primarySpecialtyName":
-            whereClause.append(" AND name in (:nameList)");
-            break;
-          case "programmeNames":
-            whereClause.append(" AND EXISTS (SELECT 1 FROM ProgrammePost pp ")
-                .append("JOIN Programme prg ON prg.id = pp.programmeId ")
-                .append("WHERE pp.postId = p.id AND prg.programmeName in (:programmeNameList))");
-            break;
-          case "nationalPostNumber":
-            whereClause.append(" AND nationalPostNumber in (:nationalPostNumberList)");
-            break;
-          case "status":
-            whereClause.append(" AND p.fundingStatus in (:fundingStatusList)");
-            break;
-          case "owner":
-            whereClause.append(" AND p.owner in (:ownerList)");
-            break;
-          case "primarySiteId":
-            whereClause.append(" AND pst.siteId in (:siteIdList)");
-            break;
-          case "approvedGradeId":
-            whereClause.append(" AND pg.gradeId in (:gradeIdList)");
-            break;
-          case "fundingType":
-            whereClause.append(" AND EXISTS (SELECT 1 FROM PostFunding pf ")
-                .append("WHERE pf.postId = p.id AND pf.fundingTypeId in (:fundingTypeList) ")
-                .append("AND (curdate() BETWEEN pf.startDate AND pf.endDate "
-                    + "OR pf.endDate IS NULL))");
-            break;
-          default:
-            throw new IllegalArgumentException("Not accounted for column filter [" + cf.getName() +
-                "] you need to add an additional case statement or remove it from the request");
-        }
-      });
-    }
-    if (StringUtils.isNotEmpty(searchString)) {
-      whereClause.append(" AND (nationalPostNumber LIKE :searchString "
-          + "OR EXISTS (SELECT 1 FROM ProgrammePost pp "
-          + "JOIN Programme prg ON prg.id = pp.programmeId "
-          + "WHERE pp.postId = p.id AND prg.programmeName LIKE :searchString) "
-          + "OR surnames LIKE :searchString "
-          + "OR forenames LIKE :searchString ) ");
-    }
-    return whereClause.toString();
   }
 
   /**

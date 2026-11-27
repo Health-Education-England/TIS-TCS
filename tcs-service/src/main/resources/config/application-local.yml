@@ -41,8 +41,6 @@ kc:
   password: ${KC_PASSWORD:}
   timeout: ${KC_TIMEOUT:10000}
 
-enable.es.search: true
-
 app:
   rabbit:
     reval:

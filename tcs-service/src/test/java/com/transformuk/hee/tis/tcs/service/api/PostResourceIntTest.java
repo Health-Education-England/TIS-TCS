@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,6 +32,7 @@ import com.transformuk.hee.tis.tcs.api.dto.PostFundingDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostGradeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSiteDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
+import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
@@ -45,6 +47,7 @@ import com.transformuk.hee.tis.tcs.service.api.decorator.PlacementViewDecorator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.api.validation.PostValidator;
 import com.transformuk.hee.tis.tcs.service.exception.ExceptionTranslator;
+import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.ContactDetails;
 import com.transformuk.hee.tis.tcs.service.model.Person;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
@@ -73,6 +76,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -90,6 +94,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -332,12 +339,64 @@ class PostResourceIntTest {
     fundingSubtype = new FundingSubTypeDto();
   }
 
+  private PostViewDTO toViewDto(Post source) {
+    PostViewDTO dto = new PostViewDTO();
+    dto.setId(source.getId());
+    dto.setNationalPostNumber(source.getNationalPostNumber());
+    dto.setStatus(source.getFundingStatus());
+    dto.setOwner(source.getOwner());
+    source.getSites().stream().filter(s -> s.getPostSiteType() == PostSiteType.PRIMARY).findFirst()
+        .ifPresent(s -> dto.setPrimarySiteId(s.getSiteId()));
+    source.getGrades().stream().filter(g -> g.getPostGradeType() == PostGradeType.APPROVED)
+        .findFirst()
+        .ifPresent(g -> dto.setApprovedGradeId(g.getGradeId()));
+    source.getSpecialties().stream()
+        .filter(s -> s.getPostSpecialtyType() == PostSpecialtyType.PRIMARY)
+        .findFirst().ifPresent(s -> dto.setPrimarySpecialtyId(s.getSpecialty().getId()));
+    return dto;
+  }
+
+  private boolean hasFilter(List<ColumnFilter> filters, String filterName, String filterValue) {
+    if (filters == null) {
+      return false;
+    }
+    return filters.stream().anyMatch(filter -> filterName.equals(filter.getName())
+        && filter.getValues() != null
+        && filter.getValues().stream().map(String::valueOf)
+        .anyMatch(filterValue::equalsIgnoreCase));
+  }
+
+  private boolean hasSort(Pageable pageable, String property, Sort.Direction direction) {
+    return pageable != null && pageable.getSort() != null && pageable.getSort().stream()
+        .anyMatch(
+            order -> property.equals(order.getProperty()) && direction == order.getDirection());
+  }
+
+  private void mockSearch(String expectedSearch, String expectedFilterName,
+      String expectedFilterValue, String expectedSortProperty,
+      Sort.Direction expectedSortDirection, Post... posts) {
+    if (expectedSortProperty != null && expectedSortDirection == null) {
+      throw new IllegalArgumentException(
+          "expectedSortDirection is required when expectedSortProperty is set");
+    }
+    List<PostViewDTO> dtos = Arrays.stream(posts).map(this::toViewDto).collect(Collectors.toList());
+    when(postElasticSearchService.searchForPage(
+        argThat(search -> Objects.equals(expectedSearch, search)),
+        argThat(filters -> expectedFilterName == null
+            ? (filters == null || filters.isEmpty())
+            : hasFilter(filters, expectedFilterName, expectedFilterValue)),
+        argThat(pageable -> expectedSortProperty == null
+            || hasSort(pageable, expectedSortProperty, expectedSortDirection))))
+        .thenReturn(new PageImpl<>(dtos));
+  }
+
   @Test
   @Transactional
   void shouldReturnMultipleCurrentFundingTypesSeparatedByCommas() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setFundingStatus(Status.CURRENT);
     postRepository.saveAndFlush(post);
+    mockSearch(null, "status", "CURRENT", "nationalPostNumber", Sort.Direction.ASC, post);
     String colFilters = new URLCodec().encode("{\"status\":[\"CURRENT\"]}");
     restPostMockMvc.perform(
             get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc&sort=id&columnFilters="
@@ -682,6 +741,7 @@ class PostResourceIntTest {
   @Test
   @Transactional
   void getAllPosts() throws Exception {
+    mockSearch(null, null, null, "id", Sort.Direction.DESC, post);
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,desc"))
         .andExpect(status().isOk())
@@ -701,6 +761,7 @@ class PostResourceIntTest {
     anotherPost.setNationalPostNumber(DEFAULT_POST_NUMBER);
     anotherPost.setOwner(OWNER_NORTH_EAST);
     postRepository.saveAndFlush(anotherPost);
+    mockSearch(null, null, null, "id", Sort.Direction.ASC, post, anotherPost);
     int databaseSize = postRepository.findAll().size();
     // Get all the postList
     restPostMockMvc.perform(get("/api/posts?sort=id,asc"))
@@ -721,6 +782,7 @@ class PostResourceIntTest {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     post.setOwner(OWNER);
     postRepository.saveAndFlush(post);
+    mockSearch("TEST", null, null, null, null, post);
     restPostMockMvc.perform(get("/api/posts?searchQuery=TEST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -735,6 +797,7 @@ class PostResourceIntTest {
   void shouldTextSearchOnCurrentTrainee() throws Exception {
     post.setNationalPostNumber(TEST_POST_NUMBER);
     postRepository.saveAndFlush(post);
+    mockSearch("TESTPOST", null, null, null, null, post);
     restPostMockMvc.perform(get("/api/posts?searchQuery=TESTPOST"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -789,6 +852,8 @@ class PostResourceIntTest {
     Post post3 = createEntity();
     post3.setNationalPostNumber(npns.get(2));
     postRepository.saveAndFlush(post3);
+    mockSearch(null, null, null, "nationalPostNumber", Sort.Direction.DESC, post3, post2, post1,
+        post);
     restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,desc")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$[0].nationalPostNumber").value("npn-03"))
@@ -810,6 +875,8 @@ class PostResourceIntTest {
     Post post33 = createEntity();
     post33.setNationalPostNumber(npns1.get(2));
     postRepository.saveAndFlush(post33);
+    mockSearch(null, null, null, "nationalPostNumber", Sort.Direction.ASC, post, post11, post22,
+        post33);
     restPostMockMvc.perform(get("/api/posts?page=0&size=100&sort=nationalPostNumber,asc")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$[0].nationalPostNumber").value("AAAAAAAAAA"))
@@ -826,6 +893,7 @@ class PostResourceIntTest {
     post.setFundingStatus(Status.INACTIVE);
     post.setOwner(OWNER);
     postRepository.saveAndFlush(post);
+    mockSearch(null, "status", "INACTIVE", "id", Sort.Direction.DESC, post);
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         OWNER + "\"]}");
@@ -841,6 +909,7 @@ class PostResourceIntTest {
   @Transactional
   void shouldFilterColumnsBySiteId() throws Exception {
     Long siteId = post.getSites().iterator().next().getSiteId();
+    mockSearch(null, "primarySiteId", String.valueOf(siteId), "id", Sort.Direction.DESC, post);
     //when & then
     String colFilters = new URLCodec()
         .encode("{\"primarySiteId\":[\"" + siteId + "\"],\"owner\":[\"" +
@@ -857,6 +926,8 @@ class PostResourceIntTest {
   @Transactional
   void shouldFilterColumnsByGradeId() throws Exception {
     Long gradeId = post.getGrades().iterator().next().getGradeId();
+    mockSearch(null, "approvedGradeId", String.valueOf(gradeId), "id", Sort.Direction.DESC,
+        post);
     //when & then
     String colFilters = new URLCodec()
         .encode("{\"approvedGradeId\":[\"" + gradeId + "\"],\"owner\":[\"" +
@@ -873,6 +944,8 @@ class PostResourceIntTest {
   @Transactional
   void shouldFilterColumnsBySpecialtyId() throws Exception {
     Long specialtyId = post.getSpecialties().iterator().next().getSpecialty().getId();
+    mockSearch(null, "primarySpecialtyId", String.valueOf(specialtyId), "id",
+        Sort.Direction.DESC, post);
     //when & then
     String colFilters = new URLCodec().encode("{\"primarySpecialtyId\":[\"" + specialtyId + "\"]}");
     // Get all the programmeList
@@ -899,6 +972,8 @@ class PostResourceIntTest {
     otherNumberPostView.setFundingStatus(Status.INACTIVE);
     otherNumberPostView.setOwner(OWNER);
     postRepository.saveAndFlush(otherNumberPostView);
+    mockSearch("TEST", "status", "INACTIVE", "id", Sort.Direction.DESC,
+        otherNumberPostView);
     //when & then
     String colFilters = new URLCodec().encode("{\"status\":[\"INACTIVE\"],\"owner\":[\"" +
         OWNER + "\"]}");

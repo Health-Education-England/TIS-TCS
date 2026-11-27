@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -32,7 +31,6 @@ import com.transformuk.hee.tis.tcs.api.dto.PostSpecialtyDTO;
 import com.transformuk.hee.tis.tcs.api.dto.PostViewDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeDTO;
 import com.transformuk.hee.tis.tcs.api.dto.SpecialtyDTO;
-import com.transformuk.hee.tis.tcs.api.enumeration.FundingType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostEsrEventStatus;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostGradeType;
 import com.transformuk.hee.tis.tcs.api.enumeration.PostSiteType;
@@ -43,7 +41,6 @@ import com.transformuk.hee.tis.tcs.service.api.validation.PostFundingValidator;
 import com.transformuk.hee.tis.tcs.service.event.PostDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.PostSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.AccessUnauthorisedException;
-import com.transformuk.hee.tis.tcs.service.model.ColumnFilter;
 import com.transformuk.hee.tis.tcs.service.model.Placement;
 import com.transformuk.hee.tis.tcs.service.model.Post;
 import com.transformuk.hee.tis.tcs.service.model.PostEsrEvent;
@@ -63,7 +60,6 @@ import com.transformuk.hee.tis.tcs.service.repository.PostRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSiteRepository;
 import com.transformuk.hee.tis.tcs.service.repository.PostSpecialtyRepository;
 import com.transformuk.hee.tis.tcs.service.repository.ProgrammeRepository;
-import com.transformuk.hee.tis.tcs.service.service.helper.SqlQuerySupplier;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostEsrEventDtoMapper;
 import com.transformuk.hee.tis.tcs.service.service.mapper.PostMapper;
 import java.time.LocalDate;
@@ -74,7 +70,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.persistence.EntityNotFoundException;
-import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,66 +80,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
 
   private static final Long SITE_ID = 12345L;
-  String query = "select distinct id,\n" +
-      "approvedGradeId,\n" +
-      "primarySpecialtyId,\n" +
-      "primarySpecialtyCode,\n" +
-      "primarySpecialtyName,\n" +
-      "primarySiteId,\n" +
-      "GROUP_CONCAT(distinct programmeName SEPARATOR ', ') programmes,\n" +
-      "GROUP_CONCAT(distinct fundingType SEPARATOR ', ') fundingType,\n" +
-      "nationalPostNumber,\n" +
-      "status,\n" +
-      "owner,\n" +
-      "intrepidId,\n" +
-      "GROUP_CONCAT(surnames SEPARATOR ', ') surnames, GROUP_CONCAT(forenames SEPARATOR ', ') forenames\n"
-      +
-      " from (SELECT p.`id`,\n" +
-      "    pg.`gradeId` as `approvedGradeId`,\n" +
-      "    ps.`specialtyId` as `primarySpecialtyId`,\n" +
-      "    sp.`specialtyCode` as `primarySpecialtyCode`,\n" +
-      "    sp.`name` as `primarySpecialtyName`,\n" +
-      "    pst.`siteId` as `primarySiteId`,\n" +
-      "    prg.`programmeName`,\n" +
-      "    pf.`fundingType`,\n" +
-      "    p.`nationalPostNumber`,\n" +
-      "    p.`status`,\n" +
-      "    p.`owner`,\n" +
-      "    p.`intrepidId`,\n" +
-      "    c.surname surnames, c.forenames forenames\n" +
-      "    FROM `Post` p\n" +
-      "    LEFT JOIN `PostGrade` pg on p.`id` = pg.`postId` AND pg.`postGradeType` = 'APPROVED'\n" +
-      "    LEFT JOIN `PostSpecialty` ps on p.`id` = ps.`postId` AND ps.`postSpecialtyType` = 'PRIMARY'\n"
-      +
-      "    LEFT JOIN `Specialty` sp on sp.`id` = ps.`specialtyId`\n" +
-      "    LEFT JOIN `PostSite` pst on p.`id` = pst.`postId` AND pst.`postSiteType` = 'PRIMARY'\n" +
-      "    LEFT JOIN `PostFunding` pf on p.`id` = pf.`postId` and (curdate() BETWEEN pf.startDate AND pf.endDate or pf.endDate is NULL)\n"
-      +
-      "    LEFT JOIN `Placement` pl on pl.postId = p.id and curdate() BETWEEN pl.dateFrom AND pl.dateTo\n"
-      +
-      "    LEFT JOIN `ContactDetails` c on pl.traineeId = c.id\n" +
-      "    LEFT JOIN `ProgrammePost` pp on pp.postId = p.id\n" +
-      "    LEFT JOIN `Programme` prg on prg.`id` = pp.`programmeId`\n" +
-      " TRUST_JOIN\n" +
-      " WHERECLAUSE\n" +
-      ") as ot\n" +
-      "group by id,approvedGradeId,primarySpecialtyId,primarySpecialtyCode,primarySpecialtyName,primarySiteId,nationalPostNumber,status,owner,intrepidId\n"
-      +
-      " ORDERBYCLAUSE\n" +
-      " LIMITCLAUSE\n" +
-      ";";
+
   @Captor
   ArgumentCaptor<Post> postArgumentCaptor;
   @Spy
@@ -169,8 +111,6 @@ class PostServiceImplTest {
   @Mock
   private PostEsrEventDtoMapper postEsrEventDtoMapperMock;
   @Mock
-  private SqlQuerySupplier sqlQuerySupplierMock;
-  @Mock
   private PostDTO postDTOMock1, postDTOMock2, postMappedDTOMock1, postMappedDTOMock2;
   @Mock
   private PostViewDTO postViewDTOMock1;
@@ -185,11 +125,7 @@ class PostServiceImplTest {
   @Captor
   private ArgumentCaptor<Set<PostSpecialty>> postSpecialtyArgumentCaptor;
   @Mock
-  private NamedParameterJdbcTemplate namedParameterJdbcTemplateMock;
-  @Mock
   private PermissionService permissionServiceMock;
-  @Captor
-  private ArgumentCaptor<String> queryCaptor;
   @Mock
   private PostFundingRepository postFundingRepositoryMock;
   @Captor
@@ -418,25 +354,6 @@ class PostServiceImplTest {
 
     long count = testObj.countCurrentFundings(testPost);
     assertEquals(0L, count);
-  }
-
-  @Test
-  void findAllShouldRetrieveAllInstances() {
-    String query = "PostQuery";
-    List<PostViewDTO> mappedPosts = Lists.newArrayList(postViewDTOMock1);
-    when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(namedParameterJdbcTemplateMock
-        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class)))
-        .thenReturn(mappedPosts);
-    when(pageableMock.getPageSize()).thenReturn(20);
-
-    Page<PostViewDTO> result = testObj.findAll(pageableMock);
-
-    assertEquals(1, result.getContent().size());
-    verify(sqlQuerySupplierMock).getQuery(SqlQuerySupplier.POST_VIEW);
-    verify(namedParameterJdbcTemplateMock)
-        .query(anyString(), any(MapSqlParameterSource.class), any(RowMapper.class));
   }
 
   @Test
@@ -792,84 +709,6 @@ class PostServiceImplTest {
         () -> testObj.canLoggedInUserViewOrAmend(postId));
     verify(permissionServiceMock).getUsersTrustIds();
     verify(postRepositoryMock).findPostWithTrustsById(postId);
-  }
-
-  @Test
-  void fundingTypeShouldExistInWhereClauseWhenFilteredByIt() {
-    final String SEARCH_STRING = StringUtils.EMPTY;
-    final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
-    List<Object> columnFilterValues = new ArrayList<>();
-    columnFilterValues.add(FundingType.TARIFF);
-    columnFilterValues.add(FundingType.MADEL);
-    columnFilterValues.add(FundingType.TRUST);
-    columnFilterValues.add(FundingType.OTHER);
-    COLUMN_FILTERS.add(new ColumnFilter("fundingType", columnFilterValues));
-    List<PostViewDTO> resultsFromQuery = new ArrayList<>();
-    resultsFromQuery.add(new PostViewDTO());
-    String whereClause = testObj.createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
-    assertTrue(whereClause.contains("fundingTypeList"));
-  }
-
-  @Test
-  void advancedSearchShouldSearchWithDescOrderByCurrentTraineeSurname() {
-    final int PAGE = 1;
-    final int SIZE = 100;
-    final Sort surnameSortOrder = Sort.by(Sort.Direction.DESC, "currentTraineeSurname");
-    final String SEARCH_STRING = StringUtils.EMPTY;
-    final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
-    final String WHERE_CLAUSE = StringUtils.EMPTY;
-    List<PostViewDTO> resultsFromQuery = new ArrayList<>();
-    resultsFromQuery.add(new PostViewDTO());
-    PageRequest pageable = PageRequest.of(PAGE, SIZE, surnameSortOrder);
-    doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
-    when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(namedParameterJdbcTemplateMock
-        .query(queryCaptor.capture(), any(MapSqlParameterSource.class),
-            any(PostServiceImpl.PostViewRowMapper.class)))
-        .thenReturn(resultsFromQuery);
-    testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
-    String capturedQueryString = queryCaptor.getValue();
-    int indexOfGroupBy = capturedQueryString.indexOf("group by");
-    assertTrue(indexOfGroupBy >= 0);
-    int indexOfOrderBy = capturedQueryString.indexOf("ORDER BY surnames DESC");
-    assertTrue(indexOfOrderBy >= 0);
-    //ordering
-    assertTrue(indexOfGroupBy < indexOfOrderBy);
-    //multiples
-    assertFalse(
-        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
-  }
-
-  @Test
-  void advancedSearchShouldSearchWithAscendingOrderByCurrentTraineeSurname() {
-    final int PAGE = 1;
-    final int SIZE = 100;
-    final Sort surnameSortOrder = Sort.by(Sort.Direction.ASC, "currentTraineeSurname");
-    final String SEARCH_STRING = StringUtils.EMPTY;
-    final List<ColumnFilter> COLUMN_FILTERS = new ArrayList<>();
-    final String WHERE_CLAUSE = StringUtils.EMPTY;
-    List<PostViewDTO> resultsFromQuery = new ArrayList<>();
-    resultsFromQuery.add(new PostViewDTO());
-    PageRequest pageable = PageRequest.of(PAGE, SIZE, surnameSortOrder);
-    doReturn(WHERE_CLAUSE).when(testObj).createWhereClause(SEARCH_STRING, COLUMN_FILTERS);
-    when(sqlQuerySupplierMock.getQuery(SqlQuerySupplier.POST_VIEW)).thenReturn(query);
-    when(permissionServiceMock.isUserTrustAdmin()).thenReturn(false);
-    when(namedParameterJdbcTemplateMock
-        .query(queryCaptor.capture(), any(MapSqlParameterSource.class),
-            any(PostServiceImpl.PostViewRowMapper.class)))
-        .thenReturn(resultsFromQuery);
-    testObj.advancedSearch(SEARCH_STRING, COLUMN_FILTERS, pageable);
-    String capturedQueryString = queryCaptor.getValue();
-    int indexOfGroupBy = capturedQueryString.indexOf("group by");
-    assertTrue(indexOfGroupBy >= 0);
-    int indexOfOrderBy = capturedQueryString.indexOf("ORDER BY surnames ASC");
-    assertTrue(indexOfOrderBy >= 0);
-    //ordering
-    assertTrue(indexOfGroupBy < indexOfOrderBy);
-    //multiples
-    assertFalse(
-        capturedQueryString.substring(indexOfGroupBy + "group by".length()).contains("group by"));
   }
 
   @Test
