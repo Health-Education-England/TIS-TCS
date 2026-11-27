@@ -13,6 +13,7 @@ import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipVal
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipSavedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DuplicateCurriculumMembershipException;
+import com.transformuk.hee.tis.tcs.service.exception.ProgrammeMembershipNotFoundException;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -275,6 +276,33 @@ public class ProgrammeMembershipServiceImpl implements ProgrammeMembershipServic
     updatePersonWhenStatusIsStale(personId);
     applicationEventPublisher.publishEvent(
         new CurriculumMembershipDeletedEvent(programmeMembershipMapper.toDto(programmeMembership)));
+  }
+
+  /**
+   * Delete the programmeMembership by uuid. Associated curriculum memberships are removed by the
+   * JPA cascade (CascadeType.ALL + orphanRemoval).
+   *
+   * @param uuid the uuid of the programme membership
+   * @throws ProgrammeMembershipNotFoundException if no programme membership exists with the uuid
+   */
+  @Override
+  public void delete(UUID uuid) {
+    log.debug("Request to delete ProgrammeMembership : {}", uuid);
+    ProgrammeMembership programmeMembership = programmeMembershipRepository.findByUuid(uuid)
+        .orElseThrow(() -> new ProgrammeMembershipNotFoundException(uuid));
+    Person person = programmeMembership.getPerson();
+    Long personId = person != null ? person.getId() : null;
+
+    // Build the DTO before deletion so the event carries the deleted state.
+    ProgrammeMembershipDTO deletedDto = programmeMembershipMapper.toDto(programmeMembership);
+
+    programmeMembershipRepository.delete(programmeMembership);
+    programmeMembershipRepository.flush();
+
+    if (personId != null) {
+      updatePersonWhenStatusIsStale(personId);
+      applicationEventPublisher.publishEvent(new CurriculumMembershipDeletedEvent(deletedDto));
+    }
   }
 
   @Transactional(readOnly = true)

@@ -4,8 +4,11 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -20,6 +23,7 @@ import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipDTO;
 import com.transformuk.hee.tis.tcs.api.dto.ProgrammeMembershipSummaryDTO;
 import com.transformuk.hee.tis.tcs.service.Application;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
+import com.transformuk.hee.tis.tcs.service.exception.ProgrammeMembershipNotFoundException;
 import com.transformuk.hee.tis.tcs.service.service.ProgrammeMembershipService;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -296,5 +300,34 @@ public class ProgrammeMembershipResourceTest {
     mockMvc.perform(get("/api/programme-memberships/" + 1L));
 
     verify(programmeMembershipServiceMock).findOne(any(Long.class));
+  }
+
+  @Test
+  public void deleteProgrammeMembershipByUuidShouldDeleteAndReturnOk() throws Exception {
+    mockMvc.perform(delete("/api/programme-memberships/uuid/{uuid}", PROGRAMME_UUID1))
+        .andExpect(status().isOk());
+
+    verify(programmeMembershipServiceMock).delete(PROGRAMME_UUID1);
+    verify(programmeMembershipServiceMock, never()).delete(any(Long.class));
+  }
+
+  @Test
+  public void deleteProgrammeMembershipByUuidShouldReturnNotFoundWhenMissing() throws Exception {
+    doThrow(new ProgrammeMembershipNotFoundException(PROGRAMME_UUID1))
+        .when(programmeMembershipServiceMock).delete(PROGRAMME_UUID1);
+
+    mockMvc.perform(delete("/api/programme-memberships/uuid/{uuid}", PROGRAMME_UUID1))
+        .andExpect(status().isNotFound());
+
+    verify(programmeMembershipServiceMock).delete(PROGRAMME_UUID1);
+  }
+
+  @Test
+  public void deleteProgrammeMembershipByUuidShouldReturnBadRequestWhenInvalidUuid()
+      throws Exception {
+    mockMvc.perform(delete("/api/programme-memberships/uuid/{uuid}", "not-a-uuid"))
+        .andExpect(status().isBadRequest());
+
+    verify(programmeMembershipServiceMock, never()).delete(any(UUID.class));
   }
 }

@@ -30,6 +30,7 @@ import com.transformuk.hee.tis.tcs.api.enumeration.Status;
 import com.transformuk.hee.tis.tcs.service.api.validation.ProgrammeMembershipValidator;
 import com.transformuk.hee.tis.tcs.service.event.CurriculumMembershipDeletedEvent;
 import com.transformuk.hee.tis.tcs.service.exception.DuplicateCurriculumMembershipException;
+import com.transformuk.hee.tis.tcs.service.exception.ProgrammeMembershipNotFoundException;
 import com.transformuk.hee.tis.tcs.service.model.Curriculum;
 import com.transformuk.hee.tis.tcs.service.model.CurriculumMembership;
 import com.transformuk.hee.tis.tcs.service.model.Person;
@@ -69,6 +70,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
@@ -126,6 +129,8 @@ public class ProgrammeMembershipServiceImplTest {
   private ProgrammeMembershipValidator programmeMembershipValidatorMock;
   @Mock
   private TrainingNumberService trainingNumberService;
+  @Captor
+  private ArgumentCaptor<CurriculumMembershipDeletedEvent> eventCaptor;
 
   @Before
   public void setup() {
@@ -817,5 +822,48 @@ public class ProgrammeMembershipServiceImplTest {
     ProgrammeMembershipDTO returnDto = testObj.patch(dto);
     verify(programmeMembershipValidatorMock).validateForBulk(any());
     Assert.assertEquals(0, returnDto.getMessageList().size());
+  }
+
+  @Test
+  public void deleteByUuidShouldDeleteProgrammeMembershipAndPublishEvent() {
+    when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(programmeMembership1));
+    when(personRepositoryMock.getOne(person.getId())).thenReturn(person);
+
+    testObj.delete(PROGRAMME_MEMBERSHIP_ID_1);
+
+    verify(programmeMembershipRepositoryMock).delete(programmeMembership1);
+    verify(programmeMembershipRepositoryMock).flush();
+    verify(personRepositoryMock).getOne(person.getId());
+    verify(applicationEventPublisherMock).publishEvent(eventCaptor.capture());
+    assertNotNull(eventCaptor.getValue());
+    verify(curriculumMembershipRepositoryMock, never()).getOne(anyLong());
+  }
+
+  @Test
+  public void deleteByUuidShouldNotUpdatePersonOrPublishEventWhenNoPerson() {
+    programmeMembership1.setPerson(null);
+    when(programmeMembershipRepositoryMock.findByUuid(PROGRAMME_MEMBERSHIP_ID_1))
+        .thenReturn(Optional.of(programmeMembership1));
+
+    testObj.delete(PROGRAMME_MEMBERSHIP_ID_1);
+
+    verify(programmeMembershipRepositoryMock).delete(programmeMembership1);
+    verify(programmeMembershipRepositoryMock).flush();
+    verify(personRepositoryMock, never()).getOne(anyLong());
+    verify(personRepositoryMock, never()).save(any());
+    verify(applicationEventPublisherMock, never()).publishEvent(any());
+  }
+
+  @Test
+  public void deleteByUuidShouldThrowWhenProgrammeMembershipNotFound() {
+    UUID uuid = UUID.randomUUID();
+    when(programmeMembershipRepositoryMock.findByUuid(uuid)).thenReturn(Optional.empty());
+
+    assertThrows(ProgrammeMembershipNotFoundException.class, () -> testObj.delete(uuid));
+
+    verify(programmeMembershipRepositoryMock, never()).delete(any(ProgrammeMembership.class));
+    verify(programmeMembershipRepositoryMock, never()).flush();
+    verify(applicationEventPublisherMock, never()).publishEvent(any());
   }
 }

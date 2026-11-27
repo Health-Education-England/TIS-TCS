@@ -69,8 +69,8 @@ public class ProgrammeMembershipResource {
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to create
    * @return the ResponseEntity with status 201 (Created) and with body the new
-   *         programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembership has
-   *         already an ID
+   *     programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembership has
+   *     already an ID
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PostMapping("/programme-memberships")
@@ -99,14 +99,14 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * PUT /programme-memberships : Updates an existing programmeMembership, or creates it if it
-   * does not exist.
+   * PUT /programme-memberships : Updates an existing programmeMembership, or creates it if it does
+   * not exist.
    *
    * @param programmeMembershipDto the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK) and with body the updated
-   *         programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembershipDTO
-   *         is not valid, or with status 500 (Internal Server Error) if the programmeMembershipDTO
-   *         couldn't be updated
+   *     programmeMembershipDTO, or with status 400 (Bad Request) if the programmeMembershipDTO is
+   *     not valid, or with status 500 (Internal Server Error) if the programmeMembershipDTO
+   *     couldn't be updated
    * @throws URISyntaxException if the Location URI syntax is incorrect
    */
   @PutMapping("/programme-memberships")
@@ -147,7 +147,7 @@ public class ProgrammeMembershipResource {
    *
    * @param id the id of the programmeMembershipDTO to retrieve
    * @return the ResponseEntity with status 200 (OK) and with body the programmeMembershipDTO, or
-   *         with status 404 (Not Found)
+   *     with status 404 (Not Found)
    */
   @GetMapping("/programme-memberships/{id}")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -168,9 +168,9 @@ public class ProgrammeMembershipResource {
    * GET /programme-memberships/summary-list : get the list of programmeMembership summaries.
    *
    * @param ids a comma-separated list of programmeMembershipDTO ids to retrieve
-   * @return the ResponseEntity with status 200 (OK) and the programmeMembershipDTO list,
-   *         or with status 400 (Bad Request) if the ids are invalid
-   *         or with status 404 (Not Found) if no programme memberships are found
+   * @return the ResponseEntity with status 200 (OK) and the programmeMembershipDTO list, or with
+   *     status 400 (Bad Request) if the ids are invalid or with status 404 (Not Found) if no
+   *     programme memberships are found
    */
   @GetMapping("/programme-memberships/summary-list")
   @PreAuthorize("hasPermission('tis:people::person:', 'View')")
@@ -203,12 +203,14 @@ public class ProgrammeMembershipResource {
   }
 
   /**
-   * POST /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
-   * id.
+   * POST /programme-memberships/delete/ : delete the programmeMembership using the pm id stored on
+   * the cm id.
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK)
+   * @deprecated Use {@link #deleteProgrammeMembershipByUuid(UUID)} instead.
    */
+  @Deprecated()
   @PostMapping("/programme-memberships/delete/")
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteProgrammeMembershipAndItsCurriculum(
@@ -232,6 +234,22 @@ public class ProgrammeMembershipResource {
   }
 
   /**
+   * DELETE /programme-memberships/uuid/:uuid : delete a programme membership by UUID. Associated
+   * curriculum memberships are removed via cascade.
+   *
+   * @param uuid the UUID of the programme membership to delete
+   * @return 200 (OK) if deleted, 404 (Not Found) if no programme membership has the UUID
+   */
+  @DeleteMapping("/programme-memberships/uuid/{uuid}")
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
+  public ResponseEntity<Void> deleteProgrammeMembershipByUuid(@PathVariable UUID uuid) {
+    log.debug("REST request to delete ProgrammeMembership by uuid : {}", uuid);
+    programmeMembershipService.delete(uuid);
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, uuid.toString())).build();
+  }
+
+  /**
    * DELETE /programme-memberships/:id : delete the "id" programmeMembership.
    *
    * @param id the id of the programmeMembershipDTO to delete
@@ -251,7 +269,7 @@ public class ProgrammeMembershipResource {
    *
    * @param programmeMembershipDtos List of the programmeMembershipDTOS to patch
    * @return the ResponseEntity with status 200 (OK) and with body the updated
-   *         programmeMembershipDTOS
+   *     programmeMembershipDTOS
    */
   @PatchMapping("/programme-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")

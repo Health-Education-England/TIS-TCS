@@ -62,6 +62,15 @@ public interface ProgrammeMembershipService {
   void delete(Long id);
 
   /**
+   * Delete a programmeMembership by its UUID, cascading to its curriculum memberships.
+   *
+   * @param uuid the uuid of the programme membership
+   * @throws com.transformuk.hee.tis.tcs.service.exception.ProgrammeMembershipNotFoundException
+   *     if no programme membership exists with the uuid
+   */
+  void delete(UUID uuid);
+
+  /**
    * Get all the programmeMemberships for a trainee id and programme id.
    *
    * @return the list of entities
