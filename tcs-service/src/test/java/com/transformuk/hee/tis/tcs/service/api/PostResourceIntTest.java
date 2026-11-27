@@ -363,7 +363,7 @@ class PostResourceIntTest {
     return filters.stream().anyMatch(filter -> filterName.equals(filter.getName())
         && filter.getValues() != null
         && filter.getValues().stream().map(String::valueOf)
-        .anyMatch(value -> filterValue.equalsIgnoreCase(value)));
+        .anyMatch(filterValue::equalsIgnoreCase));
   }
 
   private boolean hasSort(Pageable pageable, String property, Sort.Direction direction) {
