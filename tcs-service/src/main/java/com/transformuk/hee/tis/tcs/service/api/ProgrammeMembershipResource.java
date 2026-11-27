@@ -203,12 +203,15 @@ public class ProgrammeMembershipResource {
   }
 
   /**
+   * @deprecated Use {@link #deleteProgrammeMembershipByUuid instead}
+   *
    * POST /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
    * id.
    *
    * @param programmeMembershipDTO the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK)
    */
+  @Deprecated()
   @PostMapping("/programme-memberships/delete/")
   @PreAuthorize("hasAuthority('tcs:delete:entities')")
   public ResponseEntity<Void> deleteProgrammeMembershipAndItsCurriculum(
@@ -229,6 +232,22 @@ public class ProgrammeMembershipResource {
         .headers(
             HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, StringUtils.join(idsDeleted, ",")))
         .build();
+  }
+
+  /**
+   * DELETE /programme-memberships/uuid/:uuid : delete a programme membership by UUID. Associated
+   * curriculum memberships are removed via cascade.
+   *
+   * @param uuid the UUID of the programme membership to delete
+   * @return 200 (OK) if deleted, 404 (Not Found) if no programme membership has the UUID
+   */
+  @DeleteMapping("/programme-memberships/uuid/{uuid}")
+  @PreAuthorize("hasAuthority('tcs:delete:entities')")
+  public ResponseEntity<Void> deleteProgrammeMembershipByUuid(@PathVariable UUID uuid) {
+    log.debug("REST request to delete ProgrammeMembership by uuid : {}", uuid);
+    programmeMembershipService.delete(uuid);
+    return ResponseEntity.ok()
+        .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, uuid.toString())).build();
   }
 
   /**
