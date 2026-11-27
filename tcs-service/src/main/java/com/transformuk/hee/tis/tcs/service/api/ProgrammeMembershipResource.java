@@ -206,9 +206,9 @@ public class ProgrammeMembershipResource {
    * @param programmeMembershipDTO the programmeMembershipDTO to update
    * @return the ResponseEntity with status 200 (OK)
    * @deprecated Use {@link #deleteProgrammeMembershipByUuid instead}
-   * <p>
-   * POST /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
-   * id.
+   *
+   * <p> POST /programme-memberships/ : delete the programmeMembership using the pm id stored on the cm
+   * id. </p>
    */
   @Deprecated()
   @PostMapping("/programme-memberships/delete/")
@@ -269,7 +269,7 @@ public class ProgrammeMembershipResource {
    *
    * @param programmeMembershipDtos List of the programmeMembershipDTOS to patch
    * @return the ResponseEntity with status 200 (OK) and with body the updated
-   * programmeMembershipDTOS
+   *     programmeMembershipDTOS
    */
   @PatchMapping("/programme-memberships")
   @PreAuthorize("hasPermission('tis:people::person:', 'Update')")
